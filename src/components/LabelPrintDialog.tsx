@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 import { ProductionBatch } from "@/hooks/useProductionData";
 import { format } from "date-fns";
 import { Printer } from "lucide-react";
@@ -16,15 +18,28 @@ interface LabelPrintDialogProps {
 
 export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialogProps) {
   const [printingLabels, setPrintingLabels] = useState(false);
+  const [numLabelsToPrint, setNumLabelsToPrint] = useState<number>(0);
+
+  // Update the number of labels when batch changes
+  React.useEffect(() => {
+    if (batch) {
+      setNumLabelsToPrint(batch.packages_produced);
+    }
+  }, [batch]);
 
   if (!batch) return null;
 
   const handlePrintLabels = async () => {
+    if (numLabelsToPrint <= 0) {
+      toast.error("Number of labels must be greater than 0");
+      return;
+    }
+
     setPrintingLabels(true);
     
     try {
       // Generate label data for each package
-      const labelData = Array.from({ length: batch.packages_produced }, (_, index) => {
+      const labelData = Array.from({ length: numLabelsToPrint }, (_, index) => {
         const labelNumber = index + 1;
         return {
           batch_id: batch.id,
@@ -58,7 +73,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
       // You could open a print dialog or send to a thermal printer service
       window.print(); // This would print the preview
       
-      toast.success(`${batch.packages_produced} labels printed successfully`);
+      toast.success(`${numLabelsToPrint} labels printed successfully`);
       onOpenChange(false);
       
     } catch (error) {
@@ -89,10 +104,25 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             </div>
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="numLabels">Number of Labels to Print</Label>
+            <Input
+              id="numLabels"
+              type="number"
+              min="1"
+              value={numLabelsToPrint}
+              onChange={(e) => setNumLabelsToPrint(parseInt(e.target.value) || 0)}
+              className="w-32"
+            />
+            <p className="text-sm text-muted-foreground">
+              Default: {batch.packages_produced} (from batch masterdata)
+            </p>
+          </div>
+
           <div className="border rounded-lg p-4">
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <Printer className="w-4 h-4" />
-              Label Preview (1 of {batch.packages_produced})
+              Label Preview (1 of {numLabelsToPrint})
             </h3>
             
             {/* Thermal Label Preview - 50.8 x 25.4mm landscape format */}
@@ -144,11 +174,11 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             </Button>
             <Button 
               onClick={handlePrintLabels} 
-              disabled={printingLabels}
+              disabled={printingLabels || numLabelsToPrint <= 0}
               className="flex items-center gap-2"
             >
               <Printer className="w-4 h-4" />
-              {printingLabels ? "Printing..." : `Print ${batch.packages_produced} Labels`}
+              {printingLabels ? "Printing..." : `Print ${numLabelsToPrint} Labels`}
             </Button>
           </div>
         </div>
