@@ -320,7 +320,7 @@ export function Dispatch({ currentLocation }: DispatchProps) {
             </div>
           </div>
         </CardContent>
-      </div>
+      </Card>
 
       <PackingSlipDialog
         open={packingSlipOpen}
