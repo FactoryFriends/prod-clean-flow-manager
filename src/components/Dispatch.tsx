@@ -70,7 +70,9 @@ export function Dispatch({ currentLocation }: DispatchProps) {
     const existingIndex = selectedItems.findIndex(si => si.id === itemId);
     
     if (existingIndex >= 0) {
-      const maxQuantity = item.availableQuantity || 999; // No limit for external products
+      // For external products, no limit (availableQuantity is undefined)
+      // For batch products, use availableQuantity as limit
+      const maxQuantity = item.type === 'batch' && item.availableQuantity ? item.availableQuantity : 999;
       const newQuantity = Math.max(0, Math.min(maxQuantity, selectedItems[existingIndex].selectedQuantity + change));
       
       if (newQuantity === 0) {
@@ -206,7 +208,7 @@ export function Dispatch({ currentLocation }: DispatchProps) {
                         variant="outline"
                         size="sm"
                         onClick={() => handleQuantityChange(item.id, 1)}
-                        disabled={item.availableQuantity ? item.selectedQuantity >= item.availableQuantity : false}
+                        disabled={item.type === 'batch' && item.availableQuantity ? item.selectedQuantity >= item.availableQuantity : false}
                       >
                         <Plus className="w-3 h-3" />
                       </Button>
@@ -318,7 +320,7 @@ export function Dispatch({ currentLocation }: DispatchProps) {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </div>
 
       <PackingSlipDialog
         open={packingSlipOpen}
