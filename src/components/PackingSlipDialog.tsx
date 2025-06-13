@@ -37,6 +37,14 @@ export function PackingSlipDialog({
 }: PackingSlipDialogProps) {
   const { data: customers = [] } = useCustomers(true);
 
+  // Debug logging for staff names
+  console.log("PackingSlipDialog staff names:", {
+    preparedBy,
+    pickedUpBy,
+    customer,
+    selectedItemsCount: selectedItems.length
+  });
+
   const generatePackingSlipNumber = () => {
     const date = format(new Date(), "yyyyMMdd");
     const random = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
@@ -171,9 +179,9 @@ Prepared by: ${preparedBy}
             <div>
               <h3 className="text-lg font-semibold mb-4">Prepared by:</h3>
               <div className="bg-gray-50 p-4 rounded border">
-                <p className="font-semibold">{preparedBy}</p>
+                <p className="font-semibold">{preparedBy || "Not specified"}</p>
                 <p className="text-sm text-gray-600 mt-1">
-                  Electronisch ondertekend door {preparedBy}
+                  Electronisch ondertekend door {preparedBy || "Not specified"}
                 </p>
                 <p className="text-sm text-gray-600">Date: {currentDate}</p>
               </div>
@@ -181,9 +189,9 @@ Prepared by: ${preparedBy}
             <div>
               <h3 className="text-lg font-semibold mb-4">Picked up by:</h3>
               <div className="bg-gray-50 p-4 rounded border">
-                <p className="font-semibold">{pickedUpBy}</p>
+                <p className="font-semibold">{pickedUpBy || "Not specified"}</p>
                 <p className="text-sm text-gray-600 mt-1">
-                  Electronisch ondertekend door {pickedUpBy}
+                  Electronisch ondertekend door {pickedUpBy || "Not specified"}
                 </p>
                 <p className="text-sm text-gray-600">Date: {currentDate}</p>
               </div>
