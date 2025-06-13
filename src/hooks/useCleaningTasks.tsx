@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -34,7 +33,10 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
       console.log('Fetching cleaning tasks for location:', dbLocation);
       const { data, error } = await supabase
         .from('cleaning_tasks')
-        .select('*')
+        .select(`
+          *,
+          cleaning_task_templates!template_id(requires_photo)
+        `)
         .eq('location', dbLocation)
         .order('scheduled_date', { ascending: false })
         .order('created_at', { ascending: false });
@@ -45,7 +47,14 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
       }
 
       console.log('Fetched cleaning tasks:', data);
-      return data as CleaningTask[];
+      
+      // Transform the data to flatten the requires_photo field
+      const transformedData = data.map(task => ({
+        ...task,
+        requires_photo: task.cleaning_task_templates?.requires_photo || false
+      }));
+
+      return transformedData as CleaningTask[];
     },
   });
 
