@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Truck, Package, Plus, Minus } from "lucide-react";
 import { format } from "date-fns";
+import { PackingSlipDialog } from "./PackingSlipDialog";
 
 interface DispatchProps {
   currentLocation: "tothai" | "khin";
@@ -19,16 +20,17 @@ interface SelectedItem {
   type: 'batch' | 'external';
   name: string;
   batchNumber?: string;
-  availableQuantity: number;
+  availableQuantity?: number;
   selectedQuantity: number;
   expiryDate?: string;
+  productionDate?: string;
 }
 
 // Mock external products data - this would come from your database
 const externalProducts = [
-  { id: "ext-1", name: "Coconut Milk", availableQuantity: 24, supplier: "Thai Suppliers Ltd" },
-  { id: "ext-2", name: "Basmati Rice", availableQuantity: 15, supplier: "Rice Masters" },
-  { id: "ext-3", name: "Green Curry Paste", availableQuantity: 8, supplier: "Spice World" },
+  { id: "ext-1", name: "Coconut Milk", supplier: "Thai Suppliers Ltd" },
+  { id: "ext-2", name: "Basmati Rice", supplier: "Rice Masters" },
+  { id: "ext-3", name: "Green Curry Paste", supplier: "Spice World" },
 ];
 
 export function Dispatch({ currentLocation }: DispatchProps) {
@@ -36,6 +38,7 @@ export function Dispatch({ currentLocation }: DispatchProps) {
   const [preparedBy, setPreparedBy] = useState("");
   const [dispatchNotes, setDispatchNotes] = useState("");
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
+  const [packingSlipOpen, setPackingSlipOpen] = useState(false);
 
   const { data: batches } = useProductionBatches(currentLocation);
 
@@ -48,13 +51,13 @@ export function Dispatch({ currentLocation }: DispatchProps) {
     availableQuantity: batch.packages_produced,
     selectedQuantity: 0,
     expiryDate: batch.expiry_date,
+    productionDate: batch.production_date,
   }));
 
   const availableExternal = externalProducts.map(product => ({
     id: product.id,
     type: 'external' as const,
     name: product.name,
-    availableQuantity: product.availableQuantity,
     selectedQuantity: 0,
   }));
 
@@ -67,7 +70,8 @@ export function Dispatch({ currentLocation }: DispatchProps) {
     const existingIndex = selectedItems.findIndex(si => si.id === itemId);
     
     if (existingIndex >= 0) {
-      const newQuantity = Math.max(0, Math.min(item.availableQuantity, selectedItems[existingIndex].selectedQuantity + change));
+      const maxQuantity = item.availableQuantity || 999; // No limit for external products
+      const newQuantity = Math.max(0, Math.min(maxQuantity, selectedItems[existingIndex].selectedQuantity + change));
       
       if (newQuantity === 0) {
         setSelectedItems(prev => prev.filter(si => si.id !== itemId));
@@ -86,13 +90,7 @@ export function Dispatch({ currentLocation }: DispatchProps) {
   };
 
   const handleCreatePackingSlip = () => {
-    console.log("Creating packing slip with:", {
-      customer,
-      preparedBy,
-      dispatchNotes,
-      selectedItems,
-    });
-    // TODO: Implement packing slip creation
+    setPackingSlipOpen(true);
   };
 
   const isExpired = (date: string) => new Date(date) <= new Date();
@@ -133,7 +131,7 @@ export function Dispatch({ currentLocation }: DispatchProps) {
                   <SelectValue placeholder="Select customer" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="khin-restaurant">KHIN Restaurant</SelectItem>
+                  <SelectItem value="khin-restaurant">KHIN Takeaway</SelectItem>
                   <SelectItem value="tothai-restaurant">To Thai Restaurant</SelectItem>
                   <SelectItem value="external-customer">External Customer</SelectItem>
                 </SelectContent>
@@ -208,7 +206,7 @@ export function Dispatch({ currentLocation }: DispatchProps) {
                         variant="outline"
                         size="sm"
                         onClick={() => handleQuantityChange(item.id, 1)}
-                        disabled={item.selectedQuantity >= item.availableQuantity}
+                        disabled={item.availableQuantity ? item.selectedQuantity >= item.availableQuantity : false}
                       >
                         <Plus className="w-3 h-3" />
                       </Button>
@@ -265,7 +263,7 @@ export function Dispatch({ currentLocation }: DispatchProps) {
                             variant="outline"
                             size="sm"
                             onClick={() => handleQuantityChange(batch.id, 1)}
-                            disabled={selectedQty >= batch.availableQuantity}
+                            disabled={selectedQty >= (batch.availableQuantity || 0)}
                           >
                             <Plus className="w-3 h-3" />
                           </Button>
@@ -289,7 +287,6 @@ export function Dispatch({ currentLocation }: DispatchProps) {
                         <div>
                           <h4 className="font-medium">{product.name}</h4>
                           <p className="text-sm text-muted-foreground">External Product</p>
-                          <p className="text-sm">Available: {product.availableQuantity}</p>
                         </div>
                         <Badge variant="outline">External</Badge>
                       </div>
@@ -309,7 +306,6 @@ export function Dispatch({ currentLocation }: DispatchProps) {
                             variant="outline"
                             size="sm"
                             onClick={() => handleQuantityChange(product.id, 1)}
-                            disabled={selectedQty >= product.availableQuantity}
                           >
                             <Plus className="w-3 h-3" />
                           </Button>
@@ -323,6 +319,16 @@ export function Dispatch({ currentLocation }: DispatchProps) {
           </div>
         </CardContent>
       </Card>
+
+      <PackingSlipDialog
+        open={packingSlipOpen}
+        onOpenChange={setPackingSlipOpen}
+        selectedItems={selectedItems}
+        customer={customer}
+        preparedBy={preparedBy}
+        dispatchNotes={dispatchNotes}
+        currentLocation={currentLocation}
+      />
     </div>
   );
 }

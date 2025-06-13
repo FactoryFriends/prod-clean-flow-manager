@@ -5,7 +5,6 @@ import { Sidebar } from "@/components/Sidebar";
 import { LocationSwitcher } from "@/components/LocationSwitcher";
 import { Dashboard } from "@/components/Dashboard";
 import { Production } from "@/components/Production";
-import { Dispatch } from "@/components/Dispatch";
 import { Distribution } from "@/components/Distribution";
 import { CleaningTasks } from "@/components/CleaningTasks";
 import { Settings } from "@/components/Settings";
@@ -22,20 +21,7 @@ const Index = () => {
       case "dashboard":
         return <Dashboard currentLocation={currentLocation} />;
       case "production":
-        return (
-          <Tabs defaultValue="production" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="production">Production</TabsTrigger>
-              <TabsTrigger value="dispatch">Dispatch</TabsTrigger>
-            </TabsList>
-            <TabsContent value="production">
-              <Production currentLocation={currentLocation} />
-            </TabsContent>
-            <TabsContent value="dispatch">
-              <Dispatch currentLocation={currentLocation} />
-            </TabsContent>
-          </Tabs>
-        );
+        return <Production currentLocation={currentLocation} />;
       case "distribution":
         return <Distribution currentLocation={currentLocation} />;
       case "cleaning":

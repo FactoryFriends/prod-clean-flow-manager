@@ -1,224 +1,215 @@
 
-import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Textarea } from "./ui/textarea";
-import { Checkbox } from "./ui/checkbox";
-import { ProductionBatch } from "@/hooks/useProductionData";
 import { format } from "date-fns";
-import { Package, Truck } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { Check } from "lucide-react";
+
+interface SelectedItem {
+  id: string;
+  type: 'batch' | 'external';
+  name: string;
+  batchNumber?: string;
+  selectedQuantity: number;
+  productionDate?: string;
+}
 
 interface PackingSlipDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  batches: ProductionBatch[];
-  selectedBatches?: string[];
+  selectedItems: SelectedItem[];
+  customer: string;
+  preparedBy: string;
+  dispatchNotes: string;
+  currentLocation: "tothai" | "khin";
 }
 
-export function PackingSlipDialog({ 
-  open, 
-  onOpenChange, 
-  batches, 
-  selectedBatches = [] 
+export function PackingSlipDialog({
+  open,
+  onOpenChange,
+  selectedItems,
+  customer,
+  preparedBy,
+  dispatchNotes,
+  currentLocation,
 }: PackingSlipDialogProps) {
-  const [destination, setDestination] = useState("");
-  const [preparedBy, setPreparedBy] = useState("");
-  const [pickedUpBy, setPickedUpBy] = useState("");
-  const [pickupDate, setPickupDate] = useState("");
-  const [notes, setNotes] = useState("");
-  const [checkedBatches, setCheckedBatches] = useState<string[]>(selectedBatches);
-  const [creating, setCreating] = useState(false);
-
-  const handleBatchToggle = (batchId: string) => {
-    setCheckedBatches(prev => 
-      prev.includes(batchId) 
-        ? prev.filter(id => id !== batchId)
-        : [...prev, batchId]
-    );
+  const generatePackingSlipNumber = () => {
+    const date = format(new Date(), "yyyyMMdd");
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
+    return `PS-${date}-${random}`;
   };
 
-  const generateSlipNumber = () => {
-    const date = new Date();
-    const dateStr = format(date, "yyyyMMdd");
-    const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    return `PS-${dateStr}-${randomSuffix}`;
+  const getCompanyInfo = () => {
+    return {
+      name: "OptiThai",
+      subtitle: "Production Kitchen",
+      address: "Wortegem, Belgium"
+    };
   };
 
-  const calculateTotals = () => {
-    const selectedBatchData = batches.filter(batch => checkedBatches.includes(batch.id));
-    const totalPackages = selectedBatchData.reduce((sum, batch) => sum + batch.packages_produced, 0);
-    const totalItems = selectedBatchData.length;
-    return { totalPackages, totalItems };
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!destination || checkedBatches.length === 0) {
-      toast.error("Please provide destination and select at least one batch");
-      return;
-    }
-
-    setCreating(true);
-    
-    try {
-      const { totalPackages, totalItems } = calculateTotals();
-      
-      const { data, error } = await supabase
-        .from("packing_slips")
-        .insert({
-          slip_number: generateSlipNumber(),
-          destination,
-          batch_ids: checkedBatches,
-          prepared_by: preparedBy || null,
-          picked_up_by: pickedUpBy || null,
-          pickup_date: pickupDate || null,
-          total_items: totalItems,
-          total_packages: totalPackages
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      toast.success("Packing slip created successfully");
-      
-      // Reset form
-      setDestination("");
-      setPreparedBy("");
-      setPickedUpBy("");
-      setPickupDate("");
-      setNotes("");
-      setCheckedBatches([]);
-      
-      onOpenChange(false);
-      
-    } catch (error) {
-      console.error("Error creating packing slip:", error);
-      toast.error("Failed to create packing slip");
-    } finally {
-      setCreating(false);
+  const getDestination = () => {
+    switch (customer) {
+      case "khin-restaurant":
+        return "KHIN Takeaway";
+      case "tothai-restaurant":
+        return "To Thai Restaurant";
+      default:
+        return "External Customer";
     }
   };
 
-  const { totalPackages, totalItems } = calculateTotals();
+  const totalItems = selectedItems.length;
+  const totalPackages = selectedItems.reduce((sum, item) => sum + item.selectedQuantity, 0);
+
+  const packingSlipNumber = generatePackingSlipNumber();
+  const currentDate = format(new Date(), "yyyy-MM-dd");
+  const companyInfo = getCompanyInfo();
+
+  const handleDownloadPDF = () => {
+    // TODO: Implement PDF generation
+    console.log("Download PDF functionality to be implemented");
+  };
+
+  const handleCopyDetails = () => {
+    const details = `
+Packing Slip: ${packingSlipNumber}
+Date: ${currentDate}
+Destination: ${getDestination()}
+Items: ${totalItems}
+Packages: ${totalPackages}
+Prepared by: ${preparedBy}
+    `.trim();
+    
+    navigator.clipboard.writeText(details);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Package className="w-5 h-5" />
-            Create Packing Slip
-          </DialogTitle>
+          <DialogTitle>Packing Slip Preview</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="destination">Destination *</Label>
-              <Input
-                id="destination"
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                placeholder="e.g., KHIN Takeaway"
-                required
-              />
+        <div className="bg-white p-8 border rounded-lg text-black">
+          {/* Header */}
+          <div className="flex justify-between items-start mb-8">
+            <div>
+              <h1 className="text-2xl font-bold text-red-600 mb-1">{companyInfo.name}</h1>
+              <p className="text-gray-600">{companyInfo.subtitle}</p>
+              <p className="text-gray-600">{companyInfo.address}</p>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="pickup-date">Pickup Date</Label>
-              <Input
-                id="pickup-date"
-                type="date"
-                value={pickupDate}
-                onChange={(e) => setPickupDate(e.target.value)}
-              />
+            <div className="text-right">
+              <h2 className="text-xl font-bold mb-1">PACKING SLIP</h2>
+              <p className="font-mono text-sm">#{packingSlipNumber}</p>
+              <p className="text-sm">{currentDate}</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="prepared-by">Prepared By</Label>
-              <Input
-                id="prepared-by"
-                value={preparedBy}
-                onChange={(e) => setPreparedBy(e.target.value)}
-                placeholder="Staff name"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="picked-up-by">Picked Up By</Label>
-              <Input
-                id="picked-up-by"
-                value={pickedUpBy}
-                onChange={(e) => setPickedUpBy(e.target.value)}
-                placeholder="Driver/courier name"
-              />
+          {/* Destination */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-2">Destination:</h3>
+            <div className="bg-gray-50 p-4 rounded">
+              <p className="font-semibold">{getDestination()}</p>
+              <p className="text-sm text-gray-600">Date: {currentDate}</p>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <Label>Select Batches for Packing Slip *</Label>
-            <div className="border rounded-lg p-4 max-h-60 overflow-y-auto">
-              {batches.length === 0 ? (
-                <p className="text-muted-foreground text-center py-4">
-                  No batches available for packing
-                </p>
-              ) : (
-                <div className="space-y-3">
-                  {batches.map((batch) => (
-                    <div key={batch.id} className="flex items-start space-x-3">
-                      <Checkbox
-                        id={batch.id}
-                        checked={checkedBatches.includes(batch.id)}
-                        onCheckedChange={() => handleBatchToggle(batch.id)}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <label htmlFor={batch.id} className="text-sm font-medium cursor-pointer">
-                          {batch.batch_number}
-                        </label>
-                        <div className="text-xs text-muted-foreground">
-                          {batch.products.name} • {batch.packages_produced} packages • 
-                          Expires: {format(new Date(batch.expiry_date), "MMM dd, yyyy")}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+          {/* Items Table */}
+          <div className="mb-8">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 p-3 text-left font-semibold">Product</th>
+                  <th className="border border-gray-300 p-3 text-left font-semibold">Batch Number</th>
+                  <th className="border border-gray-300 p-3 text-left font-semibold">Production Date</th>
+                  <th className="border border-gray-300 p-3 text-left font-semibold">Quantity</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedItems.map((item) => (
+                  <tr key={item.id}>
+                    <td className="border border-gray-300 p-3">{item.name}</td>
+                    <td className="border border-gray-300 p-3 font-mono text-sm">
+                      {item.batchNumber || "-"}
+                    </td>
+                    <td className="border border-gray-300 p-3">
+                      {item.productionDate ? format(new Date(item.productionDate), "yyyy-MM-dd") : "-"}
+                    </td>
+                    <td className="border border-gray-300 p-3">{item.selectedQuantity} bags</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
-          {checkedBatches.length > 0 && (
-            <div className="bg-muted p-4 rounded-lg">
-              <h4 className="font-medium mb-2">Summary</h4>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>Total Batches: {totalItems}</div>
-                <div>Total Packages: {totalPackages}</div>
+          {/* Summary */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-2">Summary:</h3>
+            <p>Total Items: {totalItems}</p>
+            <p>Total Packages: {totalPackages}</p>
+          </div>
+
+          {/* FAVV Compliance */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-3">FAVV Compliance:</h3>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-green-600">
+                <Check className="w-4 h-4" />
+                <span>Full batch traceability</span>
+              </div>
+              <div className="flex items-center gap-2 text-green-600">
+                <Check className="w-4 h-4" />
+                <span>Production dates recorded</span>
+              </div>
+              <div className="flex items-center gap-2 text-green-600">
+                <Check className="w-4 h-4" />
+                <span>Transport documentation</span>
               </div>
             </div>
-          )}
+          </div>
 
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+          {/* Signatures */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Prepared by:</h3>
+              <div className="border-b border-gray-300 h-16 mb-2"></div>
+              <p className="text-sm">Name & Signature</p>
+              <p className="text-sm">Date: {currentDate}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Picked up by:</h3>
+              <div className="border-b border-gray-300 h-16 mb-2"></div>
+              <p className="text-sm">Name & Signature</p>
+              <p className="text-sm">Date: ___________</p>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center text-sm text-gray-500 border-t pt-4">
+            <p>This document serves as official transport documentation for FAVV compliance</p>
+            <p>Generated by OptiThai Operations Management System</p>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-between mt-6">
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleDownloadPDF}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Download PDF
             </Button>
             <Button 
-              type="submit" 
-              disabled={creating || checkedBatches.length === 0}
-              className="flex items-center gap-2"
+              variant="outline"
+              onClick={handleCopyDetails}
             >
-              <Truck className="w-4 h-4" />
-              {creating ? "Creating..." : "Create Packing Slip"}
+              Copy Details
             </Button>
           </div>
-        </form>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
