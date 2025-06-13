@@ -1,0 +1,78 @@
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { SelectedItem } from "@/types/dispatch";
+
+interface CreateDispatchData {
+  dispatchType: "external" | "internal";
+  customer?: string;
+  pickerCode: string;
+  pickerName: string;
+  dispatchNotes: string;
+  selectedItems: SelectedItem[];
+  currentLocation: "tothai" | "khin";
+}
+
+export const useCreateDispatch = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (dispatchData: CreateDispatchData) => {
+      const {
+        dispatchType,
+        customer,
+        pickerCode,
+        pickerName,
+        dispatchNotes,
+        selectedItems,
+        currentLocation,
+      } = dispatchData;
+
+      // Calculate totals
+      const totalItems = selectedItems.length;
+      const totalPackages = selectedItems.reduce((sum, item) => sum + item.selectedQuantity, 0);
+
+      // Create dispatch record
+      const { data: dispatchRecord, error: dispatchError } = await supabase
+        .from("dispatch_records")
+        .insert({
+          dispatch_type: dispatchType,
+          customer: dispatchType === "external" ? customer : null,
+          picker_code: pickerCode,
+          picker_name: pickerName,
+          dispatch_notes: dispatchNotes,
+          total_items: totalItems,
+          total_packages: totalPackages,
+          location: currentLocation,
+        })
+        .select()
+        .single();
+
+      if (dispatchError) throw dispatchError;
+
+      // Create dispatch items
+      const dispatchItems = selectedItems.map(item => ({
+        dispatch_id: dispatchRecord.id,
+        item_id: item.id,
+        item_type: item.type,
+        item_name: item.name,
+        batch_number: item.batchNumber || null,
+        quantity: item.selectedQuantity,
+        production_date: item.productionDate || null,
+        expiry_date: item.expiryDate || null,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from("dispatch_items")
+        .insert(dispatchItems);
+
+      if (itemsError) throw itemsError;
+
+      return dispatchRecord;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dispatch-records"] });
+      queryClient.invalidateQueries({ queryKey: ["production-batches"] });
+    },
+  });
+};

@@ -1,6 +1,7 @@
 
 import { useState } from "react";
-import { useCreateDispatch, useCreatePackingSlip } from "@/hooks/useDispatchData";
+import { useCreateDispatch } from "@/hooks/useCreateDispatch";
+import { useCreatePackingSlip } from "@/hooks/useCreatePackingSlipMutation";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
