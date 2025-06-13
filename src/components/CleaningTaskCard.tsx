@@ -1,5 +1,5 @@
 
-import { Brush, Clock, CheckCircle } from "lucide-react";
+import { Brush, Clock, CheckCircle, AlertTriangle, RotateCcw } from "lucide-react";
 import { StatusBadge } from "./StatusBadge";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -11,7 +11,7 @@ interface CleaningTask {
   location: "tothai" | "khin";
   scheduled_date: string;
   due_time: string | null;
-  status: "pending" | "in-progress" | "completed" | "overdue";
+  status: "open" | "closed";
   assigned_to: string | null;
   assigned_staff_name: string | null;
   completed_at: string | null;
@@ -22,15 +22,17 @@ interface CleaningTask {
   actual_duration: number | null;
   favv_compliance: boolean | null;
   template_id: string | null;
+  assigned_role: "chef" | "cleaner" | "other" | null;
 }
 
 interface CleaningTaskCardProps {
   task: CleaningTask;
-  onStartTask: (taskId: string) => void;
   onCompleteTask: (taskId: string) => void;
+  onReopenTask: (taskId: string) => void;
+  isOverdue: boolean;
 }
 
-export function CleaningTaskCard({ task, onStartTask, onCompleteTask }: CleaningTaskCardProps) {
+export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue }: CleaningTaskCardProps) {
   const formatDuration = (minutes: number | null) => {
     if (!minutes) return "Not specified";
     const hours = Math.floor(minutes / 60);
@@ -41,21 +43,44 @@ export function CleaningTaskCard({ task, onStartTask, onCompleteTask }: Cleaning
     return `${mins}m`;
   };
 
+  const getRoleBadgeColor = (role: string | null) => {
+    switch (role) {
+      case 'chef': return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'cleaner': return 'bg-green-50 text-green-700 border-green-200';
+      case 'other': return 'bg-gray-50 text-gray-700 border-gray-200';
+      default: return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  };
+
   return (
-    <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-shadow">
+    <div className={`bg-card border rounded-lg p-6 hover:shadow-md transition-shadow ${
+      isOverdue ? 'border-red-300 bg-red-50' : 'border-border'
+    }`}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-accent rounded-lg">
-            <Brush className="w-5 h-5 text-primary" />
+          <div className={`p-2 rounded-lg ${isOverdue ? 'bg-red-200' : 'bg-accent'}`}>
+            {isOverdue ? (
+              <AlertTriangle className="w-5 h-5 text-red-600" />
+            ) : (
+              <Brush className="w-5 h-5 text-primary" />
+            )}
           </div>
           <div>
             <h3 className="font-semibold text-foreground">{task.title}</h3>
             <p className="text-sm text-muted-foreground">
               {task.scheduled_date} {task.due_time && `at ${task.due_time}`}
             </p>
+            {isOverdue && (
+              <p className="text-sm text-red-600 font-medium">OVERDUE - Action Required!</p>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          {task.assigned_role && (
+            <Badge variant="outline" className={getRoleBadgeColor(task.assigned_role)}>
+              {task.assigned_role.toUpperCase()}
+            </Badge>
+          )}
           {task.favv_compliance && (
             <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
               FAVV
@@ -100,18 +125,7 @@ export function CleaningTaskCard({ task, onStartTask, onCompleteTask }: Cleaning
         </div>
 
         <div className="flex gap-2 pt-4 border-t border-border">
-          {task.status === "pending" && (
-            <Button
-              onClick={() => onStartTask(task.id)}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              Start Task
-            </Button>
-          )}
-          
-          {task.status === "in-progress" && (
+          {task.status === "open" && (
             <Button
               onClick={() => onCompleteTask(task.id)}
               className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
@@ -121,10 +135,18 @@ export function CleaningTaskCard({ task, onStartTask, onCompleteTask }: Cleaning
               Complete
             </Button>
           )}
-
-          <Button variant="outline" size="sm">
-            Edit Task
-          </Button>
+          
+          {task.status === "closed" && (
+            <Button
+              onClick={() => onReopenTask(task.id)}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Reopen
+            </Button>
+          )}
         </div>
       </div>
     </div>

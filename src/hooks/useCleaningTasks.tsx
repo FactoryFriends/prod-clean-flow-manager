@@ -9,7 +9,7 @@ interface CleaningTask {
   location: "tothai" | "khin";
   scheduled_date: string;
   due_time: string | null;
-  status: "pending" | "in-progress" | "completed" | "overdue";
+  status: "open" | "closed";
   assigned_to: string | null;
   assigned_staff_name: string | null;
   completed_at: string | null;
@@ -20,6 +20,7 @@ interface CleaningTask {
   actual_duration: number | null;
   favv_compliance: boolean | null;
   template_id: string | null;
+  assigned_role: "chef" | "cleaner" | "other" | null;
 }
 
 export function useCleaningTasks(dbLocation: "tothai" | "khin") {
@@ -49,15 +50,19 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
 
   // Update task status mutation
   const updateTaskMutation = useMutation({
-    mutationFn: async ({ taskId, status, completedBy }: { taskId: string; status: string; completedBy?: string }) => {
+    mutationFn: async ({ taskId, status, completedBy }: { taskId: string; status: "open" | "closed"; completedBy?: string }) => {
       const updateData: any = { 
         status,
         updated_at: new Date().toISOString()
       };
       
-      if (status === 'completed') {
+      if (status === 'closed') {
         updateData.completed_at = new Date().toISOString();
         updateData.completed_by = completedBy;
+      } else {
+        // If reopening, clear completion data
+        updateData.completed_at = null;
+        updateData.completed_by = null;
       }
 
       const { data, error } = await supabase
@@ -80,7 +85,7 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
     if (userCode && userCode.length === 4) {
       updateTaskMutation.mutate({ 
         taskId, 
-        status: 'completed', 
+        status: 'closed', 
         completedBy: userCode 
       });
     } else {
@@ -88,16 +93,32 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
     }
   };
 
-  const handleStartTask = (taskId: string) => {
-    const userCode = prompt("Enter your 4-digit staff code to start this task:");
-    if (userCode && userCode.length === 4) {
-      updateTaskMutation.mutate({ 
-        taskId, 
-        status: 'in-progress'
-      });
-    } else {
-      alert("Please enter a valid 4-digit staff code");
-    }
+  const handleReopenTask = (taskId: string) => {
+    updateTaskMutation.mutate({ 
+      taskId, 
+      status: 'open'
+    });
+  };
+
+  // Check if task is overdue (>48 hours)
+  const isTaskOverdue = (task: CleaningTask) => {
+    if (task.status === 'closed') return false;
+    
+    const scheduledDate = new Date(task.scheduled_date);
+    const now = new Date();
+    const diffHours = (now.getTime() - scheduledDate.getTime()) / (1000 * 60 * 60);
+    
+    return diffHours > 48;
+  };
+
+  // Group tasks by role
+  const getTasksByRole = (role: "chef" | "cleaner" | "other") => {
+    return cleaningTasks.filter(task => task.assigned_role === role);
+  };
+
+  // Get overdue tasks count for dashboard alerts
+  const getOverdueTasksCount = () => {
+    return cleaningTasks.filter(task => isTaskOverdue(task)).length;
   };
 
   return {
@@ -106,6 +127,9 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
     error,
     updateTaskMutation,
     handleCompleteTask,
-    handleStartTask
+    handleReopenTask,
+    isTaskOverdue,
+    getTasksByRole,
+    getOverdueTasksCount
   };
 }

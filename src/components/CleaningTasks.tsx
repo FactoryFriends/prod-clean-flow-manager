@@ -1,9 +1,12 @@
-import { Brush } from "lucide-react";
+
+import { Brush, Users, Chef, Broom } from "lucide-react";
 import { useState } from "react";
 import { useCleaningTasks } from "@/hooks/useCleaningTasks";
 import { CleaningTaskHeader } from "./CleaningTaskHeader";
 import { CleaningTaskFilters } from "./CleaningTaskFilters";
 import { CleaningTaskCard } from "./CleaningTaskCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Badge } from "./ui/badge";
 
 interface CleaningTasksProps {
   currentLocation: string;
@@ -23,20 +26,55 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
     isLoading,
     error,
     handleCompleteTask,
-    handleStartTask
+    handleReopenTask,
+    isTaskOverdue,
+    getTasksByRole,
+    getOverdueTasksCount
   } = useCleaningTasks(dbLocation);
 
   // Filter tasks based on search term, status, and FAVV compliance
-  const filteredTasks = cleaningTasks.filter(task => {
-    const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      task.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      task.assigned_staff_name?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = filterStatus === "all" || task.status === filterStatus;
-    const matchesFAVV = !showOnlyFAVV || task.favv_compliance;
-    
-    return matchesSearch && matchesStatus && matchesFAVV;
-  });
+  const filterTasks = (tasks: any[]) => {
+    return tasks.filter(task => {
+      const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.assigned_staff_name?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesStatus = filterStatus === "all" || task.status === filterStatus;
+      const matchesFAVV = !showOnlyFAVV || task.favv_compliance;
+      
+      return matchesSearch && matchesStatus && matchesFAVV;
+    });
+  };
+
+  const chefTasks = filterTasks(getTasksByRole('chef'));
+  const cleanerTasks = filterTasks(getTasksByRole('cleaner'));
+  const otherTasks = filterTasks(getTasksByRole('other'));
+  const overdueCount = getOverdueTasksCount();
+
+  const renderTaskList = (tasks: any[], emptyMessage: string) => {
+    if (tasks.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <Brush className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+          <p className="text-muted-foreground">{emptyMessage}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {tasks.map((task) => (
+          <CleaningTaskCard
+            key={task.id}
+            task={task}
+            onCompleteTask={handleCompleteTask}
+            onReopenTask={handleReopenTask}
+            isOverdue={isTaskOverdue(task)}
+          />
+        ))}
+      </div>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -69,6 +107,7 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
       <CleaningTaskHeader 
         locationName={locationName}
         currentLocation={dbLocation}
+        overdueCount={overdueCount}
       />
 
       <CleaningTaskFilters
@@ -80,28 +119,49 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
         setShowOnlyFAVV={setShowOnlyFAVV}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {filteredTasks.map((task) => (
-          <CleaningTaskCard
-            key={task.id}
-            task={task}
-            onStartTask={handleStartTask}
-            onCompleteTask={handleCompleteTask}
-          />
-        ))}
-      </div>
+      <Tabs defaultValue="chef" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="chef" className="flex items-center gap-2">
+            <Chef className="w-4 h-4" />
+            Chef Tasks
+            {chefTasks.length > 0 && (
+              <Badge variant="secondary" className="ml-1">
+                {chefTasks.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="cleaner" className="flex items-center gap-2">
+            <Broom className="w-4 h-4" />
+            Cleaner Tasks
+            {cleanerTasks.length > 0 && (
+              <Badge variant="secondary" className="ml-1">
+                {cleanerTasks.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="other" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            Other Tasks
+            {otherTasks.length > 0 && (
+              <Badge variant="secondary" className="ml-1">
+                {otherTasks.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
 
-      {filteredTasks.length === 0 && (
-        <div className="text-center py-12">
-          <Brush className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-foreground mb-2">No cleaning tasks found</h3>
-          <p className="text-muted-foreground">
-            {searchTerm || filterStatus !== "all" || showOnlyFAVV 
-              ? "Try adjusting your filters or search terms" 
-              : "No cleaning tasks scheduled for this location"}
-          </p>
-        </div>
-      )}
+        <TabsContent value="chef" className="mt-6">
+          {renderTaskList(chefTasks, "No chef tasks found")}
+        </TabsContent>
+
+        <TabsContent value="cleaner" className="mt-6">
+          {renderTaskList(cleanerTasks, "No cleaner tasks found")}
+        </TabsContent>
+
+        <TabsContent value="other" className="mt-6">
+          {renderTaskList(otherTasks, "No other tasks found")}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

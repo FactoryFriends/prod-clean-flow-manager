@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       cleaning_task_templates: {
         Row: {
+          assigned_role: Database["public"]["Enums"]["staff_role"] | null
           created_at: string
           description: string | null
           estimated_duration: number | null
@@ -18,11 +19,15 @@ export type Database = {
           frequency: Database["public"]["Enums"]["task_frequency"]
           id: string
           location: Database["public"]["Enums"]["location_type"]
+          monthly_day_of_month: number | null
+          quarterly_start_month: number | null
           requires_photo: boolean | null
           title: string
           updated_at: string
+          weekly_day_of_week: number | null
         }
         Insert: {
+          assigned_role?: Database["public"]["Enums"]["staff_role"] | null
           created_at?: string
           description?: string | null
           estimated_duration?: number | null
@@ -30,11 +35,15 @@ export type Database = {
           frequency: Database["public"]["Enums"]["task_frequency"]
           id?: string
           location: Database["public"]["Enums"]["location_type"]
+          monthly_day_of_month?: number | null
+          quarterly_start_month?: number | null
           requires_photo?: boolean | null
           title: string
           updated_at?: string
+          weekly_day_of_week?: number | null
         }
         Update: {
+          assigned_role?: Database["public"]["Enums"]["staff_role"] | null
           created_at?: string
           description?: string | null
           estimated_duration?: number | null
@@ -42,15 +51,19 @@ export type Database = {
           frequency?: Database["public"]["Enums"]["task_frequency"]
           id?: string
           location?: Database["public"]["Enums"]["location_type"]
+          monthly_day_of_month?: number | null
+          quarterly_start_month?: number | null
           requires_photo?: boolean | null
           title?: string
           updated_at?: string
+          weekly_day_of_week?: number | null
         }
         Relationships: []
       }
       cleaning_tasks: {
         Row: {
           actual_duration: number | null
+          assigned_role: Database["public"]["Enums"]["staff_role"] | null
           assigned_staff_name: string | null
           assigned_to: string | null
           completed_at: string | null
@@ -72,6 +85,7 @@ export type Database = {
         }
         Insert: {
           actual_duration?: number | null
+          assigned_role?: Database["public"]["Enums"]["staff_role"] | null
           assigned_staff_name?: string | null
           assigned_to?: string | null
           completed_at?: string | null
@@ -93,6 +107,7 @@ export type Database = {
         }
         Update: {
           actual_duration?: number | null
+          assigned_role?: Database["public"]["Enums"]["staff_role"] | null
           assigned_staff_name?: string | null
           assigned_to?: string | null
           completed_at?: string | null
@@ -158,11 +173,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      generate_scheduled_cleaning_tasks: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       location_type: "tothai" | "khin"
-      task_frequency: "daily" | "weekly" | "monthly"
-      task_status: "pending" | "in-progress" | "completed" | "overdue"
+      staff_role: "chef" | "cleaner" | "other"
+      task_frequency: "daily" | "weekly" | "monthly" | "quarterly"
+      task_status: "open" | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -279,8 +299,9 @@ export const Constants = {
   public: {
     Enums: {
       location_type: ["tothai", "khin"],
-      task_frequency: ["daily", "weekly", "monthly"],
-      task_status: ["pending", "in-progress", "completed", "overdue"],
+      staff_role: ["chef", "cleaner", "other"],
+      task_frequency: ["daily", "weekly", "monthly", "quarterly"],
+      task_status: ["open", "closed"],
     },
   },
 } as const
