@@ -1,16 +1,16 @@
 
 import { useState } from "react";
 import { NewBatchDialog } from "./NewBatchDialog";
-import { BatchCard } from "./BatchCard";
 import { LabelPrintDialog } from "./LabelPrintDialog";
-import { PackingSlipDialog } from "./PackingSlipDialog";
 import { useProductionBatches, ProductionBatch } from "@/hooks/useProductionData";
-import { Search, Filter, Package } from "lucide-react";
+import { Search, Filter, Printer, Edit } from "lucide-react";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
-import { toast } from "sonner";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import { Badge } from "./ui/badge";
+import { format } from "date-fns";
 
 interface ProductionProps {
   currentLocation: "tothai" | "khin";
@@ -21,7 +21,6 @@ export function Production({ currentLocation }: ProductionProps) {
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedBatch, setSelectedBatch] = useState<ProductionBatch | null>(null);
   const [labelDialogOpen, setLabelDialogOpen] = useState(false);
-  const [packingSlipDialogOpen, setPackingSlipDialogOpen] = useState(false);
 
   const { data: batches, isLoading, error } = useProductionBatches(currentLocation);
 
@@ -61,13 +60,20 @@ export function Production({ currentLocation }: ProductionProps) {
     setLabelDialogOpen(true);
   };
 
-  const handleCreatePackingSlip = (batch: ProductionBatch) => {
-    setSelectedBatch(batch);
-    setPackingSlipDialogOpen(true);
+  const handleEditBatch = (batch: ProductionBatch) => {
+    // TODO: Implement edit batch functionality
+    console.log("Edit batch:", batch);
   };
 
-  const handleCreateBulkPackingSlip = () => {
-    setPackingSlipDialogOpen(true);
+  const getExpiryStatus = (batch: ProductionBatch) => {
+    const now = new Date();
+    const expiryDate = new Date(batch.expiry_date);
+    const isExpired = expiryDate <= now;
+    const isExpiringSoon = expiryDate <= new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+    if (isExpired) return { label: "Expired", variant: "destructive" as const };
+    if (isExpiringSoon) return { label: "Expiring Soon", variant: "secondary" as const };
+    return { label: "Fresh", variant: "default" as const };
   };
 
   const filteredBatches = filterBatches(batches || []);
@@ -101,17 +107,7 @@ export function Production({ currentLocation }: ProductionProps) {
             Manage production batches at {getLocationName(currentLocation)}
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={handleCreateBulkPackingSlip}
-            className="flex items-center gap-2"
-          >
-            <Package className="w-4 h-4" />
-            Create Packing Slip
-          </Button>
-          <NewBatchDialog currentLocation={currentLocation} />
-        </div>
+        <NewBatchDialog currentLocation={currentLocation} />
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4">
@@ -142,22 +138,15 @@ export function Production({ currentLocation }: ProductionProps) {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <Card key={index} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="h-4 bg-muted rounded w-3/4"></div>
-                  <div className="h-3 bg-muted rounded w-1/2"></div>
-                  <div className="space-y-2">
-                    <div className="h-3 bg-muted rounded"></div>
-                    <div className="h-3 bg-muted rounded w-2/3"></div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Card>
+          <CardContent className="p-6">
+            <div className="animate-pulse space-y-4">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <div key={index} className="h-12 bg-muted rounded"></div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       ) : filteredBatches.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-center">
@@ -170,29 +159,70 @@ export function Production({ currentLocation }: ProductionProps) {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBatches.map((batch) => (
-            <BatchCard
-              key={batch.id}
-              batch={batch}
-              onPrintLabels={handlePrintLabels}
-              onCreatePackingSlip={handleCreatePackingSlip}
-            />
-          ))}
-        </div>
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Product</TableHead>
+                  <TableHead>Batch Number</TableHead>
+                  <TableHead>Chef</TableHead>
+                  <TableHead>Packages</TableHead>
+                  <TableHead>Production Date</TableHead>
+                  <TableHead>Expiry Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredBatches.map((batch) => {
+                  const expiryStatus = getExpiryStatus(batch);
+                  return (
+                    <TableRow key={batch.id}>
+                      <TableCell className="font-medium">{batch.products.name}</TableCell>
+                      <TableCell className="font-mono text-sm">{batch.batch_number}</TableCell>
+                      <TableCell>{batch.chefs.name}</TableCell>
+                      <TableCell>{batch.packages_produced}</TableCell>
+                      <TableCell>{format(new Date(batch.production_date), "MMM dd, yyyy")}</TableCell>
+                      <TableCell>{format(new Date(batch.expiry_date), "MMM dd, yyyy")}</TableCell>
+                      <TableCell>
+                        <Badge variant={expiryStatus.variant}>{expiryStatus.label}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => handlePrintLabels(batch)}
+                            className="flex items-center gap-1"
+                          >
+                            <Printer className="w-3 h-3" />
+                            Print Labels
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => handleEditBatch(batch)}
+                            className="flex items-center gap-1"
+                          >
+                            <Edit className="w-3 h-3" />
+                            Edit Batch
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       )}
 
       <LabelPrintDialog
         open={labelDialogOpen}
         onOpenChange={setLabelDialogOpen}
         batch={selectedBatch}
-      />
-
-      <PackingSlipDialog
-        open={packingSlipDialogOpen}
-        onOpenChange={setPackingSlipDialogOpen}
-        batches={filteredBatches}
-        selectedBatches={selectedBatch ? [selectedBatch.id] : []}
       />
     </div>
   );
