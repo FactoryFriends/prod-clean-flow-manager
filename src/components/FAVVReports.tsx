@@ -1,7 +1,5 @@
 
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { CleaningTaskDetailsModal } from "./task/CleaningTaskDetailsModal";
 import { OperationsFilters } from "./favv/OperationsFilters";
@@ -10,6 +8,9 @@ import { PackingSlipsTable } from "./favv/PackingSlipsTable";
 import { StockTakesTable } from "./favv/StockTakesTable";
 import { CompletedTasksTable } from "./favv/CompletedTasksTable";
 import { exportPackingSlipsCSV, exportStockTakesCSV, exportCompletedTasksCSV } from "./favv/csvExportUtils";
+import { useFAVVPackingSlips } from "../hooks/useFAVVPackingSlips";
+import { useFAVVStockTakes } from "../hooks/useFAVVStockTakes";
+import { useFAVVCompletedTasks } from "../hooks/useFAVVCompletedTasks";
 
 interface FAVVReportsProps {
   currentLocation: "tothai" | "khin";
@@ -23,223 +24,30 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
-  // Fetch packing slips with filters (for non-ToThai locations) - only show shipped packing slips
-  const { data: packingSlips = [], isLoading: isLoadingPackingSlips } = useQuery({
-    queryKey: ["favv-packing-slips", locationFilter, startDate, endDate],
-    queryFn: async () => {
-      console.log("Fetching packing slips with filters:", { locationFilter, startDate, endDate });
-      
-      const { data, error } = await supabase
-        .from("packing_slips")
-        .select(`
-          *,
-          dispatch_records (
-            location,
-            dispatch_type,
-            customer,
-            picker_name,
-            dispatch_notes
-          )
-        `)
-        .eq("status", "shipped")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching packing slips:", error);
-        throw error;
-      }
-
-      console.log("Raw packing slips data:", data);
-
-      let filteredData = data || [];
-
-      // Apply date filters
-      if (startDate) {
-        const beforeDateFilter = filteredData.length;
-        filteredData = filteredData.filter(slip => 
-          new Date(slip.created_at) >= startDate
-        );
-        console.log(`Date filter (start): ${beforeDateFilter} -> ${filteredData.length}`);
-      }
-      if (endDate) {
-        const endOfDay = new Date(endDate);
-        endOfDay.setHours(23, 59, 59, 999);
-        const beforeDateFilter = filteredData.length;
-        filteredData = filteredData.filter(slip => 
-          new Date(slip.created_at) <= endOfDay
-        );
-        console.log(`Date filter (end): ${beforeDateFilter} -> ${filteredData.length}`);
-      }
-
-      // For "all" locations, show all packing slips
-      if (locationFilter === "all") {
-        console.log("Showing all packing slips:", filteredData.length);
-      } else {
-        // For specific location filter, show packing slips for that location
-        // This includes both slips with dispatch_records from that location
-        // and slips without dispatch_records (created via Confirm & Ship)
-        const beforeLocationFilter = filteredData.length;
-        filteredData = filteredData.filter(slip => {
-          // If slip has dispatch_records, use its location
-          if (slip.dispatch_records?.location) {
-            return slip.dispatch_records.location === locationFilter;
-          }
-          
-          // If no dispatch_records, include it for all locations since
-          // these were created via "Confirm & Ship" and should be visible everywhere
-          return true;
-        });
-        
-        console.log(`Location filter (${locationFilter}): ${beforeLocationFilter} -> ${filteredData.length}`);
-      }
-
-      // Now fetch batch information for each packing slip
-      const packingSlipsWithBatches = await Promise.all(
-        filteredData.map(async (slip) => {
-          if (slip.batch_ids && slip.batch_ids.length > 0) {
-            try {
-              console.log("Fetching batch data for slip:", slip.slip_number, "batch_ids:", slip.batch_ids);
-              
-              const { data: batchData, error: batchError } = await supabase
-                .from("production_batches")
-                .select(`
-                  id,
-                  batch_number,
-                  production_date,
-                  expiry_date,
-                  products (
-                    name,
-                    unit_size,
-                    unit_type
-                  )
-                `)
-                .in("id", slip.batch_ids);
-
-              if (batchError) {
-                console.error("Error fetching batch data for slip:", slip.id, batchError);
-                return slip;
-              }
-
-              if (batchData && batchData.length > 0) {
-                console.log("Found batch data for slip:", slip.slip_number, batchData);
-                return {
-                  ...slip,
-                  batches: batchData
-                };
-              } else {
-                console.log("No batch data found for slip:", slip.slip_number);
-                return slip;
-              }
-            } catch (error) {
-              console.error("Error fetching batch data for slip:", slip.id, error);
-              return slip;
-            }
-          }
-          return slip;
-        })
-      );
-
-      console.log("Final filtered data with batches:", packingSlipsWithBatches);
-      return packingSlipsWithBatches;
-    },
-    enabled: locationFilter !== "tothai",
+  // Use the extracted hooks
+  const { data: packingSlips = [], isLoading: isLoadingPackingSlips } = useFAVVPackingSlips({
+    locationFilter,
+    startDate,
+    endDate
   });
 
-  // Fetch stock takes for ToThai location
-  const { data: stockTakes = [], isLoading: isLoadingStockTakes } = useQuery({
-    queryKey: ["favv-stock-takes", startDate, endDate],
-    queryFn: async () => {
-      // For now, we'll use production_batches as a proxy for stock takes
-      // This could be replaced with a dedicated stock_takes table in the future
-      let query = supabase
-        .from("production_batches")
-        .select(`
-          *,
-          products (name, unit_type),
-          chefs (name)
-        `)
-        .eq("location", "tothai")
-        .order("created_at", { ascending: false });
-
-      if (startDate) {
-        query = query.gte("created_at", startDate.toISOString());
-      }
-      if (endDate) {
-        const endOfDay = new Date(endDate);
-        endOfDay.setHours(23, 59, 59, 999);
-        query = query.lte("created_at", endOfDay.toISOString());
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
-    },
-    enabled: locationFilter === "tothai",
+  const { data: stockTakes = [], isLoading: isLoadingStockTakes } = useFAVVStockTakes({
+    startDate,
+    endDate,
+    enabled: locationFilter === "tothai"
   });
 
-  // Fetch completed cleaning tasks with proper staff codes handling
-  const { data: completedTasks = [], isLoading: isLoadingTasks } = useQuery({
-    queryKey: ["favv-completed-tasks", locationFilter, startDate, endDate, taskNameFilter],
-    queryFn: async () => {
-      let query = supabase
-        .from("cleaning_tasks")
-        .select("*")
-        .eq("status", "closed")
-        .order("completed_at", { ascending: false });
-
-      if (locationFilter && locationFilter !== "all") {
-        query = query.eq("location", locationFilter);
-      }
-
-      if (startDate) {
-        query = query.gte("completed_at", startDate.toISOString());
-      }
-      if (endDate) {
-        const endOfDay = new Date(endDate);
-        endOfDay.setHours(23, 59, 59, 999);
-        query = query.lte("completed_at", endOfDay.toISOString());
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-
-      // Filter by task name on client side
-      const filteredTasks = data.filter(task => 
-        !taskNameFilter || task.title.toLowerCase().includes(taskNameFilter.toLowerCase())
-      );
-
-      // Fetch staff codes separately and map them to tasks
-      const uniqueStaffCodes = [...new Set(filteredTasks.map(task => task.completed_by).filter(Boolean))];
-      
-      if (uniqueStaffCodes.length > 0) {
-        const { data: staffCodes, error: staffError } = await supabase
-          .from("staff_codes")
-          .select("code, initials")
-          .in("code", uniqueStaffCodes);
-
-        if (!staffError && staffCodes) {
-          const staffCodeMap = new Map(staffCodes.map(sc => [sc.code, sc.initials]) || []);
-
-          return filteredTasks.map(task => ({
-            ...task,
-            staff_codes: task.completed_by ? { initials: staffCodeMap.get(task.completed_by) || task.completed_by } : null
-          }));
-        }
-      }
-
-      return filteredTasks.map(task => ({
-        ...task,
-        staff_codes: null
-      }));
-    },
+  const { data: completedTasks = [], isLoading: isLoadingTasks } = useFAVVCompletedTasks({
+    locationFilter,
+    startDate,
+    endDate,
+    taskNameFilter
   });
 
   const handleTaskClick = (task: any) => {
     setSelectedTask(task);
     setIsTaskModalOpen(true);
   };
-
-  const isLoading = isLoadingPackingSlips || isLoadingStockTakes || isLoadingTasks;
 
   return (
     <div className="space-y-6">
