@@ -44,9 +44,14 @@ export function DispatchForm({
   // Set KHIN as default customer for external dispatch
   useEffect(() => {
     if (dispatchType === "external" && !customer && customers.length > 0) {
-      const khinCustomer = customers.find(c => c.name.toLowerCase().includes('khin'));
+      console.log("Looking for KHIN customer in:", customers);
+      const khinCustomer = customers.find(c => 
+        c.name.toLowerCase().includes('khin') || c.name.toLowerCase().includes('restaurant')
+      );
+      console.log("Found KHIN customer:", khinCustomer);
       if (khinCustomer) {
         setCustomer(khinCustomer.id);
+        console.log("Set customer to:", khinCustomer.id);
       }
     }
   }, [dispatchType, customers, customer, setCustomer]);
@@ -64,7 +69,7 @@ export function DispatchForm({
   }, [pickerCode, staffCodes, setPickerName]);
 
   const canSubmit = pickerCode && pickerName && selectedItems.length > 0 && 
-    (dispatchType === "internal" || customer);
+    (dispatchType === "internal" || (dispatchType === "external" && customer));
 
   console.log("DispatchForm debug:", {
     pickerCode,
@@ -72,7 +77,8 @@ export function DispatchForm({
     selectedItemsLength: selectedItems.length,
     dispatchType,
     customer,
-    canSubmit
+    canSubmit,
+    customersCount: customers.length
   });
 
   return (
@@ -122,6 +128,9 @@ export function DispatchForm({
                 ))}
               </SelectContent>
             </Select>
+            {customers.length === 0 && (
+              <p className="text-sm text-muted-foreground">Loading customers...</p>
+            )}
           </div>
         )}
 
