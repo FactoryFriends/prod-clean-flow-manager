@@ -10,6 +10,8 @@ import { TaskTemplateForm } from "./settings/TaskTemplateForm";
 import { TaskTemplateList } from "./settings/TaskTemplateList";
 import { ProductForm } from "./settings/ProductForm";
 import { ProductList } from "./settings/ProductList";
+import { StaffCodeForm } from "./settings/StaffCodeForm";
+import { StaffCodeList } from "./settings/StaffCodeList";
 import { SystemInfo } from "./settings/SystemInfo";
 import { Product } from "@/hooks/useProductionData";
 
@@ -21,8 +23,10 @@ export function Settings({ currentLocation }: SettingsProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showNewTaskDialog, setShowNewTaskDialog] = useState(false);
   const [showNewProductDialog, setShowNewProductDialog] = useState(false);
+  const [showNewStaffCodeDialog, setShowNewStaffCodeDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingStaffCode, setEditingStaffCode] = useState<any>(null);
 
   const handleEditTemplate = (template: any) => {
     setEditingTemplate(template);
@@ -32,6 +36,11 @@ export function Settings({ currentLocation }: SettingsProps) {
   const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
     setShowNewProductDialog(true);
+  };
+
+  const handleEditStaffCode = (staffCode: any) => {
+    setEditingStaffCode(staffCode);
+    setShowNewStaffCodeDialog(true);
   };
 
   const handleTaskFormSuccess = () => {
@@ -52,6 +61,16 @@ export function Settings({ currentLocation }: SettingsProps) {
   const handleProductFormCancel = () => {
     setShowNewProductDialog(false);
     setEditingProduct(null);
+  };
+
+  const handleStaffCodeFormSuccess = () => {
+    setShowNewStaffCodeDialog(false);
+    setEditingStaffCode(null);
+  };
+
+  const handleStaffCodeFormCancel = () => {
+    setShowNewStaffCodeDialog(false);
+    setEditingStaffCode(null);
   };
 
   if (!isAuthenticated) {
@@ -233,18 +252,40 @@ export function Settings({ currentLocation }: SettingsProps) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Staff Codes - Placeholder */}
+              {/* Staff Codes Management */}
               <div className="border border-border rounded-lg p-4">
-                <div className="flex items-center gap-3 mb-4">
-                  <UserCheck className="w-5 h-5 text-primary" />
-                  <div>
-                    <h3 className="text-lg font-semibold">Staff Codes</h3>
-                    <p className="text-sm text-muted-foreground">Manage staff access codes and permissions</p>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <UserCheck className="w-5 h-5 text-primary" />
+                    <div>
+                      <h3 className="text-lg font-semibold">Staff Codes</h3>
+                      <p className="text-sm text-muted-foreground">Manage staff access codes and permissions</p>
+                    </div>
                   </div>
+
+                  <Dialog open={showNewStaffCodeDialog} onOpenChange={setShowNewStaffCodeDialog}>
+                    <DialogTrigger asChild>
+                      <Button className="flex items-center gap-2">
+                        <Plus className="w-4 h-4" />
+                        New Staff Code
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[600px]">
+                      <DialogHeader>
+                        <DialogTitle>
+                          {editingStaffCode ? "Edit Staff Code" : "Create New Staff Code"}
+                        </DialogTitle>
+                      </DialogHeader>
+                      <StaffCodeForm
+                        editingStaffCode={editingStaffCode}
+                        onSuccess={handleStaffCodeFormSuccess}
+                        onCancel={handleStaffCodeFormCancel}
+                      />
+                    </DialogContent>
+                  </Dialog>
                 </div>
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>Coming soon - Staff codes management</p>
-                </div>
+
+                <StaffCodeList onEditStaffCode={handleEditStaffCode} />
               </div>
 
               {/* Chefs Management - Placeholder */}

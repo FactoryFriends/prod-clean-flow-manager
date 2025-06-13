@@ -1,0 +1,137 @@
+
+import { Edit, Trash2, UserCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { useStaffCodes } from "@/hooks/useStaffCodes";
+import { useDeleteStaffCode } from "@/hooks/useStaffCodeMutations";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
+interface StaffCode {
+  code: string;
+  name: string;
+  role?: string;
+  location?: "tothai" | "khin" | "both";
+  active?: boolean;
+}
+
+interface StaffCodeListProps {
+  onEditStaffCode: (staffCode: StaffCode) => void;
+}
+
+export function StaffCodeList({ onEditStaffCode }: StaffCodeListProps) {
+  const { data: staffCodes = [], isLoading } = useStaffCodes();
+  const deleteStaffCode = useDeleteStaffCode();
+
+  const handleDelete = (code: string) => {
+    deleteStaffCode.mutate(code);
+  };
+
+  const getLocationLabel = (location?: string) => {
+    switch (location) {
+      case "tothai":
+        return "ToThai";
+      case "khin":
+        return "KHIN";
+      case "both":
+        return "Both";
+      default:
+        return "Unknown";
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Loading staff codes...
+      </div>
+    );
+  }
+
+  if (staffCodes.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <UserCheck className="w-12 h-12 mx-auto mb-4 opacity-50" />
+        <p>No staff codes found. Create your first staff code to get started.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {staffCodes.map((staffCode) => (
+        <Card key={staffCode.code}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h3 className="text-lg font-semibold">{staffCode.name}</h3>
+                  <Badge variant="outline" className="font-mono">
+                    {staffCode.code}
+                  </Badge>
+                  <Badge variant={staffCode.active ? "default" : "secondary"}>
+                    {staffCode.active ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  {staffCode.role && (
+                    <span>Role: {staffCode.role}</span>
+                  )}
+                  <span>Location: {getLocationLabel(staffCode.location)}</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEditStaffCode(staffCode)}
+                  className="flex items-center gap-2"
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit
+                </Button>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Staff Code</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete the staff code for "{staffCode.name}"? 
+                        This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDelete(staffCode.code)}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}

@@ -442,6 +442,7 @@ export type Database = {
           location: Database["public"]["Enums"]["location_type"] | null
           name: string
           role: string | null
+          updated_at: string | null
         }
         Insert: {
           active?: boolean | null
@@ -450,6 +451,7 @@ export type Database = {
           location?: Database["public"]["Enums"]["location_type"] | null
           name: string
           role?: string | null
+          updated_at?: string | null
         }
         Update: {
           active?: boolean | null
@@ -458,6 +460,7 @@ export type Database = {
           location?: Database["public"]["Enums"]["location_type"] | null
           name?: string
           role?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
