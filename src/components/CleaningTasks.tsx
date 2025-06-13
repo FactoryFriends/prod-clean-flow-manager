@@ -1,4 +1,3 @@
-
 import { Brush } from "lucide-react";
 import { useState } from "react";
 import { useCleaningTasks } from "@/hooks/useCleaningTasks";
@@ -69,7 +68,7 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
     <div className="space-y-6">
       <CleaningTaskHeader 
         locationName={locationName}
-        currentLocation={currentLocation}
+        currentLocation={dbLocation}
       />
 
       <CleaningTaskFilters

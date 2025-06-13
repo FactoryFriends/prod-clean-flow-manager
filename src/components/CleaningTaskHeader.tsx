@@ -1,11 +1,10 @@
 
-import { Plus } from "lucide-react";
-import { Button } from "./ui/button";
 import { FAVVReport } from "./FAVVReport";
+import { NewCleaningTaskDialog } from "./NewCleaningTaskDialog";
 
 interface CleaningTaskHeaderProps {
   locationName: string;
-  currentLocation: string;
+  currentLocation: "tothai" | "khin";
 }
 
 export function CleaningTaskHeader({ locationName, currentLocation }: CleaningTaskHeaderProps) {
@@ -19,10 +18,7 @@ export function CleaningTaskHeader({ locationName, currentLocation }: CleaningTa
       </div>
       <div className="flex gap-2">
         <FAVVReport currentLocation={currentLocation} />
-        <Button className="flex items-center gap-2 w-fit">
-          <Plus className="w-4 h-4" />
-          New Cleaning Task
-        </Button>
+        <NewCleaningTaskDialog currentLocation={currentLocation} />
       </div>
     </div>
   );
