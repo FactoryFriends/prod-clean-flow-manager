@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { ProductionBatch } from "@/hooks/useProductionData";
 import { format } from "date-fns";
-import { QrCode, Printer } from "lucide-react";
+import { Printer } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -19,19 +19,6 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
 
   if (!batch) return null;
 
-  const generateQRCodeData = (labelNumber: number) => {
-    return {
-      batch_number: batch.batch_number,
-      product: batch.products.name,
-      production_date: batch.production_date,
-      expiry_date: batch.expiry_date,
-      package_number: labelNumber,
-      chef: batch.chefs.name,
-      location: batch.location,
-      package_size: `${batch.products.unit_size} ${batch.products.unit_type}`
-    };
-  };
-
   const handlePrintLabels = async () => {
     setPrintingLabels(true);
     
@@ -42,7 +29,16 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
         return {
           batch_id: batch.id,
           label_number: labelNumber,
-          qr_code_data: generateQRCodeData(labelNumber)
+          label_data: {
+            batch_number: batch.batch_number,
+            product: batch.products.name,
+            production_date: batch.production_date,
+            expiry_date: batch.expiry_date,
+            package_number: labelNumber,
+            chef: batch.chefs.name,
+            location: batch.location,
+            package_size: `${batch.products.unit_size} ${batch.products.unit_type}`
+          }
         };
       });
 
@@ -95,58 +91,53 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
 
           <div className="border rounded-lg p-4">
             <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <QrCode className="w-4 h-4" />
+              <Printer className="w-4 h-4" />
               Label Preview (1 of {batch.packages_produced})
             </h3>
             
             {/* Thermal Label Preview - 50.8 x 25.4mm landscape format */}
-            <div className="bg-white border-2 border-gray-400 mx-auto" 
+            <div className="bg-white border-2 border-gray-400 mx-auto p-2" 
                  style={{ 
                    width: '192px',  // 50.8mm at 96dpi ≈ 192px
                    height: '96px',  // 25.4mm at 96dpi ≈ 96px
                    fontSize: '8px',
-                   lineHeight: '1.1'
+                   lineHeight: '1.2'
                  }}>
-              <div className="flex h-full">
-                {/* Left side - QR Code area */}
-                <div className="w-20 h-full flex items-center justify-center bg-gray-50 border-r border-gray-300">
-                  <div className="w-16 h-16 bg-black flex items-center justify-center text-white text-xs font-bold">
-                    QR
-                  </div>
+              <div className="h-full flex flex-col justify-between">
+                {/* Product name - BOLD and larger */}
+                <div className="font-bold text-center leading-tight" style={{ fontSize: '14px' }}>
+                  {batch.products.name}
                 </div>
                 
-                {/* Right side - Text content */}
-                <div className="flex-1 p-1 flex flex-col justify-between">
-                  {/* Product name - BOLD */}
-                  <div className="font-bold text-xs leading-tight" style={{ fontSize: '10px' }}>
-                    {batch.products.name}
+                <div className="flex justify-between items-center">
+                  {/* Left column */}
+                  <div className="flex flex-col space-y-1">
+                    <div className="text-xs font-mono">
+                      {batch.batch_number}
+                    </div>
+                    <div className="text-xs">
+                      Prod: {format(new Date(batch.production_date), "dd/MM/yyyy")}
+                    </div>
+                    <div className="text-xs">
+                      Chef: {batch.chefs.name}
+                    </div>
                   </div>
                   
-                  {/* Batch number */}
-                  <div className="text-xs font-mono">
-                    {batch.batch_number}
-                  </div>
-                  
-                  {/* Production date */}
-                  <div className="text-xs">
-                    Prod: {format(new Date(batch.production_date), "dd/MM/yyyy")}
-                  </div>
-                  
-                  {/* Expiry date - BIG and BOLD */}
-                  <div className="font-bold text-sm leading-tight" style={{ fontSize: '12px' }}>
-                    EXP: {format(new Date(batch.expiry_date), "dd/MM/yyyy")}
-                  </div>
-                  
-                  {/* Chef name */}
-                  <div className="text-xs">
-                    Chef: {batch.chefs.name}
+                  {/* Right column - Expiry date BIG and BOLD */}
+                  <div className="text-right">
+                    <div className="font-bold leading-tight" style={{ fontSize: '16px' }}>
+                      EXP:
+                    </div>
+                    <div className="font-bold leading-tight" style={{ fontSize: '14px' }}>
+                      {format(new Date(batch.expiry_date), "dd/MM/yyyy")}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
             
             <p className="text-sm text-muted-foreground mt-3">
-              Thermal label format: 50.8 x 25.4mm (landscape). QR code contains: product name, batch number, production date, expiry date, package number, chef name, location, and package size.
+              Thermal label format: 50.8 x 25.4mm (landscape). Contains: product name, batch number, production date, expiry date, and chef name.
             </p>
           </div>
 
