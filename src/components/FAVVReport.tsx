@@ -201,9 +201,9 @@ Report ID: FAVV-${Date.now()}
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2 bg-orange-50 hover:bg-orange-100 border-orange-200">
+        <Button variant="outline" size="sm" className="flex items-center gap-2 bg-orange-50 hover:bg-orange-100 border-orange-200">
           <AlertTriangle className="w-4 h-4 text-orange-600" />
-          Generate FAVV Report
+          FAVV Report
         </Button>
       </SheetTrigger>
       <SheetContent className="w-[600px] sm:w-[700px]">
