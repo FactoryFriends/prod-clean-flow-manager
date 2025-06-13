@@ -8,7 +8,7 @@ import { Production } from "@/components/Production";
 import { Distribution } from "@/components/Distribution";
 import { CleaningTasks } from "@/components/CleaningTasks";
 import { Settings } from "@/components/Settings";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Invoicing } from "@/components/Invoicing";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -26,6 +26,8 @@ const Index = () => {
         return <Distribution currentLocation={currentLocation} />;
       case "cleaning":
         return <CleaningTasks currentLocation={currentLocation} />;
+      case "invoicing":
+        return <Invoicing currentLocation={currentLocation} />;
       case "settings":
         return <Settings currentLocation={currentLocation} />;
       default:

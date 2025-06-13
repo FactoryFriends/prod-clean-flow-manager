@@ -1,4 +1,5 @@
-import { Building, Package, Truck, Brush, BarChart3, Settings } from "lucide-react";
+
+import { Building, Package, Truck, Brush, BarChart3, Settings, Receipt } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SidebarProps {
@@ -13,6 +14,7 @@ const menuItems = [
   { id: "production", label: "Production", icon: Package },
   { id: "distribution", label: "Distribution", icon: Truck },
   { id: "cleaning", label: "Cleaning Tasks", icon: Brush },
+  { id: "invoicing", label: "Facturatie", icon: Receipt },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
