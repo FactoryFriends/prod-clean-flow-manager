@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Lock, Plus, Package, Edit, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
@@ -669,7 +668,7 @@ export function Settings({ currentLocation }: SettingsProps) {
         <div className="bg-card border border-border rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">System Information</h2>
           <div className="space-y-2 text-sm text-muted-foreground">
-            <p>Current Location: {currentLocation === "location1" ? "ToThai Production Facility" : "KHIN Restaurant"}</p>
+            <p>Current Location: {currentLocation === "tothai" ? "ToThai Production Facility" : "KHIN Restaurant"}</p>
             <p>Manager Access: Active</p>
             <p>Version: 1.0.0</p>
           </div>
