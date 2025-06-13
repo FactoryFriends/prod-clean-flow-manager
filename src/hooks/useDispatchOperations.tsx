@@ -16,6 +16,7 @@ interface UseDispatchOperationsProps {
   currentLocation: "tothai" | "khin";
   setCurrentDispatchId: (id: string | null) => void;
   setPackingSlipOpen: (open: boolean) => void;
+  setPackingSlipStaffNames: (names: { preparedBy: string; pickedUpBy: string }) => void;
   onSuccess: () => void;
 }
 
@@ -29,6 +30,7 @@ export function useDispatchOperations({
   currentLocation,
   setCurrentDispatchId,
   setPackingSlipOpen,
+  setPackingSlipStaffNames,
   onSuccess
 }: UseDispatchOperationsProps) {
   const { data: customers = [] } = useCustomers(true);
@@ -51,6 +53,12 @@ export function useDispatchOperations({
     console.log("Creating packing slip with staff name:", pickerName);
     
     try {
+      // Store staff names before any state changes
+      const staffNames = {
+        preparedBy: pickerName,
+        pickedUpBy: pickerName
+      };
+      
       // First create the dispatch record
       const dispatchRecord = await createDispatch.mutateAsync({
         dispatchType,
@@ -82,7 +90,10 @@ export function useDispatchOperations({
 
       setCurrentDispatchId(dispatchRecord.id);
       
-      // Open packing slip BEFORE resetting the form to preserve staff names
+      // Set staff names for packing slip
+      setPackingSlipStaffNames(staffNames);
+      
+      // Open packing slip
       setPackingSlipOpen(true);
 
       toast({
@@ -90,7 +101,7 @@ export function useDispatchOperations({
         description: `External dispatch ${slipNumber} created successfully`,
       });
 
-      // Delay the form reset to ensure packing slip gets the correct data
+      // Reset form after a short delay
       setTimeout(() => {
         onSuccess();
       }, 100);

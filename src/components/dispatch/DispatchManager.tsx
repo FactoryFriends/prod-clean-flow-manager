@@ -24,6 +24,10 @@ export function DispatchManager({ currentLocation }: DispatchManagerProps) {
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const [packingSlipOpen, setPackingSlipOpen] = useState(false);
   const [currentDispatchId, setCurrentDispatchId] = useState<string | null>(null);
+  const [packingSlipStaffNames, setPackingSlipStaffNames] = useState<{
+    preparedBy: string;
+    pickedUpBy: string;
+  }>({ preparedBy: "", pickedUpBy: "" });
 
   const { data: batches } = useProductionBatches(currentLocation);
   const { data: customers = [] } = useCustomers(true);
@@ -38,6 +42,7 @@ export function DispatchManager({ currentLocation }: DispatchManagerProps) {
     currentLocation,
     setCurrentDispatchId,
     setPackingSlipOpen,
+    setPackingSlipStaffNames,
     onSuccess: () => {
       setSelectedItems([]);
       setPickerCode("");
@@ -150,8 +155,8 @@ export function DispatchManager({ currentLocation }: DispatchManagerProps) {
           onOpenChange={setPackingSlipOpen}
           selectedItems={selectedItems}
           customer={customer}
-          preparedBy={pickerName}
-          pickedUpBy={pickerName}
+          preparedBy={packingSlipStaffNames.preparedBy}
+          pickedUpBy={packingSlipStaffNames.pickedUpBy}
           dispatchNotes={dispatchNotes}
           currentLocation={currentLocation}
         />
