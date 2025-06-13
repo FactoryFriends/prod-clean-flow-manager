@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -9,6 +8,8 @@ export interface Product {
   unit_size: number;
   unit_type: string;
   packages_per_batch: number;
+  shelf_life_days: number | null;
+  price_per_unit: number | null;
   active: boolean;
 }
 
@@ -46,6 +47,111 @@ export const useProducts = () => {
       
       if (error) throw error;
       return data as Product[];
+    },
+  });
+};
+
+export const useAllProducts = () => {
+  return useQuery({
+    queryKey: ["all-products"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("name");
+      
+      if (error) throw error;
+      return data as Product[];
+    },
+  });
+};
+
+export const useCreateProduct = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (productData: {
+      name: string;
+      unit_size: number;
+      unit_type: string;
+      packages_per_batch: number;
+      shelf_life_days: number | null;
+      price_per_unit: number | null;
+    }) => {
+      const { data, error } = await supabase
+        .from("products")
+        .insert(productData)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["all-products"] });
+      toast.success("Product created successfully");
+    },
+    onError: (error) => {
+      toast.error("Failed to create product: " + error.message);
+    },
+  });
+};
+
+export const useUpdateProduct = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, ...productData }: {
+      id: string;
+      name: string;
+      unit_size: number;
+      unit_type: string;
+      packages_per_batch: number;
+      shelf_life_days: number | null;
+      price_per_unit: number | null;
+      active: boolean;
+    }) => {
+      const { data, error } = await supabase
+        .from("products")
+        .update(productData)
+        .eq("id", id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["all-products"] });
+      toast.success("Product updated successfully");
+    },
+    onError: (error) => {
+      toast.error("Failed to update product: " + error.message);
+    },
+  });
+};
+
+export const useDeleteProduct = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("products")
+        .update({ active: false })
+        .eq("id", id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["all-products"] });
+      toast.success("Product deactivated successfully");
+    },
+    onError: (error) => {
+      toast.error("Failed to deactivate product: " + error.message);
     },
   });
 };

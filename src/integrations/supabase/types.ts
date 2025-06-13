@@ -402,6 +402,8 @@ export type Database = {
           id: string
           name: string
           packages_per_batch: number
+          price_per_unit: number | null
+          shelf_life_days: number | null
           unit_size: number
           unit_type: string
           updated_at: string
@@ -412,6 +414,8 @@ export type Database = {
           id?: string
           name: string
           packages_per_batch?: number
+          price_per_unit?: number | null
+          shelf_life_days?: number | null
           unit_size: number
           unit_type: string
           updated_at?: string
@@ -422,6 +426,8 @@ export type Database = {
           id?: string
           name?: string
           packages_per_batch?: number
+          price_per_unit?: number | null
+          shelf_life_days?: number | null
           unit_size?: number
           unit_type?: string
           updated_at?: string
