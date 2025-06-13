@@ -7,18 +7,24 @@ interface SidebarProps {
   onSectionChange: (section: string) => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  currentLocation: "tothai" | "khin";
 }
 
 const menuItems = [
-  { id: "dashboard", label: "Dashboard", icon: BarChart3 },
-  { id: "production", label: "Production", icon: Package },
-  { id: "distribution", label: "Distribution", icon: Truck },
-  { id: "cleaning", label: "Cleaning Tasks", icon: Brush },
-  { id: "invoicing", label: "Invoicing", icon: Receipt },
-  { id: "settings", label: "Settings", icon: Settings },
+  { id: "dashboard", label: "Dashboard", icon: BarChart3, availableFor: ["tothai", "khin"] },
+  { id: "production", label: "Production", icon: Package, availableFor: ["tothai"] },
+  { id: "distribution", label: "Distribution", icon: Truck, availableFor: ["tothai"] },
+  { id: "cleaning", label: "Cleaning Tasks", icon: Brush, availableFor: ["tothai", "khin"] },
+  { id: "invoicing", label: "Invoicing", icon: Receipt, availableFor: ["tothai"] },
+  { id: "settings", label: "Settings", icon: Settings, availableFor: ["tothai", "khin"] },
 ];
 
-export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleCollapse }: SidebarProps) {
+export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleCollapse, currentLocation }: SidebarProps) {
+  // Filter menu items based on current location
+  const availableMenuItems = menuItems.filter(item => 
+    item.availableFor.includes(currentLocation)
+  );
+
   return (
     <div className={cn(
       "bg-sidebar border-r border-sidebar-border h-screen transition-all duration-300",
@@ -43,7 +49,7 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
       </div>
       
       <nav className="p-4 space-y-2">
-        {menuItems.map((item) => {
+        {availableMenuItems.map((item) => {
           const Icon = item.icon;
           return (
             <button

@@ -45,6 +45,7 @@ const Index = () => {
             onSectionChange={setActiveSection}
             isCollapsed={sidebarCollapsed}
             onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+            currentLocation={currentLocation}
           />
         </div>
 
@@ -61,6 +62,7 @@ const Index = () => {
                 }}
                 isCollapsed={false}
                 onToggleCollapse={() => {}}
+                currentLocation={currentLocation}
               />
             </div>
           </div>

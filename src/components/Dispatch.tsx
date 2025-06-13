@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useProductionBatches, ProductionBatch } from "@/hooks/useProductionData";
 import { Button } from "./ui/button";
@@ -7,7 +6,7 @@ import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Truck, Package, Plus, Minus } from "lucide-react";
+import { Truck, Package, Plus, Minus, Home, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
 import { PackingSlipDialog } from "./PackingSlipDialog";
 
@@ -42,6 +41,7 @@ const staffCodes = [
 ];
 
 export function Dispatch({ currentLocation }: DispatchProps) {
+  const [dispatchType, setDispatchType] = useState<"external" | "internal">("external");
   const [customer, setCustomer] = useState("");
   const [pickerCode, setPickerCode] = useState("");
   const [pickerName, setPickerName] = useState("");
@@ -119,6 +119,17 @@ export function Dispatch({ currentLocation }: DispatchProps) {
     setPackingSlipOpen(true);
   };
 
+  const handleInternalUse = () => {
+    console.log("Processing internal use for:", selectedItems);
+    // TODO: Implement internal use booking - just log the usage without creating packing slip
+    alert(`Internal use registered: ${selectedItems.length} items logged for kitchen use`);
+    // Reset the form
+    setSelectedItems([]);
+    setPickerCode("");
+    setPickerName("");
+    setDispatchNotes("");
+  };
+
   const isExpired = (date: string) => new Date(date) <= new Date();
   const isExpiringSoon = (date: string) => new Date(date) <= new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
 
@@ -143,29 +154,68 @@ export function Dispatch({ currentLocation }: DispatchProps) {
         <h1 className="text-3xl font-bold text-foreground">Dispatch Operations</h1>
       </div>
 
+      {/* Dispatch Type Toggle */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Dispatch Type</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4">
+            <Button
+              variant={dispatchType === "external" ? "default" : "outline"}
+              onClick={() => setDispatchType("external")}
+              className="flex items-center gap-2"
+            >
+              <ArrowRight className="w-4 h-4" />
+              External Dispatch
+            </Button>
+            <Button
+              variant={dispatchType === "internal" ? "default" : "outline"}
+              onClick={() => setDispatchType("internal")}
+              className="flex items-center gap-2"
+            >
+              <Home className="w-4 h-4" />
+              Internal Use
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            {dispatchType === "external" 
+              ? "Create packing slips for external customers and restaurants"
+              : "Log internal kitchen usage without creating packing slips or invoices"
+            }
+          </p>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Dispatch Details */}
         <Card>
           <CardHeader>
-            <CardTitle>Dispatch Details</CardTitle>
+            <CardTitle>
+              {dispatchType === "external" ? "Dispatch Details" : "Internal Use Details"}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Customer</label>
-              <Select value={customer} onValueChange={setCustomer}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select customer" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="khin-restaurant">KHIN Takeaway</SelectItem>
-                  <SelectItem value="tothai-restaurant">To Thai Restaurant</SelectItem>
-                  <SelectItem value="external-customer">External Customer</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {dispatchType === "external" && (
+              <div>
+                <label className="block text-sm font-medium mb-2">Customer</label>
+                <Select value={customer} onValueChange={setCustomer}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select customer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="khin-restaurant">KHIN Takeaway</SelectItem>
+                    <SelectItem value="tothai-restaurant">To Thai Restaurant</SelectItem>
+                    <SelectItem value="external-customer">External Customer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div>
-              <label className="block text-sm font-medium mb-2">Picker Code (4 digits)</label>
+              <label className="block text-sm font-medium mb-2">
+                {dispatchType === "external" ? "Picker Code (4 digits)" : "Staff Code (4 digits)"}
+              </label>
               <Input
                 type="text"
                 placeholder="Enter 4-digit code"
@@ -176,7 +226,7 @@ export function Dispatch({ currentLocation }: DispatchProps) {
               />
               {pickerName && (
                 <p className="text-sm text-green-600 mt-1">
-                  Picker: {pickerName}
+                  {dispatchType === "external" ? "Picker" : "Staff"}: {pickerName}
                 </p>
               )}
               {pickerCode.length === 4 && !pickerName && (
@@ -187,23 +237,40 @@ export function Dispatch({ currentLocation }: DispatchProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Dispatch Notes</label>
+              <label className="block text-sm font-medium mb-2">
+                {dispatchType === "external" ? "Dispatch Notes" : "Usage Notes"}
+              </label>
               <Textarea
-                placeholder="Special delivery instructions, temperature requirements, etc..."
+                placeholder={
+                  dispatchType === "external" 
+                    ? "Special delivery instructions, temperature requirements, etc..."
+                    : "Purpose of use, recipe requirements, etc..."
+                }
                 value={dispatchNotes}
                 onChange={(e) => setDispatchNotes(e.target.value)}
                 rows={3}
               />
             </div>
 
-            <Button 
-              onClick={handleCreatePackingSlip}
-              disabled={selectedItems.length === 0 || !customer || !pickerName}
-              className="w-full"
-            >
-              <Package className="w-4 h-4 mr-2" />
-              Create Packing Slip
-            </Button>
+            {dispatchType === "external" ? (
+              <Button 
+                onClick={handleCreatePackingSlip}
+                disabled={selectedItems.length === 0 || !customer || !pickerName}
+                className="w-full"
+              >
+                <Package className="w-4 h-4 mr-2" />
+                Create Packing Slip
+              </Button>
+            ) : (
+              <Button 
+                onClick={handleInternalUse}
+                disabled={selectedItems.length === 0 || !pickerName}
+                className="w-full"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Log Internal Use
+              </Button>
+            )}
           </CardContent>
         </Card>
 
@@ -354,16 +421,18 @@ export function Dispatch({ currentLocation }: DispatchProps) {
         </CardContent>
       </Card>
 
-      <PackingSlipDialog
-        open={packingSlipOpen}
-        onOpenChange={setPackingSlipOpen}
-        selectedItems={selectedItems}
-        customer={customer}
-        preparedBy={pickerName}
-        pickedUpBy={pickerName}
-        dispatchNotes={dispatchNotes}
-        currentLocation={currentLocation}
-      />
+      {dispatchType === "external" && (
+        <PackingSlipDialog
+          open={packingSlipOpen}
+          onOpenChange={setPackingSlipOpen}
+          selectedItems={selectedItems}
+          customer={customer}
+          preparedBy={pickerName}
+          pickedUpBy={pickerName}
+          dispatchNotes={dispatchNotes}
+          currentLocation={currentLocation}
+        />
+      )}
     </div>
   );
 }
