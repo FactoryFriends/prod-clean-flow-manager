@@ -236,6 +236,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "cleaning_tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "staff_codes"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "cleaning_tasks_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "staff_codes"
+            referencedColumns: ["code"]
+          },
+          {
             foreignKeyName: "cleaning_tasks_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: false
@@ -527,6 +541,7 @@ export type Database = {
           code: string
           created_at: string
           department: string | null
+          initials: string | null
           location: Database["public"]["Enums"]["location_type"] | null
           name: string
           permission_level: string | null
@@ -538,6 +553,7 @@ export type Database = {
           code: string
           created_at?: string
           department?: string | null
+          initials?: string | null
           location?: Database["public"]["Enums"]["location_type"] | null
           name: string
           permission_level?: string | null
@@ -549,6 +565,7 @@ export type Database = {
           code?: string
           created_at?: string
           department?: string | null
+          initials?: string | null
           location?: Database["public"]["Enums"]["location_type"] | null
           name?: string
           permission_level?: string | null

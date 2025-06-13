@@ -99,7 +99,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
     enabled: locationFilter === "tothai",
   });
 
-  // Fetch completed cleaning tasks - temporarily without staff_codes join until foreign key is created
+  // Fetch completed cleaning tasks with proper staff codes handling
   const { data: completedTasks = [], isLoading: isLoadingTasks } = useQuery({
     queryKey: ["favv-completed-tasks", locationFilter, startDate, endDate, taskNameFilter],
     queryFn: async () => {
@@ -134,17 +134,19 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
       const uniqueStaffCodes = [...new Set(filteredTasks.map(task => task.completed_by).filter(Boolean))];
       
       if (uniqueStaffCodes.length > 0) {
-        const { data: staffCodes } = await supabase
+        const { data: staffCodes, error: staffError } = await supabase
           .from("staff_codes")
           .select("code, initials")
           .in("code", uniqueStaffCodes);
 
-        const staffCodeMap = new Map(staffCodes?.map(sc => [sc.code, sc.initials]) || []);
+        if (!staffError && staffCodes) {
+          const staffCodeMap = new Map(staffCodes.map(sc => [sc.code, sc.initials]) || []);
 
-        return filteredTasks.map(task => ({
-          ...task,
-          staff_codes: task.completed_by ? { initials: staffCodeMap.get(task.completed_by) || task.completed_by } : null
-        }));
+          return filteredTasks.map(task => ({
+            ...task,
+            staff_codes: task.completed_by ? { initials: staffCodeMap.get(task.completed_by) || task.completed_by } : null
+          }));
+        }
       }
 
       return filteredTasks.map(task => ({
