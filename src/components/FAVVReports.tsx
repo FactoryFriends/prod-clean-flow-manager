@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,12 +71,12 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
         console.log(`Date filter (end): ${beforeDateFilter} -> ${filteredData.length}`);
       }
 
-      // Filter by location - if there's no dispatch_records, we'll use a default location based on current location
+      // Filter by location - show packing slips created at the filtered location
       const beforeLocationFilter = filteredData.length;
       const locationFilteredData = filteredData.filter(slip => {
         if (!locationFilter || locationFilter === "all") return true;
         
-        // If slip has dispatch_records, use its location
+        // If slip has dispatch_records, use its location (where it was created)
         if (slip.dispatch_records?.location) {
           return slip.dispatch_records.location === locationFilter;
         }
