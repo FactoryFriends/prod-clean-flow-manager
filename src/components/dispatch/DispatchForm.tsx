@@ -1,12 +1,11 @@
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Home } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { DispatchType, SelectedItem } from "@/types/dispatch";
-import { useStaffCodes } from "@/hooks/useStaffCodes";
+import { useCustomers } from "@/hooks/useCustomers";
 
 interface DispatchFormProps {
   dispatchType: DispatchType;
@@ -37,116 +36,90 @@ export function DispatchForm({
   onCreatePackingSlip,
   onInternalUse,
 }: DispatchFormProps) {
-  const { data: staffCodes, isLoading: staffLoading } = useStaffCodes();
+  const { data: customers = [] } = useCustomers(true); // Only active customers
 
-  const handlePickerCodeChange = (value: string) => {
-    setPickerCode(value);
-    
-    if (value.length === 4 && staffCodes) {
-      const staff = staffCodes.find(s => s.code === value && s.active);
-      if (staff) {
-        setPickerName(staff.name);
-      } else {
-        setPickerName("");
-      }
-    } else {
-      setPickerName("");
-    }
-  };
-
-  const isValidStaffCode = pickerCode.length === 4 && staffCodes?.some(s => s.code === pickerCode && s.active);
-  const showInvalidCode = pickerCode.length === 4 && !isValidStaffCode;
+  const canSubmit = pickerCode && pickerName && selectedItems.length > 0 && 
+    (dispatchType === "internal" || customer);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          {dispatchType === "external" ? "Dispatch Details" : "Internal Use Details"}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="picker-code">Staff Code</Label>
+            <Input
+              id="picker-code"
+              placeholder="Enter staff code"
+              value={pickerCode}
+              onChange={(e) => setPickerCode(e.target.value)}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="picker-name">Staff Name</Label>
+            <Input
+              id="picker-name"
+              placeholder="Enter staff name"
+              value={pickerName}
+              onChange={(e) => setPickerName(e.target.value)}
+            />
+          </div>
+        </div>
+
         {dispatchType === "external" && (
-          <div>
-            <label className="block text-sm font-medium mb-2">Customer</label>
+          <div className="space-y-2">
+            <Label htmlFor="customer">Customer</Label>
             <Select value={customer} onValueChange={setCustomer}>
               <SelectTrigger>
                 <SelectValue placeholder="Select customer" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="khin-restaurant">KHIN Takeaway</SelectItem>
-                <SelectItem value="tothai-restaurant">To Thai Restaurant</SelectItem>
-                <SelectItem value="external-customer">External Customer</SelectItem>
+                {customers.map((customerRecord) => (
+                  <SelectItem key={customerRecord.id} value={customerRecord.id}>
+                    <div className="flex items-center gap-2">
+                      <span>{customerRecord.name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        ({customerRecord.customer_type})
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         )}
 
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            {dispatchType === "external" ? "Picker Code (4 digits)" : "Staff Code (4 digits)"}
-          </label>
-          <Input
-            type="text"
-            placeholder="Enter 4-digit code"
-            value={pickerCode}
-            onChange={(e) => handlePickerCodeChange(e.target.value)}
-            maxLength={4}
-            className="font-mono"
-            disabled={staffLoading}
-          />
-          {staffLoading && pickerCode.length > 0 && (
-            <p className="text-sm text-gray-500 mt-1">
-              Validating code...
-            </p>
-          )}
-          {pickerName && (
-            <p className="text-sm text-green-600 mt-1">
-              {dispatchType === "external" ? "Picker" : "Staff"}: {pickerName}
-            </p>
-          )}
-          {showInvalidCode && (
-            <p className="text-sm text-red-600 mt-1">
-              Invalid or inactive staff code
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            {dispatchType === "external" ? "Dispatch Notes" : "Usage Notes"}
-          </label>
+        <div className="space-y-2">
+          <Label htmlFor="dispatch-notes">Notes</Label>
           <Textarea
-            placeholder={
-              dispatchType === "external" 
-                ? "Special delivery instructions, temperature requirements, etc..."
-                : "Purpose of use, recipe requirements, etc..."
-            }
+            id="dispatch-notes"
+            placeholder="Add any dispatch notes..."
             value={dispatchNotes}
             onChange={(e) => setDispatchNotes(e.target.value)}
             rows={3}
           />
         </div>
+      </div>
 
+      <div className="flex gap-4">
         {dispatchType === "external" ? (
           <Button 
             onClick={onCreatePackingSlip}
-            disabled={selectedItems.length === 0 || !customer || !isValidStaffCode}
-            className="w-full"
+            disabled={!canSubmit}
+            className="flex-1"
           >
-            <Package className="w-4 h-4 mr-2" />
-            Create Packing Slip
+            Create Packing Slip ({selectedItems.length} items)
           </Button>
         ) : (
           <Button 
             onClick={onInternalUse}
-            disabled={selectedItems.length === 0 || !isValidStaffCode}
-            className="w-full"
+            disabled={!canSubmit}
+            className="flex-1"
           >
-            <Home className="w-4 h-4 mr-2" />
-            Log Internal Use
+            Log Internal Use ({selectedItems.length} items)
           </Button>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

@@ -1,8 +1,8 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { format } from "date-fns";
 import { Check } from "lucide-react";
+import { useCustomers } from "@/hooks/useCustomers";
 
 interface SelectedItem {
   id: string;
@@ -34,6 +34,8 @@ export function PackingSlipDialog({
   dispatchNotes,
   currentLocation,
 }: PackingSlipDialogProps) {
+  const { data: customers = [] } = useCustomers(true);
+
   const generatePackingSlipNumber = () => {
     const date = format(new Date(), "yyyyMMdd");
     const random = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
@@ -49,14 +51,8 @@ export function PackingSlipDialog({
   };
 
   const getDestination = () => {
-    switch (customer) {
-      case "khin-restaurant":
-        return "KHIN Takeaway";
-      case "tothai-restaurant":
-        return "To Thai Restaurant";
-      default:
-        return "External Customer";
-    }
+    const selectedCustomer = customers.find(c => c.id === customer);
+    return selectedCustomer ? selectedCustomer.name : "External Customer";
   };
 
   const totalItems = selectedItems.length;

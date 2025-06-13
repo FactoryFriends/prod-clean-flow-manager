@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useProductionBatches } from "@/hooks/useProductionData";
 import { useCreateDispatch, useCreatePackingSlip } from "@/hooks/useDispatchData";
+import { useCustomers } from "@/hooks/useCustomers";
 import { PackingSlipDialog } from "./PackingSlipDialog";
 import { DispatchHeader } from "./dispatch/DispatchHeader";
 import { DispatchForm } from "./dispatch/DispatchForm";
@@ -26,6 +27,7 @@ export function Dispatch({ currentLocation }: DispatchProps) {
   const [currentDispatchId, setCurrentDispatchId] = useState<string | null>(null);
 
   const { data: batches } = useProductionBatches(currentLocation);
+  const { data: customers = [] } = useCustomers(true);
   const createDispatch = useCreateDispatch();
   const createPackingSlip = useCreatePackingSlip();
   const { toast } = useToast();
@@ -80,14 +82,8 @@ export function Dispatch({ currentLocation }: DispatchProps) {
   };
 
   const getDestination = () => {
-    switch (customer) {
-      case "khin-restaurant":
-        return "KHIN Takeaway";
-      case "tothai-restaurant":
-        return "To Thai Restaurant";
-      default:
-        return "External Customer";
-    }
+    const selectedCustomer = customers.find(c => c.id === customer);
+    return selectedCustomer ? selectedCustomer.name : "External Customer";
   };
 
   const handleCreatePackingSlip = async () => {
