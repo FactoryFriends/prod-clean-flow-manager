@@ -96,43 +96,38 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             </h3>
             
             {/* Thermal Label Preview - 50.8 x 25.4mm landscape format */}
-            <div className="bg-white border-2 border-gray-400 mx-auto p-3" 
+            <div className="bg-white border-2 border-gray-400 mx-auto p-2" 
                  style={{ 
                    width: '192px',  // 50.8mm at 96dpi ≈ 192px
                    height: '96px',  // 25.4mm at 96dpi ≈ 96px
-                   fontSize: '9px',
+                   fontSize: '8px',
                    lineHeight: '1.1'
                  }}>
               <div className="h-full flex flex-col justify-between">
-                {/* Product name - BOLD and larger, takes more space */}
-                <div className="font-bold text-center leading-tight mb-1" style={{ fontSize: '12px' }}>
+                {/* Product name - BOLD and larger at top */}
+                <div className="font-bold text-center leading-tight" style={{ fontSize: '14px' }}>
                   {batch.products.name}
                 </div>
                 
-                {/* Main content area - using full width */}
-                <div className="flex-1 flex flex-col justify-between">
-                  {/* Batch and production info */}
-                  <div className="flex justify-between items-start mb-1">
-                    <div className="flex flex-col space-y-1 flex-1">
-                      <div className="text-xs font-semibold">
-                        {batch.batch_number}
-                      </div>
-                      <div className="text-xs">
-                        Prod: {format(new Date(batch.production_date), "dd/MM/yy")}
-                      </div>
-                    </div>
-                    
-                    {/* Chef name */}
-                    <div className="text-xs text-right flex-1">
-                      Chef: {batch.chefs.name}
-                    </div>
-                  </div>
-                  
-                  {/* Expiry date - BIG and BOLD at bottom */}
-                  <div className="text-center border-t pt-1">
-                    <div className="font-bold leading-tight" style={{ fontSize: '10px' }}>
-                      EXPIRES: {format(new Date(batch.expiry_date), "dd/MM/yyyy")}
-                    </div>
+                {/* Batch number - smaller font, centered */}
+                <div className="text-center" style={{ fontSize: '9px' }}>
+                  {batch.batch_number}
+                </div>
+                
+                {/* Chef name - centered */}
+                <div className="text-center" style={{ fontSize: '10px' }}>
+                  Chef: {batch.chefs.name}
+                </div>
+                
+                {/* Production date - centered */}
+                <div className="text-center" style={{ fontSize: '9px' }}>
+                  Prod: {format(new Date(batch.production_date), "dd/MM/yy")}
+                </div>
+                
+                {/* Expiry date - BIG and BOLD at bottom */}
+                <div className="text-center border-t pt-1">
+                  <div className="font-bold leading-tight" style={{ fontSize: '12px' }}>
+                    EXPIRES: {format(new Date(batch.expiry_date), "dd/MM/yyyy")}
                   </div>
                 </div>
               </div>
