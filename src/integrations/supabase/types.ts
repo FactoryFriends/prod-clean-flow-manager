@@ -9,16 +9,160 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      cleaning_task_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          estimated_duration: number | null
+          favv_compliance: boolean | null
+          frequency: Database["public"]["Enums"]["task_frequency"]
+          id: string
+          location: Database["public"]["Enums"]["location_type"]
+          requires_photo: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          estimated_duration?: number | null
+          favv_compliance?: boolean | null
+          frequency: Database["public"]["Enums"]["task_frequency"]
+          id?: string
+          location: Database["public"]["Enums"]["location_type"]
+          requires_photo?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          estimated_duration?: number | null
+          favv_compliance?: boolean | null
+          frequency?: Database["public"]["Enums"]["task_frequency"]
+          id?: string
+          location?: Database["public"]["Enums"]["location_type"]
+          requires_photo?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cleaning_tasks: {
+        Row: {
+          actual_duration: number | null
+          assigned_staff_name: string | null
+          assigned_to: string | null
+          completed_at: string | null
+          completed_by: string | null
+          completion_notes: string | null
+          created_at: string
+          description: string | null
+          due_time: string | null
+          estimated_duration: number | null
+          favv_compliance: boolean | null
+          id: string
+          location: Database["public"]["Enums"]["location_type"]
+          photo_urls: string[] | null
+          scheduled_date: string
+          status: Database["public"]["Enums"]["task_status"] | null
+          template_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          actual_duration?: number | null
+          assigned_staff_name?: string | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          description?: string | null
+          due_time?: string | null
+          estimated_duration?: number | null
+          favv_compliance?: boolean | null
+          id?: string
+          location: Database["public"]["Enums"]["location_type"]
+          photo_urls?: string[] | null
+          scheduled_date: string
+          status?: Database["public"]["Enums"]["task_status"] | null
+          template_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          actual_duration?: number | null
+          assigned_staff_name?: string | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          description?: string | null
+          due_time?: string | null
+          estimated_duration?: number | null
+          favv_compliance?: boolean | null
+          id?: string
+          location?: Database["public"]["Enums"]["location_type"]
+          photo_urls?: string[] | null
+          scheduled_date?: string
+          status?: Database["public"]["Enums"]["task_status"] | null
+          template_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cleaning_tasks_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "cleaning_task_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_codes: {
+        Row: {
+          active: boolean | null
+          code: string
+          created_at: string
+          location: Database["public"]["Enums"]["location_type"] | null
+          name: string
+          role: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          code: string
+          created_at?: string
+          location?: Database["public"]["Enums"]["location_type"] | null
+          name: string
+          role?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          code?: string
+          created_at?: string
+          location?: Database["public"]["Enums"]["location_type"] | null
+          name?: string
+          role?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_daily_cleaning_tasks: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
-      [_ in never]: never
+      location_type: "tothai" | "khin"
+      task_frequency: "daily" | "weekly" | "monthly"
+      task_status: "pending" | "in-progress" | "completed" | "overdue"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +277,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      location_type: ["tothai", "khin"],
+      task_frequency: ["daily", "weekly", "monthly"],
+      task_status: ["pending", "in-progress", "completed", "overdue"],
+    },
   },
 } as const

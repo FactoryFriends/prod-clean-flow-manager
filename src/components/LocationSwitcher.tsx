@@ -9,8 +9,8 @@ interface LocationSwitcherProps {
 }
 
 const locations = [
-  { id: "location1", name: "Main Production Facility", address: "Industrial District A" },
-  { id: "location2", name: "Secondary Distribution Center", address: "Warehouse Zone B" },
+  { id: "location1", name: "ToThai Production Facility", address: "Main Production & Distribution" },
+  { id: "location2", name: "KHIN Restaurant", address: "Restaurant Operations" },
 ];
 
 export function LocationSwitcher({ currentLocation, onLocationChange }: LocationSwitcherProps) {
