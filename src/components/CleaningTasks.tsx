@@ -1,4 +1,3 @@
-
 import { Brush, Users, ChefHat, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { useCleaningTasks } from "@/hooks/useCleaningTasks";
@@ -9,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface CleaningTasksProps {
   currentLocation: string;
