@@ -5,6 +5,8 @@ import { Button } from "./ui/button";
 import { ProductionBatch } from "@/hooks/useProductionData";
 import { format } from "date-fns";
 import { QrCode, Printer } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface LabelPrintDialogProps {
   open: boolean;

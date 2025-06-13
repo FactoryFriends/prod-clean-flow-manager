@@ -11,7 +11,7 @@ import { Settings } from "@/components/Settings";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
-  const [currentLocation, setCurrentLocation] = useState("location1");
+  const [currentLocation, setCurrentLocation] = useState<"tothai" | "khin">("tothai");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
