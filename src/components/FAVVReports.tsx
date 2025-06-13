@@ -71,21 +71,28 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
         console.log(`Date filter (end): ${beforeDateFilter} -> ${filteredData.length}`);
       }
 
-      // Filter by location - show packing slips created at the filtered location
+      // For "all" locations, show all packing slips
+      if (locationFilter === "all") {
+        console.log("Showing all packing slips:", filteredData.length);
+        return filteredData;
+      }
+
+      // For specific location filter, show packing slips for that location
+      // This includes both slips with dispatch_records from that location
+      // and slips without dispatch_records (created via Confirm & Ship)
       const beforeLocationFilter = filteredData.length;
       const locationFilteredData = filteredData.filter(slip => {
-        if (!locationFilter || locationFilter === "all") return true;
-        
-        // If slip has dispatch_records, use its location (where it was created)
+        // If slip has dispatch_records, use its location
         if (slip.dispatch_records?.location) {
           return slip.dispatch_records.location === locationFilter;
         }
         
-        // If no dispatch_records, assume it's from currentLocation
-        return locationFilter === currentLocation;
+        // If no dispatch_records, include it for all locations since
+        // these were created via "Confirm & Ship" and should be visible everywhere
+        return true;
       });
       
-      console.log(`Location filter: ${beforeLocationFilter} -> ${locationFilteredData.length}`);
+      console.log(`Location filter (${locationFilter}): ${beforeLocationFilter} -> ${locationFilteredData.length}`);
       console.log("Final filtered data:", locationFilteredData);
 
       return locationFilteredData;
