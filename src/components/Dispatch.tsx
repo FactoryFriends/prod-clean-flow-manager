@@ -33,14 +33,38 @@ const externalProducts = [
   { id: "ext-3", name: "Green Curry Paste", supplier: "Spice World" },
 ];
 
+// Mock staff codes data - this would come from your database
+const staffCodes = [
+  { code: "1234", name: "Jan Janssen", role: "Logistics Manager" },
+  { code: "5678", name: "Marie Dubois", role: "Warehouse Staff" },
+  { code: "9012", name: "Ahmed Hassan", role: "Kitchen Manager" },
+  { code: "3456", name: "Lisa Chen", role: "Warehouse Staff" },
+];
+
 export function Dispatch({ currentLocation }: DispatchProps) {
   const [customer, setCustomer] = useState("");
-  const [preparedBy, setPreparedBy] = useState("");
+  const [pickerCode, setPickerCode] = useState("");
+  const [pickerName, setPickerName] = useState("");
   const [dispatchNotes, setDispatchNotes] = useState("");
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const [packingSlipOpen, setPackingSlipOpen] = useState(false);
 
   const { data: batches } = useProductionBatches(currentLocation);
+
+  // Handle picker code input
+  const handlePickerCodeChange = (value: string) => {
+    setPickerCode(value);
+    if (value.length === 4) {
+      const staff = staffCodes.find(s => s.code === value);
+      if (staff) {
+        setPickerName(staff.name);
+      } else {
+        setPickerName("");
+      }
+    } else {
+      setPickerName("");
+    }
+  };
 
   // Convert batches to available inventory
   const availableBatches = (batches || []).map(batch => ({
@@ -141,17 +165,25 @@ export function Dispatch({ currentLocation }: DispatchProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Prepared By</label>
-              <Select value={preparedBy} onValueChange={setPreparedBy}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select staff member" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="logistics-manager">Logistics Manager</SelectItem>
-                  <SelectItem value="warehouse-staff">Warehouse Staff</SelectItem>
-                  <SelectItem value="kitchen-manager">Kitchen Manager</SelectItem>
-                </SelectContent>
-              </Select>
+              <label className="block text-sm font-medium mb-2">Picker Code (4 digits)</label>
+              <Input
+                type="text"
+                placeholder="Enter 4-digit code"
+                value={pickerCode}
+                onChange={(e) => handlePickerCodeChange(e.target.value)}
+                maxLength={4}
+                className="font-mono"
+              />
+              {pickerName && (
+                <p className="text-sm text-green-600 mt-1">
+                  Picker: {pickerName}
+                </p>
+              )}
+              {pickerCode.length === 4 && !pickerName && (
+                <p className="text-sm text-red-600 mt-1">
+                  Invalid code
+                </p>
+              )}
             </div>
 
             <div>
@@ -166,7 +198,7 @@ export function Dispatch({ currentLocation }: DispatchProps) {
 
             <Button 
               onClick={handleCreatePackingSlip}
-              disabled={selectedItems.length === 0 || !customer || !preparedBy}
+              disabled={selectedItems.length === 0 || !customer || !pickerName}
               className="w-full"
             >
               <Package className="w-4 h-4 mr-2" />
@@ -327,7 +359,8 @@ export function Dispatch({ currentLocation }: DispatchProps) {
         onOpenChange={setPackingSlipOpen}
         selectedItems={selectedItems}
         customer={customer}
-        preparedBy={preparedBy}
+        preparedBy={pickerName}
+        pickedUpBy={pickerName}
         dispatchNotes={dispatchNotes}
         currentLocation={currentLocation}
       />

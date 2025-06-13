@@ -19,6 +19,7 @@ interface PackingSlipDialogProps {
   selectedItems: SelectedItem[];
   customer: string;
   preparedBy: string;
+  pickedUpBy: string;
   dispatchNotes: string;
   currentLocation: "tothai" | "khin";
 }
@@ -29,6 +30,7 @@ export function PackingSlipDialog({
   selectedItems,
   customer,
   preparedBy,
+  pickedUpBy,
   dispatchNotes,
   currentLocation,
 }: PackingSlipDialogProps) {
@@ -171,15 +173,23 @@ Prepared by: ${preparedBy}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div>
               <h3 className="text-lg font-semibold mb-4">Prepared by:</h3>
-              <div className="border-b border-gray-300 h-16 mb-2"></div>
-              <p className="text-sm">Name & Signature</p>
-              <p className="text-sm">Date: {currentDate}</p>
+              <div className="bg-gray-50 p-4 rounded border">
+                <p className="font-semibold">{preparedBy}</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  Electronisch ondertekend door {preparedBy}
+                </p>
+                <p className="text-sm text-gray-600">Date: {currentDate}</p>
+              </div>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4">Picked up by:</h3>
-              <div className="border-b border-gray-300 h-16 mb-2"></div>
-              <p className="text-sm">Name & Signature</p>
-              <p className="text-sm">Date: ___________</p>
+              <div className="bg-gray-50 p-4 rounded border">
+                <p className="font-semibold">{pickedUpBy}</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  Electronisch ondertekend door {pickedUpBy}
+                </p>
+                <p className="text-sm text-gray-600">Date: {currentDate}</p>
+              </div>
             </div>
           </div>
 
