@@ -13,6 +13,7 @@ import { ProductList } from "./settings/ProductList";
 import { StaffCodeForm } from "./settings/StaffCodeForm";
 import { StaffCodeList } from "./settings/StaffCodeList";
 import { SystemInfo } from "./settings/SystemInfo";
+import { ManagerPasscodeForm } from "./settings/ManagerPasscodeForm";
 import { Product } from "@/hooks/useProductionData";
 
 interface SettingsProps {
@@ -310,14 +311,22 @@ export function Settings({ currentLocation }: SettingsProps) {
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <SettingsIcon className="w-6 h-6 text-primary" />
-                System Information
+                System Configuration
               </CardTitle>
               <CardDescription>
-                Current system status and configuration details
+                System settings, security, and configuration options
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <SystemInfo currentLocation={currentLocation} />
+            <CardContent className="space-y-6">
+              {/* Manager Passcode Management */}
+              <div className="border border-border rounded-lg p-4">
+                <ManagerPasscodeForm />
+              </div>
+
+              {/* System Information */}
+              <div className="border border-border rounded-lg p-4">
+                <SystemInfo currentLocation={currentLocation} />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

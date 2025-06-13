@@ -3,19 +3,20 @@ import { useState } from "react";
 import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getManagerPasscode } from "./ManagerPasscodeForm";
 
 interface SettingsAuthProps {
   onAuthenticated: () => void;
 }
-
-const MANAGER_CODE = "9999"; // Manager access code
 
 export function SettingsAuth({ onAuthenticated }: SettingsAuthProps) {
   const [authCode, setAuthCode] = useState("");
   const [authError, setAuthError] = useState("");
 
   const handleAuth = () => {
-    if (authCode === MANAGER_CODE) {
+    const managerCode = getManagerPasscode();
+    
+    if (authCode === managerCode) {
       onAuthenticated();
       setAuthError("");
     } else {
