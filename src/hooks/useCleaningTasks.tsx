@@ -22,7 +22,7 @@ interface CleaningTask {
   template_id: string | null;
 }
 
-export function useCleaningTasks(dbLocation: string) {
+export function useCleaningTasks(dbLocation: "tothai" | "khin") {
   const queryClient = useQueryClient();
 
   // Fetch cleaning tasks
