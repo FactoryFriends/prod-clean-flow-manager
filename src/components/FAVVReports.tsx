@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +26,8 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
   const { data: packingSlips = [], isLoading: isLoadingPackingSlips } = useQuery({
     queryKey: ["favv-packing-slips", locationFilter, startDate, endDate],
     queryFn: async () => {
+      console.log("Fetching packing slips with filters:", { locationFilter, startDate, endDate });
+      
       const { data, error } = await supabase
         .from("packing_slips")
         .select(`
@@ -42,30 +43,51 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
         .eq("status", "shipped")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching packing slips:", error);
+        throw error;
+      }
+
+      console.log("Raw packing slips data:", data);
 
       let filteredData = data || [];
 
       // Apply date filters
       if (startDate) {
+        const beforeDateFilter = filteredData.length;
         filteredData = filteredData.filter(slip => 
           new Date(slip.created_at) >= startDate
         );
+        console.log(`Date filter (start): ${beforeDateFilter} -> ${filteredData.length}`);
       }
       if (endDate) {
         const endOfDay = new Date(endDate);
         endOfDay.setHours(23, 59, 59, 999);
+        const beforeDateFilter = filteredData.length;
         filteredData = filteredData.filter(slip => 
           new Date(slip.created_at) <= endOfDay
         );
+        console.log(`Date filter (end): ${beforeDateFilter} -> ${filteredData.length}`);
       }
 
       // Filter by location - if there's no dispatch_records, we'll use a default location based on current location
-      return filteredData.filter(slip => 
-        !locationFilter || locationFilter === "all" || 
-        (slip.dispatch_records?.location === locationFilter) ||
-        (!slip.dispatch_records && locationFilter === currentLocation)
-      );
+      const beforeLocationFilter = filteredData.length;
+      const locationFilteredData = filteredData.filter(slip => {
+        if (!locationFilter || locationFilter === "all") return true;
+        
+        // If slip has dispatch_records, use its location
+        if (slip.dispatch_records?.location) {
+          return slip.dispatch_records.location === locationFilter;
+        }
+        
+        // If no dispatch_records, assume it's from currentLocation
+        return locationFilter === currentLocation;
+      });
+      
+      console.log(`Location filter: ${beforeLocationFilter} -> ${locationFilteredData.length}`);
+      console.log("Final filtered data:", locationFilteredData);
+
+      return locationFilteredData;
     },
     enabled: locationFilter !== "tothai",
   });
