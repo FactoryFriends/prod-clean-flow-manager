@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +8,7 @@ import { format } from "date-fns";
 import { useProductionBatches } from "@/hooks/useProductionData";
 import { SelectedItem } from "@/types/dispatch";
 import { externalProducts } from "@/data/dispatchData";
+import { BatchDetailsDialog } from "../BatchDetailsDialog";
 
 interface InventoryGridProps {
   currentLocation: "tothai" | "khin";
@@ -16,6 +18,8 @@ interface InventoryGridProps {
 
 export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange }: InventoryGridProps) {
   const { data: batches } = useProductionBatches(currentLocation);
+  const [selectedBatch, setSelectedBatch] = useState<any>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const getSelectedQuantity = (itemId: string) => {
     return selectedItems.find(si => si.id === itemId)?.selectedQuantity || 0;
@@ -36,6 +40,24 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
     return <Badge variant="default" className="ml-2">Fresh</Badge>;
   };
 
+  const handleBatchClick = (batch: any) => {
+    const batchDetails = {
+      id: batch.id,
+      name: batch.name,
+      batchNumber: batch.batchNumber,
+      availableQuantity: batch.availableQuantity,
+      expiryDate: batch.expiryDate,
+      productionDate: batch.productionDate,
+      chef: batch.chef?.name,
+      location: currentLocation,
+      unitSize: batch.unitSize,
+      unitType: batch.unitType,
+      productionNotes: batch.productionNotes,
+    };
+    setSelectedBatch(batchDetails);
+    setDetailsOpen(true);
+  };
+
   // Convert batches to available inventory
   const availableBatches = (batches || []).map(batch => ({
     id: batch.id,
@@ -46,6 +68,10 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
     selectedQuantity: 0,
     expiryDate: batch.expiry_date,
     productionDate: batch.production_date,
+    chef: batch.chefs,
+    unitSize: batch.products.unit_size,
+    unitType: batch.products.unit_type,
+    productionNotes: batch.production_notes,
   }));
 
   const availableExternal = externalProducts.map(product => ({
@@ -56,104 +82,123 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
   }));
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Available Inventory</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          {/* Self-Produced Products */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Self-Produced Products</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {availableBatches.map(batch => {
-                const selectedQty = getSelectedQuantity(batch.id);
-                return (
-                  <div key={batch.id} className="border rounded-lg p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h4 className="font-medium">{batch.name}</h4>
-                        <p className="text-sm text-muted-foreground">Batch: {batch.batchNumber}</p>
-                        {batch.expiryDate && (
-                          <p className="text-sm text-muted-foreground">
-                            Expires: {format(new Date(batch.expiryDate), "MMM dd, yyyy")}
-                          </p>
-                        )}
-                        <p className="text-sm">Available: {batch.availableQuantity}</p>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Available Inventory</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Self-Produced Products */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Self-Produced Products</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {availableBatches.map(batch => {
+                  const selectedQty = getSelectedQuantity(batch.id);
+                  return (
+                    <div key={batch.id} className="border rounded-lg p-4">
+                      <div 
+                        className="cursor-pointer hover:bg-muted/50 -m-4 p-4 rounded-lg transition-colors"
+                        onClick={() => handleBatchClick(batch)}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <h4 className="font-medium">{batch.name}</h4>
+                            <p className="text-sm text-muted-foreground">Batch: {batch.batchNumber}</p>
+                            {batch.expiryDate && (
+                              <p className="text-sm text-muted-foreground">
+                                Expires: {format(new Date(batch.expiryDate), "MMM dd, yyyy")}
+                              </p>
+                            )}
+                            <p className="text-sm">Available: {batch.availableQuantity}</p>
+                          </div>
+                          {batch.expiryDate && getExpiryBadge(batch.expiryDate)}
+                        </div>
                       </div>
-                      {batch.expiryDate && getExpiryBadge(batch.expiryDate)}
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onQuantityChange(batch.id, -1)}
-                          disabled={selectedQty === 0}
-                        >
-                          <Minus className="w-3 h-3" />
-                        </Button>
-                        <span className="w-8 text-center">{selectedQty}</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onQuantityChange(batch.id, 1)}
-                          disabled={selectedQty >= (batch.availableQuantity || 0)}
-                        >
-                          <Plus className="w-3 h-3" />
-                        </Button>
+                      
+                      <div className="flex items-center justify-between mt-3">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onQuantityChange(batch.id, -1);
+                            }}
+                            disabled={selectedQty === 0}
+                          >
+                            <Minus className="w-3 h-3" />
+                          </Button>
+                          <span className="w-8 text-center">{selectedQty}</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onQuantityChange(batch.id, 1);
+                            }}
+                            disabled={selectedQty >= (batch.availableQuantity || 0)}
+                          >
+                            <Plus className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
 
-          {/* External Products */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">External Products</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {availableExternal.map(product => {
-                const selectedQty = getSelectedQuantity(product.id);
-                return (
-                  <div key={product.id} className="border rounded-lg p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h4 className="font-medium">{product.name}</h4>
-                        <p className="text-sm text-muted-foreground">External Product</p>
+            {/* External Products */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">External Products</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {availableExternal.map(product => {
+                  const selectedQty = getSelectedQuantity(product.id);
+                  return (
+                    <div key={product.id} className="border rounded-lg p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h4 className="font-medium">{product.name}</h4>
+                          <p className="text-sm text-muted-foreground">External Product</p>
+                        </div>
+                        <Badge variant="outline">External</Badge>
                       </div>
-                      <Badge variant="outline">External</Badge>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onQuantityChange(product.id, -1)}
-                          disabled={selectedQty === 0}
-                        >
-                          <Minus className="w-3 h-3" />
-                        </Button>
-                        <span className="w-8 text-center">{selectedQty}</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onQuantityChange(product.id, 1)}
-                        >
-                          <Plus className="w-3 h-3" />
-                        </Button>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onQuantityChange(product.id, -1)}
+                            disabled={selectedQty === 0}
+                          >
+                            <Minus className="w-3 h-3" />
+                          </Button>
+                          <span className="w-8 text-center">{selectedQty}</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onQuantityChange(product.id, 1)}
+                          >
+                            <Plus className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <BatchDetailsDialog
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+        batch={selectedBatch}
+      />
+    </>
   );
 }
