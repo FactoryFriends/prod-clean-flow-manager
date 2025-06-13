@@ -1,14 +1,14 @@
-import { Brush, Users, ChefHat, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+
+import { ChefHat, Sparkles, Users } from "lucide-react";
 import { useState } from "react";
 import { useCleaningTasks } from "@/hooks/useCleaningTasks";
 import { CleaningTaskHeader } from "./CleaningTaskHeader";
 import { CleaningTaskFilters } from "./CleaningTaskFilters";
-import { CleaningTaskCard } from "./CleaningTaskCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { TabContent } from "./cleaning/TabContent";
 
 interface CleaningTasksProps {
   currentLocation: string;
@@ -64,110 +64,6 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
   const cleanerTasks = getTasksByRoleAndStatus('cleaner');
   const otherTasks = getTasksByRoleAndStatus('other');
   const overdueCount = getOverdueTasksCount();
-
-  const renderTaskList = (tasks: any[], emptyMessage: string) => {
-    if (tasks.length === 0) {
-      return (
-        <div className="text-center py-8">
-          <Brush className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-          <p className="text-muted-foreground text-sm">{emptyMessage}</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className={cn(
-        "grid gap-4",
-        isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
-      )}>
-        {tasks.map((task) => (
-          <CleaningTaskCard
-            key={task.id}
-            task={task}
-            onCompleteTask={(taskId, photoUrls) => handleCompleteTask(taskId, photoUrls)}
-            onReopenTask={handleReopenTask}
-            isOverdue={isTaskOverdue(task)}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  const renderCompletedTasksSection = (
-    completedTasks: any[], 
-    showCompleted: boolean, 
-    setShowCompleted: (show: boolean) => void,
-    sectionTitle: string
-  ) => {
-    if (completedTasks.length === 0) return null;
-
-    return (
-      <div className="mt-8 border-t border-border pt-6">
-        <Button
-          variant="ghost"
-          onClick={() => setShowCompleted(!showCompleted)}
-          className={cn(
-            "w-full flex items-center justify-between p-4 hover:bg-accent rounded-lg touch-manipulation",
-            isMobile && "min-h-[48px]"
-          )}
-        >
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-muted-foreground">
-              Completed {sectionTitle} ({completedTasks.length})
-            </span>
-          </div>
-          {showCompleted ? (
-            <ChevronUp className="w-4 h-4 text-muted-foreground" />
-          ) : (
-            <ChevronDown className="w-4 h-4 text-muted-foreground" />
-          )}
-        </Button>
-        
-        {showCompleted && (
-          <div className="mt-4">
-            {renderTaskList(completedTasks, "")}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderTabContent = (
-    openTasks: any[], 
-    completedTasks: any[], 
-    showCompleted: boolean, 
-    setShowCompleted: (show: boolean) => void,
-    emptyMessage: string,
-    sectionTitle: string
-  ) => {
-    const activeSectionTitle = sectionTitle === "Other Tasks" ? "ACTIVE TASKS" : 
-                              sectionTitle === "Chef Tasks" ? "ACTIVE CHEF TASKS" :
-                              sectionTitle === "Cleaner Tasks" ? "ACTIVE CLEANER TASKS" :
-                              `Open ${sectionTitle}`;
-    
-    return (
-      <div>
-        {/* Open Tasks Section */}
-        <div className="mb-4">
-          <h3 className={cn(
-            "font-semibold text-foreground mb-4 flex items-center gap-2",
-            isMobile ? "text-base" : "text-lg"
-          )}>
-            {activeSectionTitle}
-            {openTasks.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {openTasks.length}
-              </Badge>
-            )}
-          </h3>
-          {renderTaskList(openTasks, emptyMessage)}
-        </div>
-
-        {/* Completed Tasks Section */}
-        {renderCompletedTasksSection(completedTasks, showCompleted, setShowCompleted, sectionTitle)}
-      </div>
-    );
-  };
 
   if (isLoading) {
     return (
@@ -268,36 +164,45 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
         </TabsList>
 
         <TabsContent value="chef" className="mt-6">
-          {renderTabContent(
-            chefTasks.openTasks,
-            chefTasks.completedTasks,
-            showCompletedChef,
-            setShowCompletedChef,
-            "No open chef tasks found",
-            "Chef Tasks"
-          )}
+          <TabContent
+            openTasks={chefTasks.openTasks}
+            completedTasks={chefTasks.completedTasks}
+            showCompleted={showCompletedChef}
+            setShowCompleted={setShowCompletedChef}
+            emptyMessage="No open chef tasks found"
+            sectionTitle="Chef Tasks"
+            onCompleteTask={handleCompleteTask}
+            onReopenTask={handleReopenTask}
+            isTaskOverdue={isTaskOverdue}
+          />
         </TabsContent>
 
         <TabsContent value="cleaner" className="mt-6">
-          {renderTabContent(
-            cleanerTasks.openTasks,
-            cleanerTasks.completedTasks,
-            showCompletedCleaner,
-            setShowCompletedCleaner,
-            "No open cleaner tasks found",
-            "Cleaner Tasks"
-          )}
+          <TabContent
+            openTasks={cleanerTasks.openTasks}
+            completedTasks={cleanerTasks.completedTasks}
+            showCompleted={showCompletedCleaner}
+            setShowCompleted={setShowCompletedCleaner}
+            emptyMessage="No open cleaner tasks found"
+            sectionTitle="Cleaner Tasks"
+            onCompleteTask={handleCompleteTask}
+            onReopenTask={handleReopenTask}
+            isTaskOverdue={isTaskOverdue}
+          />
         </TabsContent>
 
         <TabsContent value="other" className="mt-6">
-          {renderTabContent(
-            otherTasks.openTasks,
-            otherTasks.completedTasks,
-            showCompletedOther,
-            setShowCompletedOther,
-            "No open other tasks found",
-            "Other Tasks"
-          )}
+          <TabContent
+            openTasks={otherTasks.openTasks}
+            completedTasks={otherTasks.completedTasks}
+            showCompleted={showCompletedOther}
+            setShowCompleted={setShowCompletedOther}
+            emptyMessage="No open other tasks found"
+            sectionTitle="Other Tasks"
+            onCompleteTask={handleCompleteTask}
+            onReopenTask={handleReopenTask}
+            isTaskOverdue={isTaskOverdue}
+          />
         </TabsContent>
       </Tabs>
     </div>
