@@ -3,11 +3,13 @@ import { useState } from "react";
 import { NewBatchDialog } from "./NewBatchDialog";
 import { BatchCard } from "./BatchCard";
 import { LabelPrintDialog } from "./LabelPrintDialog";
+import { PackingSlipDialog } from "./PackingSlipDialog";
 import { useProductionBatches, ProductionBatch } from "@/hooks/useProductionData";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, Package } from "lucide-react";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Card, CardContent } from "./ui/card";
+import { Button } from "./ui/button";
 import { toast } from "sonner";
 
 interface ProductionProps {
@@ -19,6 +21,7 @@ export function Production({ currentLocation }: ProductionProps) {
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedBatch, setSelectedBatch] = useState<ProductionBatch | null>(null);
   const [labelDialogOpen, setLabelDialogOpen] = useState(false);
+  const [packingSlipDialogOpen, setPackingSlipDialogOpen] = useState(false);
 
   const { data: batches, isLoading, error } = useProductionBatches(currentLocation);
 
@@ -59,8 +62,12 @@ export function Production({ currentLocation }: ProductionProps) {
   };
 
   const handleCreatePackingSlip = (batch: ProductionBatch) => {
-    // This would open a packing slip dialog
-    toast.info("Packing slip creation coming soon!");
+    setSelectedBatch(batch);
+    setPackingSlipDialogOpen(true);
+  };
+
+  const handleCreateBulkPackingSlip = () => {
+    setPackingSlipDialogOpen(true);
   };
 
   const filteredBatches = filterBatches(batches || []);
@@ -94,7 +101,17 @@ export function Production({ currentLocation }: ProductionProps) {
             Manage production batches at {getLocationName(currentLocation)}
           </p>
         </div>
-        <NewBatchDialog currentLocation={currentLocation} />
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleCreateBulkPackingSlip}
+            className="flex items-center gap-2"
+          >
+            <Package className="w-4 h-4" />
+            Create Packing Slip
+          </Button>
+          <NewBatchDialog currentLocation={currentLocation} />
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4">
@@ -169,6 +186,13 @@ export function Production({ currentLocation }: ProductionProps) {
         open={labelDialogOpen}
         onOpenChange={setLabelDialogOpen}
         batch={selectedBatch}
+      />
+
+      <PackingSlipDialog
+        open={packingSlipDialogOpen}
+        onOpenChange={setPackingSlipDialogOpen}
+        batches={filteredBatches}
+        selectedBatches={selectedBatch ? [selectedBatch.id] : []}
       />
     </div>
   );
