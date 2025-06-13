@@ -75,7 +75,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>Print Labels - {batch.batch_number}</DialogTitle>
         </DialogHeader>
@@ -98,21 +98,55 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
               <QrCode className="w-4 h-4" />
               Label Preview (1 of {batch.packages_produced})
             </h3>
-            <div className="bg-white border-2 border-dashed border-gray-300 p-4 text-center space-y-2 font-mono text-xs">
-              <div className="font-bold text-lg">{batch.products.name}</div>
-              <div className="text-2xl">📦 QR CODE 📦</div>
-              <div className="space-y-1">
-                <div>Batch: {batch.batch_number}</div>
-                <div>Package: 1 of {batch.packages_produced}</div>
-                <div>Size: {batch.products.unit_size} {batch.products.unit_type}</div>
-                <div>Produced: {format(new Date(batch.production_date), "dd/MM/yyyy")}</div>
-                <div>Expires: {format(new Date(batch.expiry_date), "dd/MM/yyyy")}</div>
-                <div>Chef: {batch.chefs.name}</div>
-                <div>Location: {batch.location.toUpperCase()}</div>
+            
+            {/* Thermal Label Preview - 50.8 x 25.4mm landscape format */}
+            <div className="bg-white border-2 border-gray-400 mx-auto" 
+                 style={{ 
+                   width: '192px',  // 50.8mm at 96dpi ≈ 192px
+                   height: '96px',  // 25.4mm at 96dpi ≈ 96px
+                   fontSize: '8px',
+                   lineHeight: '1.1'
+                 }}>
+              <div className="flex h-full">
+                {/* Left side - QR Code area */}
+                <div className="w-20 h-full flex items-center justify-center bg-gray-50 border-r border-gray-300">
+                  <div className="w-16 h-16 bg-black flex items-center justify-center text-white text-xs font-bold">
+                    QR
+                  </div>
+                </div>
+                
+                {/* Right side - Text content */}
+                <div className="flex-1 p-1 flex flex-col justify-between">
+                  {/* Product name - BOLD */}
+                  <div className="font-bold text-xs leading-tight" style={{ fontSize: '10px' }}>
+                    {batch.products.name}
+                  </div>
+                  
+                  {/* Batch number */}
+                  <div className="text-xs font-mono">
+                    {batch.batch_number}
+                  </div>
+                  
+                  {/* Production date */}
+                  <div className="text-xs">
+                    Prod: {format(new Date(batch.production_date), "dd/MM/yyyy")}
+                  </div>
+                  
+                  {/* Expiry date - BIG and BOLD */}
+                  <div className="font-bold text-sm leading-tight" style={{ fontSize: '12px' }}>
+                    EXP: {format(new Date(batch.expiry_date), "dd/MM/yyyy")}
+                  </div>
+                  
+                  {/* Chef name */}
+                  <div className="text-xs">
+                    Chef: {batch.chefs.name}
+                  </div>
+                </div>
               </div>
             </div>
-            <p className="text-sm text-muted-foreground mt-2">
-              This preview shows what will be printed on each thermal label
+            
+            <p className="text-sm text-muted-foreground mt-3">
+              Thermal label format: 50.8 x 25.4mm (landscape). QR code contains: product name, batch number, production date, expiry date, package number, chef name, location, and package size.
             </p>
           </div>
 
