@@ -1,5 +1,3 @@
-
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -16,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { CleaningTaskDetailsModal } from "./task/CleaningTaskDetailsModal";
 
 interface FAVVReportsProps {
   currentLocation: "tothai" | "khin";
@@ -26,6 +25,8 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
   const [startDate, setStartDate] = useState<Date | undefined>(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [taskNameFilter, setTaskNameFilter] = useState<string>("");
+  const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
   // Fetch packing slips with filters (for non-ToThai locations)
   const { data: packingSlips = [], isLoading: isLoadingPackingSlips } = useQuery({
@@ -276,6 +277,11 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
     toast.success("CSV file downloaded successfully");
   };
 
+  const handleTaskClick = (task: any) => {
+    setSelectedTask(task);
+    setIsTaskModalOpen(true);
+  };
+
   const isLoading = isLoadingPackingSlips || isLoadingStockTakes || isLoadingTasks;
 
   return (
@@ -335,7 +341,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
                       >
                         <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
                         <span className="truncate">
-                          {startDate ? format(startDate, "MMM dd, yyyy") : "Pick a date"}
+                          {startDate ? format(startDate, "dd/MM/yy") : "Pick a date"}
                         </span>
                       </Button>
                     </PopoverTrigger>
@@ -364,7 +370,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
                       >
                         <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
                         <span className="truncate">
-                          {endDate ? format(endDate, "MMM dd, yyyy") : "Pick a date"}
+                          {endDate ? format(endDate, "dd/MM/yy") : "Pick a date"}
                         </span>
                       </Button>
                     </PopoverTrigger>
@@ -570,7 +576,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
                       >
                         <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
                         <span className="truncate">
-                          {startDate ? format(startDate, "MMM dd, yyyy") : "Pick a date"}
+                          {startDate ? format(startDate, "dd/MM/yy") : "Pick a date"}
                         </span>
                       </Button>
                     </PopoverTrigger>
@@ -599,7 +605,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
                       >
                         <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
                         <span className="truncate">
-                          {endDate ? format(endDate, "MMM dd, yyyy") : "Pick a date"}
+                          {endDate ? format(endDate, "dd/MM/yy") : "Pick a date"}
                         </span>
                       </Button>
                     </PopoverTrigger>
@@ -657,14 +663,15 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
                         <TableHead>Scheduled Date</TableHead>
                         <TableHead>Completed Date</TableHead>
                         <TableHead>Completed By</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>FAVV</TableHead>
-                        <TableHead>Duration</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {completedTasks.map((task) => (
-                        <TableRow key={task.id}>
+                        <TableRow 
+                          key={task.id} 
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => handleTaskClick(task)}
+                        >
                           <TableCell className="font-medium">{task.title}</TableCell>
                           <TableCell>
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -681,35 +688,6 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
                             }
                           </TableCell>
                           <TableCell>{task.staff_codes?.initials || "N/A"}</TableCell>
-                          <TableCell>
-                            <span className={cn(
-                              "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
-                              task.assigned_role === "chef" && "bg-orange-100 text-orange-800",
-                              task.assigned_role === "cleaner" && "bg-green-100 text-green-800",
-                              task.assigned_role === "other" && "bg-gray-100 text-gray-800"
-                            )}>
-                              {task.assigned_role || "N/A"}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            {task.favv_compliance ? (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Yes
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                No
-                              </span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {task.actual_duration 
-                              ? `${task.actual_duration} min`
-                              : task.estimated_duration
-                              ? `~${task.estimated_duration} min`
-                              : "N/A"
-                            }
-                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -720,7 +698,12 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <CleaningTaskDetailsModal
+        task={selectedTask}
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+      />
     </div>
   );
 }
-
