@@ -8,6 +8,7 @@ interface SidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   currentLocation: "tothai" | "khin";
+  onLocationChange: (location: "tothai" | "khin") => void;
 }
 
 const menuItems = [
@@ -19,7 +20,7 @@ const menuItems = [
   { id: "settings", label: "Settings", icon: Settings, availableFor: ["tothai", "khin"] },
 ];
 
-export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleCollapse, currentLocation }: SidebarProps) {
+export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleCollapse, currentLocation, onLocationChange }: SidebarProps) {
   // Filter menu items based on current location
   const availableMenuItems = menuItems.filter(item => 
     item.availableFor.includes(currentLocation)
@@ -47,6 +48,36 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
           )}
         </div>
       </div>
+      
+      {/* Location switcher */}
+      {!isCollapsed && (
+        <div className="p-4 border-b border-sidebar-border">
+          <div className="flex gap-1 bg-sidebar-accent/20 rounded-lg p-1">
+            <button
+              onClick={() => onLocationChange("tothai")}
+              className={cn(
+                "flex-1 text-xs py-2 px-3 rounded-md transition-colors",
+                currentLocation === "tothai"
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
+              )}
+            >
+              ToThai
+            </button>
+            <button
+              onClick={() => onLocationChange("khin")}
+              className={cn(
+                "flex-1 text-xs py-2 px-3 rounded-md transition-colors",
+                currentLocation === "khin"
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
+              )}
+            >
+              KHIN
+            </button>
+          </div>
+        </div>
+      )}
       
       <nav className="p-4 space-y-2">
         {availableMenuItems.map((item) => {

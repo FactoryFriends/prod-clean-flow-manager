@@ -26,9 +26,9 @@ const Index = () => {
       case "settings":
         return <Settings currentLocation={currentLocation} />;
       case "invoicing":
-        return <Invoicing />;
+        return <Invoicing currentLocation={currentLocation} />;
       case "favv":
-        return <FAVVReport />;
+        return <FAVVReport currentLocation={currentLocation} />;
       default:
         return <Dashboard currentLocation={currentLocation} />;
     }
@@ -37,8 +37,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background flex">
       <Sidebar 
-        activeTab={activeTab} 
-        onTabChange={setActiveTab}
+        activeSection={activeTab} 
+        onSectionChange={setActiveTab}
+        isCollapsed={false}
+        onToggleCollapse={() => {}}
         currentLocation={currentLocation}
         onLocationChange={setCurrentLocation}
       />
