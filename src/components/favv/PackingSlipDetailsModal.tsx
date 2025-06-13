@@ -25,6 +25,17 @@ interface PackingSlip {
     customer?: string;
     dispatch_notes?: string;
   } | null;
+  batches?: {
+    id: string;
+    batch_number: string;
+    production_date: string;
+    expiry_date: string;
+    products: {
+      name: string;
+      unit_size: number;
+      unit_type: string;
+    };
+  }[];
 }
 
 interface PackingSlipDetailsModalProps {
@@ -166,10 +177,40 @@ export function PackingSlipDetailsModal({ packingSlip, isOpen, onClose }: Packin
                 )}
               </div>
             </CardContent>
-          </Card>
+          )}
 
           {/* Batch Information */}
-          {packingSlip.batch_ids && packingSlip.batch_ids.length > 0 && (
+          {packingSlip.batches && packingSlip.batches.length > 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Batch Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {packingSlip.batches.map((batch, index) => (
+                    <div key={batch.id} className="border rounded-lg p-3 bg-gray-50">
+                      <div className="flex justify-between items-start mb-2">
+                        <Badge variant="outline" className="font-mono text-xs">
+                          {batch.batch_number}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {batch.products.name}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                        <div>
+                          <span className="font-medium">Production:</span> {format(new Date(batch.production_date), "MMM dd, yyyy")}
+                        </div>
+                        <div>
+                          <span className="font-medium">Expiry:</span> {format(new Date(batch.expiry_date), "MMM dd, yyyy")}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : packingSlip.batch_ids && packingSlip.batch_ids.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Batch Information</CardTitle>

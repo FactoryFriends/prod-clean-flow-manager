@@ -26,6 +26,17 @@ interface PackingSlip {
     customer?: string;
     dispatch_notes?: string;
   } | null;
+  batches?: {
+    id: string;
+    batch_number: string;
+    production_date: string;
+    expiry_date: string;
+    products: {
+      name: string;
+      unit_size: number;
+      unit_type: string;
+    };
+  }[];
 }
 
 interface PackingSlipsTableProps {

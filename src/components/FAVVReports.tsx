@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -74,28 +73,61 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
       // For "all" locations, show all packing slips
       if (locationFilter === "all") {
         console.log("Showing all packing slips:", filteredData.length);
-        return filteredData;
+      } else {
+        // For specific location filter, show packing slips for that location
+        // This includes both slips with dispatch_records from that location
+        // and slips without dispatch_records (created via Confirm & Ship)
+        const beforeLocationFilter = filteredData.length;
+        filteredData = filteredData.filter(slip => {
+          // If slip has dispatch_records, use its location
+          if (slip.dispatch_records?.location) {
+            return slip.dispatch_records.location === locationFilter;
+          }
+          
+          // If no dispatch_records, include it for all locations since
+          // these were created via "Confirm & Ship" and should be visible everywhere
+          return true;
+        });
+        
+        console.log(`Location filter (${locationFilter}): ${beforeLocationFilter} -> ${filteredData.length}`);
       }
 
-      // For specific location filter, show packing slips for that location
-      // This includes both slips with dispatch_records from that location
-      // and slips without dispatch_records (created via Confirm & Ship)
-      const beforeLocationFilter = filteredData.length;
-      const locationFilteredData = filteredData.filter(slip => {
-        // If slip has dispatch_records, use its location
-        if (slip.dispatch_records?.location) {
-          return slip.dispatch_records.location === locationFilter;
-        }
-        
-        // If no dispatch_records, include it for all locations since
-        // these were created via "Confirm & Ship" and should be visible everywhere
-        return true;
-      });
-      
-      console.log(`Location filter (${locationFilter}): ${beforeLocationFilter} -> ${locationFilteredData.length}`);
-      console.log("Final filtered data:", locationFilteredData);
+      // Now fetch batch information for each packing slip
+      const packingSlipsWithBatches = await Promise.all(
+        filteredData.map(async (slip) => {
+          if (slip.batch_ids && slip.batch_ids.length > 0) {
+            try {
+              const { data: batchData, error: batchError } = await supabase
+                .from("production_batches")
+                .select(`
+                  id,
+                  batch_number,
+                  production_date,
+                  expiry_date,
+                  products (
+                    name,
+                    unit_size,
+                    unit_type
+                  )
+                `)
+                .in("id", slip.batch_ids);
 
-      return locationFilteredData;
+              if (!batchError && batchData) {
+                return {
+                  ...slip,
+                  batches: batchData
+                };
+              }
+            } catch (error) {
+              console.error("Error fetching batch data for slip:", slip.id, error);
+            }
+          }
+          return slip;
+        })
+      );
+
+      console.log("Final filtered data with batches:", packingSlipsWithBatches);
+      return packingSlipsWithBatches;
     },
     enabled: locationFilter !== "tothai",
   });
