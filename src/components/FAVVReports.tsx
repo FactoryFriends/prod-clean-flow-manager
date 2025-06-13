@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -97,6 +98,8 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
         filteredData.map(async (slip) => {
           if (slip.batch_ids && slip.batch_ids.length > 0) {
             try {
+              console.log("Fetching batch data for slip:", slip.slip_number, "batch_ids:", slip.batch_ids);
+              
               const { data: batchData, error: batchError } = await supabase
                 .from("production_batches")
                 .select(`
@@ -112,14 +115,24 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
                 `)
                 .in("id", slip.batch_ids);
 
-              if (!batchError && batchData) {
+              if (batchError) {
+                console.error("Error fetching batch data for slip:", slip.id, batchError);
+                return slip;
+              }
+
+              if (batchData && batchData.length > 0) {
+                console.log("Found batch data for slip:", slip.slip_number, batchData);
                 return {
                   ...slip,
                   batches: batchData
                 };
+              } else {
+                console.log("No batch data found for slip:", slip.slip_number);
+                return slip;
               }
             } catch (error) {
               console.error("Error fetching batch data for slip:", slip.id, error);
+              return slip;
             }
           }
           return slip;

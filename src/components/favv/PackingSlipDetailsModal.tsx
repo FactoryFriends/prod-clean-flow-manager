@@ -187,7 +187,7 @@ export function PackingSlipDetailsModal({ packingSlip, isOpen, onClose }: Packin
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {packingSlip.batches.map((batch, index) => (
+                  {packingSlip.batches.map((batch) => (
                     <div key={batch.id} className="border rounded-lg p-3 bg-gray-50">
                       <div className="flex justify-between items-start mb-2">
                         <Badge variant="outline" className="font-mono text-xs">
@@ -210,14 +210,14 @@ export function PackingSlipDetailsModal({ packingSlip, isOpen, onClose }: Packin
                 </div>
               </CardContent>
             </Card>
-          ) : packingSlip.batch_ids && packingSlip.batch_ids.length > 0 && (
+          ) : packingSlip.batch_ids && packingSlip.batch_ids.length > 0 ? (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Batch Information</CardTitle>
               </CardHeader>
               <CardContent>
                 <div>
-                  <p className="text-sm font-medium mb-2">Batch IDs</p>
+                  <p className="text-sm font-medium mb-2">Batch IDs (Details not available)</p>
                   <div className="flex flex-wrap gap-2">
                     {packingSlip.batch_ids.map((batchId, index) => (
                       <Badge key={index} variant="outline" className="font-mono text-xs">
@@ -225,10 +225,13 @@ export function PackingSlipDetailsModal({ packingSlip, isOpen, onClose }: Packin
                       </Badge>
                     ))}
                   </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Full batch details could not be loaded. These are the batch IDs referenced in this packing slip.
+                  </p>
                 </div>
               </CardContent>
             </Card>
-          )}
+          ) : null}
 
           {packingSlip.pickup_date && (
             <Card>
