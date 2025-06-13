@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -191,7 +190,6 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <h4 className="font-medium">{product.name}</h4>
-                          <p className="text-sm text-muted-foreground">External Product</p>
                         </div>
                         <Badge variant="outline">External</Badge>
                       </div>
