@@ -96,97 +96,99 @@ export function DispatchForm({
   });
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="picker-code">PIN Code</Label>
-            <Input
-              id="picker-code"
-              placeholder="Enter 4-digit PIN"
-              value={pickerCode}
-              onChange={(e) => setPickerCode(e.target.value)}
-              maxLength={4}
-            />
+    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+      <div className="space-y-6">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="picker-code">PIN Code</Label>
+              <Input
+                id="picker-code"
+                placeholder="Enter 4-digit PIN"
+                value={pickerCode}
+                onChange={(e) => setPickerCode(e.target.value)}
+                maxLength={4}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="picker-name">Staff Name</Label>
+              <Input
+                id="picker-name"
+                placeholder="Auto-filled from PIN"
+                value={pickerName}
+                onChange={(e) => setPickerName(e.target.value)}
+                disabled={!!pickerCode}
+              />
+            </div>
           </div>
-          
+
+          {dispatchType === "external" && (
+            <div className="space-y-2">
+              <Label htmlFor="customer">Customer</Label>
+              <Select value={customer} onValueChange={setCustomer}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select customer" />
+                </SelectTrigger>
+                <SelectContent>
+                  {customers.map((customerRecord) => (
+                    <SelectItem key={customerRecord.id} value={customerRecord.id}>
+                      <div className="flex items-center gap-2">
+                        <span>{customerRecord.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          ({customerRecord.customer_type})
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {customersLoading && (
+                <p className="text-sm text-muted-foreground">Loading customers...</p>
+              )}
+              {customersError && (
+                <p className="text-sm text-red-500">Error loading customers: {customersError.message}</p>
+              )}
+              {!customersLoading && !customersError && customers.length === 0 && (
+                <p className="text-sm text-orange-500">No customers found. Please add customers in Settings.</p>
+              )}
+              {customers.length > 0 && (
+                <p className="text-sm text-green-600">Found {customers.length} customers</p>
+              )}
+            </div>
+          )}
+
           <div className="space-y-2">
-            <Label htmlFor="picker-name">Staff Name</Label>
-            <Input
-              id="picker-name"
-              placeholder="Auto-filled from PIN"
-              value={pickerName}
-              onChange={(e) => setPickerName(e.target.value)}
-              disabled={!!pickerCode}
+            <Label htmlFor="dispatch-notes">Notes</Label>
+            <Textarea
+              id="dispatch-notes"
+              placeholder="Add any dispatch notes..."
+              value={dispatchNotes}
+              onChange={(e) => setDispatchNotes(e.target.value)}
+              rows={3}
             />
           </div>
         </div>
 
-        {dispatchType === "external" && (
-          <div className="space-y-2">
-            <Label htmlFor="customer">Customer</Label>
-            <Select value={customer} onValueChange={setCustomer}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select customer" />
-              </SelectTrigger>
-              <SelectContent>
-                {customers.map((customerRecord) => (
-                  <SelectItem key={customerRecord.id} value={customerRecord.id}>
-                    <div className="flex items-center gap-2">
-                      <span>{customerRecord.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        ({customerRecord.customer_type})
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {customersLoading && (
-              <p className="text-sm text-muted-foreground">Loading customers...</p>
-            )}
-            {customersError && (
-              <p className="text-sm text-red-500">Error loading customers: {customersError.message}</p>
-            )}
-            {!customersLoading && !customersError && customers.length === 0 && (
-              <p className="text-sm text-orange-500">No customers found. Please add customers in Settings.</p>
-            )}
-            {customers.length > 0 && (
-              <p className="text-sm text-green-600">Found {customers.length} customers</p>
-            )}
-          </div>
-        )}
-
-        <div className="space-y-2">
-          <Label htmlFor="dispatch-notes">Notes</Label>
-          <Textarea
-            id="dispatch-notes"
-            placeholder="Add any dispatch notes..."
-            value={dispatchNotes}
-            onChange={(e) => setDispatchNotes(e.target.value)}
-            rows={3}
-          />
+        <div className="flex gap-4">
+          {dispatchType === "external" ? (
+            <Button 
+              onClick={onCreatePackingSlip}
+              disabled={!canSubmit}
+              className="flex-1"
+            >
+              Create Packing Slip ({selectedItems.length} items)
+            </Button>
+          ) : (
+            <Button 
+              onClick={onInternalUse}
+              disabled={!canSubmit}
+              className="flex-1"
+            >
+              Log Internal Use ({selectedItems.length} items)
+            </Button>
+          )}
         </div>
-      </div>
-
-      <div className="flex gap-4">
-        {dispatchType === "external" ? (
-          <Button 
-            onClick={onCreatePackingSlip}
-            disabled={!canSubmit}
-            className="flex-1"
-          >
-            Create Packing Slip ({selectedItems.length} items)
-          </Button>
-        ) : (
-          <Button 
-            onClick={onInternalUse}
-            disabled={!canSubmit}
-            className="flex-1"
-          >
-            Log Internal Use ({selectedItems.length} items)
-          </Button>
-        )}
       </div>
     </div>
   );
