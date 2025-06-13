@@ -471,7 +471,7 @@ export type Database = {
       }
     }
     Enums: {
-      location_type: "tothai" | "khin"
+      location_type: "tothai" | "khin" | "both"
       staff_role: "chef" | "cleaner" | "other"
       task_frequency: "daily" | "weekly" | "monthly" | "quarterly"
       task_status: "open" | "closed"
@@ -590,7 +590,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      location_type: ["tothai", "khin"],
+      location_type: ["tothai", "khin", "both"],
       staff_role: ["chef", "cleaner", "other"],
       task_frequency: ["daily", "weekly", "monthly", "quarterly"],
       task_status: ["open", "closed"],

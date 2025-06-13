@@ -154,12 +154,15 @@ export function Settings({ currentLocation }: SettingsProps) {
 
   const updateTemplateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string, data: TaskTemplateFormData }) => {
+      // For updates, we only update the single template (no "both" logic for edits)
+      const locationValue = data.location === "both" ? "tothai" : data.location;
+      
       const { data: result, error } = await supabase
         .from('cleaning_task_templates')
         .update({
           title: data.title,
           description: data.description,
-          location: data.location === "both" ? data.location : data.location,
+          location: locationValue,
           frequency: data.frequency,
           weekly_day_of_week: data.weekly_day_of_week || null,
           monthly_day_of_month: data.monthly_day_of_month || null,
