@@ -9,6 +9,65 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      batch_labels: {
+        Row: {
+          batch_id: string
+          created_at: string
+          id: string
+          label_number: number
+          printed_at: string | null
+          qr_code_data: Json
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          id?: string
+          label_number: number
+          printed_at?: string | null
+          qr_code_data: Json
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          id?: string
+          label_number?: number
+          printed_at?: string | null
+          qr_code_data?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "batch_labels_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "production_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chefs: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          location: Database["public"]["Enums"]["location_type"]
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          location: Database["public"]["Enums"]["location_type"]
+          name: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          location?: Database["public"]["Enums"]["location_type"]
+          name?: string
+        }
+        Relationships: []
+      }
       cleaning_task_templates: {
         Row: {
           assigned_role: Database["public"]["Enums"]["staff_role"] | null
@@ -137,6 +196,135 @@ export type Database = {
           },
         ]
       }
+      packing_slips: {
+        Row: {
+          batch_ids: string[]
+          created_at: string
+          destination: string
+          id: string
+          picked_up_by: string | null
+          pickup_date: string | null
+          prepared_by: string | null
+          slip_number: string
+          total_items: number
+          total_packages: number
+        }
+        Insert: {
+          batch_ids: string[]
+          created_at?: string
+          destination: string
+          id?: string
+          picked_up_by?: string | null
+          pickup_date?: string | null
+          prepared_by?: string | null
+          slip_number: string
+          total_items?: number
+          total_packages?: number
+        }
+        Update: {
+          batch_ids?: string[]
+          created_at?: string
+          destination?: string
+          id?: string
+          picked_up_by?: string | null
+          pickup_date?: string | null
+          prepared_by?: string | null
+          slip_number?: string
+          total_items?: number
+          total_packages?: number
+        }
+        Relationships: []
+      }
+      production_batches: {
+        Row: {
+          batch_number: string
+          chef_id: string
+          created_at: string
+          expiry_date: string
+          id: string
+          location: Database["public"]["Enums"]["location_type"]
+          packages_produced: number
+          product_id: string
+          production_date: string
+          production_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          batch_number: string
+          chef_id: string
+          created_at?: string
+          expiry_date: string
+          id?: string
+          location: Database["public"]["Enums"]["location_type"]
+          packages_produced: number
+          product_id: string
+          production_date?: string
+          production_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          batch_number?: string
+          chef_id?: string
+          created_at?: string
+          expiry_date?: string
+          id?: string
+          location?: Database["public"]["Enums"]["location_type"]
+          packages_produced?: number
+          product_id?: string
+          production_date?: string
+          production_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_batches_chef_id_fkey"
+            columns: ["chef_id"]
+            isOneToOne: false
+            referencedRelation: "chefs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_batches_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          packages_per_batch: number
+          unit_size: number
+          unit_type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          packages_per_batch?: number
+          unit_size: number
+          unit_type: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          packages_per_batch?: number
+          unit_size?: number
+          unit_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       staff_codes: {
         Row: {
           active: boolean | null
@@ -169,6 +357,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_batch_number: {
+        Args: { product_name: string; production_date: string }
+        Returns: string
+      }
       generate_daily_cleaning_tasks: {
         Args: Record<PropertyKey, never>
         Returns: undefined

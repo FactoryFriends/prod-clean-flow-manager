@@ -1,143 +1,175 @@
 
-import { Package, Plus, Search, Filter } from "lucide-react";
-import { StatusBadge } from "./StatusBadge";
 import { useState } from "react";
+import { NewBatchDialog } from "./NewBatchDialog";
+import { BatchCard } from "./BatchCard";
+import { LabelPrintDialog } from "./LabelPrintDialog";
+import { useProductionBatches, ProductionBatch } from "@/hooks/useProductionData";
+import { Search, Filter } from "lucide-react";
+import { Input } from "./ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Card, CardContent } from "./ui/card";
+import { toast } from "sonner";
 
 interface ProductionProps {
-  currentLocation: string;
+  currentLocation: "tothai" | "khin";
 }
 
 export function Production({ currentLocation }: ProductionProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [selectedBatch, setSelectedBatch] = useState<ProductionBatch | null>(null);
+  const [labelDialogOpen, setLabelDialogOpen] = useState(false);
 
-  const productionItems = [
-    {
-      id: "SP-001",
-      name: "Metal Components Type A",
-      quantity: 150,
-      targetQuantity: 200,
-      status: "in-progress" as const,
-      startDate: "2024-06-10",
-      estimatedCompletion: "2024-06-15",
-      location: "Line 1",
-    },
-    {
-      id: "SP-002", 
-      name: "Plastic Housing Units",
-      quantity: 200,
-      targetQuantity: 200,
-      status: "completed" as const,
-      startDate: "2024-06-08",
-      estimatedCompletion: "2024-06-12",
-      location: "Line 2",
-    },
-    {
-      id: "SP-003",
-      name: "Electronic Assemblies",
-      quantity: 0,
-      targetQuantity: 100,
-      status: "pending" as const,
-      startDate: "2024-06-14",
-      estimatedCompletion: "2024-06-18",
-      location: "Line 3",
-    },
-    {
-      id: "SP-004",
-      name: "Rubber Seals Package",
-      quantity: 50,
-      targetQuantity: 300,
-      status: "overdue" as const,
-      startDate: "2024-06-05",
-      estimatedCompletion: "2024-06-12",
-      location: "Line 1",
-    },
-  ];
+  const { data: batches, isLoading, error } = useProductionBatches(currentLocation);
 
-  const filteredItems = productionItems.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const getLocationName = (location: string) => {
+    return location === "tothai" ? "To Thai Restaurant" : "Khin Takeaway";
+  };
+
+  const filterBatches = (batches: ProductionBatch[]) => {
+    if (!batches) return [];
+
+    return batches.filter((batch) => {
+      const matchesSearch = 
+        batch.batch_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        batch.products.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        batch.chefs.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const now = new Date();
+      const expiryDate = new Date(batch.expiry_date);
+      const isExpired = expiryDate <= now;
+      const isExpiringSoon = expiryDate <= new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+      let matchesFilter = true;
+      if (filterStatus === "fresh") {
+        matchesFilter = !isExpired && !isExpiringSoon;
+      } else if (filterStatus === "expiring") {
+        matchesFilter = isExpiringSoon && !isExpired;
+      } else if (filterStatus === "expired") {
+        matchesFilter = isExpired;
+      }
+
+      return matchesSearch && matchesFilter;
+    });
+  };
+
+  const handlePrintLabels = (batch: ProductionBatch) => {
+    setSelectedBatch(batch);
+    setLabelDialogOpen(true);
+  };
+
+  const handleCreatePackingSlip = (batch: ProductionBatch) => {
+    // This would open a packing slip dialog
+    toast.info("Packing slip creation coming soon!");
+  };
+
+  const filteredBatches = filterBatches(batches || []);
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Production Management</h1>
+            <p className="text-muted-foreground">
+              Manage production batches at {getLocationName(currentLocation)}
+            </p>
+          </div>
+        </div>
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-red-600">Failed to load production data: {error.message}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Production Management</h1>
+          <h1 className="text-3xl font-bold text-foreground">Production Management</h1>
           <p className="text-muted-foreground">
-            Track semi-product manufacturing at {currentLocation === "location1" ? "Main Production Facility" : "Secondary Distribution Center"}
+            Manage production batches at {getLocationName(currentLocation)}
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors w-fit">
-          <Plus className="w-4 h-4" />
-          New Production Run
-        </button>
+        <NewBatchDialog currentLocation={currentLocation} />
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <input
+          <Input
             type="text"
-            placeholder="Search production runs..."
+            placeholder="Search batches, products, or chefs..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="pl-10"
           />
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors">
-          <Filter className="w-4 h-4" />
-          Filter
-        </button>
+        
+        <div className="flex gap-2">
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Batches</SelectItem>
+              <SelectItem value="fresh">Fresh</SelectItem>
+              <SelectItem value="expiring">Expiring Soon</SelectItem>
+              <SelectItem value="expired">Expired</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredItems.map((item) => (
-          <div key={item.id} className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-accent rounded-lg">
-                  <Package className="w-5 h-5 text-primary" />
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Card key={index} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                  <div className="h-3 bg-muted rounded w-1/2"></div>
+                  <div className="space-y-2">
+                    <div className="h-3 bg-muted rounded"></div>
+                    <div className="h-3 bg-muted rounded w-2/3"></div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">{item.id}</h3>
-                  <p className="text-sm text-muted-foreground">{item.location}</p>
-                </div>
-              </div>
-              <StatusBadge status={item.status} size="sm" />
-            </div>
-            
-            <div className="space-y-3">
-              <h4 className="font-medium text-foreground">{item.name}</h4>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Progress</span>
-                  <span className="text-foreground font-medium">
-                    {item.quantity}/{item.targetQuantity} units
-                  </span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div 
-                    className="bg-primary h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${(item.quantity / item.targetQuantity) * 100}%` }}
-                  />
-                </div>
-              </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : filteredBatches.length === 0 ? (
+        <Card>
+          <CardContent className="p-6 text-center">
+            <p className="text-muted-foreground">
+              {searchTerm || filterStatus !== "all" 
+                ? "No batches match your search criteria" 
+                : "No production batches found. Create your first batch to get started!"
+              }
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredBatches.map((batch) => (
+            <BatchCard
+              key={batch.id}
+              batch={batch}
+              onPrintLabels={handlePrintLabels}
+              onCreatePackingSlip={handleCreatePackingSlip}
+            />
+          ))}
+        </div>
+      )}
 
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground">Started</p>
-                  <p className="text-foreground font-medium">{item.startDate}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Est. Completion</p>
-                  <p className="text-foreground font-medium">{item.estimatedCompletion}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <LabelPrintDialog
+        open={labelDialogOpen}
+        onOpenChange={setLabelDialogOpen}
+        batch={selectedBatch}
+      />
     </div>
   );
 }
