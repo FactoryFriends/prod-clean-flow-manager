@@ -1,4 +1,3 @@
-
 import { FileText, Download, Calendar, MapPin, AlertTriangle, CheckCircle, Clock } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -29,7 +28,7 @@ interface FAVVTask {
   description: string | null;
   location: "tothai" | "khin";
   scheduled_date: string;
-  status: "pending" | "in-progress" | "completed" | "overdue";
+  status: "open" | "closed";
   completed_at: string | null;
   completed_by: string | null;
   estimated_duration: number | null;
@@ -104,9 +103,15 @@ export function FAVVReport({ currentLocation }: FAVVReportProps) {
     const reportDate = new Date().toLocaleDateString();
     const reportTime = new Date().toLocaleTimeString();
     
-    const completedTasks = favvTasks.filter(task => task.status === 'completed');
-    const pendingTasks = favvTasks.filter(task => task.status === 'pending');
-    const overdueTasks = favvTasks.filter(task => task.status === 'overdue');
+    const completedTasks = favvTasks.filter(task => task.status === 'closed');
+    const pendingTasks = favvTasks.filter(task => task.status === 'open');
+    const overdueTasks = favvTasks.filter(task => {
+      if (task.status === 'closed') return false;
+      const scheduledDate = new Date(task.scheduled_date);
+      const now = new Date();
+      const diffHours = (now.getTime() - scheduledDate.getTime()) / (1000 * 60 * 60);
+      return diffHours > 48;
+    });
     
     const complianceRate = favvTasks.length > 0 ? 
       ((completedTasks.length / favvTasks.length) * 100).toFixed(1) : '0';
@@ -124,7 +129,7 @@ SUMMARY
 -------
 Total FAVV Tasks: ${favvTasks.length}
 Completed: ${completedTasks.length}
-Pending: ${pendingTasks.length}
+Open: ${pendingTasks.length}
 Overdue: ${overdueTasks.length}
 Compliance Rate: ${complianceRate}%
 
@@ -180,17 +185,15 @@ Report ID: FAVV-${Date.now()}
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'text-green-600';
-      case 'in-progress': return 'text-blue-600';
-      case 'overdue': return 'text-red-600';
+      case 'closed': return 'text-green-600';
+      case 'open': return 'text-orange-600';
       default: return 'text-orange-600';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed': return CheckCircle;
-      case 'overdue': return AlertTriangle;
+      case 'closed': return CheckCircle;
       default: return Clock;
     }
   };
@@ -262,19 +265,25 @@ Report ID: FAVV-${Date.now()}
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
                   <div className="text-2xl font-bold text-green-600">
-                    {favvTasks.filter(t => t.status === 'completed').length}
+                    {favvTasks.filter(t => t.status === 'closed').length}
                   </div>
                   <div className="text-sm text-green-700">Completed</div>
                 </div>
                 <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-center">
                   <div className="text-2xl font-bold text-orange-600">
-                    {favvTasks.filter(t => t.status === 'pending').length}
+                    {favvTasks.filter(t => t.status === 'open').length}
                   </div>
-                  <div className="text-sm text-orange-700">Pending</div>
+                  <div className="text-sm text-orange-700">Open</div>
                 </div>
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
                   <div className="text-2xl font-bold text-red-600">
-                    {favvTasks.filter(t => t.status === 'overdue').length}
+                    {favvTasks.filter(task => {
+                      if (task.status === 'closed') return false;
+                      const scheduledDate = new Date(task.scheduled_date);
+                      const now = new Date();
+                      const diffHours = (now.getTime() - scheduledDate.getTime()) / (1000 * 60 * 60);
+                      return diffHours > 48;
+                    }).length}
                   </div>
                   <div className="text-sm text-red-700">Overdue</div>
                 </div>

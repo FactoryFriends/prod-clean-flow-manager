@@ -53,7 +53,7 @@ export function NewCleaningTaskDialog({ currentLocation }: NewCleaningTaskDialog
           due_time: data.due_time || null,
           estimated_duration: data.estimated_duration,
           favv_compliance: data.favv_compliance,
-          status: 'pending'
+          status: 'open'
         })
         .select()
         .single();

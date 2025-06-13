@@ -1,5 +1,4 @@
-
-import { Brush, Users, Chef, Broom } from "lucide-react";
+import { Brush, Users, ChefHat, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useCleaningTasks } from "@/hooks/useCleaningTasks";
 import { CleaningTaskHeader } from "./CleaningTaskHeader";
@@ -122,7 +121,7 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
       <Tabs defaultValue="chef" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="chef" className="flex items-center gap-2">
-            <Chef className="w-4 h-4" />
+            <ChefHat className="w-4 h-4" />
             Chef Tasks
             {chefTasks.length > 0 && (
               <Badge variant="secondary" className="ml-1">
@@ -131,7 +130,7 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
             )}
           </TabsTrigger>
           <TabsTrigger value="cleaner" className="flex items-center gap-2">
-            <Broom className="w-4 h-4" />
+            <Sparkles className="w-4 h-4" />
             Cleaner Tasks
             {cleanerTasks.length > 0 && (
               <Badge variant="secondary" className="ml-1">

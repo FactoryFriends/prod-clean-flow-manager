@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 
 interface StatusBadgeProps {
-  status: "completed" | "in-progress" | "pending" | "overdue" | "shipped" | "delivered";
+  status: "completed" | "in-progress" | "pending" | "overdue" | "shipped" | "delivered" | "open" | "closed";
   size?: "sm" | "md";
 }
 
@@ -13,6 +13,8 @@ const statusConfig = {
   overdue: { label: "Overdue", className: "bg-red-100 text-red-800 border-red-200" },
   shipped: { label: "Shipped", className: "bg-purple-100 text-purple-800 border-purple-200" },
   delivered: { label: "Delivered", className: "bg-green-100 text-green-800 border-green-200" },
+  open: { label: "Open", className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+  closed: { label: "Closed", className: "bg-green-100 text-green-800 border-green-200" },
 };
 
 export function StatusBadge({ status, size = "md" }: StatusBadgeProps) {
