@@ -1,4 +1,5 @@
 
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -97,13 +98,18 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
     enabled: locationFilter === "tothai",
   });
 
-  // Fetch completed cleaning tasks
+  // Fetch completed cleaning tasks with staff initials
   const { data: completedTasks = [], isLoading: isLoadingTasks } = useQuery({
     queryKey: ["favv-completed-tasks", locationFilter, startDate, endDate, taskNameFilter],
     queryFn: async () => {
       let query = supabase
         .from("cleaning_tasks")
-        .select("*")
+        .select(`
+          *,
+          staff_codes!cleaning_tasks_completed_by_fkey (
+            initials
+          )
+        `)
         .eq("status", "closed")
         .order("completed_at", { ascending: false });
 
@@ -240,7 +246,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
       task.location?.toUpperCase() || "",
       format(new Date(task.scheduled_date), "yyyy-MM-dd"),
       task.completed_at ? format(new Date(task.completed_at), "yyyy-MM-dd HH:mm") : "",
-      task.completed_by || "",
+      task.staff_codes?.initials || "",
       task.assigned_role || "",
       task.favv_compliance ? "Yes" : "No",
       task.estimated_duration || "",
@@ -674,7 +680,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
                               : "N/A"
                             }
                           </TableCell>
-                          <TableCell>{task.completed_by || "N/A"}</TableCell>
+                          <TableCell>{task.staff_codes?.initials || "N/A"}</TableCell>
                           <TableCell>
                             <span className={cn(
                               "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
@@ -717,3 +723,4 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
     </div>
   );
 }
+
