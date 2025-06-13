@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, Home } from "lucide-react";
 import { DispatchType, SelectedItem } from "@/types/dispatch";
-import { staffCodes } from "@/data/dispatchData";
+import { useStaffCodes } from "@/hooks/useStaffCodes";
 
 interface DispatchFormProps {
   dispatchType: DispatchType;
@@ -37,10 +37,12 @@ export function DispatchForm({
   onCreatePackingSlip,
   onInternalUse,
 }: DispatchFormProps) {
+  const { data: staffCodes } = useStaffCodes();
+
   const handlePickerCodeChange = (value: string) => {
     setPickerCode(value);
     if (value.length === 4) {
-      const staff = staffCodes.find(s => s.code === value);
+      const staff = staffCodes?.find(s => s.code === value);
       if (staff) {
         setPickerName(staff.name);
       } else {

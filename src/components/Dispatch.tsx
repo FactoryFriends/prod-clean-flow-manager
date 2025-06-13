@@ -1,6 +1,6 @@
-
 import { useState } from "react";
 import { useProductionBatches } from "@/hooks/useProductionData";
+import { useCreateDispatch, useCreatePackingSlip } from "@/hooks/useDispatchData";
 import { PackingSlipDialog } from "./PackingSlipDialog";
 import { DispatchHeader } from "./dispatch/DispatchHeader";
 import { DispatchForm } from "./dispatch/DispatchForm";
@@ -8,6 +8,8 @@ import { SelectedItemsSummary } from "./dispatch/SelectedItemsSummary";
 import { InventoryGrid } from "./dispatch/InventoryGrid";
 import { SelectedItem, DispatchType } from "@/types/dispatch";
 import { externalProducts } from "@/data/dispatchData";
+import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 
 interface DispatchProps {
   currentLocation: "tothai" | "khin";
@@ -21,8 +23,12 @@ export function Dispatch({ currentLocation }: DispatchProps) {
   const [dispatchNotes, setDispatchNotes] = useState("");
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const [packingSlipOpen, setPackingSlipOpen] = useState(false);
+  const [currentDispatchId, setCurrentDispatchId] = useState<string | null>(null);
 
   const { data: batches } = useProductionBatches(currentLocation);
+  const createDispatch = useCreateDispatch();
+  const createPackingSlip = useCreatePackingSlip();
+  const { toast } = useToast();
 
   // Convert batches to available inventory
   const availableBatches = (batches || []).map(batch => ({
@@ -67,18 +73,110 @@ export function Dispatch({ currentLocation }: DispatchProps) {
     }
   };
 
-  const handleCreatePackingSlip = () => {
-    setPackingSlipOpen(true);
+  const generatePackingSlipNumber = () => {
+    const date = format(new Date(), "yyyyMMdd");
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
+    return `PS-${date}-${random}`;
   };
 
-  const handleInternalUse = () => {
-    console.log("Processing internal use for:", selectedItems);
-    alert(`Internal use registered: ${selectedItems.length} items logged for kitchen use`);
-    // Reset the form
-    setSelectedItems([]);
-    setPickerCode("");
-    setPickerName("");
-    setDispatchNotes("");
+  const getDestination = () => {
+    switch (customer) {
+      case "khin-restaurant":
+        return "KHIN Takeaway";
+      case "tothai-restaurant":
+        return "To Thai Restaurant";
+      default:
+        return "External Customer";
+    }
+  };
+
+  const handleCreatePackingSlip = async () => {
+    try {
+      // First create the dispatch record
+      const dispatchRecord = await createDispatch.mutateAsync({
+        dispatchType,
+        customer,
+        pickerCode,
+        pickerName,
+        dispatchNotes,
+        selectedItems,
+        currentLocation,
+      });
+
+      // Then create the packing slip
+      const batchIds = selectedItems
+        .filter(item => item.type === 'batch')
+        .map(item => item.id);
+
+      const slipNumber = generatePackingSlipNumber();
+      
+      await createPackingSlip.mutateAsync({
+        dispatchId: dispatchRecord.id,
+        slipNumber,
+        destination: getDestination(),
+        preparedBy: pickerName,
+        pickedUpBy: pickerName,
+        batchIds,
+        totalItems: selectedItems.length,
+        totalPackages: selectedItems.reduce((sum, item) => sum + item.selectedQuantity, 0),
+      });
+
+      setCurrentDispatchId(dispatchRecord.id);
+      setPackingSlipOpen(true);
+
+      toast({
+        title: "Dispatch Created",
+        description: `External dispatch ${slipNumber} created successfully`,
+      });
+
+      // Reset form
+      setSelectedItems([]);
+      setPickerCode("");
+      setPickerName("");
+      setDispatchNotes("");
+      setCustomer("");
+
+    } catch (error) {
+      console.error("Error creating dispatch:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create dispatch. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleInternalUse = async () => {
+    try {
+      await createDispatch.mutateAsync({
+        dispatchType,
+        customer: undefined,
+        pickerCode,
+        pickerName,
+        dispatchNotes,
+        selectedItems,
+        currentLocation,
+      });
+
+      toast({
+        title: "Internal Use Logged",
+        description: `${selectedItems.length} items logged for internal kitchen use`,
+      });
+
+      // Reset form
+      setSelectedItems([]);
+      setPickerCode("");
+      setPickerName("");
+      setDispatchNotes("");
+
+    } catch (error) {
+      console.error("Error logging internal use:", error);
+      toast({
+        title: "Error",
+        description: "Failed to log internal use. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

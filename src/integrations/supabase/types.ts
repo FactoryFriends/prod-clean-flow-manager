@@ -196,11 +196,101 @@ export type Database = {
           },
         ]
       }
+      dispatch_items: {
+        Row: {
+          batch_number: string | null
+          created_at: string
+          dispatch_id: string
+          expiry_date: string | null
+          id: string
+          item_id: string
+          item_name: string
+          item_type: string
+          production_date: string | null
+          quantity: number
+        }
+        Insert: {
+          batch_number?: string | null
+          created_at?: string
+          dispatch_id: string
+          expiry_date?: string | null
+          id?: string
+          item_id: string
+          item_name: string
+          item_type: string
+          production_date?: string | null
+          quantity: number
+        }
+        Update: {
+          batch_number?: string | null
+          created_at?: string
+          dispatch_id?: string
+          expiry_date?: string | null
+          id?: string
+          item_id?: string
+          item_name?: string
+          item_type?: string
+          production_date?: string | null
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispatch_items_dispatch_id_fkey"
+            columns: ["dispatch_id"]
+            isOneToOne: false
+            referencedRelation: "dispatch_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dispatch_records: {
+        Row: {
+          created_at: string
+          customer: string | null
+          dispatch_notes: string | null
+          dispatch_type: string
+          id: string
+          location: string
+          picker_code: string
+          picker_name: string
+          total_items: number
+          total_packages: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer?: string | null
+          dispatch_notes?: string | null
+          dispatch_type: string
+          id?: string
+          location: string
+          picker_code: string
+          picker_name: string
+          total_items?: number
+          total_packages?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer?: string | null
+          dispatch_notes?: string | null
+          dispatch_type?: string
+          id?: string
+          location?: string
+          picker_code?: string
+          picker_name?: string
+          total_items?: number
+          total_packages?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       packing_slips: {
         Row: {
           batch_ids: string[]
           created_at: string
           destination: string
+          dispatch_id: string | null
           id: string
           picked_up_by: string | null
           pickup_date: string | null
@@ -213,6 +303,7 @@ export type Database = {
           batch_ids: string[]
           created_at?: string
           destination: string
+          dispatch_id?: string | null
           id?: string
           picked_up_by?: string | null
           pickup_date?: string | null
@@ -225,6 +316,7 @@ export type Database = {
           batch_ids?: string[]
           created_at?: string
           destination?: string
+          dispatch_id?: string | null
           id?: string
           picked_up_by?: string | null
           pickup_date?: string | null
@@ -233,7 +325,15 @@ export type Database = {
           total_items?: number
           total_packages?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "packing_slips_dispatch_id_fkey"
+            columns: ["dispatch_id"]
+            isOneToOne: false
+            referencedRelation: "dispatch_records"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       production_batches: {
         Row: {
