@@ -53,7 +53,6 @@ export function PackingSlipDialog({
 
   const getCompanyInfo = () => {
     return {
-      name: "TOTHAI",
       subtitle: "Production Kitchen",
       address: "Leuvensestraat 100",
       city: "3300 Tienen",
@@ -102,14 +101,13 @@ Prepared by: ${preparedBy}
         <div className="bg-white p-8 border rounded-lg text-black">
           {/* Header */}
           <div className="flex justify-between items-start mb-8">
-            <div className="flex items-start gap-4">
+            <div className="flex flex-col items-start">
               <img 
                 src="/lovable-uploads/049be7aa-e57b-4eb6-bec2-515a4c2b96b3.png" 
                 alt="TOTHAI Logo" 
-                className="h-16 w-auto object-contain"
+                className="h-16 w-auto object-contain mb-4"
               />
               <div>
-                <h1 className="text-2xl font-bold text-yellow-600 mb-1">{companyInfo.name}</h1>
                 <p className="text-gray-600">{companyInfo.subtitle}</p>
                 <p className="text-gray-600">{companyInfo.address}</p>
                 <p className="text-gray-600">{companyInfo.city}</p>
