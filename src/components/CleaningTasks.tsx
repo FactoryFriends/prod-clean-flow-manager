@@ -66,7 +66,7 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
           <CleaningTaskCard
             key={task.id}
             task={task}
-            onCompleteTask={handleCompleteTask}
+            onCompleteTask={(taskId, photoUrls) => handleCompleteTask(taskId, photoUrls)}
             onReopenTask={handleReopenTask}
             isOverdue={isTaskOverdue(task)}
           />

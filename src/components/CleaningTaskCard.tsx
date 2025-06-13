@@ -1,8 +1,9 @@
 
-import { Brush, Clock, CheckCircle, AlertTriangle, RotateCcw } from "lucide-react";
+import { Brush, Clock, CheckCircle, AlertTriangle, RotateCcw, Camera } from "lucide-react";
 import { StatusBadge } from "./StatusBadge";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { useState } from "react";
 
 interface CleaningTask {
   id: string;
@@ -23,16 +24,20 @@ interface CleaningTask {
   favv_compliance: boolean | null;
   template_id: string | null;
   assigned_role: "chef" | "cleaner" | "other" | null;
+  requires_photo: boolean | null;
 }
 
 interface CleaningTaskCardProps {
   task: CleaningTask;
-  onCompleteTask: (taskId: string) => void;
+  onCompleteTask: (taskId: string, photoUrls?: string[]) => void;
   onReopenTask: (taskId: string) => void;
   isOverdue: boolean;
 }
 
 export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue }: CleaningTaskCardProps) {
+  const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
+
   const formatDuration = (minutes: number | null) => {
     if (!minutes) return "Not specified";
     const hours = Math.floor(minutes / 60);
@@ -43,13 +48,21 @@ export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue
     return `${mins}m`;
   };
 
-  const getRoleBadgeColor = (role: string | null) => {
-    switch (role) {
-      case 'chef': return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'cleaner': return 'bg-green-50 text-green-700 border-green-200';
-      case 'other': return 'bg-gray-50 text-gray-700 border-gray-200';
-      default: return 'bg-gray-50 text-gray-700 border-gray-200';
+  const getAssignedToDisplay = () => {
+    if (task.assigned_staff_name) {
+      return task.assigned_staff_name;
     }
+    
+    if (task.assigned_role) {
+      switch (task.assigned_role) {
+        case 'chef': return 'CHEF';
+        case 'cleaner': return 'CLEANING STAFF';
+        case 'other': return 'OTHER STAFF';
+        default: return 'UNASSIGNED';
+      }
+    }
+    
+    return 'UNASSIGNED';
   };
 
   // Check if task is severely overdue (72+ hours)
@@ -61,6 +74,35 @@ export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue
     const diffHours = (now.getTime() - scheduledDate.getTime()) / (1000 * 60 * 60);
     
     return diffHours >= 72;
+  };
+
+  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setSelectedPhotos(files);
+  };
+
+  const handleCompleteTask = async () => {
+    if (task.requires_photo && selectedPhotos.length === 0) {
+      alert("This task requires a photo before completion.");
+      return;
+    }
+
+    if (task.requires_photo && selectedPhotos.length > 0) {
+      setUploadingPhotos(true);
+      try {
+        // Here you would upload photos to Supabase Storage
+        // For now, we'll simulate with file names
+        const photoUrls = selectedPhotos.map(file => file.name);
+        onCompleteTask(task.id, photoUrls);
+      } catch (error) {
+        console.error('Error uploading photos:', error);
+        alert("Error uploading photos. Please try again.");
+      } finally {
+        setUploadingPhotos(false);
+      }
+    } else {
+      onCompleteTask(task.id);
+    }
   };
 
   const severelyOverdue = isSeverelyOverdue();
@@ -104,19 +146,6 @@ export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {task.assigned_role && (
-            <Badge variant="outline" className={getRoleBadgeColor(task.assigned_role)}>
-              {task.assigned_role.toUpperCase()}
-            </Badge>
-          )}
-          {task.favv_compliance && (
-            <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-              FAVV
-            </Badge>
-          )}
-          <StatusBadge status={task.status} size="sm" />
-        </div>
       </div>
       
       <div className="space-y-4">
@@ -137,7 +166,7 @@ export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue
             <div>
               <p className="text-muted-foreground">Assigned To</p>
               <p className="text-foreground font-medium">
-                {task.assigned_staff_name || task.assigned_to || "Unassigned"}
+                {getAssignedToDisplay()}
               </p>
             </div>
             <div>
@@ -151,19 +180,81 @@ export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue
               <p className="text-muted-foreground">Completed by {task.completed_by} on {new Date(task.completed_at).toLocaleDateString()}</p>
             </div>
           )}
+
+          {task.requires_photo && (
+            <div className="text-sm">
+              <div className="flex items-center gap-2 text-orange-600">
+                <Camera className="w-4 h-4" />
+                <span className="font-medium">Photo required for completion</span>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="flex gap-2 pt-4 border-t border-border">
+        {/* Photo upload for open tasks that require photos */}
+        {task.status === "open" && task.requires_photo && (
+          <div className="border-t border-border pt-4">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Upload completion photo:
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              multiple
+              onChange={handlePhotoChange}
+              className="block w-full text-sm text-muted-foreground
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-primary file:text-primary-foreground
+                hover:file:bg-primary/80"
+            />
+            {selectedPhotos.length > 0 && (
+              <p className="text-sm text-green-600 mt-1">
+                {selectedPhotos.length} photo(s) selected
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Display existing photos for completed tasks */}
+        {task.photo_urls && task.photo_urls.length > 0 && (
+          <div className="border-t border-border pt-4">
+            <p className="text-sm font-medium text-foreground mb-2">Completion photos:</p>
+            <div className="text-sm text-muted-foreground">
+              {task.photo_urls.length} photo(s) uploaded
+            </div>
+          </div>
+        )}
+
+        {/* Tags moved to bottom */}
+        <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-border">
+          {task.assigned_role && (
+            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+              {task.assigned_role.toUpperCase()}
+            </Badge>
+          )}
+          {task.favv_compliance && (
+            <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+              FAVV
+            </Badge>
+          )}
+          <StatusBadge status={task.status} size="sm" />
+        </div>
+
+        <div className="flex gap-2 pt-2">
           {task.status === "open" && (
             <Button
-              onClick={() => onCompleteTask(task.id)}
+              onClick={handleCompleteTask}
+              disabled={uploadingPhotos}
               className={`flex items-center gap-2 ${
                 severelyOverdue ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
               }`}
               size="sm"
             >
               <CheckCircle className="w-4 h-4" />
-              {severelyOverdue ? 'Complete Now' : 'Complete'}
+              {uploadingPhotos ? 'Uploading...' : severelyOverdue ? 'Complete Now' : 'Complete'}
             </Button>
           )}
           

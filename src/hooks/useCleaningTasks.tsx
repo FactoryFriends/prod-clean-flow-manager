@@ -21,6 +21,7 @@ interface CleaningTask {
   favv_compliance: boolean | null;
   template_id: string | null;
   assigned_role: "chef" | "cleaner" | "other" | null;
+  requires_photo: boolean | null;
 }
 
 export function useCleaningTasks(dbLocation: "tothai" | "khin") {
@@ -50,7 +51,12 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
 
   // Update task status mutation
   const updateTaskMutation = useMutation({
-    mutationFn: async ({ taskId, status, completedBy }: { taskId: string; status: "open" | "closed"; completedBy?: string }) => {
+    mutationFn: async ({ taskId, status, completedBy, photoUrls }: { 
+      taskId: string; 
+      status: "open" | "closed"; 
+      completedBy?: string;
+      photoUrls?: string[];
+    }) => {
       const updateData: any = { 
         status,
         updated_at: new Date().toISOString()
@@ -59,10 +65,14 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
       if (status === 'closed') {
         updateData.completed_at = new Date().toISOString();
         updateData.completed_by = completedBy;
+        if (photoUrls && photoUrls.length > 0) {
+          updateData.photo_urls = photoUrls;
+        }
       } else {
         // If reopening, clear completion data
         updateData.completed_at = null;
         updateData.completed_by = null;
+        updateData.photo_urls = null;
       }
 
       const { data, error } = await supabase
@@ -80,13 +90,14 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
     },
   });
 
-  const handleCompleteTask = (taskId: string) => {
+  const handleCompleteTask = (taskId: string, photoUrls?: string[]) => {
     const userCode = prompt("Enter your 4-digit staff code:");
     if (userCode && userCode.length === 4) {
       updateTaskMutation.mutate({ 
         taskId, 
         status: 'closed', 
-        completedBy: userCode 
+        completedBy: userCode,
+        photoUrls
       });
     } else {
       alert("Please enter a valid 4-digit staff code");
