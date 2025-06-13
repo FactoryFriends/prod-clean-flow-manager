@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -21,7 +20,7 @@ interface FAVVReportsProps {
 }
 
 export function FAVVReports({ currentLocation }: FAVVReportsProps) {
-  const [locationFilter, setLocationFilter] = useState<string>(currentLocation);
+  const [locationFilter, setLocationFilter] = useState<"all" | "tothai" | "khin">(currentLocation);
   const [startDate, setStartDate] = useState<Date | undefined>(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [taskNameFilter, setTaskNameFilter] = useState<string>("");
@@ -303,7 +302,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
                 {/* Location Filter */}
                 <div className="space-y-2">
                   <Label htmlFor="location">Location</Label>
-                  <Select value={locationFilter} onValueChange={setLocationFilter}>
+                  <Select value={locationFilter} onValueChange={(value: "all" | "tothai" | "khin") => setLocationFilter(value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select location" />
                     </SelectTrigger>
@@ -523,7 +522,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
                 {/* Location Filter */}
                 <div className="space-y-2">
                   <Label htmlFor="location">Location</Label>
-                  <Select value={locationFilter} onValueChange={setLocationFilter}>
+                  <Select value={locationFilter} onValueChange={(value: "all" | "tothai" | "khin") => setLocationFilter(value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select location" />
                     </SelectTrigger>
