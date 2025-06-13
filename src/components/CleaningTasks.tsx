@@ -1,6 +1,6 @@
-
 import { Brush, Plus, Search, Filter, Clock, CheckCircle, Camera, AlertTriangle, Calendar } from "lucide-react";
 import { StatusBadge } from "./StatusBadge";
+import { FAVVReport } from "./FAVVReport";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -179,10 +179,13 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
             Manage cleaning and maintenance tasks at {locationName}
           </p>
         </div>
-        <Button className="flex items-center gap-2 w-fit">
-          <Plus className="w-4 h-4" />
-          New Cleaning Task
-        </Button>
+        <div className="flex gap-2">
+          <FAVVReport currentLocation={currentLocation} />
+          <Button className="flex items-center gap-2 w-fit">
+            <Plus className="w-4 h-4" />
+            New Cleaning Task
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4">
