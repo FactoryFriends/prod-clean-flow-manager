@@ -28,7 +28,7 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-sidebar-primary rounded-lg flex items-center justify-center">
             <img 
-              src="/lovable-uploads/3b0e21b2-e733-4f03-91cd-641ebc206d3b.png" 
+              src="/lovable-uploads/0de3c103-6c05-4b46-bf8c-8237a9815b6d.png" 
               alt="OptiThai Logo" 
               className="w-6 h-6 object-contain"
             />
