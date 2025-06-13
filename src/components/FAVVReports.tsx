@@ -23,7 +23,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
-  // Fetch packing slips with filters (for non-ToThai locations)
+  // Fetch packing slips with filters (for non-ToThai locations) - only show shipped packing slips
   const { data: packingSlips = [], isLoading: isLoadingPackingSlips } = useQuery({
     queryKey: ["favv-packing-slips", locationFilter, startDate, endDate],
     queryFn: async () => {
@@ -39,6 +39,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
             dispatch_notes
           )
         `)
+        .eq("status", "shipped")
         .order("created_at", { ascending: false });
 
       if (startDate) {

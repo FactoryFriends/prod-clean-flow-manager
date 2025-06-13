@@ -5,6 +5,9 @@ import { format } from "date-fns";
 import { useCustomers } from "@/hooks/useCustomers";
 import { PackingSlipPreview } from "./packing-slip/PackingSlipPreview";
 import { generatePackingSlipPDF } from "@/utils/packingSlipPdfGenerator";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 
 interface SelectedItem {
   id: string;
@@ -37,14 +40,8 @@ export function PackingSlipDialog({
   currentLocation,
 }: PackingSlipDialogProps) {
   const { data: customers = [] } = useCustomers(true);
-
-  // Debug logging for staff names
-  console.log("PackingSlipDialog staff names:", {
-    preparedBy,
-    pickedUpBy,
-    customer,
-    selectedItemsCount: selectedItems.length
-  });
+  const { toast } = useToast();
+  const [isConfirming, setIsConfirming] = useState(false);
 
   const generatePackingSlipNumber = () => {
     const date = format(new Date(), "yyyyMMdd");
@@ -90,6 +87,45 @@ Prepared by: ${preparedBy}
     navigator.clipboard.writeText(details);
   };
 
+  const handleConfirmAndShip = async () => {
+    setIsConfirming(true);
+    try {
+      // Find the most recent packing slip to update its status
+      const { data: packingSlips, error: fetchError } = await supabase
+        .from("packing_slips")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (fetchError) throw fetchError;
+
+      if (packingSlips && packingSlips.length > 0) {
+        const { error: updateError } = await supabase
+          .from("packing_slips")
+          .update({ status: "shipped" })
+          .eq("id", packingSlips[0].id);
+
+        if (updateError) throw updateError;
+
+        toast({
+          title: "Packing Slip Confirmed",
+          description: "Packing slip has been marked as shipped and will appear in FAVV reports",
+        });
+
+        onOpenChange(false);
+      }
+    } catch (error) {
+      console.error("Error confirming packing slip:", error);
+      toast({
+        title: "Error",
+        description: "Failed to confirm packing slip. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -124,9 +160,18 @@ Prepared by: ${preparedBy}
               Copy Details
             </Button>
           </div>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleConfirmAndShip}
+              disabled={isConfirming}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              {isConfirming ? "Confirming..." : "Confirm & Ship"}
+            </Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Close
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
