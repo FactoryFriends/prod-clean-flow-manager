@@ -8,10 +8,13 @@ import { CleaningTasks } from "@/components/CleaningTasks";
 import { Settings } from "@/components/Settings";
 import { Invoicing } from "@/components/Invoicing";
 import { FAVVReport } from "@/components/FAVVReport";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [currentLocation, setCurrentLocation] = useState<"tothai" | "khin">("tothai");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const isMobile = useIsMobile();
 
   const renderContent = () => {
     switch (activeTab) {
@@ -35,16 +38,18 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex w-full">
       <Sidebar 
         activeSection={activeTab} 
         onSectionChange={setActiveTab}
-        isCollapsed={false}
-        onToggleCollapse={() => {}}
+        isCollapsed={isMobile ? true : sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         currentLocation={currentLocation}
         onLocationChange={setCurrentLocation}
       />
-      <main className="flex-1 p-6">
+      <main className={`flex-1 transition-all duration-300 ${
+        isMobile ? 'p-4' : 'p-6'
+      } overflow-auto`}>
         {renderContent()}
       </main>
     </div>

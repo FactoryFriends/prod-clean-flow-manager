@@ -1,6 +1,10 @@
 
-import { Building, Package, Truck, Brush, BarChart3, Settings, Receipt } from "lucide-react";
+import { Building, Package, Truck, Brush, BarChart3, Settings, Receipt, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useState } from "react";
+import { Button } from "./ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 
 interface SidebarProps {
   activeSection: string;
@@ -21,16 +25,23 @@ const menuItems = [
 ];
 
 export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleCollapse, currentLocation, onLocationChange }: SidebarProps) {
+  const isMobile = useIsMobile();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   // Filter menu items based on current location
   const availableMenuItems = menuItems.filter(item => 
     item.availableFor.includes(currentLocation)
   );
 
-  return (
-    <div className={cn(
-      "bg-sidebar border-r border-sidebar-border h-screen transition-all duration-300",
-      isCollapsed ? "w-16" : "w-64"
-    )}>
+  const handleSectionChange = (section: string) => {
+    onSectionChange(section);
+    if (isMobile) {
+      setMobileMenuOpen(false);
+    }
+  };
+
+  const SidebarContent = () => (
+    <>
       <div className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-sidebar-primary rounded-lg flex items-center justify-center">
@@ -40,7 +51,7 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
               className="w-6 h-6 object-contain"
             />
           </div>
-          {!isCollapsed && (
+          {(!isCollapsed || isMobile) && (
             <div>
               <h1 className="font-semibold text-sidebar-foreground">OptiThai</h1>
               <p className="text-sm text-sidebar-foreground/60">Production Hub</p>
@@ -50,16 +61,17 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
       </div>
       
       {/* Location switcher */}
-      {!isCollapsed && (
+      {(!isCollapsed || isMobile) && (
         <div className="p-4 border-b border-sidebar-border">
           <div className="flex gap-1 bg-sidebar-accent/20 rounded-lg p-1">
             <button
               onClick={() => onLocationChange("tothai")}
               className={cn(
-                "flex-1 text-xs py-2 px-3 rounded-md transition-colors",
+                "flex-1 text-xs py-3 px-3 rounded-md transition-colors touch-manipulation",
+                "min-h-[44px] flex items-center justify-center",
                 currentLocation === "tothai"
                   ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                  : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                  : "text-sidebar-foreground/70 hover:text-sidebar-foreground active:bg-sidebar-accent/50"
               )}
             >
               ToThai
@@ -67,10 +79,11 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
             <button
               onClick={() => onLocationChange("khin")}
               className={cn(
-                "flex-1 text-xs py-2 px-3 rounded-md transition-colors",
+                "flex-1 text-xs py-3 px-3 rounded-md transition-colors touch-manipulation",
+                "min-h-[44px] flex items-center justify-center",
                 currentLocation === "khin"
                   ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                  : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                  : "text-sidebar-foreground/70 hover:text-sidebar-foreground active:bg-sidebar-accent/50"
               )}
             >
               KHIN
@@ -85,21 +98,74 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
           return (
             <button
               key={item.id}
-              onClick={() => onSectionChange(item.id)}
+              onClick={() => handleSectionChange(item.id)}
               className={cn(
-                "w-full flex items-center gap-3 p-3 rounded-lg transition-colors",
+                "w-full flex items-center gap-3 p-4 rounded-lg transition-colors touch-manipulation",
+                "min-h-[48px] text-left",
                 "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                "active:bg-sidebar-accent/80 active:scale-[0.98]",
                 activeSection === item.id 
                   ? "bg-sidebar-accent text-sidebar-accent-foreground" 
                   : "text-sidebar-foreground/70"
               )}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
-              {!isCollapsed && <span className="text-sm font-medium">{item.label}</span>}
+              {(!isCollapsed || isMobile) && <span className="text-sm font-medium">{item.label}</span>}
             </button>
           );
         })}
       </nav>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        {/* Mobile menu trigger */}
+        <div className="fixed top-4 left-4 z-50 md:hidden">
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="icon"
+                className="h-10 w-10 bg-background/80 backdrop-blur-sm border-border/50"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-72 bg-sidebar">
+              <div className="h-full bg-sidebar">
+                <SidebarContent />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <div className={cn(
+      "bg-sidebar border-r border-sidebar-border h-screen transition-all duration-300 hidden md:block",
+      isCollapsed ? "w-16" : "w-64"
+    )}>
+      {/* Desktop toggle button */}
+      <div className="absolute -right-3 top-4 z-10">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onToggleCollapse}
+          className="h-6 w-6 rounded-full bg-background border-border/50"
+        >
+          {isCollapsed ? (
+            <Menu className="h-3 w-3" />
+          ) : (
+            <X className="h-3 w-3" />
+          )}
+        </Button>
+      </div>
+      
+      <SidebarContent />
     </div>
   );
 }

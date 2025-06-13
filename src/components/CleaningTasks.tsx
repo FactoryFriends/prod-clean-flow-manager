@@ -8,6 +8,7 @@ import { CleaningTaskCard } from "./CleaningTaskCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CleaningTasksProps {
   currentLocation: string;
@@ -20,6 +21,7 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
   const [showCompletedChef, setShowCompletedChef] = useState(false);
   const [showCompletedCleaner, setShowCompletedCleaner] = useState(false);
   const [showCompletedOther, setShowCompletedOther] = useState(false);
+  const isMobile = useIsMobile();
 
   // Map location IDs to database values
   const dbLocation = currentLocation === "location1" ? "tothai" : "khin";
@@ -68,13 +70,16 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
       return (
         <div className="text-center py-8">
           <Brush className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-          <p className="text-muted-foreground">{emptyMessage}</p>
+          <p className="text-muted-foreground text-sm">{emptyMessage}</p>
         </div>
       );
     }
 
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className={cn(
+        "grid gap-4",
+        isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
+      )}>
         {tasks.map((task) => (
           <CleaningTaskCard
             key={task.id}
@@ -101,7 +106,10 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
         <Button
           variant="ghost"
           onClick={() => setShowCompleted(!showCompleted)}
-          className="w-full flex items-center justify-between p-4 hover:bg-accent rounded-lg"
+          className={cn(
+            "w-full flex items-center justify-between p-4 hover:bg-accent rounded-lg touch-manipulation",
+            isMobile && "min-h-[48px]"
+          )}
         >
           <div className="flex items-center gap-2">
             <span className="font-medium text-muted-foreground">
@@ -132,7 +140,6 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
     emptyMessage: string,
     sectionTitle: string
   ) => {
-    // Update section titles to use "ACTIVE" for all tabs
     const activeSectionTitle = sectionTitle === "Other Tasks" ? "ACTIVE TASKS" : 
                               sectionTitle === "Chef Tasks" ? "ACTIVE CHEF TASKS" :
                               sectionTitle === "Cleaner Tasks" ? "ACTIVE CLEANER TASKS" :
@@ -142,7 +149,10 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
       <div>
         {/* Open Tasks Section */}
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-foreground mb-4">
+          <h3 className={cn(
+            "font-semibold text-foreground mb-4 flex items-center gap-2",
+            isMobile ? "text-base" : "text-lg"
+          )}>
             {activeSectionTitle}
             {openTasks.length > 0 && (
               <Badge variant="secondary" className="ml-2">
@@ -186,7 +196,7 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={cn("space-y-6", isMobile && "pt-16")}>
       <CleaningTaskHeader 
         locationName={locationName}
         currentLocation={dbLocation}
@@ -203,28 +213,52 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
       />
 
       <Tabs defaultValue="chef" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="chef" className="flex items-center gap-2">
+        <TabsList className={cn(
+          "grid w-full grid-cols-3",
+          isMobile && "h-12"
+        )}>
+          <TabsTrigger 
+            value="chef" 
+            className={cn(
+              "flex items-center gap-2 touch-manipulation",
+              isMobile && "text-xs px-2"
+            )}
+          >
             <ChefHat className="w-4 h-4" />
-            Chef Tasks
+            {!isMobile && "Chef Tasks"}
+            {isMobile && "Chef"}
             {chefTasks.openTasks.length > 0 && (
               <Badge variant="secondary" className="ml-1">
                 {chefTasks.openTasks.length}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="cleaner" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="cleaner" 
+            className={cn(
+              "flex items-center gap-2 touch-manipulation",
+              isMobile && "text-xs px-2"
+            )}
+          >
             <Sparkles className="w-4 h-4" />
-            Cleaner Tasks
+            {!isMobile && "Cleaner Tasks"}
+            {isMobile && "Cleaner"}
             {cleanerTasks.openTasks.length > 0 && (
               <Badge variant="secondary" className="ml-1">
                 {cleanerTasks.openTasks.length}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="other" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="other" 
+            className={cn(
+              "flex items-center gap-2 touch-manipulation",
+              isMobile && "text-xs px-2"
+            )}
+          >
             <Users className="w-4 h-4" />
-            Other Tasks
+            {!isMobile && "Other Tasks"}
+            {isMobile && "Other"}
             {otherTasks.openTasks.length > 0 && (
               <Badge variant="secondary" className="ml-1">
                 {otherTasks.openTasks.length}
