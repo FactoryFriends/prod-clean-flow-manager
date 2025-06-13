@@ -38,10 +38,9 @@ export function CleaningTaskFilters({
           onChange={(e) => setFilterStatus(e.target.value)}
           className="px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         >
-          <option value="all">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="in-progress">In Progress</option>
-          <option value="completed">Completed</option>
+          <option value="all">All</option>
+          <option value="open">Open</option>
+          <option value="closed">Closed</option>
           <option value="overdue">Overdue</option>
         </select>
         

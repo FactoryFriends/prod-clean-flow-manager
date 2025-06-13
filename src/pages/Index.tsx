@@ -7,6 +7,7 @@ import { Dashboard } from "@/components/Dashboard";
 import { Production } from "@/components/Production";
 import { Distribution } from "@/components/Distribution";
 import { CleaningTasks } from "@/components/CleaningTasks";
+import { Settings } from "@/components/Settings";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -25,14 +26,7 @@ const Index = () => {
       case "cleaning":
         return <CleaningTasks currentLocation={currentLocation} />;
       case "settings":
-        return (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-            <div className="bg-card border border-border rounded-lg p-6">
-              <p className="text-muted-foreground">Settings panel coming soon...</p>
-            </div>
-          </div>
-        );
+        return <Settings currentLocation={currentLocation} />;
       default:
         return <Dashboard currentLocation={currentLocation} />;
     }

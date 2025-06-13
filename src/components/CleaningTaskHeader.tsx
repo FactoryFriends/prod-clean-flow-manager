@@ -1,7 +1,6 @@
 
 import { AlertTriangle } from "lucide-react";
 import { FAVVReport } from "./FAVVReport";
-import { NewCleaningTaskDialog } from "./NewCleaningTaskDialog";
 import { Badge } from "./ui/badge";
 
 interface CleaningTaskHeaderProps {
@@ -24,17 +23,16 @@ export function CleaningTaskHeader({ locationName, currentLocation, overdueCount
           )}
         </div>
         <p className="text-muted-foreground">
-          Manage cleaning and maintenance tasks at {locationName}
+          Execute cleaning and maintenance tasks at {locationName}
         </p>
         {overdueCount > 0 && (
           <p className="text-sm text-red-600 mt-1">
-            {overdueCount} task{overdueCount > 1 ? 's' : ''} overdue ({'>'}48 hours) - Immediate attention required!
+            {overdueCount} task{overdueCount > 1 ? 's' : ''} overdue (>48 hours) - Immediate attention required!
           </p>
         )}
       </div>
       <div className="flex gap-2">
         <FAVVReport currentLocation={currentLocation} />
-        <NewCleaningTaskDialog currentLocation={currentLocation} />
       </div>
     </div>
   );
