@@ -70,6 +70,7 @@ export type Database = {
       }
       cleaning_task_templates: {
         Row: {
+          active: boolean
           assigned_role: Database["public"]["Enums"]["staff_role"] | null
           created_at: string
           description: string | null
@@ -86,6 +87,7 @@ export type Database = {
           weekly_day_of_week: number | null
         }
         Insert: {
+          active?: boolean
           assigned_role?: Database["public"]["Enums"]["staff_role"] | null
           created_at?: string
           description?: string | null
@@ -102,6 +104,7 @@ export type Database = {
           weekly_day_of_week?: number | null
         }
         Update: {
+          active?: boolean
           assigned_role?: Database["public"]["Enums"]["staff_role"] | null
           created_at?: string
           description?: string | null

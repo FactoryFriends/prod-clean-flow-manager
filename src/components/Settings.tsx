@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { Lock, Plus, Package, Edit, Trash2 } from "lucide-react";
+import { Lock, Plus, Package, Edit, Trash2, Power, PowerOff } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
@@ -101,6 +102,7 @@ export function Settings({ currentLocation }: SettingsProps) {
               assigned_role: data.assigned_role,
               favv_compliance: data.favv_compliance,
               requires_photo: data.requires_photo,
+              active: true,
             })
             .select()
             .single();
@@ -124,6 +126,7 @@ export function Settings({ currentLocation }: SettingsProps) {
             assigned_role: data.assigned_role,
             favv_compliance: data.favv_compliance,
             requires_photo: data.requires_photo,
+            active: true,
           })
           .select()
           .single();
@@ -189,6 +192,35 @@ export function Settings({ currentLocation }: SettingsProps) {
     },
   });
 
+  const toggleActiveMutation = useMutation({
+    mutationFn: async ({ id, active }: { id: string, active: boolean }) => {
+      const { data: result, error } = await supabase
+        .from('cleaning_task_templates')
+        .update({ active })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['cleaning-task-templates'] });
+      toast({
+        title: result.active ? "Template Activated" : "Template Deactivated",
+        description: `Task template has been ${result.active ? 'activated' : 'deactivated'} successfully.`,
+      });
+    },
+    onError: (error) => {
+      console.error('Failed to toggle template status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update template status. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const deleteTemplateMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
@@ -203,6 +235,14 @@ export function Settings({ currentLocation }: SettingsProps) {
       toast({
         title: "Template Deleted",
         description: "Task template has been deleted successfully.",
+      });
+    },
+    onError: (error) => {
+      console.error('Failed to delete template:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete template. Please try again.",
+        variant: "destructive",
       });
     },
   });
@@ -233,8 +273,12 @@ export function Settings({ currentLocation }: SettingsProps) {
     setShowNewTaskDialog(true);
   };
 
+  const handleToggleActive = (template: any) => {
+    toggleActiveMutation.mutate({ id: template.id, active: !template.active });
+  };
+
   const handleDelete = (template: any) => {
-    if (confirm(`Are you sure you want to delete "${template.title}"?`)) {
+    if (confirm(`Are you sure you want to permanently delete "${template.title}"? This action cannot be undone.`)) {
       deleteTemplateMutation.mutate(template.id);
     }
   };
@@ -610,10 +654,26 @@ export function Settings({ currentLocation }: SettingsProps) {
             ) : (
               <div className="grid grid-cols-1 gap-4">
                 {templates.map((template) => (
-                  <div key={template.id} className="border border-border rounded-lg p-4 space-y-2">
+                  <div key={template.id} className={`border border-border rounded-lg p-4 space-y-2 ${!template.active ? 'opacity-60 bg-muted/20' : ''}`}>
                     <div className="flex items-center justify-between">
-                      <h3 className="font-semibold">{template.title}</h3>
+                      <div className="flex items-center gap-3">
+                        <h3 className="font-semibold">{template.title}</h3>
+                        {!template.active && (
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                            Inactive
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleToggleActive(template)}
+                          disabled={toggleActiveMutation.isPending}
+                          className={template.active ? "text-orange-600 hover:text-orange-700" : "text-green-600 hover:text-green-700"}
+                        >
+                          {template.active ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
+                        </Button>
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -625,6 +685,7 @@ export function Settings({ currentLocation }: SettingsProps) {
                           variant="outline" 
                           size="sm"
                           onClick={() => handleDelete(template)}
+                          disabled={deleteTemplateMutation.isPending}
                           className="text-red-600 hover:text-red-700"
                         >
                           <Trash2 className="w-4 h-4" />
