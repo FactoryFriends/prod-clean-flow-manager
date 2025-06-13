@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -7,7 +6,7 @@ import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Calendar } from "./ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { CalendarIcon, Download, FileText, Filter } from "lucide-react";
+import { CalendarIcon, Download, FileText, Filter, Package } from "lucide-react";
 import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,8 +23,8 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
   const [startDate, setStartDate] = useState<Date | undefined>(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
 
-  // Fetch packing slips with filters
-  const { data: packingSlips = [], isLoading } = useQuery({
+  // Fetch packing slips with filters (for non-ToThai locations)
+  const { data: packingSlips = [], isLoading: isLoadingPackingSlips } = useQuery({
     queryKey: ["favv-packing-slips", locationFilter, startDate, endDate],
     queryFn: async () => {
       let query = supabase
@@ -60,11 +59,52 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
         slip.dispatch_records?.location === locationFilter
       );
     },
+    enabled: locationFilter !== "tothai",
+  });
+
+  // Fetch stock takes for ToThai location
+  const { data: stockTakes = [], isLoading: isLoadingStockTakes } = useQuery({
+    queryKey: ["favv-stock-takes", startDate, endDate],
+    queryFn: async () => {
+      // For now, we'll use production_batches as a proxy for stock takes
+      // This could be replaced with a dedicated stock_takes table in the future
+      let query = supabase
+        .from("production_batches")
+        .select(`
+          *,
+          products (name, unit_type),
+          chefs (name)
+        `)
+        .eq("location", "tothai")
+        .order("created_at", { ascending: false });
+
+      if (startDate) {
+        query = query.gte("created_at", startDate.toISOString());
+      }
+      if (endDate) {
+        const endOfDay = new Date(endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        query = query.lte("created_at", endOfDay.toISOString());
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+    enabled: locationFilter === "tothai",
   });
 
   const exportToCSV = () => {
+    if (locationFilter === "tothai") {
+      exportStockTakesCSV();
+    } else {
+      exportPackingSlipsCSV();
+    }
+  };
+
+  const exportPackingSlipsCSV = () => {
     if (!packingSlips.length) {
-      toast.error("No data to export");
+      toast.error("No packing slips to export");
       return;
     }
 
@@ -105,11 +145,53 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
       ...csvData.map(row => row.map(cell => `"${cell || ""}"`).join(","))
     ].join("\n");
 
+    downloadCSV(csvContent, `FAVV_Packing_Slips_${format(new Date(), "yyyy-MM-dd")}.csv`);
+  };
+
+  const exportStockTakesCSV = () => {
+    if (!stockTakes.length) {
+      toast.error("No stock takes to export");
+      return;
+    }
+
+    const csvHeaders = [
+      "Batch Number",
+      "Date Created",
+      "Product Name",
+      "Production Date",
+      "Expiry Date",
+      "Packages Produced",
+      "Chef Name",
+      "Unit Type",
+      "Production Notes"
+    ];
+
+    const csvData = stockTakes.map(batch => [
+      batch.batch_number,
+      format(new Date(batch.created_at), "yyyy-MM-dd HH:mm"),
+      batch.products?.name || "",
+      format(new Date(batch.production_date), "yyyy-MM-dd"),
+      format(new Date(batch.expiry_date), "yyyy-MM-dd"),
+      batch.packages_produced,
+      batch.chefs?.name || "",
+      batch.products?.unit_type || "",
+      batch.production_notes || ""
+    ]);
+
+    const csvContent = [
+      csvHeaders.join(","),
+      ...csvData.map(row => row.map(cell => `"${cell || ""}"`).join(","))
+    ].join("\n");
+
+    downloadCSV(csvContent, `FAVV_Stock_Takes_${format(new Date(), "yyyy-MM-dd")}.csv`);
+  };
+
+  const downloadCSV = (csvContent: string, filename: string) => {
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `FAVV_Packing_Slips_${format(new Date(), "yyyy-MM-dd")}.csv`);
+    link.setAttribute("download", filename);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
@@ -117,6 +199,10 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
 
     toast.success("CSV file downloaded successfully");
   };
+
+  const isLoading = isLoadingPackingSlips || isLoadingStockTakes;
+  const dataCount = locationFilter === "tothai" ? stockTakes.length : packingSlips.length;
+  const hasData = dataCount > 0;
 
   return (
     <div className="space-y-6">
@@ -134,7 +220,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Filter className="w-5 h-5" />
-            Packing Slip Filters
+            {locationFilter === "tothai" ? "Stock Take Filters" : "Packing Slip Filters"}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -214,7 +300,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
               <Button 
                 onClick={exportToCSV}
                 className="w-full"
-                disabled={!packingSlips.length}
+                disabled={!hasData}
               >
                 <Download className="w-4 h-4 mr-2" />
                 Export CSV
@@ -228,16 +314,64 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            Packing Slips ({packingSlips.length})
+            {locationFilter === "tothai" ? (
+              <>
+                <Package className="w-5 h-5" />
+                Stock Takes ({dataCount})
+              </>
+            ) : (
+              <>
+                <FileText className="w-5 h-5" />
+                Packing Slips ({dataCount})
+              </>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-8">Loading packing slips...</div>
-          ) : packingSlips.length === 0 ? (
+            <div className="text-center py-8">
+              Loading {locationFilter === "tothai" ? "stock takes" : "packing slips"}...
+            </div>
+          ) : !hasData ? (
             <div className="text-center py-8 text-muted-foreground">
-              No packing slips found for the selected criteria
+              No {locationFilter === "tothai" ? "stock takes" : "packing slips"} found for the selected criteria
+            </div>
+          ) : locationFilter === "tothai" ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Batch Number</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Product</TableHead>
+                    <TableHead>Production Date</TableHead>
+                    <TableHead>Expiry Date</TableHead>
+                    <TableHead>Packages</TableHead>
+                    <TableHead>Chef</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {stockTakes.map((batch) => (
+                    <TableRow key={batch.id}>
+                      <TableCell className="font-mono text-sm">
+                        {batch.batch_number}
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(batch.created_at), "MMM dd, yyyy HH:mm")}
+                      </TableCell>
+                      <TableCell>{batch.products?.name || "N/A"}</TableCell>
+                      <TableCell>
+                        {format(new Date(batch.production_date), "MMM dd, yyyy")}
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(batch.expiry_date), "MMM dd, yyyy")}
+                      </TableCell>
+                      <TableCell>{batch.packages_produced}</TableCell>
+                      <TableCell>{batch.chefs?.name || "N/A"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           ) : (
             <div className="overflow-x-auto">
