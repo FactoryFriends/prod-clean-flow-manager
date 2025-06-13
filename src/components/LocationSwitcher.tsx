@@ -4,13 +4,13 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface LocationSwitcherProps {
-  currentLocation: string;
-  onLocationChange: (location: string) => void;
+  currentLocation: "tothai" | "khin";
+  onLocationChange: (location: "tothai" | "khin") => void;
 }
 
 const locations = [
-  { id: "location1", name: "ToThai Production Facility", address: "Main Production & Distribution" },
-  { id: "location2", name: "KHIN Restaurant", address: "Restaurant Operations" },
+  { id: "tothai" as const, name: "ToThai Production Facility", address: "Main Production & Distribution" },
+  { id: "khin" as const, name: "KHIN Restaurant", address: "Restaurant Operations" },
 ];
 
 export function LocationSwitcher({ currentLocation, onLocationChange }: LocationSwitcherProps) {
