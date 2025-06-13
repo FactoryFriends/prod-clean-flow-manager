@@ -1,7 +1,7 @@
 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { generatePackingSlipPDF } from "@/utils/packingSlipPdfGenerator";
+import { generatePackingSlipPDF } from "@/utils/pdf/packingSlipPdfGenerator";
 import { format } from "date-fns";
 import { SelectedItem } from "@/types/dispatch";
 
