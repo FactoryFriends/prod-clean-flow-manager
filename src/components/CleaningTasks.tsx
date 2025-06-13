@@ -1,4 +1,5 @@
-import { Brush, Users, ChefHat, Sparkles } from "lucide-react";
+
+import { Brush, Users, ChefHat, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { useCleaningTasks } from "@/hooks/useCleaningTasks";
 import { CleaningTaskHeader } from "./CleaningTaskHeader";
@@ -6,6 +7,7 @@ import { CleaningTaskFilters } from "./CleaningTaskFilters";
 import { CleaningTaskCard } from "./CleaningTaskCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
 
 interface CleaningTasksProps {
   currentLocation: string;
@@ -15,6 +17,9 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [showOnlyFAVV, setShowOnlyFAVV] = useState(false);
+  const [showCompletedChef, setShowCompletedChef] = useState(false);
+  const [showCompletedCleaner, setShowCompletedCleaner] = useState(false);
+  const [showCompletedOther, setShowCompletedOther] = useState(false);
 
   // Map location IDs to database values
   const dbLocation = currentLocation === "location1" ? "tothai" : "khin";
@@ -45,9 +50,17 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
     });
   };
 
-  const chefTasks = filterTasks(getTasksByRole('chef'));
-  const cleanerTasks = filterTasks(getTasksByRole('cleaner'));
-  const otherTasks = filterTasks(getTasksByRole('other'));
+  // Separate open and completed tasks
+  const getTasksByRoleAndStatus = (role: "chef" | "cleaner" | "other") => {
+    const allTasks = filterTasks(getTasksByRole(role));
+    const openTasks = allTasks.filter(task => task.status === 'open');
+    const completedTasks = allTasks.filter(task => task.status === 'closed');
+    return { openTasks, completedTasks };
+  };
+
+  const chefTasks = getTasksByRoleAndStatus('chef');
+  const cleanerTasks = getTasksByRoleAndStatus('cleaner');
+  const otherTasks = getTasksByRoleAndStatus('other');
   const overdueCount = getOverdueTasksCount();
 
   const renderTaskList = (tasks: any[], emptyMessage: string) => {
@@ -71,6 +84,71 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
             isOverdue={isTaskOverdue(task)}
           />
         ))}
+      </div>
+    );
+  };
+
+  const renderCompletedTasksSection = (
+    completedTasks: any[], 
+    showCompleted: boolean, 
+    setShowCompleted: (show: boolean) => void,
+    sectionTitle: string
+  ) => {
+    if (completedTasks.length === 0) return null;
+
+    return (
+      <div className="mt-8 border-t border-border pt-6">
+        <Button
+          variant="ghost"
+          onClick={() => setShowCompleted(!showCompleted)}
+          className="w-full flex items-center justify-between p-4 hover:bg-accent rounded-lg"
+        >
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-muted-foreground">
+              Completed {sectionTitle} ({completedTasks.length})
+            </span>
+          </div>
+          {showCompleted ? (
+            <ChevronUp className="w-4 h-4 text-muted-foreground" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-muted-foreground" />
+          )}
+        </Button>
+        
+        {showCompleted && (
+          <div className="mt-4">
+            {renderTaskList(completedTasks, "")}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderTabContent = (
+    openTasks: any[], 
+    completedTasks: any[], 
+    showCompleted: boolean, 
+    setShowCompleted: (show: boolean) => void,
+    emptyMessage: string,
+    sectionTitle: string
+  ) => {
+    return (
+      <div>
+        {/* Open Tasks Section */}
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold text-foreground mb-4">
+            Open {sectionTitle}
+            {openTasks.length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {openTasks.length}
+              </Badge>
+            )}
+          </h3>
+          {renderTaskList(openTasks, emptyMessage)}
+        </div>
+
+        {/* Completed Tasks Section */}
+        {renderCompletedTasksSection(completedTasks, showCompleted, setShowCompleted, sectionTitle)}
       </div>
     );
   };
@@ -123,42 +201,63 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
           <TabsTrigger value="chef" className="flex items-center gap-2">
             <ChefHat className="w-4 h-4" />
             Chef Tasks
-            {chefTasks.length > 0 && (
+            {chefTasks.openTasks.length > 0 && (
               <Badge variant="secondary" className="ml-1">
-                {chefTasks.length}
+                {chefTasks.openTasks.length}
               </Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="cleaner" className="flex items-center gap-2">
             <Sparkles className="w-4 h-4" />
             Cleaner Tasks
-            {cleanerTasks.length > 0 && (
+            {cleanerTasks.openTasks.length > 0 && (
               <Badge variant="secondary" className="ml-1">
-                {cleanerTasks.length}
+                {cleanerTasks.openTasks.length}
               </Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="other" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
             Other Tasks
-            {otherTasks.length > 0 && (
+            {otherTasks.openTasks.length > 0 && (
               <Badge variant="secondary" className="ml-1">
-                {otherTasks.length}
+                {otherTasks.openTasks.length}
               </Badge>
             )}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="chef" className="mt-6">
-          {renderTaskList(chefTasks, "No chef tasks found")}
+          {renderTabContent(
+            chefTasks.openTasks,
+            chefTasks.completedTasks,
+            showCompletedChef,
+            setShowCompletedChef,
+            "No open chef tasks found",
+            "Chef Tasks"
+          )}
         </TabsContent>
 
         <TabsContent value="cleaner" className="mt-6">
-          {renderTaskList(cleanerTasks, "No cleaner tasks found")}
+          {renderTabContent(
+            cleanerTasks.openTasks,
+            cleanerTasks.completedTasks,
+            showCompletedCleaner,
+            setShowCompletedCleaner,
+            "No open cleaner tasks found",
+            "Cleaner Tasks"
+          )}
         </TabsContent>
 
         <TabsContent value="other" className="mt-6">
-          {renderTaskList(otherTasks, "No other tasks found")}
+          {renderTabContent(
+            otherTasks.openTasks,
+            otherTasks.completedTasks,
+            showCompletedOther,
+            setShowCompletedOther,
+            "No open other tasks found",
+            "Other Tasks"
+          )}
         </TabsContent>
       </Tabs>
     </div>
