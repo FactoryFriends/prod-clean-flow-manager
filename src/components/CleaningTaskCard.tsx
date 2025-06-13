@@ -52,15 +52,41 @@ export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue
     }
   };
 
+  // Check if task is severely overdue (72+ hours)
+  const isSeverelyOverdue = () => {
+    if (task.status === 'closed') return false;
+    
+    const scheduledDate = new Date(task.scheduled_date);
+    const now = new Date();
+    const diffHours = (now.getTime() - scheduledDate.getTime()) / (1000 * 60 * 60);
+    
+    return diffHours >= 72;
+  };
+
+  const severelyOverdue = isSeverelyOverdue();
+
   return (
     <div className={`bg-card border rounded-lg p-6 hover:shadow-md transition-shadow ${
+      severelyOverdue ? 'border-red-500 bg-red-50 shadow-red-100' : 
       isOverdue ? 'border-red-300 bg-red-50' : 'border-border'
     }`}>
+      {severelyOverdue && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-300 rounded-lg">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-red-600" />
+            <span className="font-bold text-red-800">CRITICAL: 72+ HOURS OVERDUE</span>
+          </div>
+          <p className="text-sm text-red-700 mt-1">This task requires immediate attention!</p>
+        </div>
+      )}
+
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${isOverdue ? 'bg-red-200' : 'bg-accent'}`}>
-            {isOverdue ? (
-              <AlertTriangle className="w-5 h-5 text-red-600" />
+          <div className={`p-2 rounded-lg ${
+            severelyOverdue ? 'bg-red-200' : isOverdue ? 'bg-red-200' : 'bg-accent'
+          }`}>
+            {severelyOverdue || isOverdue ? (
+              <AlertTriangle className={`w-5 h-5 ${severelyOverdue ? 'text-red-700' : 'text-red-600'}`} />
             ) : (
               <Brush className="w-5 h-5 text-primary" />
             )}
@@ -70,7 +96,10 @@ export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue
             <p className="text-sm text-muted-foreground">
               {task.scheduled_date} {task.due_time && `at ${task.due_time}`}
             </p>
-            {isOverdue && (
+            {severelyOverdue && (
+              <p className="text-sm text-red-700 font-bold">CRITICAL OVERDUE - Immediate Action Required!</p>
+            )}
+            {isOverdue && !severelyOverdue && (
               <p className="text-sm text-red-600 font-medium">OVERDUE - Action Required!</p>
             )}
           </div>
@@ -128,11 +157,13 @@ export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue
           {task.status === "open" && (
             <Button
               onClick={() => onCompleteTask(task.id)}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+              className={`flex items-center gap-2 ${
+                severelyOverdue ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
+              }`}
               size="sm"
             >
               <CheckCircle className="w-4 h-4" />
-              Complete
+              {severelyOverdue ? 'Complete Now' : 'Complete'}
             </Button>
           )}
           

@@ -111,6 +111,17 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
     return diffHours > 48;
   };
 
+  // Check if task is severely overdue (>72 hours)
+  const isTaskSeverelyOverdue = (task: CleaningTask) => {
+    if (task.status === 'closed') return false;
+    
+    const scheduledDate = new Date(task.scheduled_date);
+    const now = new Date();
+    const diffHours = (now.getTime() - scheduledDate.getTime()) / (1000 * 60 * 60);
+    
+    return diffHours >= 72;
+  };
+
   // Group tasks by role
   const getTasksByRole = (role: "chef" | "cleaner" | "other") => {
     return cleaningTasks.filter(task => task.assigned_role === role);
@@ -121,6 +132,11 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
     return cleaningTasks.filter(task => isTaskOverdue(task)).length;
   };
 
+  // Get severely overdue tasks count (72+ hours)
+  const getSeverelyOverdueTasksCount = () => {
+    return cleaningTasks.filter(task => isTaskSeverelyOverdue(task)).length;
+  };
+
   return {
     cleaningTasks,
     isLoading,
@@ -129,7 +145,9 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
     handleCompleteTask,
     handleReopenTask,
     isTaskOverdue,
+    isTaskSeverelyOverdue,
     getTasksByRole,
-    getOverdueTasksCount
+    getOverdueTasksCount,
+    getSeverelyOverdueTasksCount
   };
 }

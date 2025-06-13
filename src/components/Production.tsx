@@ -3,7 +3,7 @@ import { useState } from "react";
 import { NewBatchDialog } from "./NewBatchDialog";
 import { LabelPrintDialog } from "./LabelPrintDialog";
 import { useProductionBatches, ProductionBatch } from "@/hooks/useProductionData";
-import { Search, Filter, Printer, Edit } from "lucide-react";
+import { Search, Filter, Printer, Edit, X } from "lucide-react";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Card, CardContent } from "./ui/card";
@@ -40,7 +40,7 @@ export function Production({ currentLocation }: ProductionProps) {
       const now = new Date();
       const expiryDate = new Date(batch.expiry_date);
       const isExpired = expiryDate <= now;
-      const isExpiringSoon = expiryDate <= new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+      const isExpiringSoon = expiryDate <= new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000); // 2 days
 
       let matchesFilter = true;
       if (filterStatus === "fresh") {
@@ -69,11 +69,11 @@ export function Production({ currentLocation }: ProductionProps) {
     const now = new Date();
     const expiryDate = new Date(batch.expiry_date);
     const isExpired = expiryDate <= now;
-    const isExpiringSoon = expiryDate <= new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+    const isExpiringSoon = expiryDate <= new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000); // 2 days
 
-    if (isExpired) return { label: "Expired", variant: "destructive" as const };
-    if (isExpiringSoon) return { label: "Expiring Soon", variant: "secondary" as const };
-    return { label: "Fresh", variant: "default" as const };
+    if (isExpired) return { label: "Expired", variant: "destructive" as const, expired: true };
+    if (isExpiringSoon) return { label: "Expiring Soon", variant: "secondary" as const, expired: false };
+    return { label: "Fresh", variant: "default" as const, expired: false };
   };
 
   const filteredBatches = filterBatches(batches || []);
@@ -177,14 +177,44 @@ export function Production({ currentLocation }: ProductionProps) {
               <TableBody>
                 {filteredBatches.map((batch) => {
                   const expiryStatus = getExpiryStatus(batch);
+                  const now = new Date();
+                  const expiryDate = new Date(batch.expiry_date);
+                  const isExpiringSoon = expiryDate <= new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000) && expiryDate > now;
+                  const isExpired = expiryDate <= now;
+                  
                   return (
-                    <TableRow key={batch.id}>
-                      <TableCell className="font-medium">{batch.products.name}</TableCell>
-                      <TableCell className="font-mono text-sm">{batch.batch_number}</TableCell>
+                    <TableRow 
+                      key={batch.id} 
+                      className={`${
+                        isExpired ? 'bg-red-50 opacity-75' : 
+                        isExpiringSoon ? 'bg-red-50' : ''
+                      }`}
+                    >
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          {batch.products.name}
+                          {isExpired && (
+                            <X className="w-4 h-4 text-red-600" />
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className={`font-mono text-sm ${
+                        isExpired ? 'text-red-600 line-through' : 
+                        isExpiringSoon ? 'text-red-600 font-bold' : ''
+                      }`}>
+                        {batch.batch_number}
+                      </TableCell>
                       <TableCell>{batch.chefs.name}</TableCell>
                       <TableCell>{batch.packages_produced}</TableCell>
                       <TableCell>{format(new Date(batch.production_date), "MMM dd, yyyy")}</TableCell>
-                      <TableCell>{format(new Date(batch.expiry_date), "MMM dd, yyyy")}</TableCell>
+                      <TableCell className={`${
+                        isExpired ? 'text-red-600 font-bold' : 
+                        isExpiringSoon ? 'text-red-600 font-bold' : ''
+                      }`}>
+                        {format(new Date(batch.expiry_date), "MMM dd, yyyy")}
+                        {isExpired && <span className="ml-2">❌</span>}
+                        {isExpiringSoon && !isExpired && <span className="ml-2">⚠️</span>}
+                      </TableCell>
                       <TableCell>
                         <Badge variant={expiryStatus.variant}>{expiryStatus.label}</Badge>
                       </TableCell>
@@ -195,6 +225,7 @@ export function Production({ currentLocation }: ProductionProps) {
                             size="sm" 
                             onClick={() => handlePrintLabels(batch)}
                             className="flex items-center gap-1"
+                            disabled={isExpired}
                           >
                             <Printer className="w-3 h-3" />
                             Print Labels
@@ -204,6 +235,7 @@ export function Production({ currentLocation }: ProductionProps) {
                             size="sm" 
                             onClick={() => handleEditBatch(batch)}
                             className="flex items-center gap-1"
+                            disabled={isExpired}
                           >
                             <Edit className="w-3 h-3" />
                             Edit Batch
