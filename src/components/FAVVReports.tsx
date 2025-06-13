@@ -99,18 +99,13 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
     enabled: locationFilter === "tothai",
   });
 
-  // Fetch completed cleaning tasks with staff initials
+  // Fetch completed cleaning tasks - temporarily without staff_codes join until foreign key is created
   const { data: completedTasks = [], isLoading: isLoadingTasks } = useQuery({
     queryKey: ["favv-completed-tasks", locationFilter, startDate, endDate, taskNameFilter],
     queryFn: async () => {
       let query = supabase
         .from("cleaning_tasks")
-        .select(`
-          *,
-          staff_codes!cleaning_tasks_completed_by_fkey (
-            initials
-          )
-        `)
+        .select("*")
         .eq("status", "closed")
         .order("completed_at", { ascending: false });
 
@@ -131,9 +126,31 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
       if (error) throw error;
 
       // Filter by task name on client side
-      return data.filter(task => 
+      const filteredTasks = data.filter(task => 
         !taskNameFilter || task.title.toLowerCase().includes(taskNameFilter.toLowerCase())
       );
+
+      // Fetch staff codes separately and map them to tasks
+      const uniqueStaffCodes = [...new Set(filteredTasks.map(task => task.completed_by).filter(Boolean))];
+      
+      if (uniqueStaffCodes.length > 0) {
+        const { data: staffCodes } = await supabase
+          .from("staff_codes")
+          .select("code, initials")
+          .in("code", uniqueStaffCodes);
+
+        const staffCodeMap = new Map(staffCodes?.map(sc => [sc.code, sc.initials]) || []);
+
+        return filteredTasks.map(task => ({
+          ...task,
+          staff_codes: task.completed_by ? { initials: staffCodeMap.get(task.completed_by) || task.completed_by } : null
+        }));
+      }
+
+      return filteredTasks.map(task => ({
+        ...task,
+        staff_codes: null
+      }));
     },
   });
 
@@ -247,7 +264,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
       task.location?.toUpperCase() || "",
       format(new Date(task.scheduled_date), "yyyy-MM-dd"),
       task.completed_at ? format(new Date(task.completed_at), "yyyy-MM-dd HH:mm") : "",
-      task.staff_codes?.initials || "",
+      task.staff_codes?.initials || task.completed_by || "",
       task.assigned_role || "",
       task.favv_compliance ? "Yes" : "No",
       task.estimated_duration || "",
@@ -273,6 +290,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 
     toast.success("CSV file downloaded successfully");
   };
@@ -687,7 +705,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
                               : "N/A"
                             }
                           </TableCell>
-                          <TableCell>{task.staff_codes?.initials || "N/A"}</TableCell>
+                          <TableCell>{task.staff_codes?.initials || task.completed_by || "N/A"}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
