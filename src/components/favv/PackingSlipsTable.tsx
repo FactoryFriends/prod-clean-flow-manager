@@ -13,6 +13,8 @@ interface PackingSlip {
   destination: string;
   total_items: number;
   total_packages: number;
+  prepared_by?: string;
+  picked_up_by?: string;
   dispatch_records?: {
     location?: string;
     dispatch_type?: string;
@@ -69,7 +71,7 @@ export function PackingSlipsTable({ packingSlips, isLoading }: PackingSlipsTable
                     </TableCell>
                     <TableCell>
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {slip.dispatch_records?.location?.toUpperCase() || "N/A"}
+                        {slip.dispatch_records?.location?.toUpperCase() || "KHIN"}
                       </span>
                     </TableCell>
                     <TableCell>{slip.destination}</TableCell>
@@ -78,14 +80,14 @@ export function PackingSlipsTable({ packingSlips, isLoading }: PackingSlipsTable
                         "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
                         slip.dispatch_records?.dispatch_type === "external" 
                           ? "bg-green-100 text-green-800" 
-                          : "bg-orange-100 text-orange-800"
+                          : "bg-green-100 text-green-800"
                       )}>
-                        {slip.dispatch_records?.dispatch_type || "N/A"}
+                        {slip.dispatch_records?.dispatch_type || "external"}
                       </span>
                     </TableCell>
                     <TableCell>{slip.total_items}</TableCell>
                     <TableCell>{slip.total_packages}</TableCell>
-                    <TableCell>{slip.dispatch_records?.picker_name || "N/A"}</TableCell>
+                    <TableCell>{slip.dispatch_records?.picker_name || slip.picked_up_by || "N/A"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

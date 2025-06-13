@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,7 +31,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
         .from("packing_slips")
         .select(`
           *,
-          dispatch_records!inner (
+          dispatch_records (
             location,
             dispatch_type,
             customer,
@@ -59,10 +60,11 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
         );
       }
 
-      // Filter by location on the client side since dispatch_records.location is in a joined table
+      // Filter by location - if there's no dispatch_records, we'll use a default location based on current location
       return filteredData.filter(slip => 
         !locationFilter || locationFilter === "all" || 
-        slip.dispatch_records?.location === locationFilter
+        (slip.dispatch_records?.location === locationFilter) ||
+        (!slip.dispatch_records && locationFilter === currentLocation)
       );
     },
     enabled: locationFilter !== "tothai",
