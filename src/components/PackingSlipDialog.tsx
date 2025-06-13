@@ -150,7 +150,16 @@ Prepared by: ${preparedBy}
         />
 
         {/* Action Buttons */}
-        <div className="flex justify-between mt-6">
+        <div className="flex justify-between items-center mt-6">
+          <Button 
+            onClick={handleConfirmAndShip}
+            disabled={isConfirming}
+            className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg font-semibold"
+            size="lg"
+          >
+            {isConfirming ? "Confirming..." : "CONFIRM & SHIP"}
+          </Button>
+          
           <div className="flex gap-2">
             <Button 
               onClick={handleDownloadPDF}
@@ -163,15 +172,6 @@ Prepared by: ${preparedBy}
               onClick={handleCopyDetails}
             >
               Copy Details
-            </Button>
-          </div>
-          <div className="flex gap-2">
-            <Button 
-              onClick={handleConfirmAndShip}
-              disabled={isConfirming}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              {isConfirming ? "Confirming..." : "Confirm & Ship"}
             </Button>
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Close
