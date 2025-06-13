@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useStaffCodes } from "./useStaffCodes";
+import { logAuditAction } from "./useAuditLogs";
 
 interface CleaningTask {
   id: string;
@@ -95,6 +96,29 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
         .single();
 
       if (error) throw error;
+
+      // Log audit action for task completion/reopening
+      const task = data;
+      const staff = staffCodes?.find(s => s.code === completedBy);
+      
+      await logAuditAction({
+        action_type: "cleaning",
+        action_description: status === 'closed' 
+          ? `Cleaning task "${task.title}" completed`
+          : `Cleaning task "${task.title}" reopened`,
+        staff_code: completedBy,
+        staff_name: staff?.name,
+        location: task.location,
+        reference_id: taskId,
+        reference_type: "cleaning_task",
+        favv_relevant: task.favv_compliance || false,
+        metadata: {
+          task_title: task.title,
+          has_photos: photoUrls && photoUrls.length > 0,
+          photo_count: photoUrls?.length || 0
+        }
+      });
+
       return data;
     },
     onSuccess: () => {

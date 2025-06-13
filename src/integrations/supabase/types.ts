@@ -9,6 +9,51 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action_description: string
+          action_type: string
+          created_at: string
+          favv_relevant: boolean
+          id: string
+          location: string | null
+          metadata: Json | null
+          reference_id: string | null
+          reference_type: string | null
+          staff_code: string | null
+          staff_name: string | null
+          timestamp: string
+        }
+        Insert: {
+          action_description: string
+          action_type: string
+          created_at?: string
+          favv_relevant?: boolean
+          id?: string
+          location?: string | null
+          metadata?: Json | null
+          reference_id?: string | null
+          reference_type?: string | null
+          staff_code?: string | null
+          staff_name?: string | null
+          timestamp?: string
+        }
+        Update: {
+          action_description?: string
+          action_type?: string
+          created_at?: string
+          favv_relevant?: boolean
+          id?: string
+          location?: string | null
+          metadata?: Json | null
+          reference_id?: string | null
+          reference_type?: string | null
+          staff_code?: string | null
+          staff_name?: string | null
+          timestamp?: string
+        }
+        Relationships: []
+      }
       batch_labels: {
         Row: {
           batch_id: string
@@ -439,8 +484,10 @@ export type Database = {
           active: boolean | null
           code: string
           created_at: string
+          department: string | null
           location: Database["public"]["Enums"]["location_type"] | null
           name: string
+          permission_level: string | null
           role: string | null
           updated_at: string | null
         }
@@ -448,8 +495,10 @@ export type Database = {
           active?: boolean | null
           code: string
           created_at?: string
+          department?: string | null
           location?: Database["public"]["Enums"]["location_type"] | null
           name: string
+          permission_level?: string | null
           role?: string | null
           updated_at?: string | null
         }
@@ -457,8 +506,10 @@ export type Database = {
           active?: boolean | null
           code?: string
           created_at?: string
+          department?: string | null
           location?: Database["public"]["Enums"]["location_type"] | null
           name?: string
+          permission_level?: string | null
           role?: string | null
           updated_at?: string | null
         }

@@ -1,5 +1,5 @@
 
-import { Edit, Trash2, UserCheck } from "lucide-react";
+import { Edit, Trash2, UserCheck, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,6 +23,8 @@ interface StaffCode {
   role?: string;
   location?: "tothai" | "khin" | "both";
   active?: boolean;
+  department?: string;
+  permission_level?: "basic" | "supervisor" | "manager";
 }
 
 interface StaffCodeListProps {
@@ -47,6 +49,32 @@ export function StaffCodeList({ onEditStaffCode }: StaffCodeListProps) {
         return "Both";
       default:
         return "Unknown";
+    }
+  };
+
+  const getPermissionBadgeVariant = (level?: string) => {
+    switch (level) {
+      case "manager":
+        return "destructive" as const;
+      case "supervisor":
+        return "default" as const;
+      case "basic":
+        return "secondary" as const;
+      default:
+        return "outline" as const;
+    }
+  };
+
+  const getPermissionLabel = (level?: string) => {
+    switch (level) {
+      case "manager":
+        return "Manager";
+      case "supervisor":
+        return "Supervisor";
+      case "basic":
+        return "Basic";
+      default:
+        return "Not Set";
     }
   };
 
@@ -82,10 +110,20 @@ export function StaffCodeList({ onEditStaffCode }: StaffCodeListProps) {
                   <Badge variant={staffCode.active ? "default" : "secondary"}>
                     {staffCode.active ? "Active" : "Inactive"}
                   </Badge>
+                  <Badge 
+                    variant={getPermissionBadgeVariant(staffCode.permission_level)}
+                    className="flex items-center gap-1"
+                  >
+                    <Shield className="w-3 h-3" />
+                    {getPermissionLabel(staffCode.permission_level)}
+                  </Badge>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   {staffCode.role && (
                     <span>Role: {staffCode.role}</span>
+                  )}
+                  {staffCode.department && (
+                    <span>Department: {staffCode.department}</span>
                   )}
                   <span>Location: {getLocationLabel(staffCode.location)}</span>
                 </div>

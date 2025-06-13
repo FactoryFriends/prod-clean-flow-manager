@@ -9,6 +9,8 @@ export interface StaffCodeInsert {
   role?: string;
   location?: "tothai" | "khin" | "both";
   active?: boolean;
+  department?: string;
+  permission_level?: "basic" | "supervisor" | "manager";
 }
 
 export interface StaffCodeUpdate extends Partial<StaffCodeInsert> {

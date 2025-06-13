@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Plus, Package, ClipboardList, Users, Settings as SettingsIcon, UserCheck, Truck, ChefHat, Contact } from "lucide-react";
+import { Plus, Package, ClipboardList, Users, Settings as SettingsIcon, UserCheck, Truck, ChefHat, Contact, FileText } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
@@ -14,6 +13,7 @@ import { StaffCodeForm } from "./settings/StaffCodeForm";
 import { StaffCodeList } from "./settings/StaffCodeList";
 import { SystemInfo } from "./settings/SystemInfo";
 import { ManagerPasscodeForm } from "./settings/ManagerPasscodeForm";
+import { AuditTrail } from "./settings/AuditTrail";
 import { Product } from "@/hooks/useProductionData";
 
 interface SettingsProps {
@@ -92,7 +92,7 @@ export function Settings({ currentLocation }: SettingsProps) {
       </div>
 
       <Tabs defaultValue="master-data" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="master-data" className="flex items-center gap-2">
             <Package className="w-4 h-4" />
             Master Data
@@ -104,6 +104,10 @@ export function Settings({ currentLocation }: SettingsProps) {
           <TabsTrigger value="staff-external" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
             Staff & External
+          </TabsTrigger>
+          <TabsTrigger value="compliance" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            Compliance
           </TabsTrigger>
           <TabsTrigger value="system" className="flex items-center gap-2">
             <SettingsIcon className="w-4 h-4" />
@@ -301,6 +305,26 @@ export function Settings({ currentLocation }: SettingsProps) {
                 <div className="text-center py-8 text-muted-foreground">
                   <p>Coming soon - Chefs management</p>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="compliance" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <FileText className="w-6 h-6 text-primary" />
+                Compliance & Audit
+              </CardTitle>
+              <CardDescription>
+                FAVV compliance tracking and complete audit trail for food safety
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Audit Trail */}
+              <div className="border border-border rounded-lg p-4">
+                <AuditTrail />
               </div>
             </CardContent>
           </Card>
