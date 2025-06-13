@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { DispatchType, SelectedItem } from "@/types/dispatch";
 import { useCustomers } from "@/hooks/useCustomers";
+import { useStaffCodes } from "@/hooks/useStaffCodes";
+import { useEffect } from "react";
 
 interface DispatchFormProps {
   dispatchType: DispatchType;
@@ -37,21 +39,54 @@ export function DispatchForm({
   onInternalUse,
 }: DispatchFormProps) {
   const { data: customers = [] } = useCustomers(true); // Only active customers
+  const { data: staffCodes = [] } = useStaffCodes();
+
+  // Set KHIN as default customer for external dispatch
+  useEffect(() => {
+    if (dispatchType === "external" && !customer && customers.length > 0) {
+      const khinCustomer = customers.find(c => c.name.toLowerCase().includes('khin'));
+      if (khinCustomer) {
+        setCustomer(khinCustomer.id);
+      }
+    }
+  }, [dispatchType, customers, customer, setCustomer]);
+
+  // Auto-fill name when PIN code is entered
+  useEffect(() => {
+    if (pickerCode && staffCodes.length > 0) {
+      const staff = staffCodes.find(s => s.code === pickerCode);
+      if (staff) {
+        setPickerName(staff.name);
+      } else {
+        setPickerName("");
+      }
+    }
+  }, [pickerCode, staffCodes, setPickerName]);
 
   const canSubmit = pickerCode && pickerName && selectedItems.length > 0 && 
     (dispatchType === "internal" || customer);
+
+  console.log("DispatchForm debug:", {
+    pickerCode,
+    pickerName,
+    selectedItemsLength: selectedItems.length,
+    dispatchType,
+    customer,
+    canSubmit
+  });
 
   return (
     <div className="space-y-6">
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="picker-code">Staff Code</Label>
+            <Label htmlFor="picker-code">PIN Code</Label>
             <Input
               id="picker-code"
-              placeholder="Enter staff code"
+              placeholder="Enter 4-digit PIN"
               value={pickerCode}
               onChange={(e) => setPickerCode(e.target.value)}
+              maxLength={4}
             />
           </div>
           
@@ -59,9 +94,10 @@ export function DispatchForm({
             <Label htmlFor="picker-name">Staff Name</Label>
             <Input
               id="picker-name"
-              placeholder="Enter staff name"
+              placeholder="Auto-filled from PIN"
               value={pickerName}
               onChange={(e) => setPickerName(e.target.value)}
+              disabled={!!pickerCode}
             />
           </div>
         </div>

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useProductionBatches } from "@/hooks/useProductionData";
 import { useCustomers } from "@/hooks/useCustomers";
 import { PackingSlipDialog } from "../PackingSlipDialog";
@@ -27,6 +27,7 @@ export function DispatchManager({ currentLocation }: DispatchManagerProps) {
 
   const { data: batches } = useProductionBatches(currentLocation);
   const { data: customers = [] } = useCustomers(true);
+  
   const { handleCreatePackingSlip, handleInternalUse } = useDispatchOperations({
     dispatchType,
     customer,
@@ -42,9 +43,18 @@ export function DispatchManager({ currentLocation }: DispatchManagerProps) {
       setPickerCode("");
       setPickerName("");
       setDispatchNotes("");
-      setCustomer("");
+      if (dispatchType === "internal") {
+        setCustomer("");
+      }
     }
   });
+
+  // Reset customer when switching dispatch types
+  useEffect(() => {
+    if (dispatchType === "internal") {
+      setCustomer("");
+    }
+  }, [dispatchType]);
 
   // Convert batches to available inventory
   const availableBatches = (batches || []).map(batch => ({
@@ -87,7 +97,17 @@ export function DispatchManager({ currentLocation }: DispatchManagerProps) {
     } else if (change > 0) {
       setSelectedItems(prev => [...prev, { ...item, selectedQuantity: 1 }]);
     }
+
+    console.log("Selected items updated:", selectedItems.length + (change > 0 && existingIndex < 0 ? 1 : 0));
   };
+
+  console.log("DispatchManager render:", {
+    selectedItemsCount: selectedItems.length,
+    pickerCode,
+    pickerName,
+    customer,
+    dispatchType
+  });
 
   return (
     <div className="space-y-6">
