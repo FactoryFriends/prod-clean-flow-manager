@@ -21,9 +21,9 @@ export function Invoicing({ currentLocation }: InvoicingProps) {
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Facturatie</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Invoicing</h1>
           <p className="text-muted-foreground">
-            Beheer facturen en tweewekelijkse rapportages voor {getLocationName(currentLocation)}
+            Manage invoices and bi-weekly reports for {getLocationName(currentLocation)}
           </p>
         </div>
         <div className="flex items-center gap-2">

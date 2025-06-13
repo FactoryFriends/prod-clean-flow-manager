@@ -14,7 +14,7 @@ const menuItems = [
   { id: "production", label: "Production", icon: Package },
   { id: "distribution", label: "Distribution", icon: Truck },
   { id: "cleaning", label: "Cleaning Tasks", icon: Brush },
-  { id: "invoicing", label: "Facturatie", icon: Receipt },
+  { id: "invoicing", label: "Invoicing", icon: Receipt },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
@@ -27,11 +27,15 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
       <div className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-sidebar-primary rounded-lg flex items-center justify-center">
-            <Building className="w-5 h-5 text-sidebar-primary-foreground" />
+            <img 
+              src="/lovable-uploads/3b0e21b2-e733-4f03-91cd-641ebc206d3b.png" 
+              alt="OptiThai Logo" 
+              className="w-6 h-6 object-contain"
+            />
           </div>
           {!isCollapsed && (
             <div>
-              <h1 className="font-semibold text-sidebar-foreground">OpManager</h1>
+              <h1 className="font-semibold text-sidebar-foreground">OptiThai</h1>
               <p className="text-sm text-sidebar-foreground/60">Production Hub</p>
             </div>
           )}
