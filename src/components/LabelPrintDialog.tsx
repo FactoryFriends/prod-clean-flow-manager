@@ -29,7 +29,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
         return {
           batch_id: batch.id,
           label_number: labelNumber,
-          label_data: {
+          qr_code_data: {
             batch_number: batch.batch_number,
             product: batch.products.name,
             production_date: batch.production_date,
@@ -96,40 +96,42 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             </h3>
             
             {/* Thermal Label Preview - 50.8 x 25.4mm landscape format */}
-            <div className="bg-white border-2 border-gray-400 mx-auto p-2" 
+            <div className="bg-white border-2 border-gray-400 mx-auto p-3" 
                  style={{ 
                    width: '192px',  // 50.8mm at 96dpi ≈ 192px
                    height: '96px',  // 25.4mm at 96dpi ≈ 96px
-                   fontSize: '8px',
-                   lineHeight: '1.2'
+                   fontSize: '9px',
+                   lineHeight: '1.1'
                  }}>
               <div className="h-full flex flex-col justify-between">
-                {/* Product name - BOLD and larger */}
-                <div className="font-bold text-center leading-tight" style={{ fontSize: '14px' }}>
+                {/* Product name - BOLD and larger, takes more space */}
+                <div className="font-bold text-center leading-tight mb-1" style={{ fontSize: '12px' }}>
                   {batch.products.name}
                 </div>
                 
-                <div className="flex justify-between items-center">
-                  {/* Left column */}
-                  <div className="flex flex-col space-y-1">
-                    <div className="text-xs font-mono">
-                      {batch.batch_number}
+                {/* Main content area - using full width */}
+                <div className="flex-1 flex flex-col justify-between">
+                  {/* Batch and production info */}
+                  <div className="flex justify-between items-start mb-1">
+                    <div className="flex flex-col space-y-1 flex-1">
+                      <div className="text-xs font-semibold">
+                        {batch.batch_number}
+                      </div>
+                      <div className="text-xs">
+                        Prod: {format(new Date(batch.production_date), "dd/MM/yy")}
+                      </div>
                     </div>
-                    <div className="text-xs">
-                      Prod: {format(new Date(batch.production_date), "dd/MM/yyyy")}
-                    </div>
-                    <div className="text-xs">
+                    
+                    {/* Chef name */}
+                    <div className="text-xs text-right flex-1">
                       Chef: {batch.chefs.name}
                     </div>
                   </div>
                   
-                  {/* Right column - Expiry date BIG and BOLD */}
-                  <div className="text-right">
-                    <div className="font-bold leading-tight" style={{ fontSize: '16px' }}>
-                      EXP:
-                    </div>
-                    <div className="font-bold leading-tight" style={{ fontSize: '14px' }}>
-                      {format(new Date(batch.expiry_date), "dd/MM/yyyy")}
+                  {/* Expiry date - BIG and BOLD at bottom */}
+                  <div className="text-center border-t pt-1">
+                    <div className="font-bold leading-tight" style={{ fontSize: '10px' }}>
+                      EXPIRES: {format(new Date(batch.expiry_date), "dd/MM/yyyy")}
                     </div>
                   </div>
                 </div>
