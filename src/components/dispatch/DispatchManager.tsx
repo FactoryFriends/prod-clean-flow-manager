@@ -28,6 +28,7 @@ export function DispatchManager({ currentLocation }: DispatchManagerProps) {
     preparedBy: string;
     pickedUpBy: string;
   }>({ preparedBy: "", pickedUpBy: "" });
+  const [packingSlipItems, setPackingSlipItems] = useState<SelectedItem[]>([]);
 
   const { data: batches } = useProductionBatches(currentLocation);
   const { data: customers = [] } = useCustomers(true);
@@ -43,6 +44,7 @@ export function DispatchManager({ currentLocation }: DispatchManagerProps) {
     setCurrentDispatchId,
     setPackingSlipOpen,
     setPackingSlipStaffNames,
+    setPackingSlipItems,
     onSuccess: () => {
       setSelectedItems([]);
       setPickerCode("");
@@ -108,6 +110,7 @@ export function DispatchManager({ currentLocation }: DispatchManagerProps) {
 
   console.log("DispatchManager render:", {
     selectedItemsCount: selectedItems.length,
+    packingSlipItemsCount: packingSlipItems.length,
     pickerCode,
     pickerName,
     customer,
@@ -153,7 +156,7 @@ export function DispatchManager({ currentLocation }: DispatchManagerProps) {
         <PackingSlipDialog
           open={packingSlipOpen}
           onOpenChange={setPackingSlipOpen}
-          selectedItems={selectedItems}
+          selectedItems={packingSlipItems}
           customer={customer}
           preparedBy={packingSlipStaffNames.preparedBy}
           pickedUpBy={packingSlipStaffNames.pickedUpBy}

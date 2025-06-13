@@ -17,6 +17,7 @@ interface UseDispatchOperationsProps {
   setCurrentDispatchId: (id: string | null) => void;
   setPackingSlipOpen: (open: boolean) => void;
   setPackingSlipStaffNames: (names: { preparedBy: string; pickedUpBy: string }) => void;
+  setPackingSlipItems: (items: SelectedItem[]) => void;
   onSuccess: () => void;
 }
 
@@ -31,6 +32,7 @@ export function useDispatchOperations({
   setCurrentDispatchId,
   setPackingSlipOpen,
   setPackingSlipStaffNames,
+  setPackingSlipItems,
   onSuccess
 }: UseDispatchOperationsProps) {
   const { data: customers = [] } = useCustomers(true);
@@ -50,14 +52,17 @@ export function useDispatchOperations({
   };
 
   const handleCreatePackingSlip = async () => {
-    console.log("Creating packing slip with staff name:", pickerName);
+    console.log("Creating packing slip with selected items:", selectedItems.length);
     
     try {
-      // Store staff names before any state changes
+      // Store staff names and items before any state changes
       const staffNames = {
         preparedBy: pickerName,
         pickedUpBy: pickerName
       };
+      
+      // Store selected items for packing slip
+      setPackingSlipItems([...selectedItems]);
       
       // First create the dispatch record
       const dispatchRecord = await createDispatch.mutateAsync({
