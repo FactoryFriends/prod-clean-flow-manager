@@ -38,8 +38,16 @@ export function DispatchForm({
   onCreatePackingSlip,
   onInternalUse,
 }: DispatchFormProps) {
-  const { data: customers = [] } = useCustomers(true); // Only active customers
+  const { data: customers = [], isLoading: customersLoading, error: customersError } = useCustomers(true);
   const { data: staffCodes = [] } = useStaffCodes();
+
+  // Debug logging
+  console.log("DispatchForm customers debug:", {
+    customers,
+    customersLoading,
+    customersError,
+    customersLength: customers.length
+  });
 
   // Set KHIN as default customer for external dispatch
   useEffect(() => {
@@ -52,6 +60,10 @@ export function DispatchForm({
       if (khinCustomer) {
         setCustomer(khinCustomer.id);
         console.log("Set customer to:", khinCustomer.id);
+      } else {
+        // If no KHIN found, set the first customer as default
+        setCustomer(customers[0].id);
+        console.log("Set first customer as default:", customers[0].id);
       }
     }
   }, [dispatchType, customers, customer, setCustomer]);
@@ -78,7 +90,9 @@ export function DispatchForm({
     dispatchType,
     customer,
     canSubmit,
-    customersCount: customers.length
+    customersCount: customers.length,
+    customersLoading,
+    customersError
   });
 
   return (
@@ -128,8 +142,17 @@ export function DispatchForm({
                 ))}
               </SelectContent>
             </Select>
-            {customers.length === 0 && (
+            {customersLoading && (
               <p className="text-sm text-muted-foreground">Loading customers...</p>
+            )}
+            {customersError && (
+              <p className="text-sm text-red-500">Error loading customers: {customersError.message}</p>
+            )}
+            {!customersLoading && !customersError && customers.length === 0 && (
+              <p className="text-sm text-orange-500">No customers found. Please add customers in Settings.</p>
+            )}
+            {customers.length > 0 && (
+              <p className="text-sm text-green-600">Found {customers.length} customers</p>
             )}
           </div>
         )}
