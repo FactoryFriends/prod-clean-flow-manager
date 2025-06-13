@@ -132,12 +132,15 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
     emptyMessage: string,
     sectionTitle: string
   ) => {
+    // Update section title for "Other Tasks" tab
+    const activeSectionTitle = sectionTitle === "Other Tasks" ? "ACTIVE TASKS" : `Open ${sectionTitle}`;
+    
     return (
       <div>
         {/* Open Tasks Section */}
         <div className="mb-4">
           <h3 className="text-lg font-semibold text-foreground mb-4">
-            Open {sectionTitle}
+            {activeSectionTitle}
             {openTasks.length > 0 && (
               <Badge variant="secondary" className="ml-2">
                 {openTasks.length}
