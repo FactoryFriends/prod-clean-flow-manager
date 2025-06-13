@@ -1,5 +1,4 @@
-
-import { Broom, Plus, Search, Filter, Clock, CheckCircle } from "lucide-react";
+import { Brush, Plus, Search, Filter, Clock, CheckCircle } from "lucide-react";
 import { StatusBadge } from "./StatusBadge";
 import { useState } from "react";
 
@@ -110,7 +109,7 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-accent rounded-lg">
-                  <Broom className="w-5 h-5 text-primary" />
+                  <Brush className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground">{task.id}</h3>
