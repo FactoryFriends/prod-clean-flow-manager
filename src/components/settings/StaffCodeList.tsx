@@ -1,4 +1,3 @@
-
 import { Edit, Trash2, UserCheck, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +23,7 @@ interface StaffCode {
   location?: "tothai" | "khin" | "both";
   active?: boolean;
   department?: string;
-  permission_level?: "basic" | "supervisor" | "manager";
+  permission_level?: string | null; // Allow string or null to match database
 }
 
 interface StaffCodeListProps {
@@ -52,7 +51,7 @@ export function StaffCodeList({ onEditStaffCode }: StaffCodeListProps) {
     }
   };
 
-  const getPermissionBadgeVariant = (level?: string) => {
+  const getPermissionBadgeVariant = (level?: string | null) => {
     switch (level) {
       case "manager":
         return "destructive" as const;
@@ -65,7 +64,7 @@ export function StaffCodeList({ onEditStaffCode }: StaffCodeListProps) {
     }
   };
 
-  const getPermissionLabel = (level?: string) => {
+  const getPermissionLabel = (level?: string | null) => {
     switch (level) {
       case "manager":
         return "Manager";
