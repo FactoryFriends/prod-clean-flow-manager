@@ -1,11 +1,10 @@
 
-import { Brush, Clock, CheckCircle, AlertTriangle, RotateCcw, Camera } from "lucide-react";
-import { StatusBadge } from "./StatusBadge";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { PhotoUpload } from "./PhotoUpload";
-import { PhotoGallery } from "./PhotoGallery";
-import { useState } from "react";
+import { AlertTriangle } from "lucide-react";
+import { TaskIcon } from "./task/TaskIcon";
+import { TaskHeader } from "./task/TaskHeader";
+import { TaskDetails } from "./task/TaskDetails";
+import { TaskTags } from "./task/TaskTags";
+import { TaskActions } from "./task/TaskActions";
 
 interface CleaningTask {
   id: string;
@@ -37,35 +36,6 @@ interface CleaningTaskCardProps {
 }
 
 export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue }: CleaningTaskCardProps) {
-  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
-
-  const formatDuration = (minutes: number | null) => {
-    if (!minutes) return "Not specified";
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours > 0) {
-      return `${hours}h ${mins > 0 ? `${mins}m` : ''}`;
-    }
-    return `${mins}m`;
-  };
-
-  const getAssignedToDisplay = () => {
-    if (task.assigned_staff_name) {
-      return task.assigned_staff_name;
-    }
-    
-    if (task.assigned_role) {
-      switch (task.assigned_role) {
-        case 'chef': return 'CHEF';
-        case 'cleaner': return 'CLEANING STAFF';
-        case 'other': return 'OTHER STAFF';
-        default: return 'UNASSIGNED';
-      }
-    }
-    
-    return 'UNASSIGNED';
-  };
-
   // Check if task is severely overdue (72+ hours)
   const isSeverelyOverdue = () => {
     if (task.status === 'closed') return false;
@@ -75,19 +45,6 @@ export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue
     const diffHours = (now.getTime() - scheduledDate.getTime()) / (1000 * 60 * 60);
     
     return diffHours >= 72;
-  };
-
-  const handlePhotosUploaded = (photoUrls: string[]) => {
-    onCompleteTask(task.id, photoUrls);
-    setShowPhotoUpload(false);
-  };
-
-  const handleCompleteClick = () => {
-    if (task.requires_photo) {
-      setShowPhotoUpload(true);
-    } else {
-      onCompleteTask(task.id);
-    }
   };
 
   const severelyOverdue = isSeverelyOverdue();
@@ -109,139 +66,44 @@ export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue
 
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${
-            severelyOverdue ? 'bg-red-200' : isOverdue ? 'bg-red-200' : 'bg-accent'
-          }`}>
-            {severelyOverdue || isOverdue ? (
-              <AlertTriangle className={`w-5 h-5 ${severelyOverdue ? 'text-red-700' : 'text-red-600'}`} />
-            ) : (
-              <Brush className="w-5 h-5 text-primary" />
-            )}
-          </div>
-          <div>
-            <h3 className="font-semibold text-foreground">{task.title}</h3>
-            <p className="text-sm text-muted-foreground">
-              {task.scheduled_date} {task.due_time && `at ${task.due_time}`}
-            </p>
-            {severelyOverdue && (
-              <p className="text-sm text-red-700 font-bold">CRITICAL OVERDUE - Immediate Action Required!</p>
-            )}
-            {isOverdue && !severelyOverdue && (
-              <p className="text-sm text-red-600 font-medium">OVERDUE - Action Required!</p>
-            )}
-          </div>
+          <TaskIcon isOverdue={isOverdue} severelyOverdue={severelyOverdue} />
+          <TaskHeader 
+            title={task.title}
+            scheduledDate={task.scheduled_date}
+            dueTime={task.due_time}
+            severelyOverdue={severelyOverdue}
+            isOverdue={isOverdue}
+          />
         </div>
       </div>
       
       <div className="space-y-4">
-        {task.description && (
-          <p className="text-sm text-muted-foreground">{task.description}</p>
-        )}
+        <TaskDetails
+          description={task.description}
+          estimatedDuration={task.estimated_duration}
+          assignedStaffName={task.assigned_staff_name}
+          assignedRole={task.assigned_role}
+          status={task.status}
+          completedAt={task.completed_at}
+          completedBy={task.completed_by}
+          requiresPhoto={task.requires_photo}
+        />
 
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-sm">
-            <Clock className="w-4 h-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Duration:</span>
-            <span className="text-foreground font-medium">
-              {formatDuration(task.estimated_duration)}
-            </span>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-muted-foreground">Assigned To</p>
-              <p className="text-foreground font-medium">
-                {getAssignedToDisplay()}
-              </p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Status</p>
-              <p className="text-foreground font-medium capitalize">{task.status}</p>
-            </div>
-          </div>
+        <TaskTags
+          assignedRole={task.assigned_role}
+          favvCompliance={task.favv_compliance}
+          status={task.status}
+        />
 
-          {task.completed_at && (
-            <div className="text-sm">
-              <p className="text-muted-foreground">Completed by {task.completed_by} on {new Date(task.completed_at).toLocaleDateString()}</p>
-            </div>
-          )}
-
-          {task.requires_photo && (
-            <div className="text-sm">
-              <div className="flex items-center gap-2 text-orange-600">
-                <Camera className="w-4 h-4" />
-                <span className="font-medium">Photo required for completion</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Photo upload section for open tasks that require photos */}
-        {task.status === "open" && showPhotoUpload && (
-          <div className="border-t border-border pt-4">
-            <PhotoUpload
-              onPhotosUploaded={handlePhotosUploaded}
-              maxPhotos={3}
-              required={task.requires_photo || false}
-            />
-            <Button
-              variant="outline"
-              onClick={() => setShowPhotoUpload(false)}
-              className="w-full mt-2"
-            >
-              Cancel
-            </Button>
-          </div>
-        )}
-
-        {/* Display existing photos for completed tasks */}
-        {task.photo_urls && task.photo_urls.length > 0 && (
-          <div className="border-t border-border pt-4">
-            <PhotoGallery photos={task.photo_urls} />
-          </div>
-        )}
-
-        {/* Tags moved to bottom */}
-        <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-border">
-          {task.assigned_role && (
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-              {task.assigned_role.toUpperCase()}
-            </Badge>
-          )}
-          {task.favv_compliance && (
-            <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-              FAVV
-            </Badge>
-          )}
-          <StatusBadge status={task.status} size="sm" />
-        </div>
-
-        <div className="flex gap-2 pt-2">
-          {task.status === "open" && (
-            <Button
-              onClick={handleCompleteClick}
-              className={`flex items-center gap-2 ${
-                severelyOverdue ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
-              }`}
-              size="sm"
-            >
-              <CheckCircle className="w-4 h-4" />
-              {severelyOverdue ? 'Complete Now' : 'Complete'}
-            </Button>
-          )}
-          
-          {task.status === "closed" && (
-            <Button
-              onClick={() => onReopenTask(task.id)}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Reopen
-            </Button>
-          )}
-        </div>
+        <TaskActions
+          taskId={task.id}
+          status={task.status}
+          requiresPhoto={task.requires_photo}
+          photoUrls={task.photo_urls}
+          severelyOverdue={severelyOverdue}
+          onCompleteTask={onCompleteTask}
+          onReopenTask={onReopenTask}
+        />
       </div>
     </div>
   );
