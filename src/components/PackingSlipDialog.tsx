@@ -185,6 +185,11 @@ export function PackingSlipDialog({
     pdf.text(`Date: ${currentDate}`, 20, yPos);
     pdf.text(`Date: ${currentDate}`, 110, yPos);
     
+    yPos += 3;
+    const currentTime = format(new Date(), "HH:mm");
+    pdf.text(`Time: ${currentTime}`, 20, yPos);
+    pdf.text(`Time: ${currentTime}`, 110, yPos);
+    
     // Footer
     yPos += 20;
     pdf.setFontSize(8);
