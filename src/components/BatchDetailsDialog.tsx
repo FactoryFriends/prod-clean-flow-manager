@@ -37,7 +37,7 @@ export function BatchDetailsDialog({
 
   const getExpiryStatus = () => {
     if (isExpired) return { label: "Expired", variant: "destructive" as const };
-    if (isExpiringSoon) return { label: "Expiring Soon", variant: "secondary" as const };
+    if (isExpiringSoon) return { label: "Expiring Soon", variant: "warning" as const };
     return { label: "Fresh", variant: "default" as const };
   };
 

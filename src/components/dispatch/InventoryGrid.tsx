@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, Eye, EyeOff } from "lucide-react";
 import { format } from "date-fns";
 import { useProductionBatches } from "@/hooks/useProductionData";
 import { SelectedItem } from "@/types/dispatch";
@@ -20,6 +20,7 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
   const { data: batches } = useProductionBatches(currentLocation);
   const [selectedBatch, setSelectedBatch] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [showExpired, setShowExpired] = useState(false);
 
   const getSelectedQuantity = (itemId: string) => {
     return selectedItems.find(si => si.id === itemId)?.selectedQuantity || 0;
@@ -35,7 +36,7 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
       return <Badge variant="destructive" className="ml-2">Expired</Badge>;
     }
     if (isExpiringSoon(expiryDate)) {
-      return <Badge variant="secondary" className="ml-2">Expiring Soon</Badge>;
+      return <Badge variant="warning" className="ml-2">Expiring Soon</Badge>;
     }
     return <Badge variant="default" className="ml-2">Fresh</Badge>;
   };
@@ -74,6 +75,17 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
     productionNotes: batch.production_notes,
   }));
 
+  // Filter batches based on expiry status
+  const activeBatches = availableBatches.filter(batch => 
+    !batch.expiryDate || !isExpired(batch.expiryDate)
+  );
+  
+  const expiredBatches = availableBatches.filter(batch => 
+    batch.expiryDate && isExpired(batch.expiryDate)
+  );
+
+  const batchesToShow = showExpired ? availableBatches : activeBatches;
+
   const availableExternal = externalProducts.map(product => ({
     id: product.id,
     type: 'external' as const,
@@ -90,13 +102,27 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
         <CardContent>
           <div className="space-y-6">
             {/* Self-Produced Products */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Self-Produced Products</h3>
+            <div className="bg-gray-50/50 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Self-Produced Products</h3>
+                {expiredBatches.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowExpired(!showExpired)}
+                    className="flex items-center gap-2"
+                  >
+                    {showExpired ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showExpired ? 'Hide' : 'Show'} Expired ({expiredBatches.length})
+                  </Button>
+                )}
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {availableBatches.map(batch => {
+                {batchesToShow.map(batch => {
                   const selectedQty = getSelectedQuantity(batch.id);
+                  const expired = batch.expiryDate && isExpired(batch.expiryDate);
                   return (
-                    <div key={batch.id} className="border rounded-lg p-4">
+                    <div key={batch.id} className={`border rounded-lg p-4 ${expired ? 'opacity-60 bg-red-50' : 'bg-white'}`}>
                       <div 
                         className="cursor-pointer hover:bg-muted/50 -m-4 p-4 rounded-lg transition-colors"
                         onClick={() => handleBatchClick(batch)}
@@ -125,7 +151,7 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
                               e.stopPropagation();
                               onQuantityChange(batch.id, -1);
                             }}
-                            disabled={selectedQty === 0}
+                            disabled={selectedQty === 0 || expired}
                           >
                             <Minus className="w-3 h-3" />
                           </Button>
@@ -137,7 +163,7 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
                               e.stopPropagation();
                               onQuantityChange(batch.id, 1);
                             }}
-                            disabled={selectedQty >= (batch.availableQuantity || 0)}
+                            disabled={selectedQty >= (batch.availableQuantity || 0) || expired}
                           >
                             <Plus className="w-3 h-3" />
                           </Button>
@@ -150,13 +176,13 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
             </div>
 
             {/* External Products */}
-            <div>
+            <div className="bg-blue-50/30 rounded-lg p-4">
               <h3 className="text-lg font-semibold mb-4">External Products</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {availableExternal.map(product => {
                   const selectedQty = getSelectedQuantity(product.id);
                   return (
-                    <div key={product.id} className="border rounded-lg p-4">
+                    <div key={product.id} className="border rounded-lg p-4 bg-white">
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <h4 className="font-medium">{product.name}</h4>
