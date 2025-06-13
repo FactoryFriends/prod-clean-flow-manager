@@ -80,119 +80,188 @@ export function PackingSlipDialog({
     // Set font
     pdf.setFont('helvetica');
     
-    // Header - Company Info
-    pdf.setFontSize(16);
+    // Header - Company Info (left side)
+    pdf.setFontSize(18);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('TOTHAI', 20, 20);
+    pdf.text('TOTHAI', 20, 25);
     
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(companyInfo.subtitle, 20, 30);
-    pdf.text(companyInfo.address, 20, 35);
-    pdf.text(companyInfo.city, 20, 40);
-    pdf.text(companyInfo.vatNumber, 20, 45);
-    
-    // Packing Slip Title and Number
-    pdf.setFontSize(18);
+    pdf.text(companyInfo.subtitle, 20, 35);
+    pdf.text(companyInfo.address, 20, 42);
+    pdf.text(companyInfo.city, 20, 49);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('PACKING SLIP', 140, 20);
+    pdf.text(companyInfo.vatNumber, 20, 56);
+    
+    // Packing Slip Title and Number (right side)
+    pdf.setFontSize(20);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('PACKING SLIP', 140, 25);
     
     pdf.setFontSize(12);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(`#${packingSlipNumber}`, 140, 30);
-    pdf.text(currentDate, 140, 35);
-    
-    // Destination
-    pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Destination:', 20, 65);
-    
+    pdf.text(`#${packingSlipNumber}`, 140, 35);
     pdf.setFont('helvetica', 'normal');
+    pdf.text(currentDate, 140, 42);
+    
+    // Destination section with background
     let yPos = 75;
-    pdf.text(destinationCustomer ? destinationCustomer.name : "External Customer", 20, yPos);
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Destination:', 20, yPos);
+    
+    // Background box for destination
+    pdf.setFillColor(248, 250, 252); // Light gray background
+    pdf.rect(20, yPos + 5, 170, destinationCustomer ? 35 : 20, 'F');
+    
+    yPos += 15;
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(destinationCustomer ? destinationCustomer.name : "External Customer", 25, yPos);
     
     if (destinationCustomer && destinationCustomer.address) {
-      yPos += 5;
-      pdf.text(destinationCustomer.address, 20, yPos);
+      yPos += 7;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      pdf.text(destinationCustomer.address, 25, yPos);
     }
     
     if (destinationCustomer && destinationCustomer.contact_person) {
-      yPos += 5;
-      pdf.text(`Contact: ${destinationCustomer.contact_person}`, 20, yPos);
+      yPos += 7;
+      pdf.text(`Contact: ${destinationCustomer.contact_person}`, 25, yPos);
     }
     
     if (destinationCustomer && destinationCustomer.phone) {
-      yPos += 5;
-      pdf.text(`Phone: ${destinationCustomer.phone}`, 20, yPos);
+      yPos += 7;
+      pdf.text(`Phone: ${destinationCustomer.phone}`, 25, yPos);
     }
     
-    // Items Table
-    yPos += 20;
+    yPos += 7;
+    pdf.text(`Date: ${currentDate}`, 25, yPos);
+    
+    // Items Table with proper borders
+    yPos += 25;
+    
+    // Table header background
+    pdf.setFillColor(243, 244, 246); // Gray background for header
+    pdf.rect(20, yPos - 8, 170, 12, 'F');
+    
+    // Table borders
+    pdf.setDrawColor(209, 213, 219); // Gray border color
+    pdf.rect(20, yPos - 8, 170, 12); // Header border
+    
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Product', 20, yPos);
-    pdf.text('Batch Number', 70, yPos);
-    pdf.text('Production Date', 120, yPos);
-    pdf.text('Quantity', 170, yPos);
+    pdf.text('Product', 25, yPos - 2);
+    pdf.text('Batch Number', 75, yPos - 2);
+    pdf.text('Production Date', 125, yPos - 2);
+    pdf.text('Quantity', 165, yPos - 2);
     
-    // Table line
-    pdf.line(20, yPos + 2, 190, yPos + 2);
+    // Vertical lines for table columns
+    pdf.line(70, yPos - 8, 70, yPos + 4);
+    pdf.line(120, yPos - 8, 120, yPos + 4);
+    pdf.line(160, yPos - 8, 160, yPos + 4);
     
-    yPos += 10;
+    yPos += 4;
+    
+    // Table rows
     pdf.setFont('helvetica', 'normal');
-    
-    selectedItems.forEach((item) => {
-      pdf.text(item.name, 20, yPos);
-      pdf.text(item.batchNumber || "-", 70, yPos);
-      pdf.text(item.productionDate ? format(new Date(item.productionDate), "yyyy-MM-dd") : "-", 120, yPos);
-      pdf.text(`${item.selectedQuantity} bags`, 170, yPos);
-      yPos += 8;
+    selectedItems.forEach((item, index) => {
+      const rowHeight = 10;
+      
+      // Alternating row background
+      if (index % 2 === 1) {
+        pdf.setFillColor(249, 250, 251);
+        pdf.rect(20, yPos, 170, rowHeight, 'F');
+      }
+      
+      // Row border
+      pdf.rect(20, yPos, 170, rowHeight);
+      
+      // Vertical lines
+      pdf.line(70, yPos, 70, yPos + rowHeight);
+      pdf.line(120, yPos, 120, yPos + rowHeight);
+      pdf.line(160, yPos, 160, yPos + rowHeight);
+      
+      // Row content
+      pdf.text(item.name, 25, yPos + 6);
+      pdf.text(item.batchNumber || "-", 75, yPos + 6);
+      pdf.text(item.productionDate ? format(new Date(item.productionDate), "yyyy-MM-dd") : "-", 125, yPos + 6);
+      pdf.text(`${item.selectedQuantity} bags`, 165, yPos + 6);
+      
+      yPos += rowHeight;
     });
     
-    // Summary
-    yPos += 10;
+    // Summary section
+    yPos += 15;
+    pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
     pdf.text('Summary:', 20, yPos);
-    yPos += 8;
+    
+    yPos += 10;
+    pdf.setFontSize(11);
     pdf.setFont('helvetica', 'normal');
     pdf.text(`Total Items: ${totalItems}`, 20, yPos);
-    yPos += 5;
+    yPos += 7;
     pdf.text(`Total Packages: ${totalPackages}`, 20, yPos);
     
-    // FAVV Compliance
-    yPos += 15;
+    // FAVV Compliance section
+    yPos += 20;
+    pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
     pdf.text('FAVV Compliance:', 20, yPos);
-    yPos += 8;
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('✓ Full batch traceability', 20, yPos);
-    yPos += 5;
-    pdf.text('✓ Production dates recorded', 20, yPos);
-    yPos += 5;
-    pdf.text('✓ Transport documentation', 20, yPos);
     
-    // Signatures
-    yPos += 20;
+    yPos += 10;
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text('✓ Full batch traceability', 25, yPos);
+    yPos += 7;
+    pdf.text('✓ Production dates recorded', 25, yPos);
+    yPos += 7;
+    pdf.text('✓ Transport documentation', 25, yPos);
+    
+    // Signatures section with background boxes
+    yPos += 25;
+    pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
     pdf.text('Prepared by:', 20, yPos);
     pdf.text('Picked up by:', 110, yPos);
     
-    yPos += 8;
+    // Background boxes for signatures
+    pdf.setFillColor(248, 250, 252);
+    pdf.rect(20, yPos + 5, 80, 25, 'F');
+    pdf.rect(110, yPos + 5, 80, 25, 'F');
+    
+    // Signature borders
+    pdf.setDrawColor(229, 231, 235);
+    pdf.rect(20, yPos + 5, 80, 25);
+    pdf.rect(110, yPos + 5, 80, 25);
+    
+    yPos += 15;
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(preparedBy || "Not specified", 25, yPos);
+    pdf.text(pickedUpBy || "Not specified", 115, yPos);
+    
+    yPos += 7;
     pdf.setFont('helvetica', 'normal');
-    pdf.text(preparedBy || "Not specified", 20, yPos);
-    pdf.text(pickedUpBy || "Not specified", 110, yPos);
+    pdf.setFontSize(9);
+    pdf.text(`Electronisch ondertekend door ${preparedBy || "Not specified"}`, 25, yPos);
+    pdf.text(`Electronisch ondertekend door ${pickedUpBy || "Not specified"}`, 115, yPos);
     
     yPos += 5;
-    pdf.text(`Date: ${currentDate}`, 20, yPos);
-    pdf.text(`Date: ${currentDate}`, 110, yPos);
+    pdf.text(`Date: ${currentDate}`, 25, yPos);
+    pdf.text(`Date: ${currentDate}`, 115, yPos);
     
-    yPos += 3;
     const currentTime = format(new Date(), "HH:mm");
-    pdf.text(`Time: ${currentTime}`, 20, yPos);
-    pdf.text(`Time: ${currentTime}`, 110, yPos);
+    yPos += 5;
+    pdf.text(`Time: ${currentTime}`, 25, yPos);
+    pdf.text(`Time: ${currentTime}`, 115, yPos);
     
     // Footer
     yPos += 20;
     pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'normal');
     pdf.text('This document serves as official transport documentation for FAVV compliance', 20, yPos);
     yPos += 4;
     pdf.text('Generated by TOTHAI Operations Management System', 20, yPos);
@@ -326,6 +395,7 @@ Prepared by: ${preparedBy}
                   Electronisch ondertekend door {preparedBy || "Not specified"}
                 </p>
                 <p className="text-sm text-gray-600">Date: {currentDate}</p>
+                <p className="text-sm text-gray-600">Time: {format(new Date(), "HH:mm")}</p>
               </div>
             </div>
             <div>
@@ -336,6 +406,7 @@ Prepared by: ${preparedBy}
                   Electronisch ondertekend door {pickedUpBy || "Not specified"}
                 </p>
                 <p className="text-sm text-gray-600">Date: {currentDate}</p>
+                <p className="text-sm text-gray-600">Time: {format(new Date(), "HH:mm")}</p>
               </div>
             </div>
           </div>
