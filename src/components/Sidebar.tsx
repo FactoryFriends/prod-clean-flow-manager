@@ -1,5 +1,5 @@
 
-import { Building, Package, Truck, Brush, BarChart3, Settings, Receipt, Menu, X } from "lucide-react";
+import { Building, Package, Truck, Brush, BarChart3, Settings, Receipt, Menu, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
@@ -21,6 +21,7 @@ const menuItems = [
   { id: "distribution", label: "Distribution", icon: Truck, availableFor: ["tothai"] },
   { id: "cleaning", label: "Cleaning Tasks", icon: Brush, availableFor: ["tothai", "khin"] },
   { id: "invoicing", label: "Invoicing", icon: Receipt, availableFor: ["tothai"] },
+  { id: "favv", label: "FAVV Reports", icon: FileText, availableFor: ["tothai", "khin"] },
   { id: "settings", label: "Settings", icon: Settings, availableFor: ["tothai", "khin"] },
 ];
 

@@ -8,6 +8,7 @@ import { CleaningTasks } from "@/components/CleaningTasks";
 import { Settings } from "@/components/Settings";
 import { Invoicing } from "@/components/Invoicing";
 import { FAVVReport } from "@/components/FAVVReport";
+import { FAVVReports } from "@/components/FAVVReports";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
@@ -31,7 +32,7 @@ const Index = () => {
       case "invoicing":
         return <Invoicing currentLocation={currentLocation} />;
       case "favv":
-        return <FAVVReport currentLocation={currentLocation} />;
+        return <FAVVReports currentLocation={currentLocation} />;
       default:
         return <Dashboard currentLocation={currentLocation} />;
     }
