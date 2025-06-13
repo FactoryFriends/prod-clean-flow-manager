@@ -2,9 +2,9 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { format } from "date-fns";
-import { Check } from "lucide-react";
 import { useCustomers } from "@/hooks/useCustomers";
-import jsPDF from 'jspdf';
+import { PackingSlipPreview } from "./packing-slip/PackingSlipPreview";
+import { generatePackingSlipPDF } from "@/utils/packingSlipPdfGenerator";
 
 interface SelectedItem {
   id: string;
@@ -52,15 +52,6 @@ export function PackingSlipDialog({
     return `PS-${date}-${random}`;
   };
 
-  const getCompanyInfo = () => {
-    return {
-      subtitle: "Production Kitchen",
-      address: "Leuvensestraat 100",
-      city: "3300 Tienen",
-      vatNumber: "BE0534 968 163"
-    };
-  };
-
   const getDestination = () => {
     const selectedCustomer = customers.find(c => c.id === customer);
     return selectedCustomer || null;
@@ -71,203 +62,19 @@ export function PackingSlipDialog({
 
   const packingSlipNumber = generatePackingSlipNumber();
   const currentDate = format(new Date(), "yyyy-MM-dd");
-  const companyInfo = getCompanyInfo();
   const destinationCustomer = getDestination();
 
   const handleDownloadPDF = () => {
-    const pdf = new jsPDF();
-    
-    // Set font
-    pdf.setFont('helvetica');
-    
-    // Header - Company Info (left side)
-    pdf.setFontSize(18);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('TOTHAI', 20, 25);
-    
-    pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(companyInfo.subtitle, 20, 35);
-    pdf.text(companyInfo.address, 20, 42);
-    pdf.text(companyInfo.city, 20, 49);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(companyInfo.vatNumber, 20, 56);
-    
-    // Packing Slip Title and Number (right side)
-    pdf.setFontSize(20);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('PACKING SLIP', 140, 25);
-    
-    pdf.setFontSize(12);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(`#${packingSlipNumber}`, 140, 35);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(currentDate, 140, 42);
-    
-    // Destination section with background
-    let yPos = 75;
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Destination:', 20, yPos);
-    
-    // Background box for destination
-    pdf.setFillColor(248, 250, 252); // Light gray background
-    pdf.rect(20, yPos + 5, 170, destinationCustomer ? 35 : 20, 'F');
-    
-    yPos += 15;
-    pdf.setFontSize(12);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(destinationCustomer ? destinationCustomer.name : "External Customer", 25, yPos);
-    
-    if (destinationCustomer && destinationCustomer.address) {
-      yPos += 7;
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(10);
-      pdf.text(destinationCustomer.address, 25, yPos);
-    }
-    
-    if (destinationCustomer && destinationCustomer.contact_person) {
-      yPos += 7;
-      pdf.text(`Contact: ${destinationCustomer.contact_person}`, 25, yPos);
-    }
-    
-    if (destinationCustomer && destinationCustomer.phone) {
-      yPos += 7;
-      pdf.text(`Phone: ${destinationCustomer.phone}`, 25, yPos);
-    }
-    
-    yPos += 7;
-    pdf.text(`Date: ${currentDate}`, 25, yPos);
-    
-    // Items Table with proper borders
-    yPos += 25;
-    
-    // Table header background
-    pdf.setFillColor(243, 244, 246); // Gray background for header
-    pdf.rect(20, yPos - 8, 170, 12, 'F');
-    
-    // Table borders
-    pdf.setDrawColor(209, 213, 219); // Gray border color
-    pdf.rect(20, yPos - 8, 170, 12); // Header border
-    
-    pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Product', 25, yPos - 2);
-    pdf.text('Batch Number', 75, yPos - 2);
-    pdf.text('Production Date', 125, yPos - 2);
-    pdf.text('Quantity', 165, yPos - 2);
-    
-    // Vertical lines for table columns
-    pdf.line(70, yPos - 8, 70, yPos + 4);
-    pdf.line(120, yPos - 8, 120, yPos + 4);
-    pdf.line(160, yPos - 8, 160, yPos + 4);
-    
-    yPos += 4;
-    
-    // Table rows
-    pdf.setFont('helvetica', 'normal');
-    selectedItems.forEach((item, index) => {
-      const rowHeight = 10;
-      
-      // Alternating row background
-      if (index % 2 === 1) {
-        pdf.setFillColor(249, 250, 251);
-        pdf.rect(20, yPos, 170, rowHeight, 'F');
-      }
-      
-      // Row border
-      pdf.rect(20, yPos, 170, rowHeight);
-      
-      // Vertical lines
-      pdf.line(70, yPos, 70, yPos + rowHeight);
-      pdf.line(120, yPos, 120, yPos + rowHeight);
-      pdf.line(160, yPos, 160, yPos + rowHeight);
-      
-      // Row content
-      pdf.text(item.name, 25, yPos + 6);
-      pdf.text(item.batchNumber || "-", 75, yPos + 6);
-      pdf.text(item.productionDate ? format(new Date(item.productionDate), "yyyy-MM-dd") : "-", 125, yPos + 6);
-      pdf.text(`${item.selectedQuantity} bags`, 165, yPos + 6);
-      
-      yPos += rowHeight;
+    generatePackingSlipPDF({
+      packingSlipNumber,
+      currentDate,
+      destinationCustomer,
+      selectedItems,
+      totalItems,
+      totalPackages,
+      preparedBy,
+      pickedUpBy,
     });
-    
-    // Summary section
-    yPos += 15;
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Summary:', 20, yPos);
-    
-    yPos += 10;
-    pdf.setFontSize(11);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(`Total Items: ${totalItems}`, 20, yPos);
-    yPos += 7;
-    pdf.text(`Total Packages: ${totalPackages}`, 20, yPos);
-    
-    // FAVV Compliance section
-    yPos += 20;
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('FAVV Compliance:', 20, yPos);
-    
-    yPos += 10;
-    pdf.setFontSize(11);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('✓ Full batch traceability', 25, yPos);
-    yPos += 7;
-    pdf.text('✓ Production dates recorded', 25, yPos);
-    yPos += 7;
-    pdf.text('✓ Transport documentation', 25, yPos);
-    
-    // Signatures section with background boxes
-    yPos += 25;
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Prepared by:', 20, yPos);
-    pdf.text('Picked up by:', 110, yPos);
-    
-    // Background boxes for signatures
-    pdf.setFillColor(248, 250, 252);
-    pdf.rect(20, yPos + 5, 80, 25, 'F');
-    pdf.rect(110, yPos + 5, 80, 25, 'F');
-    
-    // Signature borders
-    pdf.setDrawColor(229, 231, 235);
-    pdf.rect(20, yPos + 5, 80, 25);
-    pdf.rect(110, yPos + 5, 80, 25);
-    
-    yPos += 15;
-    pdf.setFontSize(11);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(preparedBy || "Not specified", 25, yPos);
-    pdf.text(pickedUpBy || "Not specified", 115, yPos);
-    
-    yPos += 7;
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(9);
-    pdf.text(`Electronisch ondertekend door ${preparedBy || "Not specified"}`, 25, yPos);
-    pdf.text(`Electronisch ondertekend door ${pickedUpBy || "Not specified"}`, 115, yPos);
-    
-    yPos += 5;
-    pdf.text(`Date: ${currentDate}`, 25, yPos);
-    pdf.text(`Date: ${currentDate}`, 115, yPos);
-    
-    const currentTime = format(new Date(), "HH:mm");
-    yPos += 5;
-    pdf.text(`Time: ${currentTime}`, 25, yPos);
-    pdf.text(`Time: ${currentTime}`, 115, yPos);
-    
-    // Footer
-    yPos += 20;
-    pdf.setFontSize(8);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('This document serves as official transport documentation for FAVV compliance', 20, yPos);
-    yPos += 4;
-    pdf.text('Generated by TOTHAI Operations Management System', 20, yPos);
-    
-    // Save the PDF
-    pdf.save(`packing-slip-${packingSlipNumber}.pdf`);
   };
 
   const handleCopyDetails = () => {
@@ -290,133 +97,16 @@ Prepared by: ${preparedBy}
           <DialogTitle>Packing Slip Preview</DialogTitle>
         </DialogHeader>
         
-        <div className="bg-white p-8 border rounded-lg text-black">
-          {/* Header */}
-          <div className="flex justify-between items-start mb-8">
-            <div className="flex flex-col items-start">
-              <img 
-                src="/lovable-uploads/049be7aa-e57b-4eb6-bec2-515a4c2b96b3.png" 
-                alt="TOTHAI Logo" 
-                className="h-16 w-auto object-contain mb-4"
-              />
-              <div>
-                <p className="text-gray-600">{companyInfo.subtitle}</p>
-                <p className="text-gray-600">{companyInfo.address}</p>
-                <p className="text-gray-600">{companyInfo.city}</p>
-                <p className="text-gray-600 font-semibold">{companyInfo.vatNumber}</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <h2 className="text-xl font-bold mb-1">PACKING SLIP</h2>
-              <p className="font-mono text-sm">#{packingSlipNumber}</p>
-              <p className="text-sm">{currentDate}</p>
-            </div>
-          </div>
-
-          {/* Destination */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-2">Destination:</h3>
-            <div className="bg-gray-50 p-4 rounded">
-              <p className="font-semibold">{destinationCustomer ? destinationCustomer.name : "External Customer"}</p>
-              {destinationCustomer && destinationCustomer.address && (
-                <p className="text-sm text-gray-600 mt-1">{destinationCustomer.address}</p>
-              )}
-              {destinationCustomer && destinationCustomer.contact_person && (
-                <p className="text-sm text-gray-600">Contact: {destinationCustomer.contact_person}</p>
-              )}
-              {destinationCustomer && destinationCustomer.phone && (
-                <p className="text-sm text-gray-600">Phone: {destinationCustomer.phone}</p>
-              )}
-              <p className="text-sm text-gray-600 mt-2">Date: {currentDate}</p>
-            </div>
-          </div>
-
-          {/* Items Table */}
-          <div className="mb-8">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="border border-gray-300 p-3 text-left font-semibold">Product</th>
-                  <th className="border border-gray-300 p-3 text-left font-semibold">Batch Number</th>
-                  <th className="border border-gray-300 p-3 text-left font-semibold">Production Date</th>
-                  <th className="border border-gray-300 p-3 text-left font-semibold">Quantity</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedItems.map((item) => (
-                  <tr key={item.id}>
-                    <td className="border border-gray-300 p-3">{item.name}</td>
-                    <td className="border border-gray-300 p-3 font-mono text-sm">
-                      {item.batchNumber || "-"}
-                    </td>
-                    <td className="border border-gray-300 p-3">
-                      {item.productionDate ? format(new Date(item.productionDate), "yyyy-MM-dd") : "-"}
-                    </td>
-                    <td className="border border-gray-300 p-3">{item.selectedQuantity} bags</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Summary */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-2">Summary:</h3>
-            <p>Total Items: {totalItems}</p>
-            <p>Total Packages: {totalPackages}</p>
-          </div>
-
-          {/* FAVV Compliance */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-3">FAVV Compliance:</h3>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-green-600">
-                <Check className="w-4 h-4" />
-                <span>Full batch traceability</span>
-              </div>
-              <div className="flex items-center gap-2 text-green-600">
-                <Check className="w-4 h-4" />
-                <span>Production dates recorded</span>
-              </div>
-              <div className="flex items-center gap-2 text-green-600">
-                <Check className="w-4 h-4" />
-                <span>Transport documentation</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Signatures */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Prepared by:</h3>
-              <div className="bg-gray-50 p-4 rounded border">
-                <p className="font-semibold">{preparedBy || "Not specified"}</p>
-                <p className="text-sm text-gray-600 mt-1">
-                  Electronisch ondertekend door {preparedBy || "Not specified"}
-                </p>
-                <p className="text-sm text-gray-600">Date: {currentDate}</p>
-                <p className="text-sm text-gray-600">Time: {format(new Date(), "HH:mm")}</p>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Picked up by:</h3>
-              <div className="bg-gray-50 p-4 rounded border">
-                <p className="font-semibold">{pickedUpBy || "Not specified"}</p>
-                <p className="text-sm text-gray-600 mt-1">
-                  Electronisch ondertekend door {pickedUpBy || "Not specified"}
-                </p>
-                <p className="text-sm text-gray-600">Date: {currentDate}</p>
-                <p className="text-sm text-gray-600">Time: {format(new Date(), "HH:mm")}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="text-center text-sm text-gray-500 border-t pt-4">
-            <p>This document serves as official transport documentation for FAVV compliance</p>
-            <p>Generated by TOTHAI Operations Management System</p>
-          </div>
-        </div>
+        <PackingSlipPreview
+          packingSlipNumber={packingSlipNumber}
+          currentDate={currentDate}
+          destinationCustomer={destinationCustomer}
+          selectedItems={selectedItems}
+          totalItems={totalItems}
+          totalPackages={totalPackages}
+          preparedBy={preparedBy}
+          pickedUpBy={pickedUpBy}
+        />
 
         {/* Action Buttons */}
         <div className="flex justify-between mt-6">
