@@ -59,21 +59,23 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
     setDetailsOpen(true);
   };
 
-  // Convert batches to available inventory
-  const availableBatches = (batches || []).map(batch => ({
-    id: batch.id,
-    type: 'batch' as const,
-    name: batch.products.name,
-    batchNumber: batch.batch_number,
-    availableQuantity: batch.packages_produced,
-    selectedQuantity: 0,
-    expiryDate: batch.expiry_date,
-    productionDate: batch.production_date,
-    chef: batch.chefs,
-    unitSize: batch.products.unit_size,
-    unitType: batch.products.unit_type,
-    productionNotes: batch.production_notes,
-  }));
+  // Convert batches to available inventory and sort alphabetically
+  const availableBatches = (batches || [])
+    .map(batch => ({
+      id: batch.id,
+      type: 'batch' as const,
+      name: batch.products.name,
+      batchNumber: batch.batch_number,
+      availableQuantity: batch.packages_produced,
+      selectedQuantity: 0,
+      expiryDate: batch.expiry_date,
+      productionDate: batch.production_date,
+      chef: batch.chefs,
+      unitSize: batch.products.unit_size,
+      unitType: batch.products.unit_type,
+      productionNotes: batch.production_notes,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   // Filter batches based on expiry status
   const activeBatches = availableBatches.filter(batch => 
@@ -86,12 +88,15 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
 
   const batchesToShow = showExpired ? availableBatches : activeBatches;
 
-  const availableExternal = externalProducts.map(product => ({
-    id: product.id,
-    type: 'external' as const,
-    name: product.name,
-    selectedQuantity: 0,
-  }));
+  // Sort external products alphabetically
+  const availableExternal = externalProducts
+    .map(product => ({
+      id: product.id,
+      type: 'external' as const,
+      name: product.name,
+      selectedQuantity: 0,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <>
