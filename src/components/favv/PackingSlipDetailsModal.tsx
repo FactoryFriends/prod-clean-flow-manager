@@ -177,7 +177,7 @@ export function PackingSlipDetailsModal({ packingSlip, isOpen, onClose }: Packin
                 )}
               </div>
             </CardContent>
-          )}
+          </Card>
 
           {/* Batch Information */}
           {packingSlip.batches && packingSlip.batches.length > 0 ? (
