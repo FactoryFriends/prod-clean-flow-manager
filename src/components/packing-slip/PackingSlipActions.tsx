@@ -2,14 +2,7 @@
 import { Button } from "../ui/button";
 import { usePackingSlipActions } from "@/hooks/usePackingSlipActions";
 import { useState } from "react";
-
-interface SelectedItem {
-  id: string;
-  name: string;
-  batchNumber?: string;
-  selectedQuantity: number;
-  productionDate?: string;
-}
+import { SelectedItem } from "@/types/dispatch";
 
 interface Customer {
   name: string;

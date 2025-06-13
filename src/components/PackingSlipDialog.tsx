@@ -4,15 +4,7 @@ import { format } from "date-fns";
 import { useCustomers } from "@/hooks/useCustomers";
 import { PackingSlipPreview } from "./packing-slip/PackingSlipPreview";
 import { PackingSlipActions } from "./packing-slip/PackingSlipActions";
-
-interface SelectedItem {
-  id: string;
-  type: 'batch' | 'external';
-  name: string;
-  batchNumber?: string;
-  selectedQuantity: number;
-  productionDate?: string;
-}
+import { SelectedItem } from "@/types/dispatch";
 
 interface PackingSlipDialogProps {
   open: boolean;

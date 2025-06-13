@@ -3,15 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { generatePackingSlipPDF } from "@/utils/packingSlipPdfGenerator";
 import { format } from "date-fns";
-
-interface SelectedItem {
-  id: string;
-  type: 'batch' | 'external';
-  name: string;
-  batchNumber?: string;
-  selectedQuantity: number;
-  productionDate?: string;
-}
+import { SelectedItem } from "@/types/dispatch";
 
 interface Customer {
   name: string;
