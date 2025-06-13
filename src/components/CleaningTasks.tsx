@@ -132,8 +132,11 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
     emptyMessage: string,
     sectionTitle: string
   ) => {
-    // Update section title for "Other Tasks" tab
-    const activeSectionTitle = sectionTitle === "Other Tasks" ? "ACTIVE TASKS" : `Open ${sectionTitle}`;
+    // Update section titles to use "ACTIVE" for all tabs
+    const activeSectionTitle = sectionTitle === "Other Tasks" ? "ACTIVE TASKS" : 
+                              sectionTitle === "Chef Tasks" ? "ACTIVE CHEF TASKS" :
+                              sectionTitle === "Cleaner Tasks" ? "ACTIVE CLEANER TASKS" :
+                              `Open ${sectionTitle}`;
     
     return (
       <div>
