@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -42,7 +41,7 @@ interface CompletedTask {
   id: string;
   title: string;
   description?: string | null;
-  location: "tothai" | "khin";
+  location: "tothai" | "khin" | "both";
   scheduled_date: string;
   completed_at: string | null;
   completed_by: string | null;

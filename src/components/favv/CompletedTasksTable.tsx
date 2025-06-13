@@ -8,7 +8,7 @@ import { format } from "date-fns";
 interface CompletedTask {
   id: string;
   title: string;
-  location: "tothai" | "khin";
+  location: "tothai" | "khin" | "both";
   scheduled_date: string;
   completed_at: string | null;
   completed_by: string | null;
