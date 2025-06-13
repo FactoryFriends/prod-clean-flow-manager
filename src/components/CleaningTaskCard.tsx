@@ -3,6 +3,8 @@ import { Brush, Clock, CheckCircle, AlertTriangle, RotateCcw, Camera } from "luc
 import { StatusBadge } from "./StatusBadge";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { PhotoUpload } from "./PhotoUpload";
+import { PhotoGallery } from "./PhotoGallery";
 import { useState } from "react";
 
 interface CleaningTask {
@@ -35,8 +37,7 @@ interface CleaningTaskCardProps {
 }
 
 export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue }: CleaningTaskCardProps) {
-  const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
-  const [uploadingPhotos, setUploadingPhotos] = useState(false);
+  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
 
   const formatDuration = (minutes: number | null) => {
     if (!minutes) return "Not specified";
@@ -76,30 +77,14 @@ export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue
     return diffHours >= 72;
   };
 
-  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    setSelectedPhotos(files);
+  const handlePhotosUploaded = (photoUrls: string[]) => {
+    onCompleteTask(task.id, photoUrls);
+    setShowPhotoUpload(false);
   };
 
-  const handleCompleteTask = async () => {
-    if (task.requires_photo && selectedPhotos.length === 0) {
-      alert("This task requires a photo before completion.");
-      return;
-    }
-
-    if (task.requires_photo && selectedPhotos.length > 0) {
-      setUploadingPhotos(true);
-      try {
-        // Here you would upload photos to Supabase Storage
-        // For now, we'll simulate with file names
-        const photoUrls = selectedPhotos.map(file => file.name);
-        onCompleteTask(task.id, photoUrls);
-      } catch (error) {
-        console.error('Error uploading photos:', error);
-        alert("Error uploading photos. Please try again.");
-      } finally {
-        setUploadingPhotos(false);
-      }
+  const handleCompleteClick = () => {
+    if (task.requires_photo) {
+      setShowPhotoUpload(true);
     } else {
       onCompleteTask(task.id);
     }
@@ -191,40 +176,28 @@ export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue
           )}
         </div>
 
-        {/* Photo upload for open tasks that require photos */}
-        {task.status === "open" && task.requires_photo && (
+        {/* Photo upload section for open tasks that require photos */}
+        {task.status === "open" && showPhotoUpload && (
           <div className="border-t border-border pt-4">
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Upload completion photo:
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              multiple
-              onChange={handlePhotoChange}
-              className="block w-full text-sm text-muted-foreground
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-primary file:text-primary-foreground
-                hover:file:bg-primary/80"
+            <PhotoUpload
+              onPhotosUploaded={handlePhotosUploaded}
+              maxPhotos={3}
+              required={task.requires_photo || false}
             />
-            {selectedPhotos.length > 0 && (
-              <p className="text-sm text-green-600 mt-1">
-                {selectedPhotos.length} photo(s) selected
-              </p>
-            )}
+            <Button
+              variant="outline"
+              onClick={() => setShowPhotoUpload(false)}
+              className="w-full mt-2"
+            >
+              Cancel
+            </Button>
           </div>
         )}
 
         {/* Display existing photos for completed tasks */}
         {task.photo_urls && task.photo_urls.length > 0 && (
           <div className="border-t border-border pt-4">
-            <p className="text-sm font-medium text-foreground mb-2">Completion photos:</p>
-            <div className="text-sm text-muted-foreground">
-              {task.photo_urls.length} photo(s) uploaded
-            </div>
+            <PhotoGallery photos={task.photo_urls} />
           </div>
         )}
 
@@ -246,15 +219,14 @@ export function CleaningTaskCard({ task, onCompleteTask, onReopenTask, isOverdue
         <div className="flex gap-2 pt-2">
           {task.status === "open" && (
             <Button
-              onClick={handleCompleteTask}
-              disabled={uploadingPhotos}
+              onClick={handleCompleteClick}
               className={`flex items-center gap-2 ${
                 severelyOverdue ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
               }`}
               size="sm"
             >
               <CheckCircle className="w-4 h-4" />
-              {uploadingPhotos ? 'Uploading...' : severelyOverdue ? 'Complete Now' : 'Complete'}
+              {severelyOverdue ? 'Complete Now' : 'Complete'}
             </Button>
           )}
           
