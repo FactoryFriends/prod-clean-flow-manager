@@ -28,7 +28,7 @@ export function CleaningTaskHeader({ locationName, currentLocation, overdueCount
         </p>
         {overdueCount > 0 && (
           <p className="text-sm text-red-600 mt-1">
-            {overdueCount} task{overdueCount > 1 ? 's' : ''} overdue (>48 hours) - Immediate attention required!
+            {overdueCount} task{overdueCount > 1 ? 's' : ''} overdue ({'>'}48 hours) - Immediate attention required!
           </p>
         )}
       </div>
