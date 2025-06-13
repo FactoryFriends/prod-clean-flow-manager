@@ -102,7 +102,9 @@ Prepared by: ${preparedBy}
       if (packingSlips && packingSlips.length > 0) {
         const { error: updateError } = await supabase
           .from("packing_slips")
-          .update({ status: "shipped" })
+          .update({ 
+            status: "shipped" as const
+          })
           .eq("id", packingSlips[0].id);
 
         if (updateError) throw updateError;

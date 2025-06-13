@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,11 +26,11 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
   const { data: packingSlips = [], isLoading: isLoadingPackingSlips } = useQuery({
     queryKey: ["favv-packing-slips", locationFilter, startDate, endDate],
     queryFn: async () => {
-      let query = supabase
+      const { data, error } = await supabase
         .from("packing_slips")
         .select(`
           *,
-          dispatch_records (
+          dispatch_records!inner (
             location,
             dispatch_type,
             customer,
@@ -42,20 +41,26 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
         .eq("status", "shipped")
         .order("created_at", { ascending: false });
 
+      if (error) throw error;
+
+      let filteredData = data || [];
+
+      // Apply date filters
       if (startDate) {
-        query = query.gte("created_at", startDate.toISOString());
+        filteredData = filteredData.filter(slip => 
+          new Date(slip.created_at) >= startDate
+        );
       }
       if (endDate) {
         const endOfDay = new Date(endDate);
         endOfDay.setHours(23, 59, 59, 999);
-        query = query.lte("created_at", endOfDay.toISOString());
+        filteredData = filteredData.filter(slip => 
+          new Date(slip.created_at) <= endOfDay
+        );
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
-
       // Filter by location on the client side since dispatch_records.location is in a joined table
-      return data.filter(slip => 
+      return filteredData.filter(slip => 
         !locationFilter || locationFilter === "all" || 
         slip.dispatch_records?.location === locationFilter
       );

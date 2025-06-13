@@ -400,6 +400,7 @@ export type Database = {
           pickup_date: string | null
           prepared_by: string | null
           slip_number: string
+          status: string | null
           total_items: number
           total_packages: number
         }
@@ -413,6 +414,7 @@ export type Database = {
           pickup_date?: string | null
           prepared_by?: string | null
           slip_number: string
+          status?: string | null
           total_items?: number
           total_packages?: number
         }
@@ -426,6 +428,7 @@ export type Database = {
           pickup_date?: string | null
           prepared_by?: string | null
           slip_number?: string
+          status?: string | null
           total_items?: number
           total_packages?: number
         }
