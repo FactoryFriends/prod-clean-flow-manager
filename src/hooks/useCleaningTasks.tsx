@@ -1,6 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useStaffCodes } from "./useStaffCodes";
 
 interface CleaningTask {
   id: string;
@@ -26,6 +27,7 @@ interface CleaningTask {
 
 export function useCleaningTasks(dbLocation: "tothai" | "khin") {
   const queryClient = useQueryClient();
+  const { data: staffCodes } = useStaffCodes();
 
   // Fetch cleaning tasks
   const { data: cleaningTasks = [], isLoading, error } = useQuery({
@@ -100,9 +102,25 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
     },
   });
 
+  const validateStaffCode = (code: string): { isValid: boolean; staffName?: string } => {
+    if (!code || code.length !== 4 || !staffCodes) {
+      return { isValid: false };
+    }
+
+    const staff = staffCodes.find(s => s.code === code && s.active);
+    if (staff) {
+      return { isValid: true, staffName: staff.name };
+    }
+
+    return { isValid: false };
+  };
+
   const handleCompleteTask = (taskId: string, photoUrls?: string[]) => {
     const userCode = prompt("Enter your 4-digit staff code:");
-    if (userCode && userCode.length === 4) {
+    if (!userCode) return;
+
+    const validation = validateStaffCode(userCode);
+    if (validation.isValid) {
       updateTaskMutation.mutate({ 
         taskId, 
         status: 'closed', 
@@ -110,7 +128,7 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
         photoUrls
       });
     } else {
-      alert("Please enter a valid 4-digit staff code");
+      alert("Invalid or inactive staff code. Please enter a valid 4-digit staff code.");
     }
   };
 
@@ -169,6 +187,7 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
     isTaskSeverelyOverdue,
     getTasksByRole,
     getOverdueTasksCount,
-    getSeverelyOverdueTasksCount
+    getSeverelyOverdueTasksCount,
+    validateStaffCode
   };
 }

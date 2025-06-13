@@ -37,12 +37,13 @@ export function DispatchForm({
   onCreatePackingSlip,
   onInternalUse,
 }: DispatchFormProps) {
-  const { data: staffCodes } = useStaffCodes();
+  const { data: staffCodes, isLoading: staffLoading } = useStaffCodes();
 
   const handlePickerCodeChange = (value: string) => {
     setPickerCode(value);
-    if (value.length === 4) {
-      const staff = staffCodes?.find(s => s.code === value);
+    
+    if (value.length === 4 && staffCodes) {
+      const staff = staffCodes.find(s => s.code === value && s.active);
       if (staff) {
         setPickerName(staff.name);
       } else {
@@ -52,6 +53,9 @@ export function DispatchForm({
       setPickerName("");
     }
   };
+
+  const isValidStaffCode = pickerCode.length === 4 && staffCodes?.some(s => s.code === pickerCode && s.active);
+  const showInvalidCode = pickerCode.length === 4 && !isValidStaffCode;
 
   return (
     <Card>
@@ -88,15 +92,21 @@ export function DispatchForm({
             onChange={(e) => handlePickerCodeChange(e.target.value)}
             maxLength={4}
             className="font-mono"
+            disabled={staffLoading}
           />
+          {staffLoading && pickerCode.length > 0 && (
+            <p className="text-sm text-gray-500 mt-1">
+              Validating code...
+            </p>
+          )}
           {pickerName && (
             <p className="text-sm text-green-600 mt-1">
               {dispatchType === "external" ? "Picker" : "Staff"}: {pickerName}
             </p>
           )}
-          {pickerCode.length === 4 && !pickerName && (
+          {showInvalidCode && (
             <p className="text-sm text-red-600 mt-1">
-              Invalid code
+              Invalid or inactive staff code
             </p>
           )}
         </div>
@@ -120,7 +130,7 @@ export function DispatchForm({
         {dispatchType === "external" ? (
           <Button 
             onClick={onCreatePackingSlip}
-            disabled={selectedItems.length === 0 || !customer || !pickerName}
+            disabled={selectedItems.length === 0 || !customer || !isValidStaffCode}
             className="w-full"
           >
             <Package className="w-4 h-4 mr-2" />
@@ -129,7 +139,7 @@ export function DispatchForm({
         ) : (
           <Button 
             onClick={onInternalUse}
-            disabled={selectedItems.length === 0 || !pickerName}
+            disabled={selectedItems.length === 0 || !isValidStaffCode}
             className="w-full"
           >
             <Home className="w-4 h-4 mr-2" />
