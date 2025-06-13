@@ -90,37 +90,40 @@ Prepared by: ${preparedBy}
   const handleConfirmAndShip = async () => {
     setIsConfirming(true);
     try {
-      // Find the most recent packing slip to update its status
-      const { data: packingSlips, error: fetchError } = await supabase
+      // Create the packing slip in the database first
+      const batchIds = selectedItems
+        .filter(item => item.type === 'batch')
+        .map(item => item.id);
+
+      const { data: packingSlip, error: createError } = await supabase
         .from("packing_slips")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(1);
+        .insert({
+          slip_number: packingSlipNumber,
+          destination: destinationCustomer ? destinationCustomer.name : "External Customer",
+          prepared_by: preparedBy,
+          picked_up_by: pickedUpBy,
+          batch_ids: batchIds,
+          total_items: totalItems,
+          total_packages: totalPackages,
+          pickup_date: currentDate,
+          status: "shipped" as const
+        })
+        .select()
+        .single();
 
-      if (fetchError) throw fetchError;
+      if (createError) throw createError;
 
-      if (packingSlips && packingSlips.length > 0) {
-        const { error: updateError } = await supabase
-          .from("packing_slips")
-          .update({ 
-            status: "shipped" as const
-          })
-          .eq("id", packingSlips[0].id);
+      toast({
+        title: "Packing Slip Confirmed",
+        description: "Packing slip has been created and marked as shipped. It will appear in FAVV reports.",
+      });
 
-        if (updateError) throw updateError;
-
-        toast({
-          title: "Packing Slip Confirmed",
-          description: "Packing slip has been marked as shipped and will appear in FAVV reports",
-        });
-
-        onOpenChange(false);
-      }
+      onOpenChange(false);
     } catch (error) {
-      console.error("Error confirming packing slip:", error);
+      console.error("Error creating packing slip:", error);
       toast({
         title: "Error",
-        description: "Failed to confirm packing slip. Please try again.",
+        description: "Failed to create packing slip. Please try again.",
         variant: "destructive",
       });
     } finally {
