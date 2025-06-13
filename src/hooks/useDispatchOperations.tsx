@@ -48,6 +48,8 @@ export function useDispatchOperations({
   };
 
   const handleCreatePackingSlip = async () => {
+    console.log("Creating packing slip with staff name:", pickerName);
+    
     try {
       // First create the dispatch record
       const dispatchRecord = await createDispatch.mutateAsync({
@@ -79,6 +81,8 @@ export function useDispatchOperations({
       });
 
       setCurrentDispatchId(dispatchRecord.id);
+      
+      // Open packing slip BEFORE resetting the form to preserve staff names
       setPackingSlipOpen(true);
 
       toast({
@@ -86,7 +90,10 @@ export function useDispatchOperations({
         description: `External dispatch ${slipNumber} created successfully`,
       });
 
-      onSuccess();
+      // Delay the form reset to ensure packing slip gets the correct data
+      setTimeout(() => {
+        onSuccess();
+      }, 100);
 
     } catch (error) {
       console.error("Error creating dispatch:", error);
