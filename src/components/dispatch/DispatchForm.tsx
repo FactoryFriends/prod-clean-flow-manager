@@ -96,7 +96,7 @@ export function DispatchForm({
   });
 
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+    <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
       <div className="space-y-6">
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -175,7 +175,7 @@ export function DispatchForm({
             <Button 
               onClick={onCreatePackingSlip}
               disabled={!canSubmit}
-              className="flex-1"
+              className="flex-1 bg-blue-600 hover:bg-blue-700"
             >
               Create Packing Slip ({selectedItems.length} items)
             </Button>
@@ -183,7 +183,7 @@ export function DispatchForm({
             <Button 
               onClick={onInternalUse}
               disabled={!canSubmit}
-              className="flex-1"
+              className="flex-1 bg-green-600 hover:bg-green-700"
             >
               Log Internal Use ({selectedItems.length} items)
             </Button>

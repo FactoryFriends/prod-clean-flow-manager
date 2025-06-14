@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useProductionBatches } from "@/hooks/useProductionData";
 import { useCustomers } from "@/hooks/useCustomers";
 import { PackingSlipDialog } from "../PackingSlipDialog";
-import { DispatchHeader } from "./DispatchHeader";
 import { DispatchForm } from "./DispatchForm";
 import { SelectedItemsSummary } from "./SelectedItemsSummary";
 import { InventoryGrid } from "./InventoryGrid";
@@ -13,10 +12,10 @@ import { useDispatchOperations } from "@/hooks/useDispatchOperations";
 
 interface DispatchManagerProps {
   currentLocation: "tothai" | "khin";
+  dispatchType: DispatchType;
 }
 
-export function DispatchManager({ currentLocation }: DispatchManagerProps) {
-  const [dispatchType, setDispatchType] = useState<DispatchType>("external");
+export function DispatchManager({ currentLocation, dispatchType }: DispatchManagerProps) {
   const [customer, setCustomer] = useState("");
   const [pickerCode, setPickerCode] = useState("");
   const [pickerName, setPickerName] = useState("");
@@ -119,11 +118,6 @@ export function DispatchManager({ currentLocation }: DispatchManagerProps) {
 
   return (
     <div className="space-y-6">
-      <DispatchHeader 
-        dispatchType={dispatchType}
-        onDispatchTypeChange={setDispatchType}
-      />
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DispatchForm
           dispatchType={dispatchType}
