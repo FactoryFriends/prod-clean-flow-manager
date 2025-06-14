@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
@@ -11,13 +11,14 @@ import { useProducts, useChefs, useCreateProductionBatch } from "@/hooks/useProd
 
 interface EmbeddedBatchFormProps {
   currentLocation: "tothai" | "khin";
+  onBatchCreated?: (batch: any) => void;
 }
 
-export function EmbeddedBatchForm({ currentLocation }: EmbeddedBatchFormProps) {
+export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedBatchFormProps) {
   const [selectedProductId, setSelectedProductId] = useState("");
   const [selectedChefId, setSelectedChefId] = useState("");
   const [packagesProduced, setPackagesProduced] = useState("");
-  const [expiryDays, setExpiryDays] = useState("7");
+  const [calculatedExpiryDate, setCalculatedExpiryDate] = useState("");
   const [notes, setNotes] = useState("");
 
   const { data: products, isLoading: productsLoading } = useProducts();
@@ -26,6 +27,22 @@ export function EmbeddedBatchForm({ currentLocation }: EmbeddedBatchFormProps) {
 
   const selectedProduct = products?.find(p => p.id === selectedProductId);
 
+  // Auto-calculate expiry date when product changes
+  useEffect(() => {
+    if (selectedProduct && selectedProduct.shelf_life_days) {
+      const today = new Date();
+      const expiryDate = new Date(today);
+      expiryDate.setDate(today.getDate() + selectedProduct.shelf_life_days);
+      setCalculatedExpiryDate(expiryDate.toISOString().split('T')[0]);
+    } else {
+      // Default to 7 days if no shelf life specified
+      const today = new Date();
+      const expiryDate = new Date(today);
+      expiryDate.setDate(today.getDate() + 7);
+      setCalculatedExpiryDate(expiryDate.toISOString().split('T')[0]);
+    }
+  }, [selectedProduct]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -33,23 +50,24 @@ export function EmbeddedBatchForm({ currentLocation }: EmbeddedBatchFormProps) {
       return;
     }
 
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + parseInt(expiryDays));
-
     createBatch.mutate({
       product_id: selectedProductId,
       chef_id: selectedChefId,
       packages_produced: parseInt(packagesProduced),
-      expiry_date: expiryDate.toISOString().split('T')[0],
+      expiry_date: calculatedExpiryDate,
       production_notes: notes || undefined,
       location: currentLocation,
     }, {
-      onSuccess: () => {
+      onSuccess: (newBatch) => {
         setSelectedProductId("");
         setSelectedChefId("");
         setPackagesProduced("");
-        setExpiryDays("7");
         setNotes("");
+        
+        // Call the callback to open label printing
+        if (onBatchCreated) {
+          onBatchCreated(newBatch);
+        }
       }
     });
   };
@@ -117,16 +135,19 @@ export function EmbeddedBatchForm({ currentLocation }: EmbeddedBatchFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="expiry">Expiry (days)</Label>
+            <Label htmlFor="expiry">Expiry Date (Auto-calculated)</Label>
             <Input
               id="expiry"
-              type="number"
-              value={expiryDays}
-              onChange={(e) => setExpiryDays(e.target.value)}
-              min="1"
-              max="30"
+              type="date"
+              value={calculatedExpiryDate}
+              onChange={(e) => setCalculatedExpiryDate(e.target.value)}
               className="bg-white"
             />
+            {selectedProduct && selectedProduct.shelf_life_days && (
+              <p className="text-xs text-blue-600">
+                Based on {selectedProduct.shelf_life_days} days shelf life
+              </p>
+            )}
           </div>
 
           <div className="space-y-2 md:col-span-2">
@@ -147,7 +168,7 @@ export function EmbeddedBatchForm({ currentLocation }: EmbeddedBatchFormProps) {
               disabled={!canSubmit}
               className="bg-blue-600 hover:bg-blue-700"
             >
-              {createBatch.isPending ? "Creating..." : "Create Batch"}
+              {createBatch.isPending ? "Creating..." : "CREATE BATCH AND PRINT LABELS"}
             </Button>
           </div>
         </form>

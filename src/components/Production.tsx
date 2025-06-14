@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { EmbeddedBatchForm } from "./EmbeddedBatchForm";
 import { LabelPrintDialog } from "./LabelPrintDialog";
@@ -26,6 +25,11 @@ export function Production({ currentLocation }: ProductionProps) {
 
   const getLocationName = (location: string) => {
     return location === "tothai" ? "To Thai Restaurant" : "Khin Takeaway";
+  };
+
+  const handleBatchCreated = (newBatch: ProductionBatch) => {
+    setSelectedBatch(newBatch);
+    setLabelDialogOpen(true);
   };
 
   const filterBatches = (batches: ProductionBatch[]) => {
@@ -109,7 +113,7 @@ export function Production({ currentLocation }: ProductionProps) {
         </div>
       </div>
 
-      <EmbeddedBatchForm currentLocation={currentLocation} />
+      <EmbeddedBatchForm currentLocation={currentLocation} onBatchCreated={handleBatchCreated} />
 
       <div className="flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1">
