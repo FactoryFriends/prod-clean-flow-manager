@@ -1,13 +1,15 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Minus, Eye, EyeOff } from "lucide-react";
+import { Plus, Minus, Eye, EyeOff, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { useProductionBatches } from "@/hooks/useProductionData";
 import { SelectedItem } from "@/types/dispatch";
 import { externalProducts } from "@/data/dispatchData";
 import { BatchDetailsDialog } from "../BatchDetailsDialog";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface InventoryGridProps {
   currentLocation: "tothai" | "khin";
@@ -20,6 +22,7 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
   const [selectedBatch, setSelectedBatch] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [showExpired, setShowExpired] = useState(false);
+  const [filter, setFilter] = useState<"self-produced" | "external">("self-produced");
 
   const getSelectedQuantity = (itemId: string) => {
     return selectedItems.find(si => si.id === itemId)?.selectedQuantity || 0;
@@ -27,18 +30,6 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
 
   const isExpired = (date: string) => new Date(date) <= new Date();
   const isExpiringSoon = (date: string) => new Date(date) <= new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
-
-  const getExpiryBadge = (expiryDate?: string) => {
-    if (!expiryDate) return null;
-    
-    if (isExpired(expiryDate)) {
-      return <Badge variant="destructive" className="ml-2">Expired</Badge>;
-    }
-    if (isExpiringSoon(expiryDate)) {
-      return <Badge variant="warning" className="ml-2">Expiring Soon</Badge>;
-    }
-    return <Badge variant="default" className="ml-2">Fresh</Badge>;
-  };
 
   const handleBatchClick = (batch: any) => {
     const batchDetails = {
@@ -97,127 +88,144 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
+  const renderInventoryItem = (item: any) => {
+    const selectedQty = getSelectedQuantity(item.id);
+    const expired = item.expiryDate && isExpired(item.expiryDate);
+    const expiringSoon = item.expiryDate && isExpiringSoon(item.expiryDate);
+
+    return (
+      <div 
+        key={item.id} 
+        className={`bg-white border border-gray-200 rounded-lg p-6 ${expired ? 'opacity-60' : ''}`}
+      >
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex-1">
+            <div 
+              className={item.type === 'batch' ? "cursor-pointer" : ""}
+              onClick={item.type === 'batch' ? () => handleBatchClick(item) : undefined}
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">{item.name}</h3>
+              {item.type === 'batch' ? (
+                <>
+                  <p className="text-sm text-gray-600 mb-1">Batch: {item.batchNumber} • Available: {item.availableQuantity}</p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    Source: {item.chef?.name} • Production: {item.productionDate ? format(new Date(item.productionDate), "yyyy-MM-dd") : 'N/A'}
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-gray-600 mb-2">Source: External Supplier • Production: N/A</p>
+              )}
+            </div>
+            
+            <div className="flex gap-2 mb-3">
+              {item.type === 'batch' ? (
+                <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200">
+                  Made In-House
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                  External
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-col items-end gap-2">
+            <div className="text-right">
+              <div className="text-2xl font-bold text-green-600">
+                {item.availableQuantity || '∞'}
+              </div>
+              <div className="text-sm text-gray-500">
+                {item.type === 'batch' ? (item.unitType === 'bags' ? 'bags' : 'containers') : 'units'} available
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-10 h-10 p-0 text-lg font-bold"
+              onClick={() => onQuantityChange(item.id, -1)}
+              disabled={selectedQty === 0 || expired}
+            >
+              -
+            </Button>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold w-12 text-center">{selectedQty}</span>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-10 h-10 p-0 text-lg font-bold"
+              onClick={() => onQuantityChange(item.id, 1)}
+              disabled={item.availableQuantity && selectedQty >= item.availableQuantity || expired}
+            >
+              +
+            </Button>
+          </div>
+
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+            onClick={() => onQuantityChange(item.id, 1)}
+            disabled={item.availableQuantity && selectedQty >= item.availableQuantity || expired}
+          >
+            Add
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Available Inventory</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="w-5 h-5" />
+            Available Inventory
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {/* Self-Produced Products */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-green-800">Self-Produced Products</h3>
-                {expiredBatches.length > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowExpired(!showExpired)}
-                    className="flex items-center gap-2"
-                  >
-                    {showExpired ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    {showExpired ? 'Hide' : 'Show'} Expired ({expiredBatches.length})
-                  </Button>
-                )}
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {batchesToShow.map(batch => {
-                  const selectedQty = getSelectedQuantity(batch.id);
-                  const expired = batch.expiryDate && isExpired(batch.expiryDate);
-                  return (
-                    <div key={batch.id} className={`border rounded-lg p-4 ${expired ? 'opacity-60 bg-red-50' : 'bg-white'}`}>
-                      <div 
-                        className="cursor-pointer hover:bg-muted/50 -m-4 p-4 rounded-lg transition-colors"
-                        onClick={() => handleBatchClick(batch)}
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <h4 className="font-medium">{batch.name}</h4>
-                            <p className="text-sm text-muted-foreground">Batch: {batch.batchNumber}</p>
-                            {batch.expiryDate && (
-                              <p className="text-sm text-muted-foreground">
-                                Expires: {format(new Date(batch.expiryDate), "MMM dd, yyyy")}
-                              </p>
-                            )}
-                            <p className="text-sm">Available: {batch.availableQuantity}</p>
-                          </div>
-                          {batch.expiryDate && getExpiryBadge(batch.expiryDate)}
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-between mt-3">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onQuantityChange(batch.id, -1);
-                            }}
-                            disabled={selectedQty === 0 || expired}
-                          >
-                            <Minus className="w-3 h-3" />
-                          </Button>
-                          <span className="w-8 text-center">{selectedQty}</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onQuantityChange(batch.id, 1);
-                            }}
-                            disabled={selectedQty >= (batch.availableQuantity || 0) || expired}
-                          >
-                            <Plus className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+            {/* Filter Toggle */}
+            <div className="flex items-center gap-4">
+              <ToggleGroup type="single" value={filter} onValueChange={(value) => value && setFilter(value as "self-produced" | "external")}>
+                <ToggleGroupItem 
+                  value="self-produced" 
+                  className="data-[state=on]:bg-orange-100 data-[state=on]:text-orange-800 data-[state=on]:border-orange-200"
+                >
+                  Self-produced
+                </ToggleGroupItem>
+                <ToggleGroupItem 
+                  value="external"
+                  className="data-[state=on]:bg-green-100 data-[state=on]:text-green-800 data-[state=on]:border-green-200"
+                >
+                  External
+                </ToggleGroupItem>
+              </ToggleGroup>
+
+              {filter === "self-produced" && expiredBatches.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowExpired(!showExpired)}
+                  className="flex items-center gap-2"
+                >
+                  {showExpired ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showExpired ? 'Hide' : 'Show'} Expired ({expiredBatches.length})
+                </Button>
+              )}
             </div>
 
-            {/* External Products */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4 text-blue-800">External Products</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {availableExternal.map(product => {
-                  const selectedQty = getSelectedQuantity(product.id);
-                  return (
-                    <div key={product.id} className="border rounded-lg p-4 bg-white">
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h4 className="font-medium">{product.name}</h4>
-                        </div>
-                        <Badge variant="outline">External</Badge>
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onQuantityChange(product.id, -1)}
-                            disabled={selectedQty === 0}
-                          >
-                            <Minus className="w-3 h-3" />
-                          </Button>
-                          <span className="w-8 text-center">{selectedQty}</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onQuantityChange(product.id, 1)}
-                          >
-                            <Plus className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+            {/* Inventory List */}
+            <div className="space-y-4">
+              {filter === "self-produced" && batchesToShow.map(renderInventoryItem)}
+              {filter === "external" && availableExternal.map(renderInventoryItem)}
             </div>
           </div>
         </CardContent>
