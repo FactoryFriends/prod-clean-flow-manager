@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { NewBatchDialog } from "./NewBatchDialog";
+import { EmbeddedBatchForm } from "./EmbeddedBatchForm";
 import { LabelPrintDialog } from "./LabelPrintDialog";
 import { useProductionBatches, ProductionBatch } from "@/hooks/useProductionData";
 import { Search, Filter, Printer, Edit, X } from "lucide-react";
@@ -107,8 +107,9 @@ export function Production({ currentLocation }: ProductionProps) {
             Manage production batches at {getLocationName(currentLocation)}
           </p>
         </div>
-        <NewBatchDialog currentLocation={currentLocation} />
       </div>
+
+      <EmbeddedBatchForm currentLocation={currentLocation} />
 
       <div className="flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1">
@@ -153,7 +154,7 @@ export function Production({ currentLocation }: ProductionProps) {
             <p className="text-muted-foreground">
               {searchTerm || filterStatus !== "all" 
                 ? "No batches match your search criteria" 
-                : "No production batches found. Create your first batch to get started!"
+                : "No production batches found. Create your first batch using the form above!"
               }
             </p>
           </CardContent>
