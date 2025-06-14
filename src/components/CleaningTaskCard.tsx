@@ -1,4 +1,3 @@
-
 import { AlertTriangle } from "lucide-react";
 import { TaskIcon } from "./task/TaskIcon";
 import { TaskHeader } from "./task/TaskHeader";
@@ -24,7 +23,7 @@ interface CleaningTask {
   actual_duration: number | null;
   favv_compliance: boolean | null;
   template_id: string | null;
-  assigned_role: "chef" | "cleaner" | "other" | null;
+  assigned_role: "chef" | "cleaner" | null;
   requires_photo: boolean | null;
 }
 

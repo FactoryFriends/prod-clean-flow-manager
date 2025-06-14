@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +17,7 @@ interface TaskTemplateFormData {
   monthly_day_of_month?: number;
   quarterly_start_month?: number;
   estimated_duration: number;
-  assigned_role: "chef" | "cleaner" | "other";
+  assigned_role: "chef" | "cleaner";
   favv_compliance: boolean;
   requires_photo: boolean;
 }
@@ -43,7 +42,7 @@ export function TaskTemplateForm({ editingTemplate, onSuccess, onCancel }: TaskT
       monthly_day_of_month: editingTemplate?.monthly_day_of_month,
       quarterly_start_month: editingTemplate?.quarterly_start_month,
       estimated_duration: editingTemplate?.estimated_duration || 30,
-      assigned_role: editingTemplate?.assigned_role || "other",
+      assigned_role: editingTemplate?.assigned_role || "cleaner",
       favv_compliance: editingTemplate?.favv_compliance || false,
       requires_photo: editingTemplate?.requires_photo || false,
     },
@@ -271,7 +270,6 @@ export function TaskTemplateForm({ editingTemplate, onSuccess, onCancel }: TaskT
                     <SelectContent>
                       <SelectItem value="chef">Chef</SelectItem>
                       <SelectItem value="cleaner">Cleaner</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>

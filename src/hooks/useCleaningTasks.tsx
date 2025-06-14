@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useStaffCodes } from "./useStaffCodes";
@@ -22,7 +21,7 @@ interface CleaningTask {
   actual_duration: number | null;
   favv_compliance: boolean | null;
   template_id: string | null;
-  assigned_role: "chef" | "cleaner" | "other" | null;
+  assigned_role: "chef" | "cleaner" | null;
   requires_photo: boolean | null;
 }
 
@@ -185,8 +184,8 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
     return diffHours >= 72;
   };
 
-  // Group tasks by role
-  const getTasksByRole = (role: "chef" | "cleaner" | "other") => {
+  // Group tasks by role (updated to only include chef and cleaner)
+  const getTasksByRole = (role: "chef" | "cleaner") => {
     return cleaningTasks.filter(task => task.assigned_role === role);
   };
 

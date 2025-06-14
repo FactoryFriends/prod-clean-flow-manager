@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Badge } from "../ui/badge";
@@ -13,7 +12,7 @@ interface CleaningTask {
   location: "tothai" | "khin";
   scheduled_date: string;
   completed_at: string | null;
-  assigned_role: "chef" | "cleaner" | "other" | null;
+  assigned_role: "chef" | "cleaner" | null;
   favv_compliance: boolean | null;
   estimated_duration: number | null;
   actual_duration: number | null;
@@ -46,7 +45,6 @@ export function CleaningTaskDetailsModal({ task, isOpen, onClose }: CleaningTask
     switch (role) {
       case "chef": return "bg-orange-100 text-orange-800";
       case "cleaner": return "bg-green-100 text-green-800";
-      case "other": return "bg-gray-100 text-gray-800";
       default: return "bg-gray-100 text-gray-800";
     }
   };

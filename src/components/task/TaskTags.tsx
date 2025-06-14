@@ -3,7 +3,7 @@ import { StatusBadge } from "../StatusBadge";
 import { Badge } from "../ui/badge";
 
 interface TaskTagsProps {
-  assignedRole: "chef" | "cleaner" | "other" | null;
+  assignedRole: "chef" | "cleaner" | null;
   favvCompliance: boolean | null;
   status: "open" | "closed";
 }

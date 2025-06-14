@@ -1,4 +1,3 @@
-
 import { ChefHat, Sparkles, Users, AlertTriangle, Calendar } from "lucide-react";
 import { useState } from "react";
 import { useCleaningTasks } from "@/hooks/useCleaningTasks";
@@ -17,7 +16,7 @@ interface CleaningTasksProps {
 export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedLocation, setSelectedLocation] = useState<"tothai" | "khin">("tothai");
-  const [filterRole, setFilterRole] = useState<"all" | "chef" | "cleaner" | "other">("all");
+  const [filterRole, setFilterRole] = useState<"all" | "chef" | "cleaner">("all");
   const isMobile = useIsMobile();
 
   // Map location IDs to database values
