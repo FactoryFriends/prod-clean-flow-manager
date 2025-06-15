@@ -101,7 +101,9 @@ export function NewBatchDialog({ currentLocation }: NewBatchDialogProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="packages">Number of Packages Produced</Label>
+            <Label htmlFor="packages">
+              Number of Packages{selectedProduct?.unit_type === "PIECE" ? "/Bags" : ""} Produced
+            </Label>
             <Input
               id="packages"
               type="number"
@@ -109,7 +111,11 @@ export function NewBatchDialog({ currentLocation }: NewBatchDialogProps) {
               pattern="[0-9]*"
               value={packagesProduced}
               onChange={(e) => setPackagesProduced(e.target.value)}
-              placeholder="Enter number of packages"
+              placeholder={
+                selectedProduct?.unit_type === "PIECE"
+                  ? "e.g. 20 (bags of 30 pieces)"
+                  : "Enter number of packages"
+              }
               min="1"
             />
             {selectedProduct && (
@@ -120,6 +126,11 @@ export function NewBatchDialog({ currentLocation }: NewBatchDialogProps) {
                 <p className="text-xs italic text-blue-800">
                   Tip: You can adjust this value if you made a smaller or larger batch than usual.
                 </p>
+                {selectedProduct.unit_type === "PIECE" && (
+                  <p className="text-xs mt-1 text-blue-700">
+                    For example, if you made 600 spring rolls and pack 30 per bag: enter 20 for "Number of Packages/Bags".
+                  </p>
+                )}
               </div>
             )}
           </div>

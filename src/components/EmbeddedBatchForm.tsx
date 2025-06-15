@@ -116,7 +116,9 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="packages">Number of Packages</Label>
+            <Label htmlFor="packages">
+              Number of Packages{selectedProduct?.unit_type === "PIECE" ? "/Bags" : ""} Produced
+            </Label>
             <Input
               id="packages"
               type="number"
@@ -124,7 +126,11 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
               pattern="[0-9]*"
               value={packagesProduced}
               onChange={(e) => setPackagesProduced(e.target.value)}
-              placeholder="Enter packages"
+              placeholder={
+                selectedProduct?.unit_type === "PIECE"
+                  ? "e.g. 20 (bags of 30 pieces)"
+                  : "Enter number of packages"
+              }
               min="1"
               className="bg-white"
             />
@@ -136,6 +142,11 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
                 <p className="text-xs italic text-blue-800">
                   You can change this if you produced more or less than the usual batch.
                 </p>
+                {selectedProduct.unit_type === "PIECE" && (
+                  <p className="text-xs mt-1 text-blue-700">
+                    For example, if you made 600 spring rolls and pack 30 per bag: enter 20 for "Number of Packages/Bags".
+                  </p>
+                )}
               </>
             )}
           </div>
