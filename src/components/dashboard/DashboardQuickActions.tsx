@@ -34,7 +34,7 @@ export function DashboardQuickActions({ onSectionChange }: DashboardQuickActions
         </button>
         <button 
           onClick={() => onSectionChange('reports:favv')}
-          className="p-4 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors"
+          className="p-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
         >
           <ShieldCheck className="w-6 h-6 mx-auto mb-2" />
           <span className="text-sm font-medium">FAVV Compliance</span>
