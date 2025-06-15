@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -30,6 +29,10 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
     markup_percent: editingProduct?.markup_percent || 0,
     sales_price: editingProduct?.sales_price || 0,
     minimal_margin_threshold_percent: editingProduct?.minimal_margin_threshold_percent || 25,
+    supplier_package_unit: editingProduct?.supplier_package_unit || "",
+    units_per_package: editingProduct?.units_per_package ?? null,
+    inner_unit_type: editingProduct?.inner_unit_type || "",
+    price_per_package: editingProduct?.price_per_package ?? null,
   });
 
   useEffect(() => {
@@ -47,13 +50,25 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
     setFormData((prev) => ({
       ...prev,
       [field]: value,
+      // Automatically update price_per_unit when package fields change
+      ...(field === "price_per_package" || field === "units_per_package"
+        ? {
+            price_per_unit:
+              value && (field === "price_per_package" || prev.units_per_package)
+                ? (
+                    ((field === "price_per_package" ? value : prev.price_per_package) ?? 0) /
+                    ((field === "units_per_package" ? value : prev.units_per_package) || 1)
+                  )
+                : prev.price_per_unit
+          }
+        : {})
     }));
   };
 
   const handlePricingChange = (field: string, value: number) => {
     setFormData((prev) => ({
       ...prev,
-      [field]: value,
+      [field]: value
     }));
   };
 
@@ -64,6 +79,11 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
       product_type === "zelfgemaakt"
         ? "TOTHAI PRODUCTION"
         : formData.supplier_name;
+    // Calculate price_per_unit (for reporting, margin calculations)
+    const pricePerUnit =
+      formData.price_per_package && formData.units_per_package > 0
+        ? formData.price_per_package / formData.units_per_package
+        : formData.price_per_package ?? formData.price_per_unit ?? 0;
 
     const productData: any = {
       name: formData.name,
@@ -93,6 +113,11 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
       markup_percent: Number(formData.markup_percent) || 0,
       sales_price: Number(formData.sales_price) || 0,
       minimal_margin_threshold_percent: Number(formData.minimal_margin_threshold_percent) || 25,
+      supplier_package_unit: formData.supplier_package_unit,
+      units_per_package: formData.units_per_package,
+      inner_unit_type: formData.inner_unit_type,
+      price_per_package: formData.price_per_package,
+      price_per_unit: pricePerUnit,
     };
 
     if (

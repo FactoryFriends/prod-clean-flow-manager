@@ -541,11 +541,13 @@ export type Database = {
           cost: number | null
           created_at: string
           id: string
+          inner_unit_type: string | null
           markup_percent: number | null
           minimal_margin_threshold_percent: number | null
           name: string
           packages_per_batch: number
           pickable: boolean
+          price_per_package: number | null
           price_per_unit: number | null
           product_fiche_url: string | null
           product_kind: string
@@ -554,8 +556,10 @@ export type Database = {
           shelf_life_days: number | null
           supplier_id: string | null
           supplier_name: string | null
+          supplier_package_unit: string | null
           unit_size: number
           unit_type: string
+          units_per_package: number | null
           updated_at: string
         }
         Insert: {
@@ -564,11 +568,13 @@ export type Database = {
           cost?: number | null
           created_at?: string
           id?: string
+          inner_unit_type?: string | null
           markup_percent?: number | null
           minimal_margin_threshold_percent?: number | null
           name: string
           packages_per_batch?: number
           pickable?: boolean
+          price_per_package?: number | null
           price_per_unit?: number | null
           product_fiche_url?: string | null
           product_kind?: string
@@ -577,8 +583,10 @@ export type Database = {
           shelf_life_days?: number | null
           supplier_id?: string | null
           supplier_name?: string | null
+          supplier_package_unit?: string | null
           unit_size: number
           unit_type: string
+          units_per_package?: number | null
           updated_at?: string
         }
         Update: {
@@ -587,11 +595,13 @@ export type Database = {
           cost?: number | null
           created_at?: string
           id?: string
+          inner_unit_type?: string | null
           markup_percent?: number | null
           minimal_margin_threshold_percent?: number | null
           name?: string
           packages_per_batch?: number
           pickable?: boolean
+          price_per_package?: number | null
           price_per_unit?: number | null
           product_fiche_url?: string | null
           product_kind?: string
@@ -600,8 +610,10 @@ export type Database = {
           shelf_life_days?: number | null
           supplier_id?: string | null
           supplier_name?: string | null
+          supplier_package_unit?: string | null
           unit_size?: number
           unit_type?: string
+          units_per_package?: number | null
           updated_at?: string
         }
         Relationships: [

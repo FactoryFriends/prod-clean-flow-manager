@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,6 +11,11 @@ interface ProductMainFieldsProps {
 }
 
 export function ProductMainFields({ formData, onFieldChange }: ProductMainFieldsProps) {
+  const showSupplierPackageFields =
+    formData.product_type === "extern" ||
+    formData.product_type === "ingredient" ||
+    formData.product_type === "drink";
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
@@ -129,9 +133,85 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
             <SelectItem value="zelfgemaakt">Zelfgemaakt</SelectItem>
             <SelectItem value="extern">Extern product</SelectItem>
             <SelectItem value="ingredient">Ingrediënt</SelectItem>
+            <SelectItem value="drink">Drink</SelectItem>
           </SelectContent>
         </Select>
       </div>
+
+      {/* Supplier Package Fields */}
+      {showSupplierPackageFields && (
+        <>
+          <div className="space-y-2">
+            <Label htmlFor="supplier_package_unit">Purchase Unit (e.g. CASE, BOX)</Label>
+            <Input
+              id="supplier_package_unit"
+              type="text"
+              placeholder="e.g. CASE, BOX"
+              value={formData.supplier_package_unit || ""}
+              onChange={e => onFieldChange("supplier_package_unit", e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="units_per_package">
+              Units per Package 
+              <span className="text-xs text-muted-foreground ml-1">(if relevant)</span>
+            </Label>
+            <Input
+              id="units_per_package"
+              type="number"
+              min="1"
+              value={formData.units_per_package ?? ""}
+              placeholder="e.g. 24"
+              onChange={e => onFieldChange("units_per_package", e.target.value ? Number(e.target.value) : null)}
+            />
+            <div className="text-xs text-muted-foreground">
+              Leave blank if not packed as identical units.
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="inner_unit_type">Inner Unit Type (e.g. BOTTLE, LITER, CAN)</Label>
+            <Input
+              id="inner_unit_type"
+              type="text"
+              placeholder="e.g. BOTTLE"
+              value={formData.inner_unit_type || ""}
+              onChange={e => onFieldChange("inner_unit_type", e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="price_per_package">Price per Purchase Package (€)</Label>
+            <Input
+              id="price_per_package"
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.price_per_package ?? ""}
+              onChange={e => onFieldChange("price_per_package", e.target.value ? Number(e.target.value) : null)}
+            />
+          </div>
+          {/* Calculated per unit price */}
+          <div>
+            <Label>Price per Unit (€)</Label>
+            <Input
+              value={
+                formData.price_per_package && formData.units_per_package > 0
+                  ? (formData.price_per_package / formData.units_per_package).toFixed(4)
+                  : (formData.price_per_package
+                    ? Number(formData.price_per_package).toFixed(4)
+                    : "")
+              }
+              readOnly
+              disabled
+              className="bg-gray-100 cursor-not-allowed"
+            />
+            <div className="text-xs text-muted-foreground italic mt-1">
+              {formData.price_per_package && formData.units_per_package > 0
+                ? `Calculated: ${formData.price_per_package} / ${formData.units_per_package}`
+                : `Equal to package price if not packed as units`}
+            </div>
+          </div>
+        </>
+      )}
 
       <ProductSupplierSelect
         value={formData.supplier_id}

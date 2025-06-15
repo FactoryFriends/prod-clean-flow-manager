@@ -30,7 +30,12 @@ interface DrinkFormData {
 }
 
 export function DrinkForm() {
-  const form = useForm<DrinkFormData>({
+  const form = useForm<DrinkFormData & {
+    supplier_package_unit?: string;
+    units_per_package?: number;
+    inner_unit_type?: string;
+    price_per_package?: number;
+  }>({
     defaultValues: {
       name: "",
       unit_size: 1,
@@ -41,6 +46,10 @@ export function DrinkForm() {
       cost: 0,
       markup_percent: 0,
       sales_price: 0,
+      supplier_package_unit: "",
+      units_per_package: undefined,
+      inner_unit_type: "",
+      price_per_package: undefined,
     },
   });
 
@@ -56,6 +65,12 @@ export function DrinkForm() {
     return exists ? "Name already exists – please choose a unique name." : true;
   }
 
+  const supplierPackageUnit = form.watch("supplier_package_unit");
+  const unitsPerPackage = Number(form.watch("units_per_package")) || 1;
+  const innerUnitType = form.watch("inner_unit_type");
+  const pricePerPackage = Number(form.watch("price_per_package")) || 0;
+  const pricePerUnit = unitsPerPackage > 0 ? pricePerPackage / unitsPerPackage : pricePerPackage || 0;
+
   const cost = Number(form.watch("cost")) || 0;
   const markupPercent = Number(form.watch("markup_percent")) || 0;
   const fixedSalesPrice = Number(form.watch("sales_price")) || 0;
@@ -64,7 +79,12 @@ export function DrinkForm() {
   const deltaSalesPrice = calculatedSalesPrice - fixedSalesPrice;
   const deltaColor = deltaSalesPrice >= 0 ? "text-green-700" : "text-red-600";
 
-  const onSubmit = (data: DrinkFormData) => {
+  const onSubmit = (data: DrinkFormData & {
+    supplier_package_unit?: string;
+    units_per_package?: number;
+    inner_unit_type?: string;
+    price_per_package?: number;
+  }) => {
     createProduct.mutate(
       {
         name: data.name,
@@ -86,6 +106,13 @@ export function DrinkForm() {
         cost: Number(data.cost) || 0,
         markup_percent: Number(data.markup_percent) || 0,
         sales_price: Number(data.sales_price) || 0,
+        supplier_package_unit: data.supplier_package_unit,
+        units_per_package: data.units_per_package ? Number(data.units_per_package) : null,
+        inner_unit_type: data.inner_unit_type,
+        price_per_package: data.price_per_package ? Number(data.price_per_package) : null,
+        price_per_unit: data.price_per_package && data.units_per_package
+          ? Number(data.price_per_package) / Number(data.units_per_package)
+          : (data.price_per_package ?? data.price_per_unit ?? 0),
       },
       {
         onSuccess: () => {
@@ -278,6 +305,85 @@ export function DrinkForm() {
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="supplier_package_unit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Purchase Unit (e.g. CASE, BOX)</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. CASE, BOX" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="units_per_package"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Units per Package{" "}
+                  <span className="text-xs text-muted-foreground">(if relevant)</span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 24"
+                    {...field}
+                  />
+                </FormControl>
+                <div className="text-xs text-muted-foreground">
+                  Leave blank if not packed as identical units.
+                </div>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="inner_unit_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Inner Unit Type (e.g. BOTTLE, LITER, CAN)</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. BOTTLE" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="price_per_package"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Price per Purchase Package (€)</FormLabel>
+                <FormControl>
+                  <Input type="number" min="0" step="0.01" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          {/* Calculated per unit price */}
+          <div>
+            <FormLabel>Price per Unit (€)</FormLabel>
+            <Input
+              value={
+                pricePerPackage && unitsPerPackage > 0
+                  ? (pricePerPackage / unitsPerPackage).toFixed(4)
+                  : (pricePerPackage ? pricePerPackage.toFixed(4) : "")
+              }
+              readOnly
+              disabled
+              className="bg-gray-100 cursor-not-allowed"
+            />
+            <div className="text-xs text-muted-foreground italic mt-1">
+              {pricePerPackage && unitsPerPackage > 0
+                ? `Calculated: ${pricePerPackage} / ${unitsPerPackage}`
+                : `Equal to package price if not packed as units`}
+            </div>
+          </div>
+
           <Button type="submit" className="w-full">
             Save Drink
           </Button>
@@ -289,4 +395,4 @@ export function DrinkForm() {
 
 export default DrinkForm;
 
-// File is now over 205 lines. This file is getting long – consider asking me to refactor it into smaller components for maintainability!
+// File is now over 293 lines. This file is getting long – consider asking me to refactor it into smaller components for maintainability!

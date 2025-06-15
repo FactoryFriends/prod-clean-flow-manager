@@ -123,64 +123,82 @@ export function IngredientPriceManager() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Unit</TableHead>
+              <TableHead>Purchase Unit</TableHead>
+              <TableHead>Units/pkg</TableHead>
+              <TableHead>Inner Unit</TableHead>
               <TableHead>Supplier</TableHead>
-              <TableHead>Current Price&nbsp;(&euro;)</TableHead>
-              <TableHead>New Price</TableHead>
+              <TableHead>Current Price/Unit&nbsp;(&euro;)</TableHead>
+              <TableHead>Current Price/Package&nbsp;(&euro;)</TableHead>
+              <TableHead>New Price/Package</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {shownIngredients.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
+                <TableCell colSpan={9} className="text-center text-muted-foreground">
                   No matching ingredients found.
                 </TableCell>
               </TableRow>
             )}
-            {shownIngredients.map(ing => (
-              <TableRow key={ing.id}>
-                <TableCell>{ing.name}</TableCell>
-                <TableCell>{ing.unit_type}</TableCell>
-                <TableCell>
-                  {suppliers.find(sup => sup.id === ing.supplier_id)?.name || "No supplier"}
-                </TableCell>
-                <TableCell>
-                  {typeof ing.price_per_unit === "number"
-                    ? ing.price_per_unit.toFixed(2)
-                    : "—"}
-                </TableCell>
-                <TableCell>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={editingPrice[ing.id] || ""}
-                    placeholder="Enter new price"
-                    className="max-w-[100px]"
-                    onChange={e =>
-                      setEditingPrice(prev => ({
-                        ...prev,
-                        [ing.id]: e.target.value
-                      }))
-                    }
-                  />
-                </TableCell>
-                <TableCell>
-                  <Button
-                    size="sm"
-                    onClick={() => handleAddPrice(ing.id)}
-                    disabled={!editingPrice[ing.id]}
-                  >
-                    Update Price
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {shownIngredients.map(ing => {
+              let perUnit =
+                ing.price_per_package && ing.units_per_package > 0
+                  ? ing.price_per_package / ing.units_per_package
+                  : ing.price_per_package || ing.price_per_unit || 0;
+              return (
+                <TableRow key={ing.id}>
+                  <TableCell>{ing.name}</TableCell>
+                  <TableCell>{ing.supplier_package_unit || "–"}</TableCell>
+                  <TableCell>{ing.units_per_package || "–"}</TableCell>
+                  <TableCell>{ing.inner_unit_type || ing.unit_type}</TableCell>
+                  <TableCell>
+                    {suppliers.find(sup => sup.id === ing.supplier_id)?.name || "No supplier"}
+                  </TableCell>
+                  <TableCell>
+                    {typeof perUnit === "number" && !isNaN(perUnit)
+                      ? perUnit.toFixed(2)
+                      : "—"}
+                  </TableCell>
+                  <TableCell>
+                    {typeof ing.price_per_package === "number"
+                      ? ing.price_per_package.toFixed(2)
+                      : "—"}
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={editingPrice[ing.id] || ""}
+                      placeholder="Enter new package price"
+                      className="max-w-[100px]"
+                      onChange={e =>
+                        setEditingPrice(prev => ({
+                          ...prev,
+                          [ing.id]: e.target.value
+                        }))
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddPrice(ing.id)}
+                      disabled={!editingPrice[ing.id]}
+                    >
+                      Update Price
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
         <div className="text-xs mt-2 text-muted-foreground">
-          All active, external ingredients are listed. Changing the price will immediately be used for new calculations and margin reports. All price changes are stored in cost history.
+          All active, external ingredients/drinks are listed. Set the new price per package (e.g., per case or box). Price per unit will be calculated based on units per package.
+          <br />
+          Changing the package price will immediately update all margin calculations and cost history.
         </div>
       </div>
 
