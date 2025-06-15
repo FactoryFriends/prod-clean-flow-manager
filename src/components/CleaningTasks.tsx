@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useCleaningTasks } from "@/hooks/useCleaningTasks";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -178,27 +177,7 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
             setDetailsModalOpen(false);
             setSelectedTask(null);
           }}
-        >
-          {/* Show photos gallery at bottom if present */}
-          {selectedTask.photo_urls && selectedTask.photo_urls.length > 0 && (
-            <div className="mt-6">
-              <h4 className="font-medium mb-2 flex items-center gap-2">
-                Completion Photos
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {selectedTask.photo_urls.map((url: string, idx: number) => (
-                  <div key={idx} className="aspect-square rounded bg-gray-100 overflow-hidden">
-                    <img
-                      src={url}
-                      alt={`Completion Photo ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </CleaningTaskDetailsModal>
+        />
       )}
     </div>
   );

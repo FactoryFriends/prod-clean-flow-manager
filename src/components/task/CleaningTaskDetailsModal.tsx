@@ -1,7 +1,8 @@
+
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Badge } from "../ui/badge";
-import { CalendarIcon, Clock, User, CheckSquare, Camera } from "lucide-react";
+import { CalendarIcon, Clock, User, CheckSquare } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,7 @@ interface CleaningTask {
   staff_codes?: {
     initials: string;
   } | null;
+  photo_urls?: string[] | null;
 }
 
 interface CleaningTaskDetailsModalProps {
@@ -159,6 +161,26 @@ export function CleaningTaskDetailsModal({ task, isOpen, onClose }: CleaningTask
               <p className="text-sm text-muted-foreground bg-gray-50 p-3 rounded-md">
                 {task.completion_notes}
               </p>
+            </div>
+          )}
+
+          {/* Completion Photos (if any) */}
+          {task.photo_urls && task.photo_urls.length > 0 && (
+            <div>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                Completion Photos
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {task.photo_urls.map((url: string, idx: number) => (
+                  <div key={idx} className="aspect-square rounded bg-gray-100 overflow-hidden">
+                    <img
+                      src={url}
+                      alt={`Completion Photo ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
