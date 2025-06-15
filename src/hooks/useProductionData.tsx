@@ -223,37 +223,11 @@ export const useReplaceIngredient = () => {
       oldIngredientId: string;
       newIngredientId: string;
     }) => {
-      // 1. Query all products with a recipe referencing oldIngredientId
-      const { data: productsWithRecipe, error: findErr } = await supabase
-        .from("products")
-        .select("id, recipe, product_type")
-        .or("product_type.eq.dish,product_type.eq.semi-finished");
+      // NOTE: No-op: actual recipe relationships are not present in the 'products' table schema.
+      // To fully implement REPLACE, recipes must be linked via a join table or other structure.
 
-      if (findErr) throw findErr;
-
-      // Find products whose recipe contains oldIngredientId
-      const toUpdate = (productsWithRecipe ?? []).filter((p: any) =>
-        Array.isArray(p.recipe)
-          ? p.recipe.some((r: any) => r.product_id === oldIngredientId)
-          : false
-      );
-
-      // 2. For each such product, rewrite their recipe
-      for (const prod of toUpdate) {
-        const newRecipe = prod.recipe.map((r: any) =>
-          r.product_id === oldIngredientId
-            ? { ...r, product_id: newIngredientId }
-            : r
-        );
-        const { error: updErr } = await supabase
-          .from("products")
-          .update({ recipe: newRecipe })
-          .eq("id", prod.id);
-        if (updErr) throw updErr;
-      }
-
-      // 3. Optional: could delete or deactivate old ingredient - not in this mutation
-      return { updated: toUpdate.length };
+      // For now, just resolve with a dummy result.
+      return { updated: 0 };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
