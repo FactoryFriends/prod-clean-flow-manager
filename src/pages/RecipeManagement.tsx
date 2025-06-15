@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IngredientForm } from "@/components/ingredients/IngredientForm";
@@ -102,8 +101,8 @@ function IngredientsTab() {
             <h3 className="text-lg font-semibold">{editProduct ? "Edit Ingredient" : "Add Ingredient"}</h3>
             <Button variant="outline" size="sm" onClick={handleCancel}>Cancel</Button>
           </div>
-          {/* Pass editProduct for editing support in the future */}
-          <IngredientForm editProduct={editProduct} onCompleted={handleCancel} />
+          {/* Don't pass editProduct or onCompleted */}
+          <IngredientForm />
         </div>
       ) : (
         <>
@@ -157,7 +156,8 @@ function SemiFinishedTab() {
             <h3 className="text-lg font-semibold">{editProduct ? "Edit Semi-finished" : "Add Semi-finished"}</h3>
             <Button variant="outline" size="sm" onClick={handleCancel}>Cancel</Button>
           </div>
-          <SemiFinishedForm editProduct={editProduct} onCompleted={handleCancel} />
+          {/* Don't pass editProduct or onCompleted */}
+          <SemiFinishedForm />
         </div>
       ) : (
         <>
@@ -211,7 +211,8 @@ function DishesTab() {
             <h3 className="text-lg font-semibold">{editProduct ? "Edit Dish" : "Add Dish"}</h3>
             <Button variant="outline" size="sm" onClick={handleCancel}>Cancel</Button>
           </div>
-          <DishForm editProduct={editProduct} onCompleted={handleCancel} />
+          {/* Use correct props: editingProduct & onSuccess */}
+          <DishForm editingProduct={editProduct} onSuccess={handleCancel} />
         </div>
       ) : (
         <>
@@ -259,4 +260,3 @@ export function RecipeManagement() {
 }
 
 export default RecipeManagement;
-
