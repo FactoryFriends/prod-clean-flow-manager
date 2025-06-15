@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -290,11 +289,19 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
           {/* Recipe */}
           <div>
             <FormLabel>Recipe (Ingredients & Semi-finished)</FormLabel>
-            <RecipeIngredientsInput
-              ingredientOptions={ingredientOptions}
-              recipe={recipe}
-              setRecipe={setRecipe}
-            />
+            {/* Show info if options are empty */}
+            {ingredientOptions.length === 0 ? (
+              <div className="p-2 my-2 rounded bg-yellow-100 text-yellow-900 border border-yellow-300 text-sm flex items-center gap-2">
+                <span className="font-semibold">No ingredients or semi-finished products available!</span>
+                <span className="ml-1">Please create and activate at least one ingredient or semi-finished product first.</span>
+              </div>
+            ) : (
+              <RecipeIngredientsInput
+                ingredientOptions={ingredientOptions}
+                recipe={recipe}
+                setRecipe={setRecipe}
+              />
+            )}
           </div>
 
           {/* Est price display */}
