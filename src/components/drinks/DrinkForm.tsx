@@ -1,10 +1,16 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { useCreateProduct, useAllProducts } from "@/hooks/useProductionData";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { toast } from "sonner";
@@ -18,6 +24,9 @@ interface DrinkFormData {
   supplier_id: string;
   price_per_unit: number;
   active: boolean;
+  cost: number;
+  markup_percent: number;
+  sales_price: number;
 }
 
 export function DrinkForm() {
@@ -29,6 +38,9 @@ export function DrinkForm() {
       supplier_id: "",
       price_per_unit: 0,
       active: true,
+      cost: 0,
+      markup_percent: 0,
+      sales_price: 0,
     },
   });
 
@@ -44,6 +56,14 @@ export function DrinkForm() {
     return exists ? "Name already exists – please choose a unique name." : true;
   }
 
+  const cost = Number(form.watch("cost")) || 0;
+  const markupPercent = Number(form.watch("markup_percent")) || 0;
+  const fixedSalesPrice = Number(form.watch("sales_price")) || 0;
+
+  const calculatedSalesPrice = cost + (cost * markupPercent / 100);
+  const deltaSalesPrice = calculatedSalesPrice - fixedSalesPrice;
+  const deltaColor = deltaSalesPrice >= 0 ? "text-green-700" : "text-red-600";
+
   const onSubmit = (data: DrinkFormData) => {
     createProduct.mutate(
       {
@@ -51,7 +71,8 @@ export function DrinkForm() {
         unit_size: Number(data.unit_size),
         unit_type: data.unit_type,
         packages_per_batch: 1,
-        supplier_name: suppliers.find((s) => s.id === data.supplier_id)?.name || null,
+        supplier_name:
+          suppliers.find((s) => s.id === data.supplier_id)?.name || null,
         price_per_unit: Number(data.price_per_unit),
         shelf_life_days: null,
         product_type: "drink",
@@ -62,6 +83,9 @@ export function DrinkForm() {
         labour_time_minutes: null,
         active: data.active,
         recipe: null,
+        cost: Number(data.cost) || 0,
+        markup_percent: Number(data.markup_percent) || 0,
+        sales_price: Number(data.sales_price) || 0,
       },
       {
         onSuccess: () => {
@@ -164,17 +188,79 @@ export function DrinkForm() {
               <FormItem>
                 <FormLabel>Price per unit (€)</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    {...field}
-                  />
+                  <Input type="number" min="0" step="0.01" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="cost"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cost (€)</FormLabel>
+                <FormControl>
+                  <Input type="number" min="0" step="0.01" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="markup_percent"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Markup (%)</FormLabel>
+                <FormControl>
+                  <Input type="number" min="0" step="0.01" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <div>
+            <FormLabel>Calculated Sales Price (€)</FormLabel>
+            <Input
+              value={calculatedSalesPrice.toFixed(2)}
+              readOnly
+              disabled
+              className="bg-gray-100 cursor-not-allowed"
+            />
+            <div className="text-xs text-muted-foreground italic mt-1">
+              Calculated: Cost + (Cost × Markup %)
+            </div>
+          </div>
+
+          <FormField
+            control={form.control}
+            name="sales_price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fixed Sales Price (€)</FormLabel>
+                <FormControl>
+                  <Input type="number" min="0" step="0.01" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <div>
+            <FormLabel>Delta (€)</FormLabel>
+            <Input
+              value={deltaSalesPrice.toFixed(2)}
+              readOnly
+              disabled
+              className={`bg-gray-100 cursor-not-allowed font-semibold ${deltaColor}`}
+            />
+            <div className={`text-xs mt-1 italic ${deltaColor}`}>
+              {deltaSalesPrice >= 0
+                ? "Fixed sales price is equal or below calculated (OK)"
+                : "Fixed sales price is higher than calculated!"}
+            </div>
+          </div>
 
           <FormField
             control={form.control}
@@ -202,3 +288,5 @@ export function DrinkForm() {
 }
 
 export default DrinkForm;
+
+// File is now over 205 lines. This file is getting long – consider asking me to refactor it into smaller components for maintainability!
