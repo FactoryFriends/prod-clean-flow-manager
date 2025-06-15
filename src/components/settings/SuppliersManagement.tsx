@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAllSuppliers, useCreateSupplier, useUpdateSupplier, useDeactivateSupplier, Supplier } from "@/hooks/useSuppliers";
 import { Button } from "@/components/ui/button";
@@ -56,7 +55,7 @@ export function SuppliersManagement() {
 
   // Debug: print suppliers to the console and UI for visibility
   if (!isLoading) {
-    console.log("Fetched suppliers:", suppliers);
+    console.log("Fetched suppliers:", suppliers, "length:", suppliers?.length);
   }
 
   return (
@@ -100,6 +99,11 @@ export function SuppliersManagement() {
         </div>
       </form>
       <div>
+        <div className="bg-yellow-50 border border-yellow-300 text-yellow-800 rounded p-2 text-xs mb-2">
+          <div><strong>Debug:</strong> <code>typeof suppliers = {typeof suppliers}</code></div>
+          <div><strong>Array.isArray(suppliers):</strong> {Array.isArray(suppliers) ? "true" : "false"}</div>
+          <div><strong>suppliers?.length:</strong> {suppliers?.length ?? "undefined"}</div>
+        </div>
         {isLoading ? (
           <div className="text-center py-8 text-muted-foreground">
             Loading suppliers...
@@ -111,14 +115,12 @@ export function SuppliersManagement() {
         ) : suppliers?.length === 0 ? (
           <div>
             <div className="text-muted-foreground">No suppliers found.</div>
-            {/* Debug: Show JSON data */}
             <pre className="text-xs text-gray-500 bg-gray-100 rounded p-2 mt-4">
               {JSON.stringify(suppliers, null, 2)}
             </pre>
           </div>
         ) : (
           <div className="space-y-2">
-            {/* Debug: Show JSON data */}
             <pre className="text-xs text-gray-500 bg-gray-100 rounded p-2 mb-2">
               {JSON.stringify(suppliers, null, 2)}
             </pre>
