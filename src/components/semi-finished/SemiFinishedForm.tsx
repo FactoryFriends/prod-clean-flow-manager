@@ -146,7 +146,8 @@ export function SemiFinishedForm() {
         product_id: ingredient.id,
         name: ingredient.name,
         qty: ingredientQty,
-        unit: ingredient.unit_type || ingredient.unit || "",
+        // FIX: Use unit_type instead of unit
+        unit: ingredient.unit_type || "",
       },
     ]);
     setSelectedIngredientId("");

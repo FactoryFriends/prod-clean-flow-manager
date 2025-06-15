@@ -87,6 +87,8 @@ export const useCreateProduct = () => {
       pickable: boolean;
       supplier_id?: string | null;
       product_fiche_url?: string | null;
+      labour_time_minutes?: number | null;
+      [key: string]: any;
     }) => {
       const { data, error } = await supabase
         .from("products")
