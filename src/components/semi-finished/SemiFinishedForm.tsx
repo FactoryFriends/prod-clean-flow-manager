@@ -13,10 +13,15 @@ type SemiFinishedFormData = {
   unit_size: number;
   unit_type: string;
   supplier_id?: string;
-  price_per_unit: number;
+  shelf_life_days: number | null;
 };
 
 const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE"];
+
+// Placeholder for calculated price (implement actual logic later)
+function calculatePricePlaceholder() {
+  return "Calculated from recipe";
+}
 
 export function SemiFinishedForm() {
   const form = useForm<SemiFinishedFormData>({
@@ -25,7 +30,7 @@ export function SemiFinishedForm() {
       unit_size: 1,
       unit_type: "KG",
       supplier_id: "",
-      price_per_unit: 0,
+      shelf_life_days: null,
     },
   });
 
@@ -53,9 +58,9 @@ export function SemiFinishedForm() {
         unit_size: Number(data.unit_size),
         unit_type: data.unit_type,
         supplier_name: (data.supplier_id && suppliers.find(s => s.id === data.supplier_id)?.name) || null,
-        price_per_unit: Number(data.price_per_unit) || null,
+        price_per_unit: null, // will be set based on recipe, for now null
         packages_per_batch: 1,
-        shelf_life_days: null,
+        shelf_life_days: data.shelf_life_days ? Number(data.shelf_life_days) : null,
         product_type: "semi-finished",
         product_kind: "semi-finished",
         pickable: false,
@@ -155,19 +160,40 @@ export function SemiFinishedForm() {
             )}
           />
 
+          {/* New shelf life input */}
           <FormField
             control={form.control}
-            name="price_per_unit"
+            name="shelf_life_days"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Estimated price/batch (€)</FormLabel>
+                <FormLabel>Shelf life (days)</FormLabel>
                 <FormControl>
-                  <Input type="number" min="0" step="0.01" {...field} />
+                  <Input
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 7"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          {/* Calculated price/batch field */}
+          <div>
+            <FormLabel>Estimated price/batch (€)</FormLabel>
+            <Input
+              value={calculatePricePlaceholder()}
+              readOnly
+              disabled
+              className="bg-gray-100 cursor-not-allowed"
+            />
+            <div className="text-xs text-muted-foreground italic mt-1">
+              Price is automatically calculated from the ingredient recipe.
+            </div>
+          </div>
 
           <Button type="submit" className="w-full">
             Save Semi-finished Product
