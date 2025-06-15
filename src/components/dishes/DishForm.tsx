@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -7,13 +8,13 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { useCreateProduct, useAllProducts, useUpdateProduct, Product } from "@/hooks/useProductionData";
 import { toast } from "sonner";
 import { RecipeIngredientsInput } from "../semi-finished/RecipeIngredientsInput";
+import { estimatedDishPrice } from "./useEstimatedDishCost";
+import DishPriceSummary from "./DishPriceSummary";
 
 export interface DishFormProps {
   editingProduct?: Product | null;
   onSuccess?: () => void;
 }
-
-const FIXED_LABOUR_COST_PER_MIN = 0.5; // Euro per minute
 
 export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
   const form = useForm({
@@ -56,24 +57,6 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
       : true;
   }
 
-  // Calculate estimated price: sum of recipe costs + labour
-  function estimatedPrice(recipeArr: any[], allProductsArr: Product[], labourMinutes: number): number {
-    let cost = 0;
-    for (const ri of recipeArr) {
-      const matched = allProductsArr?.find(p => p.id === ri.product_id);
-      if (matched && matched.price_per_unit != null && matched.unit_size) {
-        // Convert cost proportionally if possible (qty / unit_size) * price_per_unit
-        cost += (
-          Number(ri.qty) / Number(matched.unit_size)
-        ) * Number(matched.price_per_unit);
-      }
-    }
-    if (labourMinutes && !isNaN(labourMinutes)) {
-      cost += Number(labourMinutes) * FIXED_LABOUR_COST_PER_MIN;
-    }
-    return Math.round(cost * 100) / 100;
-  }
-
   // --- New calculated sales price and delta logic ---
   const recipeVal = recipe;
   const allProductsVal = allProducts;
@@ -81,28 +64,7 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
   const markupPercent = Number(form.watch("markup_percent")) || 0;
   const fixedCost = Number(form.watch("cost")) || 0;
   const fixedSalesPrice = Number(form.watch("sales_price")) || 0;
-
-  // CALCULATED SALES PRICE = cost + (cost * markup_percent/100)
-  const calculatedSalesPrice = fixedCost + (fixedCost * markupPercent / 100);
-
-  // DELTA: calculated - fixed sales price
-  const deltaSalesPrice = calculatedSalesPrice - fixedSalesPrice;
-
-  // For styling delta:
-  const deltaColor = deltaSalesPrice >= 0
-    ? "text-green-700"
-    : "text-red-600";
-
-  // Effective margin calc, alarm if below minimal threshold  
   const minimalMargin = form.watch("minimal_margin_threshold_percent");
-  const marginPct =
-    fixedSalesPrice && fixedCost && Number(fixedSalesPrice) > 0
-      ? ((Number(fixedSalesPrice) - Number(fixedCost)) / Number(fixedSalesPrice)) * 100
-      : null;
-  const showMarginAlarm =
-    marginPct !== null &&
-    minimalMargin !== undefined &&
-    marginPct < minimalMargin;
 
   function onSubmit(data: any) {
     if (recipe.length === 0) {
@@ -116,7 +78,7 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
       unit_size: Number(data.unit_size),
       unit_type: data.unit_type,
       packages_per_batch: 1,
-      price_per_unit: estimatedPrice(recipe, allProducts, data.labour_time_minutes),
+      price_per_unit: estimatedDishPrice(recipe, allProducts, data.labour_time_minutes),
       cost: Number(data.cost) || 0,
       markup_percent: Number(data.markup_percent) || 0,
       sales_price: Number(data.sales_price) || 0,
@@ -165,11 +127,15 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
     }
   }, [editingProduct]);
 
+  const estimatedPriceValue = estimatedDishPrice(
+    recipe,
+    allProducts,
+    Number(form.watch("labour_time_minutes"))
+  );
+
   return (
     <div className="bg-white border p-6 rounded-xl shadow max-w-xl">
       <h2 className="text-xl font-semibold mb-2">{editingProduct ? "Edit Dish" : "Add Dish"}</h2>
-      
-      {/* DEBUGGER REMOVED */}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -292,7 +258,6 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
           {/* Recipe */}
           <div>
             <FormLabel>Recipe (Ingredients & Semi-finished)</FormLabel>
-            {/* Show info if options are empty */}
             {ingredientOptions.length === 0 ? (
               <div className="p-2 my-2 rounded bg-yellow-100 text-yellow-900 border border-yellow-300 text-sm flex items-center gap-2">
                 <span className="font-semibold">No ingredients or semi-finished products available!</span>
@@ -311,19 +276,13 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
           <div>
             <FormLabel>Estimated Price per Unit (€)</FormLabel>
             <Input
-              value={
-                estimatedPrice(
-                  recipe,
-                  allProducts,
-                  Number(form.watch("labour_time_minutes"))
-                ).toFixed(2)
-              }
+              value={estimatedPriceValue.toFixed(2)}
               readOnly
               disabled
               className="bg-gray-100 cursor-not-allowed"
             />
             <div className="text-xs text-muted-foreground italic mt-1">
-              Price is calculated from the cost of selected ingredients/semi-finished per unit and labour time at €{FIXED_LABOUR_COST_PER_MIN.toFixed(2)}/min.
+              Price is calculated from the cost of selected ingredients/semi-finished per unit and labour time at €0.50/min.
             </div>
           </div>
 
@@ -354,19 +313,13 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
             )}
           />
 
-          {/* --- NEW: CALCULATED SALES PRICE --- */}
-          <div>
-            <FormLabel>Calculated Sales Price (€)</FormLabel>
-            <Input
-              value={calculatedSalesPrice.toFixed(2)}
-              readOnly
-              disabled
-              className="bg-gray-100 cursor-not-allowed"
-            />
-            <div className="text-xs text-muted-foreground italic mt-1">
-              Calculated: Cost + (Cost × Markup %)
-            </div>
-          </div>
+          {/* --- SALES PRICE AND MARGIN SUMMARY --- */}
+          <DishPriceSummary
+            cost={fixedCost}
+            markupPercent={markupPercent}
+            fixedSalesPrice={fixedSalesPrice}
+            minimalMargin={minimalMargin}
+          />
 
           {/* SALES PRICE (EDITABLE) */}
           <FormField
@@ -382,22 +335,6 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
             )}
           />
 
-          {/* --- NEW: DELTA --- */}
-          <div>
-            <FormLabel>Delta (€)</FormLabel>
-            <Input
-              value={deltaSalesPrice.toFixed(2)}
-              readOnly
-              disabled
-              className={`bg-gray-100 cursor-not-allowed font-semibold ${deltaColor}`}
-            />
-            <div className={`text-xs mt-1 italic ${deltaColor}`}>
-              {deltaSalesPrice >= 0
-                ? "Fixed sales price is equal or below calculated (OK)"
-                : "Fixed sales price is higher than calculated!"}
-            </div>
-          </div>
-
           {/* Minimal margin threshold */}
           <FormField
             control={form.control}
@@ -411,18 +348,6 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
               </FormItem>
             )}
           />
-          {/* Margin */}
-          <div className="text-sm font-medium mt-2">
-            Effective Margin:{" "}
-            <span className={showMarginAlarm ? "text-red-600" : "text-green-700"}>
-              {marginPct !== null ? `${marginPct.toFixed(2)}%` : "—"}
-            </span>
-            {showMarginAlarm && (
-              <span className="ml-2 text-red-500 font-bold animate-pulse">
-                ⚠ Below minimal threshold!
-              </span>
-            )}
-          </div>
 
           <Button type="submit" className="w-full">
             {editingProduct ? "Update Dish" : "Save Dish"}
