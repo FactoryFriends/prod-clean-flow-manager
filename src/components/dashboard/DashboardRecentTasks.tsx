@@ -14,9 +14,10 @@ interface CompletedTask {
 
 interface DashboardRecentTasksProps {
   todaysCompletedTasks: CompletedTask[];
+  onSectionChange?: (section: string) => void;
 }
 
-export function DashboardRecentTasks({ todaysCompletedTasks }: DashboardRecentTasksProps) {
+export function DashboardRecentTasks({ todaysCompletedTasks, onSectionChange }: DashboardRecentTasksProps) {
   return (
     <div className="bg-card border border-border rounded-lg p-6">
       <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
@@ -46,7 +47,7 @@ export function DashboardRecentTasks({ todaysCompletedTasks }: DashboardRecentTa
           <p className="text-sm text-muted-foreground py-4">No tasks completed today yet</p>
         )}
         <button 
-          onClick={() => window.location.hash = '#reports'}
+          onClick={() => onSectionChange?.('reports')}
           className="w-full text-sm text-primary hover:text-primary/80 underline text-center py-2"
         >
           View All Completed Tasks →

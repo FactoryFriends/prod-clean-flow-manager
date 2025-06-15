@@ -10,9 +10,10 @@ import { DashboardRecentTasks } from "./dashboard/DashboardRecentTasks";
 
 interface DashboardProps {
   currentLocation: string;
+  onSectionChange?: (section: string) => void;
 }
 
-export function Dashboard({ currentLocation }: DashboardProps) {
+export function Dashboard({ currentLocation, onSectionChange }: DashboardProps) {
   // Map location IDs to database values
   const dbLocation = currentLocation === "location1" ? "tothai" : "khin";
   
@@ -90,8 +91,11 @@ export function Dashboard({ currentLocation }: DashboardProps) {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DashboardRecentTasks todaysCompletedTasks={todaysCompletedTasks} />
-        <DashboardQuickActions />
+        <DashboardRecentTasks 
+          todaysCompletedTasks={todaysCompletedTasks} 
+          onSectionChange={onSectionChange}
+        />
+        <DashboardQuickActions onSectionChange={onSectionChange} />
       </div>
     </div>
   );

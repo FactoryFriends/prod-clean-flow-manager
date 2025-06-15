@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Dashboard } from "@/components/Dashboard";
@@ -18,7 +19,7 @@ const Index = () => {
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
-        return <Dashboard currentLocation={currentLocation} />;
+        return <Dashboard currentLocation={currentLocation} onSectionChange={setActiveTab} />;
       case "production":
         return <Production currentLocation={currentLocation} />;
       case "distribution":
@@ -32,7 +33,7 @@ const Index = () => {
       case "reports":
         return <Reports currentLocation={currentLocation} />;
       default:
-        return <Dashboard currentLocation={currentLocation} />;
+        return <Dashboard currentLocation={currentLocation} onSectionChange={setActiveTab} />;
     }
   };
 
