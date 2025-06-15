@@ -189,6 +189,29 @@ export const useDeleteProduct = () => {
   });
 };
 
+export const usePermanentDeleteProduct = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["all-products"] });
+      toast.success("Ingredient permanently deleted.");
+    },
+    onError: (error) => {
+      toast.error("Failed to permanently delete ingredient: " + error.message);
+    },
+  });
+};
+
 export const useChefs = (location?: "tothai" | "khin") => {
   return useQuery({
     queryKey: ["chefs", location],

@@ -3,20 +3,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IngredientForm } from "@/components/ingredients/IngredientForm";
 import { SemiFinishedForm } from "@/components/semi-finished/SemiFinishedForm";
 import { DishForm } from "@/components/dishes/DishForm";
-import { useAllProducts, useDeleteProduct } from "@/hooks/useProductionData";
+import { useAllProducts, useDeleteProduct, usePermanentDeleteProduct } from "@/hooks/useProductionData";
 import { Button } from "@/components/ui/button";
 
-// List table component used for all 3 product types
+// Updated ProductList to include a permanent delete option and graceful handling of missing products
 function ProductList({
   products,
   type,
   onEdit,
   onDeactivate,
+  onPermanentlyDelete,
 }: {
   products: any[];
   type: string;
   onEdit: (product: any) => void;
   onDeactivate: (product: any) => void;
+  onPermanentlyDelete?: (product: any) => void;
 }) {
   if (!products?.length) {
     return (
@@ -57,6 +59,21 @@ function ProductList({
                 >
                   DEACTIVATE
                 </Button>
+                {type === "ingredient" && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      if (window.confirm(
+                        `Are you sure you want to permanently delete "${item.name}"? This action cannot be undone and may affect any recipes using this ingredient.`
+                      )) {
+                        onPermanentlyDelete && onPermanentlyDelete(item);
+                      }
+                    }}
+                  >
+                    DELETE
+                  </Button>
+                )}
               </td>
             </tr>
           ))}
@@ -69,10 +86,11 @@ function ProductList({
 function IngredientsTab() {
   const { data: allProducts = [] } = useAllProducts();
   const deleteProduct = useDeleteProduct();
+  const permanentDeleteProduct = usePermanentDeleteProduct();
   const [showForm, setShowForm] = useState(false);
   const [editProduct, setEditProduct] = useState<any>(null);
 
-  // Filter for ingredients — using 'as any' to access product_kind without TS error
+  // Filter for ingredients only
   const ingredients = allProducts.filter(
     (p) =>
       (p as any).product_kind === "extern" && (p as any).product_type !== "dish"
@@ -90,6 +108,9 @@ function IngredientsTab() {
     if (window.confirm(`Are you sure you want to deactivate "${item.name}"?`)) {
       deleteProduct.mutate(item.id);
     }
+  };
+  const handlePermanentDelete = (item: any) => {
+    permanentDeleteProduct.mutate(item.id);
   };
   const handleCancel = () => {
     setShowForm(false);
@@ -118,6 +139,7 @@ function IngredientsTab() {
             type="ingredient"
             onEdit={handleEdit}
             onDeactivate={handleDeactivate}
+            onPermanentlyDelete={handlePermanentDelete}
           />
         </>
       )}
