@@ -17,6 +17,7 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedLocation, setSelectedLocation] = useState<"tothai" | "khin">("tothai");
   const [filterRole, setFilterRole] = useState<"all" | "chef" | "cleaner">("all");
+  const [showOverdueTasks, setShowOverdueTasks] = useState(false);
   const isMobile = useIsMobile();
   
   // Set help context
@@ -42,13 +43,28 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
 
   const overdueCount = getOverdueTasksCount();
 
-  // Filter tasks by selected date and role
+  // Handle overdue alert click
+  const handleOverdueAlertClick = () => {
+    setShowOverdueTasks(true);
+    setFilterRole("all"); // Show all roles when viewing overdue tasks
+  };
+
+  // Filter tasks by selected date and role, or show overdue tasks
   const filteredTasks = cleaningTasks.filter(task => {
-    const taskDate = task.scheduled_date.split('T')[0];
-    const matchesDate = taskDate === selectedDate;
-    const matchesRole = filterRole === "all" || task.assigned_role === filterRole;
-    const isOpen = task.status === 'open';
-    return matchesDate && matchesRole && isOpen;
+    if (showOverdueTasks) {
+      // Show overdue tasks regardless of date
+      const matchesRole = filterRole === "all" || task.assigned_role === filterRole;
+      const isOpen = task.status === 'open';
+      const isOverdue = isTaskOverdue(task);
+      return matchesRole && isOpen && isOverdue;
+    } else {
+      // Show tasks for selected date
+      const taskDate = task.scheduled_date.split('T')[0];
+      const matchesDate = taskDate === selectedDate;
+      const matchesRole = filterRole === "all" || task.assigned_role === filterRole;
+      const isOpen = task.status === 'open';
+      return matchesDate && matchesRole && isOpen;
+    }
   });
 
   if (isLoading) {
@@ -79,16 +95,17 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
 
   return (
     <div className={cn("space-y-6 p-6", isMobile && "pt-16")}>
-      <OverdueAlert 
-        overdueCount={overdueCount} 
-        locationName={selectedLocation === 'tothai' ? 'ToThai' : 'KHIN'} 
-      />
-
       <TaskScheduleCard
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
         selectedLocation={selectedLocation}
         onLocationChange={setSelectedLocation}
+      />
+
+      <OverdueAlert 
+        overdueCount={overdueCount} 
+        locationName={selectedLocation === 'tothai' ? 'ToThai' : 'KHIN'}
+        onClick={handleOverdueAlertClick}
       />
 
       <RoleFilter
@@ -97,11 +114,13 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
       />
 
       <TasksList
-        selectedDate={selectedDate}
+        selectedDate={showOverdueTasks ? "overdue" : selectedDate}
         filteredTasks={filteredTasks}
         onCompleteTask={handleCompleteTask}
         onReopenTask={handleReopenTask}
         isTaskOverdue={isTaskOverdue}
+        showOverdueTasks={showOverdueTasks}
+        onBackToSchedule={() => setShowOverdueTasks(false)}
       />
     </div>
   );
