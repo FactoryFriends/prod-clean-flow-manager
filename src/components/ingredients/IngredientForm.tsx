@@ -75,9 +75,14 @@ export function IngredientForm() {
   // --- FIX: set supplier_name per constraint before creating product
   const onSubmit = (data: ExtendedIngredientFormData) => {
     let updated: ExtendedIngredientFormData & { supplier_name: string } = { ...data, supplier_name: "" };
+
     if (data.product_kind === "extern") {
       const sup = suppliers.find(s => s.id === data.supplier_id);
-      updated.supplier_name = sup && sup.name ? sup.name : "";
+      if (!sup) {
+        toast.error("Please select a valid supplier before saving an externally purchased ingredient.");
+        return; // prevents submission
+      }
+      updated.supplier_name = sup.name;
     } else {
       updated.supplier_name = "TOTHAI PRODUCTION";
     }
