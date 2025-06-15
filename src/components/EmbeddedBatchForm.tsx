@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -121,6 +120,8 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
             <Input
               id="packages"
               type="number"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={packagesProduced}
               onChange={(e) => setPackagesProduced(e.target.value)}
               placeholder="Enter packages"
