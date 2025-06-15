@@ -35,7 +35,7 @@ export function IngredientForm() {
     const exists = allProducts.some(
       (p) => p.name.trim().toLowerCase() === value.trim().toLowerCase()
     );
-    return exists ? "Naam bestaat al – kies een unieke naam." : true;
+    return exists ? "Name already exists – please choose a unique name." : true;
   }
 
   const onSubmit = (data: IngredientFormData) => {
@@ -62,52 +62,52 @@ export function IngredientForm() {
 
   return (
     <div className="bg-white border p-6 rounded-xl shadow max-w-xl">
-      <h2 className="text-xl font-semibold mb-2">Ingrediënt toevoegen</h2>
+      <h2 className="text-xl font-semibold mb-2">Add Ingredient</h2>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* NAAM (uniek) */}
+          {/* NAME (unique) */}
           <FormField
             control={form.control}
             name="name"
-            rules={{ required: "Naam is verplicht", validate: validateUniqueName }}
+            rules={{ required: "Name is required", validate: validateUniqueName }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Naam</FormLabel>
+                <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="bv. Scampi 13/15 diepvries" {...field} />
+                  <Input placeholder="e.g. Scampi 13/15 frozen" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          {/* PRODUCTSOORT */}
+          {/* PRODUCT TYPE */}
           <FormField
             control={form.control}
             name="product_kind"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Productsoort</FormLabel>
+                <FormLabel>Product Type</FormLabel>
                 <FormControl>
                   <select
                     {...field}
                     className="w-full border rounded-md px-3 py-2 text-sm"
                   >
-                    <option value="zelfgemaakt">Zelfgemaakt</option>
-                    <option value="extern">Extern aangekocht</option>
+                    <option value="zelfgemaakt">Self-made</option>
+                    <option value="extern">Purchased externally</option>
                   </select>
                 </FormControl>
               </FormItem>
             )}
           />
 
-          {/* VERPAKKINGSEENHEID */}
+          {/* PACKAGE SIZE */}
           <FormField
             control={form.control}
             name="unit_size"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Verpakkingseenheid</FormLabel>
+                <FormLabel>Package Size</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.01" min="0" {...field} />
                 </FormControl>
@@ -116,13 +116,13 @@ export function IngredientForm() {
             )}
           />
 
-          {/* EENHEID (dropdown) */}
+          {/* UNIT (dropdown) */}
           <FormField
             control={form.control}
             name="unit_type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Eenheid</FormLabel>
+                <FormLabel>Unit</FormLabel>
                 <FormControl>
                   <select
                     {...field}
@@ -140,13 +140,13 @@ export function IngredientForm() {
             )}
           />
 
-          {/* LEVERANCIER (dropdown) */}
+          {/* SUPPLIER (dropdown) */}
           <FormField
             control={form.control}
             name="supplier_name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Leverancier</FormLabel>
+                <FormLabel>Supplier</FormLabel>
                 <FormControl>
                   <select
                     {...field}
@@ -165,13 +165,13 @@ export function IngredientForm() {
             )}
           />
 
-          {/* PRIJS */}
+          {/* PRICE */}
           <FormField
             control={form.control}
             name="price_per_unit"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Prijs per eenheid (€)</FormLabel>
+                <FormLabel>Price per unit (€)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -185,7 +185,7 @@ export function IngredientForm() {
             )}
           />
 
-          {/* PICKBAAR */}
+          {/* PICKABLE */}
           <FormField
             control={form.control}
             name="pickable"
@@ -197,18 +197,18 @@ export function IngredientForm() {
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
-                <FormLabel className="mb-0">Pickbaar voor distributie</FormLabel>
+                <FormLabel className="mb-0">Pickable for distribution</FormLabel>
               </FormItem>
             )}
           />
 
-          {/* ALLERGENEN */}
+          {/* ALLERGENS */}
           <FormField
             control={form.control}
             name="allergens"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Allergenen</FormLabel>
+                <FormLabel>Allergens</FormLabel>
                 <div className="flex flex-wrap gap-2">
                   {ALLERGENS.map((allergen) => (
                     <label
@@ -235,7 +235,7 @@ export function IngredientForm() {
           />
 
           <Button type="submit" className="w-full">
-            Ingrediënt opslaan
+            Save Ingredient
           </Button>
         </form>
       </Form>
