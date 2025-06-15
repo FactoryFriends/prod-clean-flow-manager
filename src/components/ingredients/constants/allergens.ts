@@ -1,6 +1,6 @@
 
-// Two-language allergen list: display "English / Dutch", but store 'english'
 export const ALLERGENS = [
+  { english: "No Allergens", dutch: "Geen allergenen" }, // <--- added
   { english: "Gluten", dutch: "Gluten" },
   { english: "Crustaceans", dutch: "Schaaldieren" },
   { english: "Eggs", dutch: "Eieren" },
@@ -17,5 +17,5 @@ export const ALLERGENS = [
   { english: "Molluscs", dutch: "Weekdieren" },
 ];
 
-// For select and form storage, always use only the English name:
 export const ALLERGENS_ENGLISH = ALLERGENS.map(a => a.english);
+
