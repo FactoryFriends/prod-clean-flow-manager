@@ -61,18 +61,19 @@ export function useFAVVPackingSlips({
         console.log(`Date filter (end): ${beforeDateFilter} -> ${filteredData.length}`);
       }
 
-      // Apply location filter
-      if (locationFilter === "all") {
-        console.log("Showing all packing slips:", filteredData.length);
-      } else {
+      // Apply location filter - only filter if not "all"
+      if (locationFilter !== "all") {
         const beforeLocationFilter = filteredData.length;
         filteredData = filteredData.filter(slip => {
           if (slip.dispatch_records?.location) {
             return slip.dispatch_records.location === locationFilter;
           }
+          // If no dispatch_records.location, assume it's from the current location
           return true;
         });
         console.log(`Location filter (${locationFilter}): ${beforeLocationFilter} -> ${filteredData.length}`);
+      } else {
+        console.log("Showing all packing slips:", filteredData.length);
       }
 
       // Fetch batch information for each packing slip
@@ -124,6 +125,6 @@ export function useFAVVPackingSlips({
       console.log("Final filtered data with batches:", packingSlipsWithBatches);
       return packingSlipsWithBatches;
     },
-    enabled: enabled && locationFilter !== "tothai",
+    enabled: enabled,
   });
 }
