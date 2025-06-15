@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAllProducts, useUpdateProduct } from "@/hooks/useProductionData";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -22,9 +21,9 @@ export function IngredientPriceManager() {
 
   const { data: suppliers = [] } = useSuppliers();
 
-  // Show ALL active ingredients instead of only external ones
+  // Show ONLY active, external ingredients
   const shownIngredients = allProducts
-    .filter(p => p.active)
+    .filter(p => p.active && p.product_type === "extern")
     .filter(ing => {
       const nameMatch = ing.name.toLowerCase().includes(filterName.trim().toLowerCase());
       const supplierMatch = filterSupplierId
@@ -80,7 +79,7 @@ export function IngredientPriceManager() {
     <div className="space-y-10">
       <div>
         <h2 className="text-xl font-bold flex items-center gap-2 mb-2">
-          <BadgeDollarSign className="w-6 h-6" /> Ingredient Prices (Active Only)
+          <BadgeDollarSign className="w-6 h-6" /> Ingredient Prices (Active, External Only)
         </h2>
         {/* Filtering Controls */}
         <div className="flex flex-wrap gap-4 items-end mb-4">
@@ -179,7 +178,7 @@ export function IngredientPriceManager() {
           </TableBody>
         </Table>
         <div className="text-xs mt-2 text-muted-foreground">
-          All active ingredients are listed. Changing the price will immediately be used for new calculations and margin reports. All price changes are stored in cost history.
+          All active, external ingredients are listed. Changing the price will immediately be used for new calculations and margin reports. All price changes are stored in cost history.
         </div>
       </div>
 
@@ -234,4 +233,3 @@ export function IngredientPriceManager() {
 }
 
 export default IngredientPriceManager;
-
