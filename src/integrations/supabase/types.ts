@@ -507,7 +507,9 @@ export type Database = {
           name: string
           packages_per_batch: number
           price_per_unit: number | null
+          product_type: string
           shelf_life_days: number | null
+          supplier_name: string | null
           unit_size: number
           unit_type: string
           updated_at: string
@@ -519,7 +521,9 @@ export type Database = {
           name: string
           packages_per_batch?: number
           price_per_unit?: number | null
+          product_type?: string
           shelf_life_days?: number | null
+          supplier_name?: string | null
           unit_size: number
           unit_type: string
           updated_at?: string
@@ -531,7 +535,9 @@ export type Database = {
           name?: string
           packages_per_batch?: number
           price_per_unit?: number | null
+          product_type?: string
           shelf_life_days?: number | null
+          supplier_name?: string | null
           unit_size?: number
           unit_type?: string
           updated_at?: string

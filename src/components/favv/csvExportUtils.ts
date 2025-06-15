@@ -87,11 +87,10 @@ export const exportPackingSlipsCSV = (packingSlips: PackingSlip[]) => {
     return;
   }
 
-  // Header 'Location' vervangen door 'Produced By'
   const csvHeaders = [
     "Packing Slip Number",
     "Date Created",
-    "Produced By", // was "Location"
+    "Produced By",
     "Destination",
     "Dispatch Type",
     "Customer",
@@ -106,26 +105,26 @@ export const exportPackingSlipsCSV = (packingSlips: PackingSlip[]) => {
     "Batchnummer"
   ];
 
-  // Per lijn correcte waarde voor 'Produced By'
   const csvData: string[][] = [];
 
   packingSlips.forEach((slip) => {
-    // Functie om produced by te bepalen
-    let producedByVal = "";
-    if (slip.dispatch_records?.location === "tothai") {
-      producedByVal = "TOTHAI PRODUCTION";
-    } else if (slip.destination) {
-      producedByVal = slip.destination;
-    } else {
-      producedByVal = ""; // fallback leeg
-    }
-
+    // Custom: For every batch, determine correct Produced By
     if (slip.batches && slip.batches.length > 0) {
       slip.batches.forEach((batch) => {
+        // Normaal zit hier products.product_type en supplier_name
+        let producedByVal = "";
+        if (batch.products?.product_type === "zelfgemaakt") {
+          producedByVal = "TOTHAI PRODUCTION";
+        } else if (batch.products?.product_type === "extern" && batch.products?.supplier_name) {
+          producedByVal = batch.products.supplier_name;
+        } else {
+          producedByVal = "";
+        }
+
         csvData.push([
           slip.slip_number,
           format(new Date(slip.created_at), "yyyy-MM-dd HH:mm"),
-          producedByVal, // nieuwe waarde!
+          producedByVal,
           slip.destination,
           slip.dispatch_records?.dispatch_type || "",
           slip.dispatch_records?.customer || "",
@@ -141,10 +140,20 @@ export const exportPackingSlipsCSV = (packingSlips: PackingSlip[]) => {
         ]);
       });
     } else {
+      // fallback voor packing slip zonder batch info
+      let producedByVal = "";
+      if (slip.dispatch_records?.location === "tothai") {
+        producedByVal = "TOTHAI PRODUCTION";
+      } else if (slip.destination) {
+        producedByVal = slip.destination;
+      } else {
+        producedByVal = "";
+      }
+
       csvData.push([
         slip.slip_number,
         format(new Date(slip.created_at), "yyyy-MM-dd HH:mm"),
-        producedByVal, // nieuwe waarde!
+        producedByVal,
         slip.destination,
         slip.dispatch_records?.dispatch_type || "",
         slip.dispatch_records?.customer || "",

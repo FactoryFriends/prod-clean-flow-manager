@@ -11,6 +11,8 @@ export interface Product {
   shelf_life_days: number | null;
   price_per_unit: number | null;
   active: boolean;
+  product_type: string; // 'zelfgemaakt' | 'extern'
+  supplier_name: string | null;
 }
 
 export interface Chef {
@@ -77,6 +79,8 @@ export const useCreateProduct = () => {
       packages_per_batch: number;
       shelf_life_days: number | null;
       price_per_unit: number | null;
+      product_type: string;
+      supplier_name: string;
     }) => {
       const { data, error } = await supabase
         .from("products")
@@ -102,7 +106,10 @@ export const useUpdateProduct = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, ...productData }: {
+    mutationFn: async ({
+      id,
+      ...productData
+    }: {
       id: string;
       name: string;
       unit_size: number;
@@ -111,6 +118,8 @@ export const useUpdateProduct = () => {
       shelf_life_days: number | null;
       price_per_unit: number | null;
       active: boolean;
+      product_type: string;
+      supplier_name: string;
     }) => {
       const { data, error } = await supabase
         .from("products")

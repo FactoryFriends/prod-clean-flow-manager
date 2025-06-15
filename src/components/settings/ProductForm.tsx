@@ -22,6 +22,8 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
     shelf_life_days: editingProduct?.shelf_life_days || 7,
     price_per_unit: editingProduct?.price_per_unit || 0,
     active: editingProduct?.active ?? true,
+    product_type: editingProduct?.product_type || "zelfgemaakt",
+    supplier_name: editingProduct?.supplier_name || "TOTHAI PRODUCTION",
   });
 
   const createProduct = useCreateProduct();
@@ -29,7 +31,13 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    let product_type = formData.product_type;
+    let supplier_name =
+      product_type === "zelfgemaakt"
+        ? "TOTHAI PRODUCTION"
+        : formData.supplier_name;
+
     const productData = {
       name: formData.name,
       unit_size: Number(formData.unit_size),
@@ -38,7 +46,14 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
       shelf_life_days: formData.shelf_life_days ? Number(formData.shelf_life_days) : null,
       price_per_unit: formData.price_per_unit ? Number(formData.price_per_unit) : null,
       active: formData.active,
+      product_type: product_type,
+      supplier_name: supplier_name,
     };
+
+    if (product_type === "extern" && (!formData.supplier_name || formData.supplier_name.trim() === "")) {
+      alert("Vul de naam van de externe leverancier in.");
+      return;
+    }
 
     if (editingProduct) {
       updateProduct.mutate({ id: editingProduct.id, ...productData }, {
@@ -127,6 +142,40 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
             min="0"
             value={formData.price_per_unit || ""}
             onChange={(e) => setFormData({ ...formData, price_per_unit: e.target.value ? Number(e.target.value) : null })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="product_type">Type</Label>
+          <Select
+            value={formData.product_type}
+            onValueChange={(value) => {
+              setFormData((prev) => ({
+                ...prev,
+                product_type: value,
+                supplier_name: value === "zelfgemaakt" ? "TOTHAI PRODUCTION" : "",
+              }));
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Kies type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="zelfgemaakt">Zelfgemaakt</SelectItem>
+              <SelectItem value="extern">Extern product</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="supplier_name">Leverancier</Label>
+          <Input
+            id="supplier_name"
+            value={formData.product_type === "zelfgemaakt" ? "TOTHAI PRODUCTION" : formData.supplier_name || ""}
+            disabled={formData.product_type === "zelfgemaakt"}
+            required={formData.product_type === "extern"}
+            placeholder={formData.product_type === "extern" ? "Naam externe leverancier" : ""}
+            onChange={(e) => setFormData({ ...formData, supplier_name: e.target.value })}
           />
         </div>
       </div>
