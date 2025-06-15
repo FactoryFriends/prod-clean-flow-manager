@@ -1,10 +1,10 @@
+
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IngredientForm } from "@/components/ingredients/IngredientForm";
 import { SemiFinishedForm } from "@/components/semi-finished/SemiFinishedForm";
 import { DishForm } from "@/components/dishes/DishForm";
 import { useAllProducts } from "@/hooks/useProductionData";
-import { useAllDishes } from "@/hooks/useProductionData";
 import { useState } from "react";
 import { useDishAllergens } from "@/components/dishes/DishAllergensUtils";
 import { DishAllergensExport } from "@/components/dishes/DishAllergensExport";
@@ -33,7 +33,7 @@ const rollupAllergens = (dish, allProducts) => {
 
 function DishesTab() {
   const { data: allProducts = [] } = useAllProducts();
-  const { data: dishes = [] } = useAllDishes();
+  const dishes = allProducts.filter(p => p.product_type === "dish");
   const [selectedDish, setSelectedDish] = useState(null);
 
   return (
@@ -140,3 +140,4 @@ export function RecipeManagement() {
 }
 
 export default RecipeManagement;
+
