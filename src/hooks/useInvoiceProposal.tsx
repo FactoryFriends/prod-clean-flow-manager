@@ -34,7 +34,7 @@ export const useInvoiceProposal = (
     queryFn: async (): Promise<InvoiceProposal> => {
       console.log("Fetching invoice proposal for:", { currentLocation, startDate, endDate, productTypeFilter });
 
-      // Get packing slips with their batch information for the period
+      // Get packing slips with their dispatch record information for the period
       const { data: packingSlips, error } = await supabase
         .from("packing_slips")
         .select(`
@@ -42,7 +42,9 @@ export const useInvoiceProposal = (
           slip_number,
           created_at,
           batch_ids,
+          dispatch_id,
           dispatch_records!inner (
+            id,
             location,
             dispatch_type
           )
@@ -74,7 +76,11 @@ export const useInvoiceProposal = (
       const allBatchIds = packingSlips.flatMap(slip => slip.batch_ids || []);
       const uniqueBatchIds = [...new Set(allBatchIds)];
 
+      // Get all dispatch IDs from packing slips
+      const dispatchIds = packingSlips.map(slip => slip.dispatch_id).filter(Boolean);
+
       console.log("Unique batch IDs found:", uniqueBatchIds.length);
+      console.log("Dispatch IDs found:", dispatchIds.length);
 
       const productTotals = new Map<string, InvoiceProposalItem>();
 
@@ -134,7 +140,7 @@ export const useInvoiceProposal = (
           if (!batch || !batch.products) return;
 
           const product = batch.products;
-          if (!product.price_per_unit) return; // Skip products without price
+          const pricePerUnit = product.price_per_unit || 0;
 
           const productKey = `self-${product.id}`;
           
@@ -148,9 +154,9 @@ export const useInvoiceProposal = (
               productId: product.id,
               unitSize: product.unit_size,
               unitType: product.unit_type,
-              pricePerUnit: product.price_per_unit,
+              pricePerUnit: pricePerUnit,
               totalQuantity: item.quantity,
-              totalAmount: item.quantity * product.price_per_unit,
+              totalAmount: item.quantity * pricePerUnit,
               packingSlipCount: 0, // Will be calculated below
               isExternal: false
             });
@@ -175,23 +181,18 @@ export const useInvoiceProposal = (
       }
 
       // Handle external products
-      if (productTypeFilter === "external" || productTypeFilter === "both") {
-        // Get dispatch items for external products
+      if ((productTypeFilter === "external" || productTypeFilter === "both") && dispatchIds.length > 0) {
+        // Get dispatch items for external products from our specific dispatch records
         const { data: externalDispatchItems, error: externalDispatchError } = await supabase
           .from("dispatch_items")
           .select(`
             item_id,
             item_name,
             quantity,
-            dispatch_id,
-            dispatch_records!inner (
-              location,
-              dispatch_type
-            )
+            dispatch_id
           `)
-          .eq("item_type", "external")
-          .eq("dispatch_records.location", currentLocation)
-          .eq("dispatch_records.dispatch_type", "external");
+          .in("dispatch_id", dispatchIds)
+          .eq("item_type", "external");
 
         if (externalDispatchError) {
           console.error("Error fetching external dispatch items:", externalDispatchError);
@@ -200,14 +201,8 @@ export const useInvoiceProposal = (
 
         console.log("Found external dispatch items:", externalDispatchItems?.length || 0);
 
-        // Filter external items by dispatch records that have packing slips in our date range
-        const relevantDispatchIds = packingSlips.map(slip => slip.dispatch_records?.id).filter(Boolean);
-        const filteredExternalItems = externalDispatchItems?.filter(item => 
-          relevantDispatchIds.includes(item.dispatch_id)
-        ) || [];
-
         // Process external items (note: they typically don't have prices in the system)
-        filteredExternalItems.forEach(item => {
+        externalDispatchItems?.forEach(item => {
           const productKey = `external-${item.item_id}`;
           
           if (productTotals.has(productKey)) {
@@ -235,9 +230,9 @@ export const useInvoiceProposal = (
             const productId = item.productId;
             const slipsWithProduct = packingSlips.filter(slip => {
               // Check if any dispatch items in this slip contain this external product
-              return filteredExternalItems.some(extItem => 
+              return externalDispatchItems?.some(extItem => 
                 extItem.item_id === productId && 
-                relevantDispatchIds.includes(extItem.dispatch_id)
+                extItem.dispatch_id === slip.dispatch_id
               );
             });
             
