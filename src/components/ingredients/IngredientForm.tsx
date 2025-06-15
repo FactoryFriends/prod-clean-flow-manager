@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -76,6 +77,7 @@ export function IngredientForm() {
       {
         ...data,
         allergens: data.allergens ?? [],
+        product_type: "ingredient", // <--- FIXED: ensure correct product_type
       },
       {
         onSuccess: () => {
@@ -326,3 +328,4 @@ export function IngredientForm() {
 }
 
 export default IngredientForm;
+
