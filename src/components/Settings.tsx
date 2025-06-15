@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,7 +30,6 @@ export function Settings({ currentLocation }: SettingsProps) {
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [staffCodeDialogOpen, setStaffCodeDialogOpen] = useState(false);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
-  const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
   
   // Filter states
   const [productFilter, setProductFilter] = useState("");
@@ -71,10 +71,6 @@ export function Settings({ currentLocation }: SettingsProps) {
     setEditingTemplate(null);
   };
 
-  const handleCustomerSuccess = () => {
-    setCustomerDialogOpen(false);
-  };
-
   const handleAddNewProduct = () => {
     setEditingProduct(null);
     setProductDialogOpen(true);
@@ -88,10 +84,6 @@ export function Settings({ currentLocation }: SettingsProps) {
   const handleAddNewTemplate = () => {
     setEditingTemplate(null);
     setTemplateDialogOpen(true);
-  };
-
-  const handleAddNewCustomer = () => {
-    setCustomerDialogOpen(true);
   };
 
   return (
@@ -200,15 +192,9 @@ export function Settings({ currentLocation }: SettingsProps) {
         <TabsContent value="customers" className="space-y-4">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Customer Management</CardTitle>
-                  <CardDescription>Manage customer information and delivery details</CardDescription>
-                </div>
-                <Button onClick={handleAddNewCustomer} className="flex items-center gap-2">
-                  <Plus className="w-4 h-4" />
-                  Add New Customer
-                </Button>
+              <div>
+                <CardTitle>Customer Management</CardTitle>
+                <CardDescription>Manage customer information and delivery details</CardDescription>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -272,16 +258,6 @@ export function Settings({ currentLocation }: SettingsProps) {
             onSuccess={handleTemplateSuccess}
             onCancel={() => setTemplateDialogOpen(false)}
           />
-        </DialogContent>
-      </Dialog>
-
-      {/* Customer Dialog */}
-      <Dialog open={customerDialogOpen} onOpenChange={setCustomerDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Add New Customer</DialogTitle>
-          </DialogHeader>
-          <CustomerForm onSuccess={handleCustomerSuccess} />
         </DialogContent>
       </Dialog>
     </div>
