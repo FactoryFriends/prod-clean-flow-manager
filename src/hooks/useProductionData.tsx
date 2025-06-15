@@ -14,6 +14,8 @@ export interface Product {
   product_type: string; // 'zelfgemaakt' | 'extern'
   supplier_name: string | null;
   pickable?: boolean; // <-- ADDED to match database and UI usage
+  supplier_id?: string | null; // <-- ADDED!
+  product_fiche_url?: string | null; // <-- ADDED!
 }
 
 export interface Chef {
@@ -71,7 +73,6 @@ export const useAllProducts = () => {
 
 export const useCreateProduct = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (productData: {
       name: string;
@@ -82,8 +83,10 @@ export const useCreateProduct = () => {
       price_per_unit: number | null;
       product_type: string;
       product_kind: string;
-      supplier_name: string;
+      supplier_name: string | null;
       pickable: boolean;
+      supplier_id?: string | null;
+      product_fiche_url?: string | null;
     }) => {
       const { data, error } = await supabase
         .from("products")
@@ -107,7 +110,6 @@ export const useCreateProduct = () => {
 
 export const useUpdateProduct = () => {
   const queryClient = useQueryClient();
-  
   return useMutation({
     mutationFn: async ({
       id,
@@ -122,7 +124,11 @@ export const useUpdateProduct = () => {
       price_per_unit: number | null;
       active: boolean;
       product_type: string;
-      supplier_name: string;
+      supplier_name: string | null;
+      product_kind: string;
+      pickable: boolean;
+      supplier_id?: string | null;
+      product_fiche_url?: string | null;
     }) => {
       const { data, error } = await supabase
         .from("products")
@@ -130,7 +136,7 @@ export const useUpdateProduct = () => {
         .eq("id", id)
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     },

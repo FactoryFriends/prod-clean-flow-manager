@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { useCreateProduct, useUpdateProduct, Product } from "@/hooks/useProductionData";
 import { useSuppliers } from "@/hooks/useSuppliers";
-import { toast } from "react-toastify";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface ProductFormProps {
   editingProduct?: Product | null;
