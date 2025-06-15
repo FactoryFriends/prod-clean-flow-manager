@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -54,13 +53,28 @@ export const useCreateSupplier = () => {
       if (error) throw error;
       return data as Supplier;
     },
-    onSuccess: () => {
+    onMutate: async (newSupplier) => {
+      await queryClient.cancelQueries({ queryKey: ["suppliers"] });
+      await queryClient.cancelQueries({ queryKey: ["all-suppliers"] });
+      const previous = queryClient.getQueryData(["suppliers"]);
+      const previousAll = queryClient.getQueryData(["all-suppliers"]);
+      const fakeId = "optimistic-" + Date.now();
+      const optimistic = { id: fakeId, ...newSupplier, active: true };
+      if (previous) queryClient.setQueryData(["suppliers"], (old: any) => [...old, optimistic]);
+      if (previousAll) queryClient.setQueryData(["all-suppliers"], (old: any) => [...old, optimistic]);
+      return { previous, previousAll };
+    },
+    onError: (err, variables, ctx: any) => {
+      if (ctx?.previous) queryClient.setQueryData(["suppliers"], ctx.previous);
+      if (ctx?.previousAll) queryClient.setQueryData(["all-suppliers"], ctx.previousAll);
+      toast.error("Failed to add supplier: " + err.message);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["suppliers"] });
       queryClient.invalidateQueries({ queryKey: ["all-suppliers"] });
-      toast.success("Supplier added successfully");
     },
-    onError: (error) => {
-      toast.error("Failed to add supplier: " + error.message);
+    onSuccess: () => {
+      toast.success("Supplier added successfully");
     },
   });
 };
@@ -81,13 +95,30 @@ export const useUpdateSupplier = () => {
       if (error) throw error;
       return data as Supplier;
     },
-    onSuccess: () => {
+    onMutate: async (update) => {
+      await queryClient.cancelQueries({ queryKey: ["suppliers"] });
+      await queryClient.cancelQueries({ queryKey: ["all-suppliers"] });
+      const previous = queryClient.getQueryData(["suppliers"]);
+      const previousAll = queryClient.getQueryData(["all-suppliers"]);
+      queryClient.setQueryData(["suppliers"], (old: any) =>
+        old ? old.map((s: any) => s.id === update.id ? { ...s, ...update } : s) : []
+      );
+      queryClient.setQueryData(["all-suppliers"], (old: any) =>
+        old ? old.map((s: any) => s.id === update.id ? { ...s, ...update } : s) : []
+      );
+      return { previous, previousAll };
+    },
+    onError: (err, variables, ctx: any) => {
+      if (ctx?.previous) queryClient.setQueryData(["suppliers"], ctx.previous);
+      if (ctx?.previousAll) queryClient.setQueryData(["all-suppliers"], ctx.previousAll);
+      toast.error("Failed to update supplier: " + err.message);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["suppliers"] });
       queryClient.invalidateQueries({ queryKey: ["all-suppliers"] });
-      toast.success("Supplier updated successfully");
     },
-    onError: (error) => {
-      toast.error("Failed to update supplier: " + error.message);
+    onSuccess: () => {
+      toast.success("Supplier updated successfully");
     },
   });
 };
@@ -103,13 +134,30 @@ export const useDeactivateSupplier = () => {
       if (error) throw error;
       return id;
     },
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["suppliers"] });
+      await queryClient.cancelQueries({ queryKey: ["all-suppliers"] });
+      const previous = queryClient.getQueryData(["suppliers"]);
+      const previousAll = queryClient.getQueryData(["all-suppliers"]);
+      queryClient.setQueryData(["suppliers"], (old: any) =>
+        old ? old.filter((s: any) => s.id !== id) : []
+      );
+      queryClient.setQueryData(["all-suppliers"], (old: any) =>
+        old ? old.filter((s: any) => s.id !== id) : []
+      );
+      return { previous, previousAll };
+    },
+    onError: (err, variables, ctx: any) => {
+      if (ctx?.previous) queryClient.setQueryData(["suppliers"], ctx.previous);
+      if (ctx?.previousAll) queryClient.setQueryData(["all-suppliers"], ctx.previousAll);
+      toast.error("Failed to deactivate supplier: " + err.message);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["suppliers"] });
       queryClient.invalidateQueries({ queryKey: ["all-suppliers"] });
-      toast.success("Supplier deactivated");
     },
-    onError: (error) => {
-      toast.error("Failed to deactivate supplier: " + error.message);
+    onSuccess: () => {
+      toast.success("Supplier deactivated");
     },
   });
 };

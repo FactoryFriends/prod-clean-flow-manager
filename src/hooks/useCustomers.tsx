@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -60,8 +59,27 @@ export const useCreateCustomer = () => {
 
       if (error) throw error;
     },
-    onSuccess: () => {
+    onMutate: async (_newCustomer) => {
+      await queryClient.cancelQueries({ queryKey: ["customers"] });
+      const previous = queryClient.getQueryData(["customers"]);
+      // Optimistic add (fake id)
+      const fakeId = "optimistic-" + Date.now();
+      const optimistic = { ..._newCustomer, id: fakeId, active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+      if (previous) queryClient.setQueryData(["customers"], (old: any) => [...old, optimistic]);
+      return { previous };
+    },
+    onError: (err, variables, ctx: any) => {
+      if (ctx?.previous) queryClient.setQueryData(["customers"], ctx.previous);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to create customer",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
+    },
+    onSuccess: () => {
       toast({
         title: "Customer Created",
         description: "Customer has been created successfully",
@@ -83,8 +101,26 @@ export const useUpdateCustomer = () => {
 
       if (error) throw error;
     },
-    onSuccess: () => {
+    onMutate: async (payload) => {
+      await queryClient.cancelQueries({ queryKey: ["customers"] });
+      const previous = queryClient.getQueryData(["customers"]);
+      queryClient.setQueryData(["customers"], (old: any) =>
+        old ? old.map((c: any) => c.id === payload.id ? { ...c, ...payload.data } : c) : []
+      );
+      return { previous };
+    },
+    onError: (err, variables, ctx: any) => {
+      if (ctx?.previous) queryClient.setQueryData(["customers"], ctx.previous);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to update customer",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
+    },
+    onSuccess: () => {
       toast({
         title: "Customer Updated",
         description: "Customer has been updated successfully",
@@ -106,8 +142,26 @@ export const useDeleteCustomer = () => {
 
       if (error) throw error;
     },
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["customers"] });
+      const previous = queryClient.getQueryData(["customers"]);
+      queryClient.setQueryData(["customers"], (old: any) =>
+        old ? old.filter((c: any) => c.id !== id) : []
+      );
+      return { previous };
+    },
+    onError: (err, variables, ctx: any) => {
+      if (ctx?.previous) queryClient.setQueryData(["customers"], ctx.previous);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to delete customer",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
+    },
+    onSuccess: () => {
       toast({
         title: "Customer Deleted",
         description: "Customer has been deleted successfully",

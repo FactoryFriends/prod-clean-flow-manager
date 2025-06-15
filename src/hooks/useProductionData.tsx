@@ -110,14 +110,41 @@ export const useCreateProduct = () => {
 
       return data;
     },
-    onSuccess: () => {
+    // Optimistic update:
+    onMutate: async (newProduct) => {
+      await queryClient.cancelQueries({ queryKey: ["products"] });
+      await queryClient.cancelQueries({ queryKey: ["all-products"] });
+      const previousData = queryClient.getQueryData(["products"]);
+      const previousAll = queryClient.getQueryData(["all-products"]);
+      const fakeId = "optimistic-" + Date.now();
+
+      // Optimistically add
+      const optimisticProduct = { id: fakeId, ...newProduct, active: true };
+      if (previousData) {
+        queryClient.setQueryData(["products"], (old: any) =>
+          old ? [...old, optimisticProduct] : [optimisticProduct]
+        );
+      }
+      if (previousAll) {
+        queryClient.setQueryData(["all-products"], (old: any) =>
+          old ? [...old, optimisticProduct] : [optimisticProduct]
+        );
+      }
+      return { previousData, previousAll };
+    },
+    onError: (err, variables, context: any) => {
+      // Rollback
+      if (context?.previousData) queryClient.setQueryData(["products"], context.previousData);
+      if (context?.previousAll) queryClient.setQueryData(["all-products"], context.previousAll);
+      toast.error("Failed to create product: " + (err.message || "Unknown error"));
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["all-products"] });
+    },
+    onSuccess: () => {
       toast.success("Product created successfully");
-    },
-    onError: (error) => {
-      toast.error("Failed to create product: " + error.message);
-    },
+    }
   });
 };
 
@@ -132,7 +159,6 @@ export const useUpdateProduct = () => {
         .eq("id", id)
         .maybeSingle();
       if (fetchError) throw fetchError;
-
       const currentCost = existingProduct?.cost ?? null;
       const { data, error } = await supabase
         .from("products")
@@ -158,60 +184,110 @@ export const useUpdateProduct = () => {
       }
       return data;
     },
-    onSuccess: () => {
+    onMutate: async (update) => {
+      await queryClient.cancelQueries({ queryKey: ["products"] });
+      await queryClient.cancelQueries({ queryKey: ["all-products"] });
+      // Optimistically update
+      const previousData = queryClient.getQueryData(["products"]);
+      const previousAll = queryClient.getQueryData(["all-products"]);
+      queryClient.setQueryData(["products"], (old: any) =>
+        old ? old.map((p: any) => p.id === update.id ? { ...p, ...update } : p) : []
+      );
+      queryClient.setQueryData(["all-products"], (old: any) =>
+        old ? old.map((p: any) => p.id === update.id ? { ...p, ...update } : p) : []
+      );
+      return { previousData, previousAll };
+    },
+    onError: (err, variables, context: any) => {
+      if (context?.previousData) queryClient.setQueryData(["products"], context.previousData);
+      if (context?.previousAll) queryClient.setQueryData(["all-products"], context.previousAll);
+      toast.error("Failed to update product: " + (err.message || "Unknown error"));
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["all-products"] });
+    },
+    onSuccess: () => {
       toast.success("Product updated successfully");
-    },
-    onError: (error) => {
-      toast.error("Failed to update product: " + error.message);
-    },
+    }
   });
 };
 
 export const useDeleteProduct = () => {
   const queryClient = useQueryClient();
-  
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from("products")
         .update({ active: false })
         .eq("id", id);
-      
       if (error) throw error;
     },
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["products"] });
+      await queryClient.cancelQueries({ queryKey: ["all-products"] });
+      const previousData = queryClient.getQueryData(["products"]);
+      const previousAll = queryClient.getQueryData(["all-products"]);
+      // Optimistically remove
+      queryClient.setQueryData(["products"], (old: any) =>
+        old ? old.filter((p: any) => p.id !== id) : []
+      );
+      queryClient.setQueryData(["all-products"], (old: any) =>
+        old ? old.filter((p: any) => p.id !== id) : []
+      );
+      return { previousData, previousAll };
+    },
+    onError: (err, variables, context: any) => {
+      if (context?.previousData) queryClient.setQueryData(["products"], context.previousData);
+      if (context?.previousAll) queryClient.setQueryData(["all-products"], context.previousAll);
+      toast.error("Failed to deactivate product: " + (err.message || "Unknown error"));
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["all-products"] });
+    },
+    onSuccess: () => {
       toast.success("Product deactivated successfully");
-    },
-    onError: (error) => {
-      toast.error("Failed to deactivate product: " + error.message);
-    },
+    }
   });
 };
 
 export const usePermanentDeleteProduct = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from("products")
         .delete()
         .eq("id", id);
-
       if (error) throw error;
     },
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["products"] });
+      await queryClient.cancelQueries({ queryKey: ["all-products"] });
+      const previousData = queryClient.getQueryData(["products"]);
+      const previousAll = queryClient.getQueryData(["all-products"]);
+      // Optimistically remove
+      queryClient.setQueryData(["products"], (old: any) =>
+        old ? old.filter((p: any) => p.id !== id) : []
+      );
+      queryClient.setQueryData(["all-products"], (old: any) =>
+        old ? old.filter((p: any) => p.id !== id) : []
+      );
+      return { previousData, previousAll };
+    },
+    onError: (err, variables, context: any) => {
+      if (context?.previousData) queryClient.setQueryData(["products"], context.previousData);
+      if (context?.previousAll) queryClient.setQueryData(["all-products"], context.previousAll);
+      toast.error("Failed to permanently delete ingredient: " + (err.message || "Unknown error"));
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["all-products"] });
+    },
+    onSuccess: () => {
       toast.success("Ingredient permanently deleted.");
-    },
-    onError: (error) => {
-      toast.error("Failed to permanently delete ingredient: " + error.message);
-    },
+    }
   });
 };
 
