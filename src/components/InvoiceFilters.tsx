@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -55,6 +54,19 @@ export function InvoiceFilters({
       
       onCustomStartDateChange(format(startDate, "yyyy-MM-dd"));
       onCustomEndDateChange(format(endDate, "yyyy-MM-dd"));
+    }
+  };
+
+  const getProductTypeDescription = () => {
+    switch (productTypeFilter) {
+      case "self-produced":
+        return "Alleen zelf geproduceerde producten worden meegenomen";
+      case "external":
+        return "Alleen externe producten worden meegenomen";
+      case "both":
+        return "Zowel zelf geproduceerde als externe producten worden meegenomen";
+      default:
+        return "";
     }
   };
 
@@ -129,12 +141,10 @@ export function InvoiceFilters({
           </Button>
         </div>
         
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground space-y-1">
           <p>• Producten worden gefilterd op basis van geselecteerd type</p>
           <p>• Gebaseerd op packing slip datums en geleverde hoeveelheden</p>
-          <p>• {productTypeFilter === "self-produced" && "Alleen zelf geproduceerde producten worden meegenomen"}</p>
-          <p>• {productTypeFilter === "external" && "Alleen externe producten worden meegenomen"}</p>
-          <p>• {productTypeFilter === "both" && "Zowel zelf geproduceerde als externe producten worden meegenomen"}</p>
+          <p>• {getProductTypeDescription()}</p>
         </div>
       </CardContent>
     </Card>
