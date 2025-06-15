@@ -93,7 +93,9 @@ export function useFAVVPackingSlips({
                   products (
                     name,
                     unit_size,
-                    unit_type
+                    unit_type,
+                    product_type,
+                    supplier_name
                   )
                 `)
                 .in("id", slip.batch_ids);
