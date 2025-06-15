@@ -4,16 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarDays, Plus } from "lucide-react";
+import { CalendarDays, FileText } from "lucide-react";
+import { format, subWeeks, startOfWeek, endOfWeek, subMonths, startOfMonth, endOfMonth } from "date-fns";
 
 interface InvoiceFiltersProps {
-  filterPeriod: "all" | "current" | "custom";
-  onFilterPeriodChange: (period: "all" | "current" | "custom") => void;
+  filterPeriod: "all" | "current" | "custom" | "2weeks" | "1month";
+  onFilterPeriodChange: (period: "all" | "current" | "custom" | "2weeks" | "1month") => void;
   customStartDate: string;
   onCustomStartDateChange: (date: string) => void;
   customEndDate: string;
   onCustomEndDateChange: (date: string) => void;
   currentLocation: "tothai" | "khin";
+  onGenerateProposal: () => void;
 }
 
 export function InvoiceFilters({
@@ -23,11 +25,33 @@ export function InvoiceFilters({
   onCustomStartDateChange,
   customEndDate,
   onCustomEndDateChange,
-  currentLocation
+  currentLocation,
+  onGenerateProposal
 }: InvoiceFiltersProps) {
-  const handleGenerateInvoice = () => {
-    // TODO: Implement automatic invoice generation for current 2-week period
-    console.log("Generating invoice for current period...");
+
+  const handlePeriodChange = (period: "all" | "current" | "custom" | "2weeks" | "1month") => {
+    onFilterPeriodChange(period);
+    
+    // Auto-set dates for predefined periods
+    const today = new Date();
+    
+    if (period === "2weeks") {
+      // Previous 2 weeks
+      const twoWeeksAgo = subWeeks(today, 2);
+      const startDate = startOfWeek(twoWeeksAgo, { weekStartsOn: 1 }); // Monday
+      const endDate = endOfWeek(subWeeks(today, 1), { weekStartsOn: 1 }); // Sunday
+      
+      onCustomStartDateChange(format(startDate, "yyyy-MM-dd"));
+      onCustomEndDateChange(format(endDate, "yyyy-MM-dd"));
+    } else if (period === "1month") {
+      // Previous month
+      const lastMonth = subMonths(today, 1);
+      const startDate = startOfMonth(lastMonth);
+      const endDate = endOfMonth(lastMonth);
+      
+      onCustomStartDateChange(format(startDate, "yyyy-MM-dd"));
+      onCustomEndDateChange(format(endDate, "yyyy-MM-dd"));
+    }
   };
 
   return (
@@ -35,26 +59,26 @@ export function InvoiceFilters({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CalendarDays className="w-5 h-5" />
-          Factuur Filters & Acties
+          Factuurvoorstel Filters
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-col lg:flex-row gap-4 items-end">
           <div className="flex-1">
             <Label htmlFor="period-select">Periode</Label>
-            <Select value={filterPeriod} onValueChange={onFilterPeriodChange}>
+            <Select value={filterPeriod} onValueChange={handlePeriodChange}>
               <SelectTrigger id="period-select">
                 <SelectValue placeholder="Selecteer periode" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="current">Huidige tweewekelijkse periode</SelectItem>
-                <SelectItem value="all">Alle facturen</SelectItem>
+                <SelectItem value="2weeks">Vorige 2 weken</SelectItem>
+                <SelectItem value="1month">Vorige maand</SelectItem>
                 <SelectItem value="custom">Aangepaste periode</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {filterPeriod === "custom" && (
+          {(filterPeriod === "custom" || filterPeriod === "2weeks" || filterPeriod === "1month") && (
             <>
               <div className="flex-1">
                 <Label htmlFor="start-date">Van datum</Label>
@@ -77,10 +101,20 @@ export function InvoiceFilters({
             </>
           )}
 
-          <Button onClick={handleGenerateInvoice} className="flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Genereer Factuur
+          <Button 
+            onClick={onGenerateProposal} 
+            className="flex items-center gap-2"
+            disabled={!customStartDate || !customEndDate}
+          >
+            <FileText className="w-4 h-4" />
+            Genereer Voorstel
           </Button>
+        </div>
+        
+        <div className="text-sm text-muted-foreground">
+          <p>• Alleen zelf geproduceerde producten worden meegenomen</p>
+          <p>• Externe producten worden voorlopig niet doorgefactureerd</p>
+          <p>• Gebaseerd op packing slip datums en geleverde hoeveelheden</p>
         </div>
       </CardContent>
     </Card>

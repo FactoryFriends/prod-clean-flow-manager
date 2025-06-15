@@ -1,29 +1,42 @@
 
 import { Receipt } from "lucide-react";
-import { InvoiceList } from "./InvoiceList";
+import { InvoiceProposal } from "./InvoiceProposal";
 import { InvoiceFilters } from "./InvoiceFilters";
 import { useState } from "react";
+import { format, subWeeks, startOfWeek, endOfWeek } from "date-fns";
 
 interface InvoicingProps {
   currentLocation: "tothai" | "khin";
 }
 
 export function Invoicing({ currentLocation }: InvoicingProps) {
-  const [filterPeriod, setFilterPeriod] = useState<"all" | "current" | "custom">("current");
-  const [customStartDate, setCustomStartDate] = useState<string>("");
-  const [customEndDate, setCustomEndDate] = useState<string>("");
+  const [filterPeriod, setFilterPeriod] = useState<"all" | "current" | "custom" | "2weeks" | "1month">("2weeks");
+  const [showProposal, setShowProposal] = useState(false);
+  
+  // Initialize with previous 2 weeks
+  const today = new Date();
+  const twoWeeksAgo = subWeeks(today, 2);
+  const defaultStartDate = startOfWeek(twoWeeksAgo, { weekStartsOn: 1 });
+  const defaultEndDate = endOfWeek(subWeeks(today, 1), { weekStartsOn: 1 });
+  
+  const [customStartDate, setCustomStartDate] = useState<string>(format(defaultStartDate, "yyyy-MM-dd"));
+  const [customEndDate, setCustomEndDate] = useState<string>(format(defaultEndDate, "yyyy-MM-dd"));
 
   const getLocationName = (location: string) => {
     return location === "tothai" ? "To Thai Restaurant" : "Khin Takeaway";
+  };
+
+  const handleGenerateProposal = () => {
+    setShowProposal(true);
   };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Invoicing</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Factuurvoorstel</h1>
           <p className="text-muted-foreground">
-            Manage invoices and bi-weekly reports for {getLocationName(currentLocation)}
+            Genereer factuurvoorstellen op basis van geleverde producten voor {getLocationName(currentLocation)}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -42,14 +55,16 @@ export function Invoicing({ currentLocation }: InvoicingProps) {
         customEndDate={customEndDate}
         onCustomEndDateChange={setCustomEndDate}
         currentLocation={currentLocation}
+        onGenerateProposal={handleGenerateProposal}
       />
 
-      <InvoiceList
-        currentLocation={currentLocation}
-        filterPeriod={filterPeriod}
-        customStartDate={customStartDate}
-        customEndDate={customEndDate}
-      />
+      {showProposal && customStartDate && customEndDate && (
+        <InvoiceProposal
+          currentLocation={currentLocation}
+          startDate={customStartDate}
+          endDate={customEndDate}
+        />
+      )}
     </div>
   );
 }
