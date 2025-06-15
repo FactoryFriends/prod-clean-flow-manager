@@ -72,6 +72,9 @@ function IngredientsTab() {
   const [showForm, setShowForm] = useState(false);
   const [editProduct, setEditProduct] = useState<any>(null);
 
+  // DEBUG: Print out fetched products
+  console.log("All products (for IngredientsTab):", allProducts);
+
   const ingredients = allProducts.filter((p) => p.product_type === "ingredient");
 
   const handleEdit = (item: any) => {
@@ -127,6 +130,9 @@ function SemiFinishedTab() {
   const [showForm, setShowForm] = useState(false);
   const [editProduct, setEditProduct] = useState<any>(null);
 
+  // DEBUG: Print out fetched products
+  console.log("All products (for SemiFinishedTab):", allProducts);
+
   const semiFinished = allProducts.filter((p) => p.product_type === "semi-finished");
 
   const handleEdit = (item: any) => {
@@ -181,6 +187,9 @@ function DishesTab() {
   const deleteProduct = useDeleteProduct();
   const [showForm, setShowForm] = useState(false);
   const [editProduct, setEditProduct] = useState<any>(null);
+
+  // DEBUG: Print out fetched products
+  console.log("All products (for DishesTab):", allProducts);
 
   const dishes = allProducts.filter((p) => p.product_type === "dish");
 
