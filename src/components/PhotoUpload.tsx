@@ -45,26 +45,40 @@ export function PhotoUpload({ onPhotosUploaded, maxPhotos = 5, required = false 
     setUploadError(null);
 
     try {
+      console.log('Starting photo upload process...');
+      
       const uploadPromises = selectedFiles.map(async (file) => {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         const filePath = `cleaning-tasks/${fileName}`;
 
+        console.log('Uploading file:', fileName);
+
         const { data, error } = await supabase.storage
           .from('cleaning-photos')
-          .upload(filePath, file);
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Upload error:', error);
+          throw error;
+        }
+
+        console.log('Upload successful:', data);
 
         // Get public URL
         const { data: { publicUrl } } = supabase.storage
           .from('cleaning-photos')
           .getPublicUrl(filePath);
 
+        console.log('Public URL:', publicUrl);
         return publicUrl;
       });
 
       const photoUrls = await Promise.all(uploadPromises);
+      console.log('All photos uploaded successfully:', photoUrls);
       onPhotosUploaded(photoUrls);
       setSelectedFiles([]);
     } catch (error) {
