@@ -38,6 +38,14 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
     if (editingProduct?.product_fiche_url) setFormData(f => ({ ...f, product_fiche_url: editingProduct.product_fiche_url }));
   }, [editingProduct]);
 
+  // Calculated Sales Price
+  const fixedCost = Number(formData.cost) || 0;
+  const markupPercent = Number(formData.markup_percent) || 0;
+  const fixedSalesPrice = Number(formData.sales_price) || 0;
+  const calculatedSalesPrice = fixedCost + (fixedCost * markupPercent / 100);
+  const deltaSalesPrice = calculatedSalesPrice - fixedSalesPrice;
+  const deltaColor = deltaSalesPrice >= 0 ? "text-green-700" : "text-red-600";
+
   // Margin calculation helper
   const marginPct = (() => {
     if (!formData.sales_price || !formData.cost) return null;
@@ -304,6 +312,20 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
         />
       </div>
 
+      {/* --- NEW: CALCULATED SALES PRICE --- */}
+      <div>
+        <Label>Calculated Sales Price (€)</Label>
+        <Input
+          value={calculatedSalesPrice.toFixed(2)}
+          readOnly
+          disabled
+          className="bg-gray-100 cursor-not-allowed"
+        />
+        <div className="text-xs text-muted-foreground italic mt-1">
+          Calculated: Cost + (Cost × Markup %)
+        </div>
+      </div>
+
       {/* Sales Price */}
       <div className="space-y-2">
         <Label htmlFor="sales_price">Sales Price (€)</Label>
@@ -315,6 +337,22 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
           value={formData.sales_price ?? ""}
           onChange={e => setFormData({ ...formData, sales_price: e.target.value ? Number(e.target.value) : 0 })}
         />
+      </div>
+
+      {/* --- NEW: DELTA --- */}
+      <div>
+        <Label>Delta (€)</Label>
+        <Input
+          value={deltaSalesPrice.toFixed(2)}
+          readOnly
+          disabled
+          className={`bg-gray-100 cursor-not-allowed font-semibold ${deltaColor}`}
+        />
+        <div className={`text-xs mt-1 italic ${deltaColor}`}>
+          {deltaSalesPrice >= 0
+            ? "Fixed sales price is equal or below calculated (OK)"
+            : "Fixed sales price is higher than calculated!"}
+        </div>
       </div>
 
       {/* Minimal margin threshold */}
