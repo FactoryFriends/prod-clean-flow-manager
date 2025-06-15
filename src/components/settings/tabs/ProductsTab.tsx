@@ -25,12 +25,12 @@ export function ProductsTab({
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Product Management</CardTitle>
-              <CardDescription>Manage products and their specifications</CardDescription>
+              <CardTitle>Semi-finished Management</CardTitle>
+              <CardDescription>Manage semi-finished products and their specifications</CardDescription>
             </div>
             <Button onClick={onAddNewProduct} className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
-              Add New Product
+              Add New Semi-finished
             </Button>
           </div>
         </CardHeader>
@@ -38,7 +38,7 @@ export function ProductsTab({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
-              placeholder="Filter products..."
+              placeholder="Filter semi-finished products..."
               value={productFilter}
               onChange={(e) => setProductFilter(e.target.value)}
               className="pl-10"
@@ -50,3 +50,4 @@ export function ProductsTab({
     </TabsContent>
   );
 }
+
