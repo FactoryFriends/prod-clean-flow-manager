@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -37,10 +36,17 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
   const updateProduct = useUpdateProduct();
   const { data: allProducts = [] } = useAllProducts();
 
-  // Only allow as recipe: ingredients and semi-finished (active)
+  // Updated: Accept all products that are active and are ingredients or semi-finished (from either field)
   const ingredientOptions = allProducts?.filter(
     (p) =>
-      (p.product_type === "ingredient" || p.product_type === "semi-finished") && p.active
+      p.active &&
+      (
+        p.product_type === "ingredient" ||
+        p.product_type === "semi-finished" ||
+        p.product_kind === "ingredient" ||
+        p.product_kind === "semi-finished" ||
+        p.product_kind === "extern" // support legacy filtering for externally bought ingredients
+      )
   ) || [];
 
   // Name uniqueness validation
