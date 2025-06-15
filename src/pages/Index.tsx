@@ -8,6 +8,7 @@ import { CleaningTasks } from "@/components/CleaningTasks";
 import { Settings } from "@/components/Settings";
 import { Invoicing } from "@/components/Invoicing";
 import { Reports } from "@/components/Reports";
+import { LocationHeader } from "@/components/LocationHeader";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
@@ -47,11 +48,17 @@ const Index = () => {
         currentLocation={currentLocation}
         onLocationChange={setCurrentLocation}
       />
-      <main className={`flex-1 transition-all duration-300 ${
-        isMobile ? 'p-4' : 'p-6'
-      } overflow-auto`}>
-        {renderContent()}
-      </main>
+      <div className="flex-1 flex flex-col">
+        <LocationHeader 
+          currentLocation={currentLocation}
+          onLocationChange={setCurrentLocation}
+        />
+        <main className={`flex-1 transition-all duration-300 ${
+          isMobile ? 'p-4' : 'p-6'
+        } overflow-auto`}>
+          {renderContent()}
+        </main>
+      </div>
     </div>
   );
 };

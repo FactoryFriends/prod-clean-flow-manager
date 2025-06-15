@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,18 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// KHIN brand colors
+				khin: {
+					primary: '#ac7f22',
+					secondary: '#000000',
+					accent: '#ffffff'
+				},
+				// ToThai brand colors
+				tothai: {
+					primary: '#f5dd0f',
+					secondary: '#c1b830',
+					accent: '#ab2325'
 				}
 			},
 			borderRadius: {

@@ -62,7 +62,7 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
         </div>
       </div>
       
-      {/* Location switcher */}
+      {/* Location switcher with brand colors */}
       {(!isCollapsed || isMobile) && (
         <div className="p-4 border-b border-sidebar-border">
           <div className="flex gap-1 bg-sidebar-accent/20 rounded-lg p-1">
@@ -70,9 +70,9 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
               onClick={() => onLocationChange("tothai")}
               className={cn(
                 "flex-1 text-xs py-3 px-3 rounded-md transition-colors touch-manipulation",
-                "min-h-[44px] flex items-center justify-center",
+                "min-h-[44px] flex items-center justify-center font-medium",
                 currentLocation === "tothai"
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  ? "bg-tothai-primary text-tothai-accent shadow-sm"
                   : "text-sidebar-foreground/70 hover:text-sidebar-foreground active:bg-sidebar-accent/50"
               )}
             >
@@ -82,9 +82,9 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
               onClick={() => onLocationChange("khin")}
               className={cn(
                 "flex-1 text-xs py-3 px-3 rounded-md transition-colors touch-manipulation",
-                "min-h-[44px] flex items-center justify-center",
+                "min-h-[44px] flex items-center justify-center font-medium",
                 currentLocation === "khin"
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  ? "bg-khin-primary text-khin-accent shadow-sm"
                   : "text-sidebar-foreground/70 hover:text-sidebar-foreground active:bg-sidebar-accent/50"
               )}
             >
