@@ -12,6 +12,9 @@ import { useFAVVPackingSlips } from "../hooks/useFAVVPackingSlips";
 import { useFAVVStockTakes } from "../hooks/useFAVVStockTakes";
 import { useFAVVCompletedTasks } from "../hooks/useFAVVCompletedTasks";
 import { Package, FileText, Brush } from "lucide-react";
+import { BatchesInStockTable } from "./favv/BatchesInStockTable";
+import { BatchMovementsTable } from "./favv/BatchMovementsTable";
+import { useBatchStock } from "@/hooks/useBatchStock";
 
 interface FAVVReportsProps {
   currentLocation: "tothai" | "khin";
@@ -24,6 +27,11 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
   const [taskNameFilter, setTaskNameFilter] = useState<string>("");
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+
+  // New tabs: "in-stock", "movements", "clear"
+  const [batchTab, setBatchTab] = useState<"in-stock" | "movements" | "clear">("in-stock");
+  const [batchSearch, setBatchSearch] = useState("");
+  const [selectedBatch, setSelectedBatch] = useState<any>(null); // For movement dialog
 
   // Use the extracted hooks
   const { data: packingSlips = [], isLoading: isLoadingPackingSlips } = useFAVVPackingSlips({
@@ -45,11 +53,25 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
     taskNameFilter
   });
 
+  // Stock query
+  const { data: batchesInStock = [], isLoading: isLoadingStock } = useBatchStock({
+    location: currentLocation,
+    search: batchSearch,
+    inStockOnly: batchTab === "in-stock",
+  });
+  // All batches for clear tab (show all, filter on batchSearch)
+  const { data: allBatches = [], isLoading: isLoadingAll } = useBatchStock({
+    location: currentLocation,
+    search: batchSearch,
+    inStockOnly: false,
+  });
+
   const handleTaskClick = (task: any) => {
     setSelectedTask(task);
     setIsTaskModalOpen(true);
   };
 
+  // Tab UI
   return (
     <div className="space-y-6">
       <Card>
@@ -60,6 +82,38 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
           </CardDescription>
         </CardHeader>
       </Card>
+
+      <div className="flex flex-col md:flex-row md:items-center md:gap-8 gap-2">
+        <div className="flex gap-1 border rounded-lg px-2 py-1 bg-white shadow-inner w-full max-w-xs">
+          <input
+            type="text"
+            placeholder="Search batch number..."
+            value={batchSearch}
+            onChange={e => setBatchSearch(e.target.value)}
+            className="flex-1 outline-none bg-transparent text-sm"
+          />
+        </div>
+        <div className="flex gap-2 mt-2 md:mt-0">
+          <button 
+            className={`px-3 py-1 rounded-lg border ${batchTab==="in-stock"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
+            onClick={() => setBatchTab("in-stock")}
+          >
+            In Stock
+          </button>
+          <button 
+            className={`px-3 py-1 rounded-lg border ${batchTab==="movements"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
+            onClick={() => setBatchTab("movements")}
+          >
+            Stock Movements
+          </button>
+          <button 
+            className={`px-3 py-1 rounded-lg border ${batchTab==="clear"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
+            onClick={() => setBatchTab("clear")}
+          >
+            Clear/Used
+          </button>
+        </div>
+      </div>
 
       <Tabs defaultValue="produced" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
@@ -78,20 +132,39 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
         </TabsList>
 
         <TabsContent value="produced" className="space-y-6">
-          <OperationsFilters
-            locationFilter={locationFilter}
-            setLocationFilter={setLocationFilter}
-            startDate={startDate}
-            setStartDate={setStartDate}
-            endDate={endDate}
-            setEndDate={setEndDate}
-            onExport={() => exportStockTakesCSV(stockTakes)}
-            exportDisabled={!stockTakes.length}
-            title="Production Overview"
-            description="Filter and view all produced batches"
-          />
+          {/* Tab Content */}
+          {batchTab === "in-stock" && (
+            <BatchesInStockTable
+              batches={batchesInStock}
+              isLoading={isLoadingStock}
+              onBatchClick={setSelectedBatch}
+            />
+          )}
 
-          <StockTakesTable stockTakes={stockTakes} isLoading={isLoadingStockTakes} />
+          {batchTab === "movements" && (
+            <>
+            <BatchesInStockTable
+              batches={allBatches}
+              isLoading={isLoadingAll}
+              onBatchClick={setSelectedBatch}
+            />
+            {selectedBatch && (
+              <BatchMovementsTable 
+                batchId={selectedBatch.id}
+                batchNumber={selectedBatch.batch_number}
+                onClose={() => setSelectedBatch(null)}
+              />
+            )}
+            </>
+          )}
+
+          {batchTab === "clear" && (
+            <BatchesInStockTable
+              batches={allBatches.filter(b => b.packages_in_stock < b.packages_produced)}
+              isLoading={isLoadingAll}
+              onBatchClick={setSelectedBatch}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="dispatched" className="space-y-6">
