@@ -54,6 +54,11 @@ export function SuppliersManagement() {
     }
   }
 
+  // Debug: print suppliers to the console and UI for visibility
+  if (!isLoading) {
+    console.log("Fetched suppliers:", suppliers);
+  }
+
   return (
     <div className="space-y-6">
       <form className="bg-muted p-4 rounded-xl space-y-3" onSubmit={handleSubmit}>
@@ -104,9 +109,19 @@ export function SuppliersManagement() {
             Failed to load suppliers. {error?.message || "Unknown error."}
           </div>
         ) : suppliers?.length === 0 ? (
-          <div className="text-muted-foreground">No suppliers found.</div>
+          <div>
+            <div className="text-muted-foreground">No suppliers found.</div>
+            {/* Debug: Show JSON data */}
+            <pre className="text-xs text-gray-500 bg-gray-100 rounded p-2 mt-4">
+              {JSON.stringify(suppliers, null, 2)}
+            </pre>
+          </div>
         ) : (
           <div className="space-y-2">
+            {/* Debug: Show JSON data */}
+            <pre className="text-xs text-gray-500 bg-gray-100 rounded p-2 mb-2">
+              {JSON.stringify(suppliers, null, 2)}
+            </pre>
             {suppliers?.map((s) => (
               <div
                 key={s.id}
