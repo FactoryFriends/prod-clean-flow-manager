@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
@@ -12,7 +11,7 @@ import { exportPackingSlipsCSV, exportStockTakesCSV, exportCompletedTasksCSV } f
 import { useFAVVPackingSlips } from "../hooks/useFAVVPackingSlips";
 import { useFAVVStockTakes } from "../hooks/useFAVVStockTakes";
 import { useFAVVCompletedTasks } from "../hooks/useFAVVCompletedTasks";
-import { Package, FileText, Broom } from "lucide-react";
+import { Package, FileText, Brush } from "lucide-react";
 
 interface FAVVReportsProps {
   currentLocation: "tothai" | "khin";
@@ -73,7 +72,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
             Packing Lists
           </TabsTrigger>
           <TabsTrigger value="cleaning" className="flex items-center gap-2">
-            <Broom className="w-4 h-4" />
+            <Brush className="w-4 h-4" />
             Cleaning Tasks
           </TabsTrigger>
         </TabsList>
