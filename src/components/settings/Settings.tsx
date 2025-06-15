@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { SettingsAuth } from "@/components/settings/SettingsAuth";
@@ -8,7 +9,7 @@ import { DrinksTab } from "@/components/settings/tabs/DrinksTab";
 import { StaffTab } from "@/components/settings/tabs/StaffTab";
 import { TasksTab } from "@/components/settings/tabs/TasksTab";
 import { CustomersTab } from "@/components/settings/tabs/CustomersTab";
-import { FAVVTab } from "@/components/settings/tabs/FAVVTab";
+// REMOVED: import { FAVVTab } from "@/components/settings/tabs/FAVVTab";
 import { SettingsDialogs } from "@/components/settings/SettingsDialogs";
 import { SystemInfo } from "@/components/settings/SystemInfo";
 import { SuppliersTab } from "@/components/settings/tabs/SuppliersTab";
@@ -131,7 +132,7 @@ export function Settings({ currentLocation }: SettingsProps) {
           setCustomerFilter={setCustomerFilter}
         />
 
-        <FAVVTab currentLocation={currentLocation} />
+        {/* REMOVED: <FAVVTab currentLocation={currentLocation} /> */}
 
         <SuppliersTab />
 
