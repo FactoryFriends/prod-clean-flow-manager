@@ -15,22 +15,34 @@ const defaultInnerUnits = ["BOTTLE", "LITER", "CAN", "PIECE"];
 
 const UnitOptionsContext = createContext<UnitOptionsContextType | undefined>(undefined);
 
+function toUpperTrim(value: string) {
+  return (value ?? "").trim().toUpperCase();
+}
+
 export function UnitOptionsProvider({ children }: { children: ReactNode }) {
   const [purchaseUnits, setPurchaseUnits] = useState<string[]>(defaultPurchaseUnits);
   const [innerUnits, setInnerUnits] = useState<string[]>(defaultInnerUnits);
 
   const addPurchaseUnit = (value: string) => {
+    const normalized = toUpperTrim(value);
+    if (!normalized) return;
     setPurchaseUnits((units) =>
-      units.includes(value) ? units : [...units, value.trim()]
+      units.map(u => toUpperTrim(u)).includes(normalized) ? units : [...units, normalized]
     );
   };
   const addInnerUnit = (value: string) => {
+    const normalized = toUpperTrim(value);
+    if (!normalized) return;
     setInnerUnits((units) =>
-      units.includes(value) ? units : [...units, value.trim()]
+      units.map(u => toUpperTrim(u)).includes(normalized) ? units : [...units, normalized]
     );
   };
-  const removePurchaseUnit = (value: string) => setPurchaseUnits((units) => units.filter((v) => v !== value));
-  const removeInnerUnit = (value: string) => setInnerUnits((units) => units.filter((v) => v !== value));
+  const removePurchaseUnit = (value: string) => setPurchaseUnits((units) =>
+    units.filter((v) => toUpperTrim(v) !== toUpperTrim(value))
+  );
+  const removeInnerUnit = (value: string) => setInnerUnits((units) =>
+    units.filter((v) => toUpperTrim(v) !== toUpperTrim(value))
+  );
 
   return (
     <UnitOptionsContext.Provider

@@ -14,6 +14,7 @@ import {
 import { useCreateProduct, useAllProducts } from "@/hooks/useProductionData";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { toast } from "sonner";
+import { useUnitOptions } from "../shared/UnitOptionsContext";
 
 const DRINK_UNIT_OPTIONS = ["BOTTLE", "CAN", "LITER", "PIECE"];
 
@@ -52,6 +53,9 @@ export function DrinkForm() {
     },
   });
 
+  const { innerUnits, purchaseUnits } = useUnitOptions();
+  const [error, setError] = React.useState<string | null>(null);
+
   const createProduct = useCreateProduct();
   const { data: allProducts } = useAllProducts();
   const { data: suppliers = [] } = useSuppliers();
@@ -62,6 +66,12 @@ export function DrinkForm() {
       (p) => p.name.trim().toLowerCase() === value.trim().toLowerCase()
     );
     return exists ? "Name already exists – please choose a unique name." : true;
+  }
+
+  function validatePositive(v: any, label: string) {
+    const n = Number(v);
+    if (isNaN(n) || n <= 0) return `${label} must be a positive number`;
+    return true;
   }
 
   const supplierPackageUnit = form.watch("supplier_package_unit");
@@ -79,38 +89,39 @@ export function DrinkForm() {
   const deltaColor = deltaSalesPrice >= 0 ? "text-green-700" : "text-red-600";
 
   const onSubmit = (data: DrinkFormData) => {
+    setError(null);
+    // Prevent empty/invalid units
+    if (!data.unit_type || !innerUnits.map(u => u.toUpperCase()).includes((data.unit_type + '').toUpperCase())) {
+      setError("Unit type must be selected from the dropdown.");
+      return;
+    }
+    if (data.units_per_package !== undefined && Number(data.units_per_package) <= 0) {
+      setError("Units per package must be greater than 0 if set.");
+      return;
+    }
+    // Normalize supplier name
+    if (data.supplier_id && suppliers.length) {
+      const sup = suppliers.find((s) => s.id === data.supplier_id);
+      if (!sup) {
+        setError("Supplier must be selected from the list.");
+        return;
+      }
+      data.supplier_id = sup.id;
+    }
+
     createProduct.mutate(
       {
-        name: data.name,
-        unit_size: Number(data.unit_size),
-        unit_type: data.unit_type,
-        packages_per_batch: 1,
-        supplier_name:
-          suppliers.find((s) => s.id === data.supplier_id)?.name || null,
-        price_per_unit: data.price_per_package && data.units_per_package
-          ? Number(data.price_per_package) / Number(data.units_per_package)
-          : (data.price_per_package ?? data.price_per_unit ?? 0),
-        shelf_life_days: null,
-        product_type: "drink",
-        product_kind: "extern",
-        pickable: true,
-        supplier_id: data.supplier_id || null,
-        product_fiche_url: null,
-        labour_time_minutes: null,
-        active: data.active,
-        recipe: null,
+        ...data,
+        unit_type: data.unit_type.toUpperCase(),
         cost: Number(data.cost) || 0,
         markup_percent: Number(data.markup_percent) || 0,
         sales_price: Number(data.sales_price) || 0,
-        supplier_package_unit: data.supplier_package_unit,
-        units_per_package: data.units_per_package ? Number(data.units_per_package) : null,
-        inner_unit_type: data.inner_unit_type,
-        price_per_package: data.price_per_package ? Number(data.price_per_package) : null,
+        supplier_package_unit: data.supplier_package_unit ? data.supplier_package_unit.toUpperCase() : undefined,
+        inner_unit_type: data.inner_unit_type ? data.inner_unit_type.toUpperCase() : undefined,
       },
       {
         onSuccess: () => {
           form.reset();
-          toast.success("Drink product created");
         },
       }
     );
@@ -119,6 +130,7 @@ export function DrinkForm() {
   return (
     <div className="bg-white border p-6 rounded-xl shadow max-w-xl">
       <h2 className="text-xl font-semibold mb-2">Add Drink</h2>
+      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-3">{error}</div>}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
