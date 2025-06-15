@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,7 +50,10 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
       unit_size: Number(formData.unit_size),
       unit_type: formData.unit_type,
       packages_per_batch: Number(formData.packages_per_batch),
-      shelf_life_days: formData.shelf_life_days ? Number(formData.shelf_life_days) : null,
+      // Only include shelf_life_days if relevant
+      shelf_life_days: (product_type === "zelfgemaakt" ? (
+        formData.shelf_life_days ? Number(formData.shelf_life_days) : null
+      ) : null),
       price_per_unit: formData.price_per_unit ? Number(formData.price_per_unit) : null,
       active: formData.active,
       product_type: product_type,
@@ -59,11 +61,27 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
       product_kind: product_type,
       pickable: false,
       supplier_id: formData.supplier_id || null,
-      product_fiche_url: formData.product_fiche_url || null,
+      // Only include product_fiche_url if relevant
+      product_fiche_url: (
+        product_type === "extern" || product_type === "ingredient"
+          ? formData.product_fiche_url || null
+          : null
+      ),
     };
 
-    if (product_type === "extern" && (!formData.supplier_name || formData.supplier_name.trim() === "")) {
+    if (
+      product_type === "extern" &&
+      (!formData.supplier_name || formData.supplier_name.trim() === "")
+    ) {
       alert("Vul de naam van de externe leverancier in.");
+      return;
+    }
+
+    if (
+      product_type === "ingredient" &&
+      (!formData.supplier_name || formData.supplier_name.trim() === "")
+    ) {
+      alert("Vul de naam van de leverancier voor ingrediënt in.");
       return;
     }
 
@@ -95,7 +113,10 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
 
         <div className="space-y-2">
           <Label htmlFor="unit_type">Unit Type</Label>
-          <Select value={formData.unit_type} onValueChange={(value) => setFormData({ ...formData, unit_type: value })}>
+          <Select
+            value={formData.unit_type}
+            onValueChange={(value) => setFormData({ ...formData, unit_type: value })}
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -134,16 +155,26 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="shelf_life_days">Shelf Life (Days)</Label>
-          <Input
-            id="shelf_life_days"
-            type="number"
-            min="1"
-            value={formData.shelf_life_days || ""}
-            onChange={(e) => setFormData({ ...formData, shelf_life_days: e.target.value ? Number(e.target.value) : null })}
-          />
-        </div>
+        {/* Shelf life only for self-produced */}
+        {formData.product_type === "zelfgemaakt" && (
+          <div className="space-y-2">
+            <Label htmlFor="shelf_life_days">
+              Shelf Life (Days)
+            </Label>
+            <Input
+              id="shelf_life_days"
+              type="number"
+              min="1"
+              value={formData.shelf_life_days || ""}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  shelf_life_days: e.target.value ? Number(e.target.value) : null,
+                })
+              }
+            />
+          </div>
+        )}
 
         <div className="space-y-2">
           <Label htmlFor="price_per_unit">Price per Unit</Label>
@@ -167,7 +198,10 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
                 product_type: value,
                 supplier_name: value === "zelfgemaakt" ? "TOTHAI PRODUCTION" : "",
                 supplier_id: value === "zelfgemaakt" ? null : prev.supplier_id,
-                product_fiche_url: value === "zelfgemaakt" ? null : prev.product_fiche_url,
+                // Remove or keep fiche url depending on selection
+                product_fiche_url: (value === "extern" || value === "ingredient") ? prev.product_fiche_url : null,
+                // Remove shelf life for non-self-made
+                shelf_life_days: value === "zelfgemaakt" ? prev.shelf_life_days : null,
               }));
             }}
           >
@@ -177,6 +211,7 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
             <SelectContent>
               <SelectItem value="zelfgemaakt">Zelfgemaakt</SelectItem>
               <SelectItem value="extern">Extern product</SelectItem>
+              <SelectItem value="ingredient">Ingrediënt</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -185,10 +220,11 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
           value={formData.supplier_id}
           onChange={val => setFormData({ ...formData, supplier_id: val })}
           productType={formData.product_type}
-          required={formData.product_type === "extern"}
+          required={formData.product_type === "extern" || formData.product_type === "ingredient"}
         />
 
-        {formData.product_type === "extern" && (
+        {/* Show fiche upload for extern & ingredient */}
+        {(formData.product_type === "extern" || formData.product_type === "ingredient") && (
           <ProductFicheUpload
             value={formData.product_fiche_url}
             onChange={val => setFormData({ ...formData, product_fiche_url: val })}
@@ -199,11 +235,21 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
           <Label htmlFor="supplier_name">Leverancier</Label>
           <Input
             id="supplier_name"
-            value={formData.product_type === "zelfgemaakt" ? "TOTHAI PRODUCTION" : formData.supplier_name || ""}
+            value={
+              formData.product_type === "zelfgemaakt"
+                ? "TOTHAI PRODUCTION"
+                : formData.supplier_name || ""
+            }
             disabled={formData.product_type === "zelfgemaakt"}
-            required={formData.product_type === "extern"}
-            placeholder={formData.product_type === "extern" ? "Naam externe leverancier" : ""}
-            onChange={(e) => setFormData({ ...formData, supplier_name: e.target.value })}
+            required={formData.product_type === "extern" || formData.product_type === "ingredient"}
+            placeholder={
+              formData.product_type === "extern" || formData.product_type === "ingredient"
+                ? "Naam externe leverancier"
+                : ""
+            }
+            onChange={(e) =>
+              setFormData({ ...formData, supplier_name: e.target.value })
+            }
           />
         </div>
       </div>
@@ -213,7 +259,9 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
           <Switch
             id="active"
             checked={formData.active}
-            onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
+            onCheckedChange={(checked) =>
+              setFormData({ ...formData, active: checked })
+            }
           />
           <Label htmlFor="active">Active</Label>
         </div>
@@ -224,7 +272,11 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
           Cancel
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : editingProduct ? "Update Product" : "Create Product"}
+          {isLoading
+            ? "Saving..."
+            : editingProduct
+              ? "Update Product"
+              : "Create Product"}
         </Button>
       </div>
     </form>
