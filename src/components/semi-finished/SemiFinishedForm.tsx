@@ -7,6 +7,17 @@ import { useCreateProduct, useAllProducts } from "@/hooks/useProductionData";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { toast } from "sonner";
 
+import {
+  SemiFinishedFormData,
+  RecipeIngredient,
+  formatNumberComma,
+  parseNumberComma,
+  calculateUnitSize,
+  UNIT_OPTIONS,
+} from "./semifinishedFormUtils";
+import { BatchAndUnitFields } from "./BatchAndUnitFields";
+import { RecipeIngredientsInput } from "./RecipeIngredientsInput";
+
 type SemiFinishedFormData = {
   name: string;
   batch_size: number;
@@ -72,10 +83,7 @@ export function SemiFinishedForm() {
   });
 
   // For ingredients selection in recipe
-  const [recipe, setRecipe] = useState<RecipeIngredient[]>([]);
-  const [ingredientSearch, setIngredientSearch] = useState("");
-  const [selectedIngredientId, setSelectedIngredientId] = useState<string>("");
-  const [ingredientQty, setIngredientQty] = useState<number>(0);
+  const [recipe, setRecipe] = React.useState<RecipeIngredient[]>([]);
 
   const createProduct = useCreateProduct();
   const { data: allProducts } = useAllProducts();
@@ -89,7 +97,7 @@ export function SemiFinishedForm() {
         p.active
     ) || [];
 
-  // Name uniqueness validation (prevent duplicate semi-finished names)
+  // Name uniqueness validation
   function validateUniqueName(value: string) {
     if (!allProducts) return true;
     const exists = allProducts.some(
@@ -124,7 +132,7 @@ export function SemiFinishedForm() {
     createProduct.mutate(
       {
         name: data.name,
-        unit_size: Number(parseNumberComma(data.unit_size as any)), // calculated
+        unit_size: Number(parseNumberComma(data.unit_size as any)),
         unit_type: data.unit_type,
         packages_per_batch: Number(parseNumberComma(data.packages_per_batch as any)),
         supplier_name:
@@ -159,38 +167,6 @@ export function SemiFinishedForm() {
     );
   };
 
-  function handleAddIngredient() {
-    if (!selectedIngredientId) {
-      toast.error("Select an ingredient");
-      return;
-    }
-    const ingredient = ingredientOptions.find((i) => i.id === selectedIngredientId);
-    if (!ingredient) return;
-    if (!ingredientQty || parseNumberComma(ingredientQty as any) <= 0) {
-      toast.error("Quantity must be greater than zero");
-      return;
-    }
-    if (recipe.find((r) => r.product_id === selectedIngredientId)) {
-      toast.error("Already added");
-      return;
-    }
-    setRecipe([
-      ...recipe,
-      {
-        product_id: ingredient.id,
-        name: ingredient.name,
-        qty: Number(parseNumberComma(ingredientQty as any)),
-        unit: ingredient.unit_type || "",
-      },
-    ]);
-    setSelectedIngredientId("");
-    setIngredientQty(0);
-  }
-
-  function handleRemoveRecipeIngredient(id: string) {
-    setRecipe(recipe.filter((r) => r.product_id !== id));
-  }
-
   return (
     <div className="bg-white border p-6 rounded-xl shadow max-w-xl">
       <h2 className="text-xl font-semibold mb-2">Add Semi-finished Product</h2>
@@ -216,79 +192,7 @@ export function SemiFinishedForm() {
           />
 
           {/* BATCH section */}
-          <div className="flex gap-2 flex-col md:flex-row">
-            <FormField
-              control={form.control}
-              name="batch_size"
-              rules={{ required: "Batch size is required" }}
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel>Batch Size</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      inputMode="decimal"
-                      {...field}
-                      value={formatNumberComma(field.value)}
-                      onChange={(e) => {
-                        const cleaned = e.target.value.replace(/[^\d,]/g, "");
-                        field.onChange(cleaned);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="batch_unit"
-              render={({ field }) => (
-                <FormItem className="w-32">
-                  <FormLabel>Batch Unit</FormLabel>
-                  <FormControl>
-                    <select
-                      {...field}
-                      className="w-full border rounded-md px-3 py-2 text-sm bg-white"
-                    >
-                      {UNIT_OPTIONS.map((u) => (
-                        <option value={u} key={u}>
-                          {u}
-                        </option>
-                      ))}
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="packages_per_batch"
-              rules={{
-                required: "Packages per batch is required",
-                min: { value: 1, message: "Must be at least 1" },
-              }}
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel>Packages per Batch</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      inputMode="numeric"
-                      {...field}
-                      value={formatNumberComma(field.value)}
-                      onChange={(e) => {
-                        const cleaned = e.target.value.replace(/[^\d,]/g, "");
-                        field.onChange(cleaned);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <BatchAndUnitFields />
 
           {/* Auto-calculated unit size */}
           <div>
@@ -394,92 +298,11 @@ export function SemiFinishedForm() {
           {/* Recipe (per batch) */}
           <div>
             <FormLabel>Recipe (Ingredients per batch)</FormLabel>
-            <div className="flex flex-col md:flex-row gap-2 items-end mt-1">
-              <div className="w-full">
-                {/* Search for ingredients */}
-                <Input
-                  placeholder="Search ingredient"
-                  value={ingredientSearch}
-                  onChange={(e) => setIngredientSearch(e.target.value)}
-                  className="mb-2"
-                />
-                <select
-                  value={selectedIngredientId}
-                  onChange={(e) => setSelectedIngredientId(e.target.value)}
-                  className="w-full border rounded-md bg-white text-sm px-2 py-1"
-                >
-                  <option value="">Select ingredient</option>
-                  {ingredientOptions
-                    .filter((ing) =>
-                      ingredientSearch.trim().length === 0
-                        ? true
-                        : ing.name
-                            .toLowerCase()
-                            .includes(ingredientSearch.toLowerCase())
-                    )
-                    .map((ing) => (
-                      <option key={ing.id} value={ing.id}>
-                        {ing.name} ({ing.unit_type})
-                      </option>
-                    ))}
-                </select>
-              </div>
-              <Input
-                className="w-28"
-                placeholder="Qty"
-                type="text"
-                inputMode="decimal"
-                value={ingredientQty === 0 ? "" : formatNumberComma(ingredientQty)}
-                onChange={(e) => {
-                  const cleaned = e.target.value.replace(/[^\d,]/g, "");
-                  setIngredientQty(cleaned ? parseNumberComma(cleaned) ?? 0 : 0);
-                }}
-              />
-              <span className="text-xs mb-2">
-                {selectedIngredientId &&
-                  ingredientOptions.find((i) => i.id === selectedIngredientId)
-                    ?.unit_type}
-              </span>
-              <Button
-                type="button"
-                className="w-fit"
-                onClick={handleAddIngredient}
-              >
-                Add
-              </Button>
-            </div>
-            {recipe.length > 0 && (
-              <div className="mt-3 border rounded bg-gray-50 px-3 py-2">
-                <ul className="text-sm space-y-1">
-                  {recipe.map((ing) => (
-                    <li
-                      key={ing.product_id}
-                      className="flex justify-between items-center"
-                    >
-                      <div>
-                        <span className="font-medium">{ing.name}</span>
-                        <span className="ml-2">
-                          {formatNumberComma(ing.qty)} {ing.unit}
-                        </span>
-                      </div>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleRemoveRecipeIngredient(ing.product_id)}
-                      >
-                        Remove
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {recipe.length === 0 && (
-              <div className="text-xs text-muted-foreground italic mt-1">
-                Add ingredients to build the recipe for this batch (input QTY per batch).
-              </div>
-            )}
+            <RecipeIngredientsInput
+              ingredientOptions={ingredientOptions}
+              recipe={recipe}
+              setRecipe={setRecipe}
+            />
           </div>
 
           {/* Calculated price/batch field */}
