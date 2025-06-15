@@ -1,8 +1,7 @@
 
-
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Plus } from "lucide-react";
+import { Edit, Trash2, Replace } from "lucide-react"; // Changed import
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 function ProductList({
@@ -81,7 +80,7 @@ function ProductList({
                         onClick={() => onReplace(item)}
                         aria-label="Replace"
                       >
-                        <Plus className="w-4 h-4" />
+                        <Replace className="w-4 h-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>Replace</TooltipContent>
