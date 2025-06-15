@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs } from "@/components/ui/tabs";
 import { SettingsAuth } from "./settings/SettingsAuth";
@@ -12,6 +11,9 @@ import { CustomersTab } from "./settings/tabs/CustomersTab";
 import { FAVVTab } from "./settings/tabs/FAVVTab";
 import { SettingsDialogs } from "./settings/SettingsDialogs";
 import { SystemInfo } from "./settings/SystemInfo";
+import IngredientPriceManager from "./reports/IngredientPriceManager";
+import { SuppliersTab } from "./settings/tabs/SuppliersTab";
+import { TabsContent } from "@/components/ui/tabs";
 
 interface SettingsProps {
   currentLocation: "tothai" | "khin";
@@ -131,6 +133,12 @@ export function Settings({ currentLocation }: SettingsProps) {
         />
 
         <FAVVTab currentLocation={currentLocation} />
+
+        <SuppliersTab />
+
+        <TabsContent value="ingredient-margins" className="space-y-4">
+          <IngredientPriceManager />
+        </TabsContent>
       </Tabs>
 
       <SystemInfo currentLocation={currentLocation} />
