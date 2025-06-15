@@ -42,10 +42,6 @@ export function SemiFinishedForm() {
       shelf_life_days: null,
       labour_time_minutes: null,
       active: true,
-      cost: 0,
-      markup_percent: 0,
-      sales_price: 0,
-      minimal_margin_threshold_percent: 25,
     },
   });
 
@@ -91,19 +87,6 @@ export function SemiFinishedForm() {
     return () => sub?.unsubscribe?.();
   }, [form]);
 
-  // Watch form fields for margin calculations
-  const salesPrice = form.watch("sales_price");
-  const cost = form.watch("cost");
-  const minimalMargin = form.watch("minimal_margin_threshold_percent");
-  const marginPct =
-    salesPrice && cost && Number(salesPrice) > 0
-      ? ((Number(salesPrice) - Number(cost)) / Number(salesPrice)) * 100
-      : null;
-  const showMarginAlarm =
-    marginPct !== null &&
-    minimalMargin !== undefined &&
-    marginPct < minimalMargin;
-
   const onSubmit = (data: SemiFinishedFormData) => {
     if (recipe.length === 0) {
       toast.error("Please add at least one ingredient to the recipe.");
@@ -137,10 +120,6 @@ export function SemiFinishedForm() {
           qty: Number(parseNumberComma(ri.qty as any)),
           unit: ri.unit,
         })),
-        cost: Number(data.cost) || 0,
-        markup_percent: Number(data.markup_percent) || 0,
-        sales_price: Number(data.sales_price) || 0,
-        minimal_margin_threshold_percent: Number(data.minimal_margin_threshold_percent) || 25,
       },
       {
         onSuccess: () => {
@@ -302,96 +281,6 @@ export function SemiFinishedForm() {
             <div className="text-xs text-muted-foreground italic mt-1">
               Price is automatically calculated from the ingredient recipe per batch.
             </div>
-          </div>
-
-          {/* Cost */}
-          <FormField
-            control={form.control}
-            name="cost"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cost (€)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* Markup % */}
-          <FormField
-            control={form.control}
-            name="markup_percent"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Markup (%)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* Sales Price */}
-          <FormField
-            control={form.control}
-            name="sales_price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Sales Price (€)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* Minimal margin threshold */}
-          <FormField
-            control={form.control}
-            name="minimal_margin_threshold_percent"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Minimal Margin Threshold (%)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Margin */}
-          <div className="text-sm font-medium mt-2">
-            Effective Margin:{" "}
-            <span className={showMarginAlarm ? "text-red-600" : "text-green-700"}>
-              {marginPct !== null ? `${marginPct.toFixed(2)}%` : "—"}
-            </span>
-            {showMarginAlarm && (
-              <span className="ml-2 text-red-500 font-bold animate-pulse">
-                ⚠ Below minimal threshold!
-              </span>
-            )}
           </div>
 
           {/* Active / Inactive Toggle */}
