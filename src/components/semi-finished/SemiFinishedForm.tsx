@@ -38,9 +38,22 @@ function calculatePricePlaceholder(
   return "Calculated from recipe";
 }
 
+// Helpers for format/parse comma decimal
+function formatNumberComma(n: number | string | undefined | null) {
+  if (n === undefined || n === null || n === "") return "";
+  const numberVal = typeof n === "number" ? n : parseFloat(String(n).replace(",", "."));
+  if (isNaN(numberVal)) return "";
+  return numberVal.toFixed(2).replace(".", ",");
+}
+function parseNumberComma(s: string) {
+  if (!s) return undefined;
+  return parseFloat(s.replace(",", "."));
+}
+// For calculateUnitSize: output as string with comma
 function calculateUnitSize(batchSize: number, packagesPerBatch: number) {
   if (!batchSize || !packagesPerBatch || packagesPerBatch <= 0) return "";
-  return (batchSize / packagesPerBatch).toFixed(3);
+  const v = batchSize / packagesPerBatch;
+  return formatNumberComma(v);
 }
 
 export function SemiFinishedForm() {
@@ -111,16 +124,16 @@ export function SemiFinishedForm() {
     createProduct.mutate(
       {
         name: data.name,
-        unit_size: Number(data.unit_size), // calculated
+        unit_size: Number(parseNumberComma(data.unit_size as any)), // calculated
         unit_type: data.unit_type,
-        packages_per_batch: Number(data.packages_per_batch),
+        packages_per_batch: Number(parseNumberComma(data.packages_per_batch as any)),
         supplier_name:
           (data.supplier_id &&
             suppliers.find((s) => s.id === data.supplier_id)?.name) ||
           null,
         price_per_unit: null, // to be calculated later if needed
         shelf_life_days: data.shelf_life_days
-          ? Number(data.shelf_life_days)
+          ? Number(parseNumberComma(data.shelf_life_days as any))
           : null,
         product_type: "semi-finished",
         product_kind: "semi-finished",
@@ -128,11 +141,11 @@ export function SemiFinishedForm() {
         supplier_id: data.supplier_id || null,
         product_fiche_url: null,
         labour_time_minutes: data.labour_time_minutes
-          ? Number(data.labour_time_minutes)
+          ? Number(parseNumberComma(data.labour_time_minutes as any))
           : null,
         recipe: recipe.map((ri) => ({
           product_id: ri.product_id,
-          qty: ri.qty,
+          qty: Number(parseNumberComma(ri.qty as any)),
           unit: ri.unit,
         })),
       },
@@ -153,7 +166,7 @@ export function SemiFinishedForm() {
     }
     const ingredient = ingredientOptions.find((i) => i.id === selectedIngredientId);
     if (!ingredient) return;
-    if (ingredientQty <= 0) {
+    if (!ingredientQty || parseNumberComma(ingredientQty as any) <= 0) {
       toast.error("Quantity must be greater than zero");
       return;
     }
@@ -166,7 +179,7 @@ export function SemiFinishedForm() {
       {
         product_id: ingredient.id,
         name: ingredient.name,
-        qty: ingredientQty,
+        qty: Number(parseNumberComma(ingredientQty as any)),
         unit: ingredient.unit_type || "",
       },
     ]);
@@ -213,11 +226,14 @@ export function SemiFinishedForm() {
                   <FormLabel>Batch Size</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
+                      type="text"
+                      inputMode="decimal"
                       {...field}
-                      value={field.value ?? ""}
+                      value={formatNumberComma(field.value)}
+                      onChange={(e) => {
+                        const cleaned = e.target.value.replace(/[^\d,]/g, "");
+                        field.onChange(cleaned);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -258,11 +274,14 @@ export function SemiFinishedForm() {
                   <FormLabel>Packages per Batch</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
-                      min="1"
-                      step="1"
+                      type="text"
+                      inputMode="numeric"
                       {...field}
-                      value={field.value ?? ""}
+                      value={formatNumberComma(field.value)}
+                      onChange={(e) => {
+                        const cleaned = e.target.value.replace(/[^\d,]/g, "");
+                        field.onChange(cleaned);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -280,8 +299,8 @@ export function SemiFinishedForm() {
               readOnly
               value={
                 calculateUnitSize(
-                  form.watch("batch_size"),
-                  form.watch("packages_per_batch"),
+                  parseNumberComma(form.watch("batch_size") as any) ?? 0,
+                  parseNumberComma(form.watch("packages_per_batch") as any) ?? 1,
                 ) +
                 (form.watch("batch_unit") ? ` ${form.watch("batch_unit")}` : "")
               }
@@ -290,7 +309,7 @@ export function SemiFinishedForm() {
             <div className="text-xs text-muted-foreground italic mt-1">
               <span>
                 Each unit will have this size. <br />
-                For example: If a batch is 20 liters and makes 5 units, then unit size = 4 liters.
+                For example: If a batch is 20 liters and makes 5 units, then unit size = 4,00 liters.
               </span>
             </div>
           </div>
@@ -331,11 +350,15 @@ export function SemiFinishedForm() {
                 <FormLabel>Shelf life (days)</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
-                    min="1"
+                    type="text"
+                    inputMode="numeric"
                     placeholder="e.g. 7"
                     {...field}
-                    value={field.value ?? ""}
+                    value={formatNumberComma(field.value)}
+                    onChange={(e) => {
+                      const cleaned = e.target.value.replace(/[^\d,]/g, "");
+                      field.onChange(cleaned);
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -352,11 +375,15 @@ export function SemiFinishedForm() {
                 <FormLabel>Labour time (minutes)</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
-                    min="0"
+                    type="text"
+                    inputMode="numeric"
                     placeholder="e.g. 45"
                     {...field}
-                    value={field.value ?? ""}
+                    value={formatNumberComma(field.value)}
+                    onChange={(e) => {
+                      const cleaned = e.target.value.replace(/[^\d,]/g, "");
+                      field.onChange(cleaned);
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -400,14 +427,15 @@ export function SemiFinishedForm() {
               <Input
                 className="w-28"
                 placeholder="Qty"
-                type="number"
-                min="0"
-                step="0.01"
-                value={ingredientQty === 0 ? "" : ingredientQty}
-                onChange={(e) => setIngredientQty(Number(e.target.value))}
+                type="text"
+                inputMode="decimal"
+                value={ingredientQty === 0 ? "" : formatNumberComma(ingredientQty)}
+                onChange={(e) => {
+                  const cleaned = e.target.value.replace(/[^\d,]/g, "");
+                  setIngredientQty(cleaned ? parseNumberComma(cleaned) ?? 0 : 0);
+                }}
               />
               <span className="text-xs mb-2">
-                {/* Show unit type for current selection */}
                 {selectedIngredientId &&
                   ingredientOptions.find((i) => i.id === selectedIngredientId)
                     ?.unit_type}
@@ -431,7 +459,7 @@ export function SemiFinishedForm() {
                       <div>
                         <span className="font-medium">{ing.name}</span>
                         <span className="ml-2">
-                          {ing.qty} {ing.unit}
+                          {formatNumberComma(ing.qty)} {ing.unit}
                         </span>
                       </div>
                       <Button
