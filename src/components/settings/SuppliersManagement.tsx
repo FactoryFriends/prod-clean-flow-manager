@@ -1,8 +1,8 @@
-
 import React, { useState } from "react";
 import { useAllSuppliers, useCreateSupplier, useUpdateSupplier, useDeactivateSupplier, Supplier } from "@/hooks/useSuppliers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Plus, Edit, Trash2 } from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -12,6 +12,7 @@ import {
   TableCell,
   TableCaption,
 } from "@/components/ui/table";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 export function SuppliersManagement() {
   const { data: suppliers, isLoading, isError, error } = useAllSuppliers();
@@ -93,7 +94,8 @@ export function SuppliersManagement() {
             value={form.address}
             onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
           />
-          <Button type="submit" className="shrink-0 min-w-max">
+          <Button type="submit" className="shrink-0 min-w-max flex items-center gap-2">
+            <Plus className="w-4 h-4" />
             {editing ? "Save" : "Add"}
           </Button>
           {editing && (
@@ -148,22 +150,34 @@ export function SuppliersManagement() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEditClick(s)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => deactivateSupplier.mutate(s.id)}
-                          disabled={!s.active}
-                        >
-                          Deactivate
-                        </Button>
+                      <div className="flex gap-1">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => handleEditClick(s)}
+                              aria-label="Edit"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Edit</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => deactivateSupplier.mutate(s.id)}
+                              disabled={!s.active}
+                              aria-label="Deactivate"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Deactivate</TooltipContent>
+                        </Tooltip>
                       </div>
                     </TableCell>
                   </TableRow>

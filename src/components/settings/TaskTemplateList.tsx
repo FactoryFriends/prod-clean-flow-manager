@@ -1,9 +1,9 @@
-
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Package, Edit, Trash2, Power, PowerOff } from "lucide-react";
+import { Package, Edit, Trash2, Power, PowerOff, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface TaskTemplateListProps {
   onEditTemplate: (template: any) => void;
@@ -122,32 +122,50 @@ export function TaskTemplateList({ onEditTemplate }: TaskTemplateListProps) {
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => handleToggleActive(template)}
-                disabled={toggleActiveMutation.isPending}
-                className={template.active ? "text-orange-600 hover:text-orange-700" : "text-green-600 hover:text-green-700"}
-              >
-                {template.active ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => onEditTemplate(template)}
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => handleDelete(template)}
-                disabled={deleteTemplateMutation.isPending}
-                className="text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+            <div className="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleToggleActive(template)}
+                    disabled={toggleActiveMutation.isPending}
+                    aria-label={template.active ? "Deactivate" : "Activate"}
+                    className={template.active ? "text-orange-600 hover:text-orange-700" : "text-green-600 hover:text-green-700"}
+                  >
+                    {template.active ? <Trash2 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{template.active ? "Deactivate" : "Activate"}</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => onEditTemplate(template)}
+                    aria-label="Edit"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Edit</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => handleDelete(template)}
+                    disabled={deleteTemplateMutation.isPending}
+                    aria-label="Delete"
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Delete</TooltipContent>
+              </Tooltip>
             </div>
           </div>
           {template.description && (

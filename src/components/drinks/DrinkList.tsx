@@ -1,8 +1,10 @@
 
-import { Edit, Trash2, Wine, AlertTriangle } from "lucide-react";
+
+import { Edit, Trash2, Wine, AlertTriangle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAllProducts, useDeleteProduct, Product } from "@/hooks/useProductionData";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface DrinkListProps {
   onEditProduct: (product: Product) => void;
@@ -59,22 +61,34 @@ export function DrinkList({ onEditProduct }: DrinkListProps) {
                 </div>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onEditProduct(drink)}
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDelete(drink.id)}
-                disabled={deleteProduct.isPending}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+            <div className="flex gap-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onEditProduct(drink)}
+                    aria-label="Edit"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Edit</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDelete(drink.id)}
+                    disabled={deleteProduct.isPending}
+                    aria-label="Deactivate"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Deactivate</TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </div>
@@ -82,3 +96,4 @@ export function DrinkList({ onEditProduct }: DrinkListProps) {
     </div>
   );
 }
+

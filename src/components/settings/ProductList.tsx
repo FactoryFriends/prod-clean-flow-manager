@@ -1,7 +1,9 @@
-import { Edit, Trash2, Package, AlertTriangle } from "lucide-react";
+
+import { Edit, Trash2, AlertTriangle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAllProducts, useDeleteProduct, Product } from "@/hooks/useProductionData";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ProductListProps {
   onEditProduct: (product: Product) => void;
@@ -11,7 +13,6 @@ export function ProductList({ onEditProduct }: ProductListProps) {
   const { data: products, isLoading } = useAllProducts();
   const deleteProduct = useDeleteProduct();
 
-  // Helper for margin
   function marginPct(product: any) {
     if (!product.sales_price || !product.cost) return null;
     if (Number(product.sales_price) === 0) return null;
@@ -34,7 +35,7 @@ export function ProductList({ onEditProduct }: ProductListProps) {
   if (!products || products.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
+        <Plus className="w-12 h-12 mx-auto mb-4 opacity-50" />
         <p>No products found. Create your first product to get started.</p>
       </div>
     );
@@ -102,22 +103,34 @@ export function ProductList({ onEditProduct }: ProductListProps) {
                   </div>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onEditProduct(product)}
-                >
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDelete(product.id)}
-                  disabled={deleteProduct.isPending}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+              <div className="flex gap-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onEditProduct(product)}
+                      aria-label="Edit"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Edit</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(product.id)}
+                      disabled={deleteProduct.isPending}
+                      aria-label="Delete"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Deactivate</TooltipContent>
+                </Tooltip>
               </div>
             </div>
           </div>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Edit, Trash2, Building2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 export function CustomerList() {
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
@@ -110,23 +110,31 @@ export function CustomerList() {
                   )}
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(customer)}
-                    className="flex items-center gap-2"
-                  >
-                    <Edit className="w-4 h-4" />
-                    Edit
-                  </Button>
-                  
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                        <Trash2 className="w-4 h-4" />
+                <div className="flex items-center gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(customer)}
+                        aria-label="Edit"
+                      >
+                        <Edit className="w-4 h-4" />
                       </Button>
-                    </AlertDialogTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>Edit</TooltipContent>
+                  </Tooltip>
+                  <AlertDialog>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" aria-label="Delete" className="text-red-600 hover:text-red-700">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>Delete</TooltipContent>
+                    </Tooltip>
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete Customer</AlertDialogTitle>

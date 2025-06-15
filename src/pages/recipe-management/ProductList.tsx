@@ -1,6 +1,9 @@
 
+
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { Edit, Trash2, Plus } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 function ProductList({
   products,
@@ -46,39 +49,64 @@ function ProductList({
                   ? `€${Number(item.price_per_unit).toFixed(2)}`
                   : <span className="italic text-muted-foreground">Not set</span>}
               </td>
-              <td className="p-2 flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => onEdit(item)}>EDIT</Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => onDeactivate(item)}
-                  disabled={!item.active}
-                >
-                  DEACTIVATE
-                </Button>
+              <td className="p-2 flex gap-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" onClick={() => onEdit(item)} aria-label="Edit">
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Edit</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onDeactivate(item)}
+                      disabled={!item.active}
+                      aria-label="Deactivate"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Deactivate</TooltipContent>
+                </Tooltip>
                 {type === "ingredient" && onReplace && (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => onReplace(item)}
-                  >
-                    REPLACE
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onReplace(item)}
+                        aria-label="Replace"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Replace</TooltipContent>
+                  </Tooltip>
                 )}
                 {type === "ingredient" && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => {
-                      if (window.confirm(
-                        `Are you sure you want to permanently delete "${item.name}"? This action cannot be undone and may affect any recipes using this ingredient.`
-                      )) {
-                        onPermanentlyDelete && onPermanentlyDelete(item);
-                      }
-                    }}
-                  >
-                    DELETE
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          if (window.confirm(
+                            `Are you sure you want to permanently delete "${item.name}"? This action cannot be undone and may affect any recipes using this ingredient.`
+                          )) {
+                            onPermanentlyDelete && onPermanentlyDelete(item);
+                          }
+                        }}
+                        aria-label="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Delete</TooltipContent>
+                  </Tooltip>
                 )}
               </td>
             </tr>
@@ -90,3 +118,4 @@ function ProductList({
 }
 
 export default ProductList;
+
