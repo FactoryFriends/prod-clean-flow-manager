@@ -58,7 +58,12 @@ export function ProductList({ onEditProduct }: ProductListProps) {
                     {product.active ? "Active" : "Inactive"}
                   </Badge>
                   {showMarginAlarm && (
-                    <AlertTriangle className="w-5 h-5 text-red-600 animate-pulse" title="Margin below minimal threshold!" />
+                    <>
+                      <AlertTriangle className="w-5 h-5 text-red-600 animate-pulse" />
+                      <span className="sr-only">
+                        Margin below minimal threshold!
+                      </span>
+                    </>
                   )}
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">

@@ -42,11 +42,10 @@ export function SemiFinishedForm() {
       shelf_life_days: null,
       labour_time_minutes: null,
       active: true,
-      // Cost/margin fields
       cost: 0,
       markup_percent: 0,
       sales_price: 0,
-      minimal_margin_threshold_percent: 25
+      minimal_margin_threshold_percent: 25,
     },
   });
 
@@ -92,7 +91,7 @@ export function SemiFinishedForm() {
     return () => sub?.unsubscribe?.();
   }, [form]);
 
-  // Effective margin calculation
+  // Watch form fields for margin calculations
   const salesPrice = form.watch("sales_price");
   const cost = form.watch("cost");
   const minimalMargin = form.watch("minimal_margin_threshold_percent");
@@ -306,45 +305,82 @@ export function SemiFinishedForm() {
           </div>
 
           {/* Cost */}
-          <div>
-            <FormLabel>Cost (€)</FormLabel>
-            <Input
-              type="number"
-              min="0"
-              step="0.01"
-              {...form.register("cost")}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="cost"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cost (€)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           {/* Markup % */}
-          <div>
-            <FormLabel>Markup (%)</FormLabel>
-            <Input
-              type="number"
-              min="0"
-              step="0.01"
-              {...form.register("markup_percent")}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="markup_percent"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Markup (%)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           {/* Sales Price */}
-          <div>
-            <FormLabel>Sales Price (€)</FormLabel>
-            <Input
-              type="number"
-              min="0"
-              step="0.01"
-              {...form.register("sales_price")}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="sales_price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Sales Price (€)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           {/* Minimal margin threshold */}
-          <div>
-            <FormLabel>Minimal Margin Threshold (%)</FormLabel>
-            <Input
-              type="number"
-              min="0"
-              step="0.01"
-              {...form.register("minimal_margin_threshold_percent")}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="minimal_margin_threshold_percent"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Minimal Margin Threshold (%)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           {/* Margin */}
           <div className="text-sm font-medium mt-2">
             Effective Margin:{" "}

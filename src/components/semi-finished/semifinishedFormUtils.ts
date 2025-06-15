@@ -1,3 +1,4 @@
+
 export type SemiFinishedFormData = {
   name: string;
   batch_size: number;
@@ -9,6 +10,11 @@ export type SemiFinishedFormData = {
   shelf_life_days: number | null;
   labour_time_minutes: number | null;
   active: boolean;
+  // ADD THE NEW FIELDS BELOW
+  cost: number;
+  markup_percent: number;
+  sales_price: number;
+  minimal_margin_threshold_percent: number;
 };
 
 export type RecipeIngredient = {
