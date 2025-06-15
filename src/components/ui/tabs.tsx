@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
 
@@ -29,8 +28,8 @@ const TabsTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-2 text-sm font-semibold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-      // Active: subtle green pill, strong green text, bold, subtle border.
-      "data-[state=active]:bg-green-100 data-[state=active]:text-green-800 data-[state=active]:font-bold data-[state=active]:border data-[state=active]:border-green-300 data-[state=active]:shadow-md",
+      // Active: subtle green pill, strong green text, bold.
+      "data-[state=active]:bg-green-100 data-[state=active]:text-green-800 data-[state=active]:font-bold",
       // Inactive: no background, regular green-800 text
       "hover:bg-green-50 hover:text-green-700 text-green-800",
       className
@@ -56,4 +55,3 @@ const TabsContent = React.forwardRef<
 TabsContent.displayName = TabsPrimitive.Content.displayName
 
 export { Tabs, TabsList, TabsTrigger, TabsContent }
-
