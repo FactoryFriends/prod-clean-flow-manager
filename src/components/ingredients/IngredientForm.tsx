@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,9 @@ import type { IngredientFormData } from "./types";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import IngredientSupplierSelect from "./IngredientSupplierSelect";
+import IngredientAllergensInput from "./IngredientAllergensInput";
+import IngredientFicheUpload from "./IngredientFicheUpload";
 const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE"];
 
 // Extend the form type locally to add new fields if not present in types.ts
@@ -168,65 +170,21 @@ export function IngredientForm() {
           />
 
           {/* SUPPLIER (dropdown, only extern selectable) */}
-          <FormField
+          <IngredientSupplierSelect
             control={form.control}
-            name="supplier_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Supplier</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    className="w-full border rounded-md px-3 py-2 text-sm bg-white"
-                    disabled={form.watch("product_kind") === "zelfgemaakt"}
-                    required={form.watch("product_kind") === "extern"}
-                    value={field.value || ""}
-                    onChange={(e) => field.onChange(e.target.value)}
-                  >
-                    <option value="">
-                      {form.watch("product_kind") === "extern"
-                        ? "Select supplier…"
-                        : "TOTHAI PRODUCTION"}
-                    </option>
-                    {suppliers.map((sup) => (
-                      <option key={sup.id} value={sup.id}>
-                        {sup.name}
-                      </option>
-                    ))}
-                  </select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            suppliers={suppliers}
+            productKind={productType}
+            watch={form.watch}
           />
 
           {/* PRODUCTFICHE (enkel voor extern product) */}
           {productType === "extern" && (
-            <FormField
+            <IngredientFicheUpload
               control={form.control}
-              name="product_fiche_url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Product fiche (optional)</FormLabel>
-                  <input
-                    type="file"
-                    accept="application/pdf"
-                    onChange={handleFicheUpload}
-                    disabled={uploadingFiche}
-                    className="block"
-                  />
-                  {field.value && (
-                    <a
-                      href={`https://dtfhwnvclwbknycmcejb.supabase.co/storage/v1/object/public/public-files/${field.value}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-primary text-xs underline mt-1"
-                    >
-                      Bekijk/upload productfiche
-                    </a>
-                  )}
-                </FormItem>
-              )}
+              ficheFile={ficheFile}
+              uploadingFiche={uploadingFiche}
+              onUpload={handleFicheUpload}
+              fieldValue={form.getValues("product_fiche_url")}
             />
           )}
 
@@ -268,55 +226,7 @@ export function IngredientForm() {
           />
 
           {/* ALLERGENS */}
-          <FormField
-            control={form.control}
-            name="allergens"
-            render={({ field }) => {
-              const value = field.value || [];
-              const handleChange = (allergen: string) => {
-                if (allergen === "No Allergens") {
-                  // If "No Allergens" is selected, reset others.
-                  field.onChange(
-                    value.includes("No Allergens") ? [] : ["No Allergens"]
-                  );
-                } else {
-                  // Selecting a regular allergen should remove "No Allergens" if present
-                  let next;
-                  if (value.includes(allergen)) {
-                    next = value.filter((val: string) => val !== allergen);
-                  } else {
-                    next = [...(value || []).filter((val) => val !== "No Allergens"), allergen];
-                  }
-                  field.onChange(next);
-                }
-              };
-
-              return (
-                <FormItem>
-                  <FormLabel>Allergens</FormLabel>
-                  <div className="flex flex-wrap gap-2">
-                    {ALLERGENS.map((a) => (
-                      <label
-                        key={a.english}
-                        className="flex items-center gap-1 text-xs bg-gray-50 border rounded px-2 py-1"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={value?.includes(a.english)}
-                          onChange={() => handleChange(a.english)}
-                          // Disable others if No Allergens is checked
-                          disabled={
-                            a.english !== "No Allergens" && value?.includes("No Allergens")
-                          }
-                        />
-                        {a.english} / {a.dutch}
-                      </label>
-                    ))}
-                  </div>
-                </FormItem>
-              );
-            }}
-          />
+          <IngredientAllergensInput control={form.control} />
 
           <Button type="submit" className="w-full">
             Save Ingredient
@@ -328,4 +238,3 @@ export function IngredientForm() {
 }
 
 export default IngredientForm;
-
