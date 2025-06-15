@@ -75,7 +75,11 @@ function IngredientsTab() {
   // DEBUG: Print out fetched products
   console.log("All products (for IngredientsTab):", allProducts);
 
-  const ingredients = allProducts.filter((p) => p.product_type === "ingredient");
+  // FIXED: Ingredient = product_kind === 'extern', not a dish
+  const ingredients = allProducts.filter(
+    (p) =>
+      p.product_kind === "extern" && p.product_type !== "dish"
+  );
 
   const handleEdit = (item: any) => {
     setEditProduct(item);
@@ -133,7 +137,11 @@ function SemiFinishedTab() {
   // DEBUG: Print out fetched products
   console.log("All products (for SemiFinishedTab):", allProducts);
 
-  const semiFinished = allProducts.filter((p) => p.product_type === "semi-finished");
+  // FIXED: Semi-finished = product_kind === 'zelfgemaakt', not a dish
+  const semiFinished = allProducts.filter(
+    (p) =>
+      p.product_kind === "zelfgemaakt" && p.product_type !== "dish"
+  );
 
   const handleEdit = (item: any) => {
     setEditProduct(item);
