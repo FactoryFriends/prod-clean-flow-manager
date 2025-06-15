@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -74,14 +75,30 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
     return Math.round(cost * 100) / 100;
   }
 
-  // Effective margin calc
-  const salesPrice = form.watch("sales_price");
-  const cost = form.watch("cost");
-  const minimalMargin = form.watch("minimal_margin_threshold_percent");
+  // --- New calculated sales price and delta logic ---
+  const recipeVal = recipe;
+  const allProductsVal = allProducts;
+  const labourMinutes = Number(form.watch("labour_time_minutes")) || 0;
+  const markupPercent = Number(form.watch("markup_percent")) || 0;
+  const fixedCost = Number(form.watch("cost")) || 0;
+  const fixedSalesPrice = Number(form.watch("sales_price")) || 0;
 
+  // CALCULATED SALES PRICE = cost + (cost * markup_percent/100)
+  const calculatedSalesPrice = fixedCost + (fixedCost * markupPercent / 100);
+
+  // DELTA: calculated - fixed sales price
+  const deltaSalesPrice = calculatedSalesPrice - fixedSalesPrice;
+
+  // For styling delta:
+  const deltaColor = deltaSalesPrice >= 0
+    ? "text-green-700"
+    : "text-red-600";
+
+  // Effective margin calc, alarm if below minimal threshold  
+  const minimalMargin = form.watch("minimal_margin_threshold_percent");
   const marginPct =
-    salesPrice && cost && Number(salesPrice) > 0
-      ? ((Number(salesPrice) - Number(cost)) / Number(salesPrice)) * 100
+    fixedSalesPrice && fixedCost && Number(fixedSalesPrice) > 0
+      ? ((Number(fixedSalesPrice) - Number(fixedCost)) / Number(fixedSalesPrice)) * 100
       : null;
   const showMarginAlarm =
     marginPct !== null &&
@@ -326,19 +343,51 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
               </FormItem>
             )}
           />
-          {/* SALES PRICE */}
+
+          {/* --- NEW: CALCULATED SALES PRICE --- */}
+          <div>
+            <FormLabel>Calculated Sales Price (€)</FormLabel>
+            <Input
+              value={calculatedSalesPrice.toFixed(2)}
+              readOnly
+              disabled
+              className="bg-gray-100 cursor-not-allowed"
+            />
+            <div className="text-xs text-muted-foreground italic mt-1">
+              Calculated: Cost + (Cost × Markup %)
+            </div>
+          </div>
+
+          {/* SALES PRICE (EDITABLE) */}
           <FormField
             control={form.control}
             name="sales_price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Sales Price (€)</FormLabel>
+                <FormLabel>Fixed Sales Price (€)</FormLabel>
                 <FormControl>
                   <Input type="number" min="0" step="0.01" {...field} />
                 </FormControl>
               </FormItem>
             )}
           />
+
+          {/* --- NEW: DELTA --- */}
+          <div>
+            <FormLabel>Delta (€)</FormLabel>
+            <Input
+              value={deltaSalesPrice.toFixed(2)}
+              readOnly
+              disabled
+              className={`bg-gray-100 cursor-not-allowed font-semibold ${deltaColor}`}
+            />
+            <div className={`text-xs mt-1 italic ${deltaColor}`}>
+              {deltaSalesPrice >= 0
+                ? "Fixed sales price is equal or below calculated (OK)"
+                : "Fixed sales price is higher than calculated!"}
+            </div>
+          </div>
+
           {/* Minimal margin threshold */}
           <FormField
             control={form.control}
