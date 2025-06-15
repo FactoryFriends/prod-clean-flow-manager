@@ -15,8 +15,9 @@ interface CleaningTasksProps {
 }
 
 export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
-  // State for date navigation
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  // State for date navigation (now supports range)
+  const [startDate, setStartDate] = useState<Date | null>(new Date());
+  const [endDate, setEndDate] = useState<Date | null>(new Date());
   const [selectedLocation, setSelectedLocation] = useState<"tothai" | "khin">("tothai");
   const [filterRole, setFilterRole] = useState<"all" | "chef" | "cleaner">("all");
   const [showOverdueTasks, setShowOverdueTasks] = useState(false);
@@ -59,21 +60,31 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
     }
   };
 
-  // Filter tasks by selected date and role, or show overdue tasks
+  // Helper to reset to today for both date fields
+  const handleToday = () => {
+    const today = new Date();
+    setStartDate(today);
+    setEndDate(today);
+    setShowOverdueTasks(false);
+  };
+
+  // Filter logic now: by period
   const filteredTasks = cleaningTasks.filter(task => {
     if (showOverdueTasks) {
-      // Show overdue tasks regardless of date
       const matchesRole = filterRole === "all" || task.assigned_role === filterRole;
       const isOpen = task.status === 'open';
       const isOverdue = isTaskOverdue(task);
       return matchesRole && isOpen && isOverdue;
     } else {
-      // Show tasks for selected date
-      const taskDate = task.scheduled_date.split('T')[0];
-      const matchesDate = taskDate === selectedDate;
+      // Range: show tasks within startDate ~ endDate
+      const taskDate = new Date(task.scheduled_date.split('T')[0]);
+      if (!startDate || !endDate) return false;
+      const inRange =
+        taskDate >= new Date(startDate.toDateString()) &&
+        taskDate <= new Date(endDate.toDateString());
       const matchesRole = filterRole === "all" || task.assigned_role === filterRole;
       const isOpen = task.status === 'open' || task.status === 'closed';
-      return matchesDate && matchesRole && isOpen;
+      return inRange && matchesRole && isOpen;
     }
   });
 
@@ -105,21 +116,17 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
 
   return (
     <div className={cn("space-y-6 p-6", isMobile && "pt-16")}>
-      {/* Always-visible date picker */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-2">
-        <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-1">
-            Browse cleaning tasks for date:
-          </label>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={e => setSelectedDate(e.target.value)}
-            className="px-3 py-2 border border-border rounded-lg text-sm"
-            max={format(new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000), "yyyy-MM-dd")}
-            min="2020-01-01"
-          />
-        </div>
+      {/* Styled date/range picker */}
+      <CleaningTasksFilters
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        onToday={handleToday}
+      />
+
+      {/* Location select stays the same */}
+      <div className="flex gap-2 mb-2">
         <div>
           <label className="block text-sm font-medium text-muted-foreground mb-1">
             Location:
@@ -132,14 +139,6 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
             <option value="tothai">ToThai</option>
             <option value="khin">KHIN</option>
           </select>
-        </div>
-        <div>
-          <button
-            className="mt-6 sm:mt-4 ml-0 sm:ml-4 underline text-blue-600 text-sm"
-            onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])}
-          >
-            Today
-          </button>
         </div>
       </div>
 
@@ -154,9 +153,8 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
         onRoleChange={setFilterRole}
       />
 
-      {/* Pass a click handler for completed tasks */}
       <TasksList
-        selectedDate={showOverdueTasks ? "overdue" : selectedDate}
+        selectedDate={showOverdueTasks ? "overdue" : ""}
         filteredTasks={filteredTasks}
         onCompleteTask={handleCompleteTask}
         onReopenTask={handleReopenTask}
