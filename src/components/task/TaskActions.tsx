@@ -3,6 +3,7 @@ import { CheckCircle, RotateCcw } from "lucide-react";
 import { Button } from "../ui/button";
 import { PhotoUpload } from "../PhotoUpload";
 import { PhotoGallery } from "../PhotoGallery";
+import { ContextualHelp } from "../help/ContextualHelp";
 import { useState } from "react";
 
 interface TaskActionsProps {
@@ -66,7 +67,7 @@ export function TaskActions({
         </div>
       )}
 
-      <div className="flex gap-2 pt-2">
+      <div className="flex gap-2 pt-2 items-center">
         {status === "open" && (
           <Button
             onClick={handleCompleteClick}
@@ -90,6 +91,10 @@ export function TaskActions({
             <RotateCcw className="w-4 h-4" />
             Reopen
           </Button>
+        )}
+        
+        {status === "open" && (
+          <ContextualHelp helpKey="cleaning.complete-task" side="top" />
         )}
       </div>
     </div>

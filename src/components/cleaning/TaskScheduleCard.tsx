@@ -2,6 +2,7 @@
 import { Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { LocationSelector } from "./LocationSelector";
+import { ContextualHelp } from "@/components/help/ContextualHelp";
 
 interface TaskScheduleCardProps {
   selectedDate: string;
@@ -22,6 +23,7 @@ export function TaskScheduleCard({
         <div className="flex items-center gap-3 mb-4">
           <Calendar className="w-5 h-5 text-gray-600" />
           <h2 className="text-lg font-semibold">Task Schedule</h2>
+          <ContextualHelp helpKey="cleaning.overview" side="right" />
         </div>
         
         <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">

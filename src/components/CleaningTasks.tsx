@@ -1,7 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCleaningTasks } from "@/hooks/useCleaningTasks";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useHelp } from "@/components/help/HelpProvider";
 import { cn } from "@/lib/utils";
 import { OverdueAlert } from "./cleaning/OverdueAlert";
 import { TaskScheduleCard } from "./cleaning/TaskScheduleCard";
@@ -17,6 +18,13 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
   const [selectedLocation, setSelectedLocation] = useState<"tothai" | "khin">("tothai");
   const [filterRole, setFilterRole] = useState<"all" | "chef" | "cleaner">("all");
   const isMobile = useIsMobile();
+  
+  // Set help context
+  const { setCurrentSection } = useHelp();
+  
+  useEffect(() => {
+    setCurrentSection("cleaning");
+  }, [setCurrentSection]);
 
   // Map location IDs to database values
   const dbLocation = currentLocation === "location1" ? "tothai" : "khin";

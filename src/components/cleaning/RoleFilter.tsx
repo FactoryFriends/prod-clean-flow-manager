@@ -2,6 +2,7 @@
 import { ChefHat, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ContextualHelp } from "@/components/help/ContextualHelp";
 
 interface RoleFilterProps {
   filterRole: "all" | "chef" | "cleaner";
@@ -14,6 +15,7 @@ export function RoleFilter({ filterRole, onRoleChange }: RoleFilterProps) {
       <div className="flex items-center gap-2">
         <Users className="w-5 h-5 text-gray-600" />
         <span className="font-medium text-gray-700">Filter by Role:</span>
+        <ContextualHelp helpKey="cleaning.role-filter" side="right" />
       </div>
       
       <div className="flex gap-2">
