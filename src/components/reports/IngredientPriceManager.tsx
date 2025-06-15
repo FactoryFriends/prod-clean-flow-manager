@@ -123,6 +123,7 @@ export function IngredientPriceManager() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
+              <TableHead>Unit</TableHead>
               <TableHead>Supplier</TableHead>
               <TableHead>Current Price&nbsp;(&euro;)</TableHead>
               <TableHead>New Price</TableHead>
@@ -132,7 +133,7 @@ export function IngredientPriceManager() {
           <TableBody>
             {shownIngredients.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground">
+                <TableCell colSpan={6} className="text-center text-muted-foreground">
                   No matching ingredients found.
                 </TableCell>
               </TableRow>
@@ -140,6 +141,7 @@ export function IngredientPriceManager() {
             {shownIngredients.map(ing => (
               <TableRow key={ing.id}>
                 <TableCell>{ing.name}</TableCell>
+                <TableCell>{ing.unit_type}</TableCell>
                 <TableCell>
                   {suppliers.find(sup => sup.id === ing.supplier_id)?.name || "No supplier"}
                 </TableCell>
