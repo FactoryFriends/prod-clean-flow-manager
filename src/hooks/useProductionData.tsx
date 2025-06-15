@@ -23,6 +23,7 @@ export interface Product {
   markup_percent?: number | null;
   sales_price?: number | null;
   minimal_margin_threshold_percent?: number | null;
+  product_kind: string; // <-- Add this line for TS support!
 }
 
 export interface Chef {
