@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,8 +9,11 @@ import { toast } from "sonner";
 
 type SemiFinishedFormData = {
   name: string;
-  unit_size: number;
-  unit_type: string;
+  batch_size: number;
+  batch_unit: string;
+  packages_per_batch: number;
+  unit_size: number; // will be auto calculated, not user input
+  unit_type: string; // matches batch_unit, but can adjust if you want to support conversion
   supplier_id?: string;
   shelf_life_days: number | null;
   labour_time_minutes: number | null;
@@ -20,7 +22,7 @@ type SemiFinishedFormData = {
 type RecipeIngredient = {
   product_id: string;
   name: string;
-  qty: number;
+  qty: number; // per batch!
   unit: string;
 };
 
@@ -36,12 +38,20 @@ function calculatePricePlaceholder(
   return "Calculated from recipe";
 }
 
+function calculateUnitSize(batchSize: number, packagesPerBatch: number) {
+  if (!batchSize || !packagesPerBatch || packagesPerBatch <= 0) return "";
+  return (batchSize / packagesPerBatch).toFixed(3);
+}
+
 export function SemiFinishedForm() {
   const form = useForm<SemiFinishedFormData>({
     defaultValues: {
       name: "",
-      unit_size: 1,
-      unit_type: "KG",
+      batch_size: 20,
+      batch_unit: "LITER",
+      packages_per_batch: 1,
+      unit_size: 0, // calculated
+      unit_type: "LITER",
       supplier_id: "",
       shelf_life_days: null,
       labour_time_minutes: null,
@@ -79,23 +89,36 @@ export function SemiFinishedForm() {
       : true;
   }
 
+  // For units, sync unit_type to batch_unit unless you support conversions
+  React.useEffect(() => {
+    // Auto-update unit_type and unit_size based on batch/unit fields
+    const sub = form.watch(({ batch_size, batch_unit, packages_per_batch }) => {
+      const autoUnitSize =
+        batch_size && packages_per_batch
+          ? Number(batch_size) / Number(packages_per_batch)
+          : 0;
+      form.setValue("unit_size", autoUnitSize);
+      form.setValue("unit_type", batch_unit);
+    });
+    return () => sub?.unsubscribe?.();
+  }, [form]);
+
   const onSubmit = (data: SemiFinishedFormData) => {
     if (recipe.length === 0) {
       toast.error("Please add at least one ingredient to the recipe.");
       return;
     }
-
     createProduct.mutate(
       {
         name: data.name,
-        unit_size: Number(data.unit_size),
+        unit_size: Number(data.unit_size), // calculated
         unit_type: data.unit_type,
+        packages_per_batch: Number(data.packages_per_batch),
         supplier_name:
           (data.supplier_id &&
             suppliers.find((s) => s.id === data.supplier_id)?.name) ||
           null,
         price_per_unit: null, // to be calculated later if needed
-        packages_per_batch: 1,
         shelf_life_days: data.shelf_life_days
           ? Number(data.shelf_life_days)
           : null,
@@ -104,7 +127,6 @@ export function SemiFinishedForm() {
         pickable: false,
         supplier_id: data.supplier_id || null,
         product_fiche_url: null,
-        // New:
         labour_time_minutes: data.labour_time_minutes
           ? Number(data.labour_time_minutes)
           : null,
@@ -135,7 +157,6 @@ export function SemiFinishedForm() {
       toast.error("Quantity must be greater than zero");
       return;
     }
-    // Prevent duplicate
     if (recipe.find((r) => r.product_id === selectedIngredientId)) {
       toast.error("Already added");
       return;
@@ -146,7 +167,6 @@ export function SemiFinishedForm() {
         product_id: ingredient.id,
         name: ingredient.name,
         qty: ingredientQty,
-        // FIX: Use unit_type instead of unit
         unit: ingredient.unit_type || "",
       },
     ]);
@@ -182,43 +202,100 @@ export function SemiFinishedForm() {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="unit_size"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Batch Size</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.01" min="0" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* BATCH section */}
+          <div className="flex gap-2 flex-col md:flex-row">
+            <FormField
+              control={form.control}
+              name="batch_size"
+              rules={{ required: "Batch size is required" }}
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel>Batch Size</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="batch_unit"
+              render={({ field }) => (
+                <FormItem className="w-32">
+                  <FormLabel>Batch Unit</FormLabel>
+                  <FormControl>
+                    <select
+                      {...field}
+                      className="w-full border rounded-md px-3 py-2 text-sm bg-white"
+                    >
+                      {UNIT_OPTIONS.map((u) => (
+                        <option value={u} key={u}>
+                          {u}
+                        </option>
+                      ))}
+                    </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="packages_per_batch"
+              rules={{
+                required: "Packages per batch is required",
+                min: { value: 1, message: "Must be at least 1" },
+              }}
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel>Packages per Batch</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="1"
+                      step="1"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-          <FormField
-            control={form.control}
-            name="unit_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Unit</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    className="w-full border rounded-md px-3 py-2 text-sm bg-white"
-                  >
-                    {UNIT_OPTIONS.map((u) => (
-                      <option value={u} key={u}>
-                        {u}
-                      </option>
-                    ))}
-                  </select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Auto-calculated unit size */}
+          <div>
+            <FormLabel>
+              Unit Size (auto-calculated)
+            </FormLabel>
+            <Input
+              readOnly
+              value={
+                calculateUnitSize(
+                  form.watch("batch_size"),
+                  form.watch("packages_per_batch"),
+                ) +
+                (form.watch("batch_unit") ? ` ${form.watch("batch_unit")}` : "")
+              }
+              className="bg-gray-100 cursor-not-allowed"
+            />
+            <div className="text-xs text-muted-foreground italic mt-1">
+              <span>
+                Each unit will have this size. <br />
+                For example: If a batch is 20 liters and makes 5 units, then unit size = 4 liters.
+              </span>
+            </div>
+          </div>
 
+          {/* Supplier */}
           <FormField
             control={form.control}
             name="supplier_id"
@@ -287,12 +364,12 @@ export function SemiFinishedForm() {
             )}
           />
 
-          {/* Recipe ingredient selection UI */}
+          {/* Recipe (per batch) */}
           <div>
-            <FormLabel>Recipe (Ingredients)</FormLabel>
+            <FormLabel>Recipe (Ingredients per batch)</FormLabel>
             <div className="flex flex-col md:flex-row gap-2 items-end mt-1">
               <div className="w-full">
-                {/* Search/filter input for ingredients */}
+                {/* Search for ingredients */}
                 <Input
                   placeholder="Search ingredient"
                   value={ingredientSearch}
@@ -329,7 +406,17 @@ export function SemiFinishedForm() {
                 value={ingredientQty === 0 ? "" : ingredientQty}
                 onChange={(e) => setIngredientQty(Number(e.target.value))}
               />
-              <Button type="button" className="w-fit" onClick={handleAddIngredient}>
+              <span className="text-xs mb-2">
+                {/* Show unit type for current selection */}
+                {selectedIngredientId &&
+                  ingredientOptions.find((i) => i.id === selectedIngredientId)
+                    ?.unit_type}
+              </span>
+              <Button
+                type="button"
+                className="w-fit"
+                onClick={handleAddIngredient}
+              >
                 Add
               </Button>
             </div>
@@ -337,7 +424,10 @@ export function SemiFinishedForm() {
               <div className="mt-3 border rounded bg-gray-50 px-3 py-2">
                 <ul className="text-sm space-y-1">
                   {recipe.map((ing) => (
-                    <li key={ing.product_id} className="flex justify-between items-center">
+                    <li
+                      key={ing.product_id}
+                      className="flex justify-between items-center"
+                    >
                       <div>
                         <span className="font-medium">{ing.name}</span>
                         <span className="ml-2">
@@ -359,7 +449,7 @@ export function SemiFinishedForm() {
             )}
             {recipe.length === 0 && (
               <div className="text-xs text-muted-foreground italic mt-1">
-                Add ingredients to build the recipe for this product.
+                Add ingredients to build the recipe for this batch (input QTY per batch).
               </div>
             )}
           </div>
@@ -374,7 +464,7 @@ export function SemiFinishedForm() {
               className="bg-gray-100 cursor-not-allowed"
             />
             <div className="text-xs text-muted-foreground italic mt-1">
-              Price is automatically calculated from the ingredient recipe.
+              Price is automatically calculated from the ingredient recipe per batch.
             </div>
           </div>
 
