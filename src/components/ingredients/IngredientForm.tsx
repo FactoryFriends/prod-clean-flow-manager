@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -7,34 +6,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { useCreateProduct, useAllProducts } from "@/hooks/useProductionData";
 import { toast } from "sonner";
-
-type IngredientFormData = {
-  name: string;
-  unit_size: number;
-  unit_type: string;
-  supplier_name: string;
-  price_per_unit: number;
-  product_kind: "zelfgemaakt" | "extern";
-  pickable: boolean;
-  allergens: string[];
-};
-
-const ALLERGENS = [
-  "Gluten",
-  "Schaaldieren",
-  "Eieren",
-  "Vis",
-  "Pinda",
-  "Soja",
-  "Melk",
-  "Noten",
-  "Selderij",
-  "Mosterd",
-  "Sesam",
-  "Sulfiet",
-  "Lupine",
-  "Weekdieren",
-];
+import { ALLERGENS } from "./constants/allergens";
+import type { IngredientFormData } from "./types";
 
 const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE"];
 const SUPPLIER_OPTIONS = ["Metro", "Bidfood", "Makro", "Asia Center", "Vandemoortele", "Anders"];
