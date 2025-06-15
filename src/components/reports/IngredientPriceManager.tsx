@@ -170,7 +170,7 @@ export function IngredientPriceManager() {
                     onClick={() => handleAddPrice(ing.id)}
                     disabled={!editingPrice[ing.id]}
                   >
-                    Add Price
+                    Update Price
                   </Button>
                 </TableCell>
               </TableRow>
