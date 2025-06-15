@@ -95,7 +95,8 @@ export function Dashboard({ currentLocation, onSectionChange }: DashboardProps) 
           todaysCompletedTasks={todaysCompletedTasks} 
           onSectionChange={onSectionChange}
         />
-        <DashboardQuickActions onSectionChange={onSectionChange} />
+        {/* Pass onSectionChange as-is; Index.tsx will parse the "reports:favv" value */}
+        <DashboardQuickActions onSectionChange={onSectionChange ?? (() => {})} />
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { FAVVReports } from "./FAVVReports";
@@ -6,9 +7,18 @@ import { ManagementReports } from "./ManagementReports";
 interface ReportsProps {
   currentLocation: "tothai" | "khin";
   onSectionChange?: (section: string) => void;
+  favvTabActive?: boolean; // <--- New optional prop
 }
 
-export function Reports({ currentLocation, onSectionChange }: ReportsProps) {
+export function Reports({ currentLocation, onSectionChange, favvTabActive }: ReportsProps) {
+  // If favvTabActive is set, show favv, otherwise show management tab by default
+  const [tab, setTab] = useState(favvTabActive ? "favv" : "management");
+
+  // If prop changes (user re-clicks through quick action), update the tab
+  React.useEffect(() => {
+    if (favvTabActive) setTab("favv");
+  }, [favvTabActive]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -20,7 +30,7 @@ export function Reports({ currentLocation, onSectionChange }: ReportsProps) {
         </div>
       </div>
 
-      <Tabs defaultValue="management" className="w-full">
+      <Tabs value={tab} onValueChange={setTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="management">Management Dashboard</TabsTrigger>
           <TabsTrigger value="favv">FAVV Compliance</TabsTrigger>

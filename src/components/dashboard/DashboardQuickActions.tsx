@@ -1,7 +1,8 @@
 
-import { Package, Truck, ClipboardList, CheckCircle } from "lucide-react";
+import { Package, Truck, ClipboardList, ShieldCheck } from "lucide-react";
 
 interface DashboardQuickActionsProps {
+  // onSectionChange now allows `'reports:favv'` as well!
   onSectionChange: (section: string) => void;
 }
 
@@ -32,11 +33,11 @@ export function DashboardQuickActions({ onSectionChange }: DashboardQuickActions
           <span className="text-sm font-medium">Cleaning Tasks</span>
         </button>
         <button 
-          onClick={() => onSectionChange('reports')}
+          onClick={() => onSectionChange('reports:favv')}
           className="p-4 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors"
         >
-          <CheckCircle className="w-6 h-6 mx-auto mb-2" />
-          <span className="text-sm font-medium">View Reports</span>
+          <ShieldCheck className="w-6 h-6 mx-auto mb-2" />
+          <span className="text-sm font-medium">FAVV Compliance</span>
         </button>
       </div>
     </div>
