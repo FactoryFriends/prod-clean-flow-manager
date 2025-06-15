@@ -4,7 +4,7 @@ import { Dashboard } from "@/components/Dashboard";
 import { Production } from "@/components/Production";
 import { Distribution } from "@/components/Distribution";
 import { CleaningTasks } from "@/components/CleaningTasks";
-import { Settings } from "@/components/Settings";
+import { Settings } from "@/components/settings/Settings";
 import { Invoicing } from "@/components/Invoicing";
 import { Reports } from "@/components/Reports";
 import { LocationHeader } from "@/components/LocationHeader";
