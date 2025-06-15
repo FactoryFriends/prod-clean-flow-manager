@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useAllProducts, useUpdateProduct } from "@/hooks/useProductionData";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -21,24 +22,16 @@ export function IngredientPriceManager() {
 
   const { data: suppliers = [] } = useSuppliers();
 
-  // Filter for only externally bought ingredients
-  const externalIngredients = allProducts.filter(
-    p =>
-      p.active &&
-      (
-        p.product_kind === "extern" ||
-        p.product_type === "extern"
-      )
-  );
-
-  // Filter by ingredient name (case-insensitive substring match) and supplier
-  const shownIngredients = externalIngredients.filter(ing => {
-    const nameMatch = ing.name.toLowerCase().includes(filterName.trim().toLowerCase());
-    const supplierMatch = filterSupplierId
-      ? (ing.supplier_id === filterSupplierId)
-      : true;
-    return nameMatch && supplierMatch;
-  });
+  // Show ALL active ingredients instead of only external ones
+  const shownIngredients = allProducts
+    .filter(p => p.active)
+    .filter(ing => {
+      const nameMatch = ing.name.toLowerCase().includes(filterName.trim().toLowerCase());
+      const supplierMatch = filterSupplierId
+        ? (ing.supplier_id === filterSupplierId)
+        : true;
+      return nameMatch && supplierMatch;
+    });
 
   // All semi-finished and dishes
   const semiFinishedAndDishes = allProducts.filter(
@@ -87,7 +80,7 @@ export function IngredientPriceManager() {
     <div className="space-y-10">
       <div>
         <h2 className="text-xl font-bold flex items-center gap-2 mb-2">
-          <BadgeDollarSign className="w-6 h-6" /> Ingredient Prices (External Only)
+          <BadgeDollarSign className="w-6 h-6" /> Ingredient Prices (Active Only)
         </h2>
         {/* Filtering Controls */}
         <div className="flex flex-wrap gap-4 items-end mb-4">
@@ -124,7 +117,7 @@ export function IngredientPriceManager() {
           </div>
           <div className="flex items-center gap-2 mt-5">
             <FilterIcon className="h-5 w-5 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Filtering {shownIngredients.length} of {externalIngredients.length} ingredients</span>
+            <span className="text-xs text-muted-foreground">Filtering {shownIngredients.length} of {allProducts.filter(p => p.active).length} active ingredients</span>
           </div>
         </div>
         <Table>
@@ -141,7 +134,7 @@ export function IngredientPriceManager() {
             {shownIngredients.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground">
-                  No matching external ingredients found.
+                  No matching ingredients found.
                 </TableCell>
               </TableRow>
             )}
@@ -186,7 +179,7 @@ export function IngredientPriceManager() {
           </TableBody>
         </Table>
         <div className="text-xs mt-2 text-muted-foreground">
-          Only externally bought ingredients can be managed here. Changing the price will immediately be used for new calculations and margin reports. All price changes are stored in cost history.
+          All active ingredients are listed. Changing the price will immediately be used for new calculations and margin reports. All price changes are stored in cost history.
         </div>
       </div>
 
@@ -241,3 +234,4 @@ export function IngredientPriceManager() {
 }
 
 export default IngredientPriceManager;
+
