@@ -58,7 +58,6 @@ export function IngredientForm() {
       return;
     }
     setFicheFile(file);
-    // Instead of direct setValue, use correct name
     form.setValue("product_fiche_url", data?.path || "");
     setUploadingFiche(false);
     toast.success("Product fiche uploaded!");
@@ -73,13 +72,21 @@ export function IngredientForm() {
     return exists ? "Name already exists – please choose a unique name." : true;
   }
 
+  // --- FIX: set supplier_name per constraint before creating product
   const onSubmit = (data: ExtendedIngredientFormData) => {
-    // Always send allergens array, default to [] if not present
+    let updated: ExtendedIngredientFormData & { supplier_name: string } = { ...data, supplier_name: "" };
+    if (data.product_kind === "extern") {
+      const sup = suppliers.find(s => s.id === data.supplier_id);
+      updated.supplier_name = sup && sup.name ? sup.name : "";
+    } else {
+      updated.supplier_name = "TOTHAI PRODUCTION";
+    }
+
     createProduct.mutate(
       {
-        ...data,
+        ...updated,
         allergens: data.allergens ?? [],
-        product_type: "ingredient", // <--- FIXED: ensure correct product_type
+        product_type: "ingredient", // ensure correct product_type
       },
       {
         onSuccess: () => {
