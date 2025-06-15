@@ -1,7 +1,17 @@
+
 import React, { useState } from "react";
 import { useAllSuppliers, useCreateSupplier, useUpdateSupplier, useDeactivateSupplier, Supplier } from "@/hooks/useSuppliers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+} from "@/components/ui/table";
 
 export function SuppliersManagement() {
   const { data: suppliers, isLoading, isError, error } = useAllSuppliers();
@@ -53,11 +63,6 @@ export function SuppliersManagement() {
     }
   }
 
-  // Debug: print suppliers to the console and UI for visibility
-  if (!isLoading) {
-    console.log("Fetched suppliers:", suppliers, "length:", suppliers?.length);
-  }
-
   return (
     <div className="space-y-6">
       <form className="bg-muted p-4 rounded-xl space-y-3" onSubmit={handleSubmit}>
@@ -98,55 +103,82 @@ export function SuppliersManagement() {
           )}
         </div>
       </form>
-      <div>
-        <div className="bg-yellow-50 border border-yellow-300 text-yellow-800 rounded p-2 text-xs mb-2">
-          <div><strong>Debug:</strong> <code>typeof suppliers = {typeof suppliers}</code></div>
-          <div><strong>Array.isArray(suppliers):</strong> {Array.isArray(suppliers) ? "true" : "false"}</div>
-          <div><strong>suppliers?.length:</strong> {suppliers?.length ?? "undefined"}</div>
+
+      {isLoading ? (
+        <div className="text-center py-8 text-muted-foreground">
+          Loading suppliers...
         </div>
-        {isLoading ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Loading suppliers...
-          </div>
-        ) : isError ? (
-          <div className="text-center py-8 text-red-600">
-            Failed to load suppliers. {error?.message || "Unknown error."}
-          </div>
-        ) : suppliers?.length === 0 ? (
-          <div>
-            <div className="text-muted-foreground">No suppliers found.</div>
-            <pre className="text-xs text-gray-500 bg-gray-100 rounded p-2 mt-4">
-              {JSON.stringify(suppliers, null, 2)}
-            </pre>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <pre className="text-xs text-gray-500 bg-gray-100 rounded p-2 mb-2">
-              {JSON.stringify(suppliers, null, 2)}
-            </pre>
-            {suppliers?.map((s) => (
-              <div
-                key={s.id}
-                className="flex items-center justify-between bg-white p-3 rounded border gap-3"
-              >
-                <div>
-                  <span className="font-medium">{s.name}</span>
-                  {s.contact_person && <span className="ml-2 text-xs text-muted-foreground">({s.contact_person})</span>}
-                  {s.email && <span className="ml-3 text-xs">{s.email}</span>}
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => handleEditClick(s)}>
-                    Edit
-                  </Button>
-                  <Button size="sm" variant="destructive" onClick={() => deactivateSupplier.mutate(s.id)}>
-                    Deactivate
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      ) : isError ? (
+        <div className="text-center py-8 text-red-600">
+          Failed to load suppliers. {error?.message || "Unknown error."}
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <Table>
+            <TableCaption>
+              {(!suppliers || suppliers.length === 0)
+                ? "No suppliers found."
+                : `${suppliers.length} supplier${suppliers.length === 1 ? "" : "s"}.`}
+            </TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>E-mail</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Address</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {suppliers && suppliers.length > 0 ? (
+                suppliers.map((s) => (
+                  <TableRow key={s.id}>
+                    <TableCell className="font-medium">{s.name}</TableCell>
+                    <TableCell>{s.contact_person || <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell>{s.email || <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell>{s.phone || <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell>{s.address || <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell>
+                      {s.active ? (
+                        <span className="text-green-600 font-semibold">Active</span>
+                      ) : (
+                        <span className="text-muted-foreground">Inactive</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEditClick(s)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => deactivateSupplier.mutate(s.id)}
+                          disabled={!s.active}
+                        >
+                          Deactivate
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-muted-foreground">
+                    No suppliers found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 }
