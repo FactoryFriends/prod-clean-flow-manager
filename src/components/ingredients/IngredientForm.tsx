@@ -71,9 +71,11 @@ export function IngredientForm() {
   }
 
   const onSubmit = (data: ExtendedIngredientFormData) => {
+    // Always send allergens array, default to [] if not present
     createProduct.mutate(
       {
         ...data,
+        allergens: data.allergens ?? [],
       },
       {
         onSuccess: () => {
