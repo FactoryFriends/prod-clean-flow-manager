@@ -31,7 +31,7 @@ const Index = () => {
       case "invoicing":
         return <Invoicing currentLocation={currentLocation} />;
       case "reports":
-        return <Reports currentLocation={currentLocation} />;
+        return <Reports currentLocation={currentLocation} onSectionChange={setActiveTab} />;
       default:
         return <Dashboard currentLocation={currentLocation} onSectionChange={setActiveTab} />;
     }

@@ -11,9 +11,10 @@ import { format, startOfDay, endOfDay } from "date-fns";
 
 interface ManagementReportsProps {
   currentLocation: "tothai" | "khin";
+  onSectionChange?: (section: string) => void;
 }
 
-export function ManagementReports({ currentLocation }: ManagementReportsProps) {
+export function ManagementReports({ currentLocation, onSectionChange }: ManagementReportsProps) {
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -44,6 +45,36 @@ export function ManagementReports({ currentLocation }: ManagementReportsProps) {
     setIsTaskModalOpen(true);
   };
 
+  const handleTileClick = (tileType: string) => {
+    switch (tileType) {
+      case "completed":
+        // Scroll to completed tasks table
+        const tableElement = document.querySelector('[data-testid="completed-tasks-table"]');
+        if (tableElement) {
+          tableElement.scrollIntoView({ behavior: 'smooth' });
+        }
+        break;
+      case "photos":
+        // Scroll to photo gallery section
+        const photoSection = document.querySelector('[data-testid="photo-gallery"]');
+        if (photoSection) {
+          photoSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        break;
+      case "overdue":
+        // Navigate to cleaning tasks
+        onSectionChange?.('cleaning');
+        break;
+      case "completion":
+        // Scroll to completed tasks table for completion rate details
+        const completionSection = document.querySelector('[data-testid="completed-tasks-table"]');
+        if (completionSection) {
+          completionSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        break;
+    }
+  };
+
   const stats = [
     {
       title: "Tasks Completed Today",
@@ -51,6 +82,7 @@ export function ManagementReports({ currentLocation }: ManagementReportsProps) {
       icon: CheckCircle,
       color: "text-green-600",
       bgColor: "bg-green-50",
+      clickType: "completed",
     },
     {
       title: "Tasks with Photo Evidence",
@@ -58,6 +90,7 @@ export function ManagementReports({ currentLocation }: ManagementReportsProps) {
       icon: Camera,
       color: "text-blue-600", 
       bgColor: "bg-blue-50",
+      clickType: "photos",
     },
     {
       title: "Overdue Tasks",
@@ -65,6 +98,7 @@ export function ManagementReports({ currentLocation }: ManagementReportsProps) {
       icon: AlertTriangle,
       color: "text-red-600",
       bgColor: "bg-red-50",
+      clickType: "overdue",
     },
     {
       title: "Completion Rate",
@@ -72,6 +106,7 @@ export function ManagementReports({ currentLocation }: ManagementReportsProps) {
       icon: TrendingUp,
       color: "text-purple-600",
       bgColor: "bg-purple-50",
+      clickType: "completion",
     },
   ];
 
@@ -101,7 +136,11 @@ export function ManagementReports({ currentLocation }: ManagementReportsProps) {
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <Card key={index} className="hover:shadow-md transition-shadow">
+            <Card 
+              key={index} 
+              className="hover:shadow-md transition-all cursor-pointer hover:scale-105" 
+              onClick={() => handleTileClick(stat.clickType)}
+            >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className={`p-2 rounded-lg ${stat.bgColor}`}>
@@ -120,7 +159,7 @@ export function ManagementReports({ currentLocation }: ManagementReportsProps) {
 
       {/* Recent Task Completions with Photos */}
       {tasksWithPhotos.length > 0 && (
-        <Card>
+        <Card data-testid="photo-gallery">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Camera className="w-5 h-5" />
@@ -162,11 +201,13 @@ export function ManagementReports({ currentLocation }: ManagementReportsProps) {
       )}
 
       {/* Completed Tasks Table */}
-      <CompletedTasksTable
-        completedTasks={completedTasks}
-        isLoading={isLoading}
-        onTaskClick={handleTaskClick}
-      />
+      <div data-testid="completed-tasks-table">
+        <CompletedTasksTable
+          completedTasks={completedTasks}
+          isLoading={isLoading}
+          onTaskClick={handleTaskClick}
+        />
+      </div>
 
       <CleaningTaskDetailsModal
         task={selectedTask}

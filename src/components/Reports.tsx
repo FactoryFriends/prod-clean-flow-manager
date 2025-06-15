@@ -6,9 +6,10 @@ import { ManagementReports } from "./ManagementReports";
 
 interface ReportsProps {
   currentLocation: "tothai" | "khin";
+  onSectionChange?: (section: string) => void;
 }
 
-export function Reports({ currentLocation }: ReportsProps) {
+export function Reports({ currentLocation, onSectionChange }: ReportsProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -27,7 +28,7 @@ export function Reports({ currentLocation }: ReportsProps) {
         </TabsList>
 
         <TabsContent value="management" className="space-y-6">
-          <ManagementReports currentLocation={currentLocation} />
+          <ManagementReports currentLocation={currentLocation} onSectionChange={onSectionChange} />
         </TabsContent>
 
         <TabsContent value="favv" className="space-y-6">
