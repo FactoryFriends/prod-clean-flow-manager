@@ -20,20 +20,20 @@ type IngredientFormData = {
 };
 
 const ALLERGENS = [
-  "Glutenbevattende granen (tarwe, rogge, gerst, haver en spelt)",
+  "Gluten",
   "Schaaldieren",
   "Eieren",
   "Vis",
-  "Pinda's (aardnoten)",
+  "Pinda",
   "Soja",
-  "Melk en zuivelproducten (incl. lactose)",
-  "Schaalvruchten (amandel, hazelnoot, walnoot, cashewnoot, pecannoot, paranoot, pistachnoot, macadamianoot)",
-  "Selder",
+  "Melk",
+  "Noten",
+  "Selderij",
   "Mosterd",
-  "Sesamzaad",
-  "Sulfieten (>10mg/kg of >10ml/liter)",
+  "Sesam",
+  "Sulfiet",
   "Lupine",
-  "Weekdieren (zoals mosselen en oesters)",
+  "Weekdieren",
 ];
 
 const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE"];
