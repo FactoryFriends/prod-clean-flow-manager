@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Dashboard } from "@/components/Dashboard";
@@ -10,6 +9,7 @@ import { Invoicing } from "@/components/Invoicing";
 import { Reports } from "@/components/Reports";
 import { LocationHeader } from "@/components/LocationHeader";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { RecipeManagement } from "./RecipeManagement";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -33,6 +33,8 @@ const Index = () => {
         return <Invoicing currentLocation={currentLocation} />;
       case "reports":
         return <Reports currentLocation={currentLocation} onSectionChange={setActiveTab} />;
+      case "recipe-management":
+        return <RecipeManagement />;
       default:
         return <Dashboard currentLocation={currentLocation} onSectionChange={setActiveTab} />;
     }
