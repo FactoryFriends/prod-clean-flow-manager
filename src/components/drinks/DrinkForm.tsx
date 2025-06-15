@@ -36,7 +36,6 @@ export function DrinkForm() {
   const { data: allProducts } = useAllProducts();
   const { data: suppliers = [] } = useSuppliers();
 
-  // Name uniqueness validation
   function validateUniqueName(value: string) {
     if (!allProducts) return true;
     const exists = allProducts.some(
@@ -51,18 +50,18 @@ export function DrinkForm() {
         name: data.name,
         unit_size: Number(data.unit_size),
         unit_type: data.unit_type,
-        packages_per_batch: 1, // Always 1 for drinks
+        packages_per_batch: 1,
         supplier_name: suppliers.find((s) => s.id === data.supplier_id)?.name || null,
         price_per_unit: Number(data.price_per_unit),
         shelf_life_days: null,
         product_type: "drink",
-        product_kind: "extern", // Drinks are always purchased externally
-        pickable: true, // Drinks are always pickable
+        product_kind: "extern",
+        pickable: true,
         supplier_id: data.supplier_id || null,
         product_fiche_url: null,
         labour_time_minutes: null,
         active: data.active,
-        recipe: null, // No recipe for drinks
+        recipe: null,
       },
       {
         onSuccess: () => {
@@ -78,7 +77,6 @@ export function DrinkForm() {
       <h2 className="text-xl font-semibold mb-2">Add Drink</h2>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* NAME (unique) */}
           <FormField
             control={form.control}
             name="name"
@@ -94,7 +92,6 @@ export function DrinkForm() {
             )}
           />
 
-          {/* PACKAGE SIZE */}
           <FormField
             control={form.control}
             name="unit_size"
@@ -109,7 +106,6 @@ export function DrinkForm() {
             )}
           />
 
-          {/* UNIT (dropdown) */}
           <FormField
             control={form.control}
             name="unit_type"
@@ -133,7 +129,6 @@ export function DrinkForm() {
             )}
           />
 
-          {/* SUPPLIER (required for drinks) */}
           <FormField
             control={form.control}
             name="supplier_id"
@@ -161,7 +156,6 @@ export function DrinkForm() {
             )}
           />
 
-          {/* PRICE */}
           <FormField
             control={form.control}
             name="price_per_unit"
@@ -182,7 +176,6 @@ export function DrinkForm() {
             )}
           />
 
-          {/* Active / Inactive Toggle */}
           <FormField
             control={form.control}
             name="active"
