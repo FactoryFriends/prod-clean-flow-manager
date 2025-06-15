@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Tabs } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { SettingsAuth } from "@/components/settings/SettingsAuth";
 import { SettingsHeader } from "@/components/settings/SettingsHeader";
 import { SettingsTabsList } from "@/components/settings/SettingsTabsList";
