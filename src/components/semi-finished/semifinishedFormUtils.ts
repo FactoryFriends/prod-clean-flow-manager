@@ -1,4 +1,3 @@
-
 export type SemiFinishedFormData = {
   name: string;
   batch_size: number;
@@ -9,6 +8,7 @@ export type SemiFinishedFormData = {
   supplier_id?: string;
   shelf_life_days: number | null;
   labour_time_minutes: number | null;
+  active: boolean;
 };
 
 export type RecipeIngredient = {

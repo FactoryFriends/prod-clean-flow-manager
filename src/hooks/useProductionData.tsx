@@ -16,6 +16,8 @@ export interface Product {
   pickable?: boolean; // <-- ADDED to match database and UI usage
   supplier_id?: string | null; // <-- ADDED!
   product_fiche_url?: string | null; // <-- ADDED!
+  description?: string;
+  labour_time_minutes?: number | null;
 }
 
 export interface Chef {

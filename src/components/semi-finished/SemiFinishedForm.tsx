@@ -290,7 +290,10 @@ export function SemiFinishedForm() {
             render={({ field }) => (
               <FormItem>
                 <div className="flex items-center gap-2">
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  <Switch
+                    checked={!!field.value}
+                    onCheckedChange={field.onChange}
+                  />
                   <FormLabel>{field.value ? "Active" : "Inactive"}</FormLabel>
                 </div>
               </FormItem>
