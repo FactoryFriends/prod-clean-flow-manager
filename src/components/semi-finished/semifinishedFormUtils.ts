@@ -27,9 +27,12 @@ export function formatNumberComma(n: number | string | undefined | null) {
   return numberVal.toFixed(2).replace(".", ",");
 }
 
-export function parseNumberComma(s: string) {
-  if (!s) return undefined;
-  return parseFloat(s.replace(",", "."));
+// FIXED: Accept string or number as input. 
+export function parseNumberComma(s: string | number | undefined | null) {
+  if (s === undefined || s === null || s === "") return undefined;
+  if (typeof s === "number") return s;
+  if (typeof s === "string") return parseFloat(s.replace(",", "."));
+  return undefined;
 }
 
 export function calculateUnitSize(batchSize: number, packagesPerBatch: number) {
