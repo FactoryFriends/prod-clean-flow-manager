@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+
+import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,27 +19,6 @@ import {
 import { BatchAndUnitFields } from "./BatchAndUnitFields";
 import { RecipeIngredientsInput } from "./RecipeIngredientsInput";
 
-type SemiFinishedFormData = {
-  name: string;
-  batch_size: number;
-  batch_unit: string;
-  packages_per_batch: number;
-  unit_size: number; // will be auto calculated, not user input
-  unit_type: string; // matches batch_unit, but can adjust if you want to support conversion
-  supplier_id?: string;
-  shelf_life_days: number | null;
-  labour_time_minutes: number | null;
-};
-
-type RecipeIngredient = {
-  product_id: string;
-  name: string;
-  qty: number; // per batch!
-  unit: string;
-};
-
-const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE"];
-
 // Placeholder for calculated price (implement actual logic later)
 function calculatePricePlaceholder(
   recipe: RecipeIngredient[],
@@ -47,24 +27,6 @@ function calculatePricePlaceholder(
   // TODO: fetch ingredient prices and compute for now just a placeholder
   // You could sum ingredient cost here if available
   return "Calculated from recipe";
-}
-
-// Helpers for format/parse comma decimal
-function formatNumberComma(n: number | string | undefined | null) {
-  if (n === undefined || n === null || n === "") return "";
-  const numberVal = typeof n === "number" ? n : parseFloat(String(n).replace(",", "."));
-  if (isNaN(numberVal)) return "";
-  return numberVal.toFixed(2).replace(".", ",");
-}
-function parseNumberComma(s: string) {
-  if (!s) return undefined;
-  return parseFloat(s.replace(",", "."));
-}
-// For calculateUnitSize: output as string with comma
-function calculateUnitSize(batchSize: number, packagesPerBatch: number) {
-  if (!batchSize || !packagesPerBatch || packagesPerBatch <= 0) return "";
-  const v = batchSize / packagesPerBatch;
-  return formatNumberComma(v);
 }
 
 export function SemiFinishedForm() {
