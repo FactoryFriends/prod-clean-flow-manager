@@ -8,9 +8,10 @@ import { OverdueAlert } from "./cleaning/OverdueAlert";
 import { TaskScheduleCard } from "./cleaning/TaskScheduleCard";
 import { RoleFilter } from "./cleaning/RoleFilter";
 import { TasksList } from "./cleaning/TasksList";
-import { TaskPhotoModal } from "./task/TaskPhotoModal";
+// import { TaskPhotoModal } from "./task/TaskPhotoModal"; // Removed
 import { format } from "date-fns";
 import { CleaningTasksFilters } from "./CleaningTasksFilters";
+import { CleaningTaskDetailsModal } from "./task/CleaningTaskDetailsModal";
 
 interface CleaningTasksProps {
   currentLocation: string;
@@ -26,8 +27,9 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
   const isMobile = useIsMobile();
   const { setCurrentSection } = useHelp();
 
-  // Photo modal
-  const [photoModalTask, setPhotoModalTask] = useState<{ photoUrls: string[], title: string } | null>(null);
+  // Details modal for completed tasks (shows both details and photos)
+  const [selectedTask, setSelectedTask] = useState<any | null>(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
   useEffect(() => {
     setCurrentSection("cleaning");
@@ -55,10 +57,11 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
     setFilterRole("all"); // Show all roles when viewing overdue tasks
   };
 
-  // Handle clicking on any completed task with photos
+  // Handle clicking on any completed task with photos (show details + photos)
   const handleCompletedTaskClick = (task: any) => {
     if (task.status === "closed" && task.photo_urls && task.photo_urls.length) {
-      setPhotoModalTask({ photoUrls: task.photo_urls, title: task.title });
+      setSelectedTask(task);
+      setDetailsModalOpen(true);
     }
   };
 
@@ -166,14 +169,36 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
         onCompletedTaskClick={handleCompletedTaskClick}
       />
 
-      {/* Task Photo Modal */}
-      {photoModalTask && (
-        <TaskPhotoModal
-          open={!!photoModalTask}
-          onClose={() => setPhotoModalTask(null)}
-          photoUrls={photoModalTask.photoUrls}
-          taskTitle={photoModalTask.title}
-        />
+      {/* Modal: Show details + photo gallery below if any */}
+      {selectedTask && (
+        <CleaningTaskDetailsModal
+          task={selectedTask}
+          isOpen={detailsModalOpen}
+          onClose={() => {
+            setDetailsModalOpen(false);
+            setSelectedTask(null);
+          }}
+        >
+          {/* Show photos gallery at bottom if present */}
+          {selectedTask.photo_urls && selectedTask.photo_urls.length > 0 && (
+            <div className="mt-6">
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                Completion Photos
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {selectedTask.photo_urls.map((url: string, idx: number) => (
+                  <div key={idx} className="aspect-square rounded bg-gray-100 overflow-hidden">
+                    <img
+                      src={url}
+                      alt={`Completion Photo ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CleaningTaskDetailsModal>
       )}
     </div>
   );
