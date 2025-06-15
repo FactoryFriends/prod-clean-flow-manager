@@ -1,4 +1,3 @@
-
 import { Building, Package, Truck, Brush, BarChart3, Settings, Receipt, Menu, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -122,8 +121,8 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
   if (isMobile) {
     return (
       <>
-        {/* Mobile menu trigger */}
-        <div className="fixed top-4 left-4 z-50 md:hidden">
+        {/* Mobile menu trigger - moved to right side */}
+        <div className="fixed top-4 right-4 z-50 md:hidden">
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button 
