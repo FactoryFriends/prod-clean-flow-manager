@@ -1,3 +1,4 @@
+
 import React from "react";
 import { IngredientForm } from "@/components/ingredients/IngredientForm";
 
@@ -6,13 +7,14 @@ export function RecipeManagement() {
     <div className="max-w-3xl mx-auto mt-8 space-y-6">
       <h1 className="text-3xl font-bold">Recipe Management</h1>
       <p className="text-muted-foreground">
-        Hier komt de centrale module voor het beheren van recepten, halffabrikaten, ingrediënten en marges binnen OptiThai.<br />
-        Je kunt straks hier producten en hun samenstelling beheren, werkuren toevoegen, en kostprijzen automatisch laten berekenen.
+        This is the central module for managing recipes, semi-finished products, ingredients, and margins within OptiThai.<br />
+        Soon you will be able to manage products and their composition here, add labor hours, and let OptiThai calculate costs automatically.
       </p>
       <IngredientForm />
-      {/* Later tabbladen of cards voor "Basisproduct toevoegen", "Gerecht toevoegen", etc. */}
+      {/* Later: tabs or cards for "Add Base Product", "Add Dish", etc. */}
     </div>
   );
 }
 
 export default RecipeManagement;
+
