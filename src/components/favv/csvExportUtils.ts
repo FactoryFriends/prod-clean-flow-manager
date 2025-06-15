@@ -111,10 +111,11 @@ export const exportPackingSlipsCSV = (packingSlips: PackingSlip[]) => {
   const csvData: string[][] = [];
 
   packingSlips.forEach((slip) => {
+    let hadBatch = false;
     // Custom: For every batch, determine correct Produced By
     if (slip.batches && slip.batches.length > 0) {
+      hadBatch = true;
       slip.batches.forEach((batch) => {
-        // Normaal zit hier products.product_type en supplier_name
         let producedByVal = "";
         if (batch.products?.product_type === "zelfgemaakt") {
           producedByVal = "TOTHAI PRODUCTION";
@@ -142,7 +143,8 @@ export const exportPackingSlipsCSV = (packingSlips: PackingSlip[]) => {
           batch.batch_number || "",
         ]);
       });
-    } else {
+    }
+    if (!hadBatch) {
       // fallback voor packing slip zonder batch info
       let producedByVal = "";
       if (slip.dispatch_records?.location === "tothai") {
@@ -171,6 +173,8 @@ export const exportPackingSlipsCSV = (packingSlips: PackingSlip[]) => {
         "",
       ]);
     }
+    // Voeg hier na elke packing slip een lege lijn toe (aantal velden = headers!):
+    csvData.push(Array(csvHeaders.length).fill(""));
   });
 
   const csvContent = [
