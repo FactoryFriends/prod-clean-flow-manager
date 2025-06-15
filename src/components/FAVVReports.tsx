@@ -83,38 +83,6 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
         </CardHeader>
       </Card>
 
-      <div className="flex flex-col md:flex-row md:items-center md:gap-8 gap-2">
-        <div className="flex gap-1 border rounded-lg px-2 py-1 bg-white shadow-inner w-full max-w-xs">
-          <input
-            type="text"
-            placeholder="Search batch number..."
-            value={batchSearch}
-            onChange={e => setBatchSearch(e.target.value)}
-            className="flex-1 outline-none bg-transparent text-sm"
-          />
-        </div>
-        <div className="flex gap-2 mt-2 md:mt-0">
-          <button 
-            className={`px-3 py-1 rounded-lg border ${batchTab==="in-stock"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
-            onClick={() => setBatchTab("in-stock")}
-          >
-            In Stock
-          </button>
-          <button 
-            className={`px-3 py-1 rounded-lg border ${batchTab==="movements"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
-            onClick={() => setBatchTab("movements")}
-          >
-            Stock Movements
-          </button>
-          <button 
-            className={`px-3 py-1 rounded-lg border ${batchTab==="clear"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
-            onClick={() => setBatchTab("clear")}
-          >
-            Clear/Used
-          </button>
-        </div>
-      </div>
-
       <Tabs defaultValue="produced" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="produced" className="flex items-center gap-2">
@@ -132,7 +100,40 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
         </TabsList>
 
         <TabsContent value="produced" className="space-y-6">
-          {/* Tab Content */}
+          {/* Only show search and batch filters in "produced" tab */}
+          <div className="flex flex-col md:flex-row md:items-center md:gap-8 gap-2">
+            <div className="flex gap-1 border rounded-lg px-2 py-1 bg-white shadow-inner w-full max-w-xs">
+              <input
+                type="text"
+                placeholder="Search batch number..."
+                value={batchSearch}
+                onChange={e => setBatchSearch(e.target.value)}
+                className="flex-1 outline-none bg-transparent text-sm"
+              />
+            </div>
+            <div className="flex gap-2 mt-2 md:mt-0">
+              <button 
+                className={`px-3 py-1 rounded-lg border ${batchTab==="in-stock"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
+                onClick={() => setBatchTab("in-stock")}
+              >
+                In Stock
+              </button>
+              <button 
+                className={`px-3 py-1 rounded-lg border ${batchTab==="movements"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
+                onClick={() => setBatchTab("movements")}
+              >
+                Stock Movements
+              </button>
+              <button 
+                className={`px-3 py-1 rounded-lg border ${batchTab==="clear"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
+                onClick={() => setBatchTab("clear")}
+              >
+                Clear/Used
+              </button>
+            </div>
+          </div>
+
+          {/* Tab Content for produced batches */}
           {batchTab === "in-stock" && (
             <BatchesInStockTable
               batches={batchesInStock}
@@ -143,18 +144,18 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
 
           {batchTab === "movements" && (
             <>
-            <BatchesInStockTable
-              batches={allBatches}
-              isLoading={isLoadingAll}
-              onBatchClick={setSelectedBatch}
-            />
-            {selectedBatch && (
-              <BatchMovementsTable 
-                batchId={selectedBatch.id}
-                batchNumber={selectedBatch.batch_number}
-                onClose={() => setSelectedBatch(null)}
+              <BatchesInStockTable
+                batches={allBatches}
+                isLoading={isLoadingAll}
+                onBatchClick={setSelectedBatch}
               />
-            )}
+              {selectedBatch && (
+                <BatchMovementsTable 
+                  batchId={selectedBatch.id}
+                  batchNumber={selectedBatch.batch_number}
+                  onClose={() => setSelectedBatch(null)}
+                />
+              )}
             </>
           )}
 
@@ -168,6 +169,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
         </TabsContent>
 
         <TabsContent value="dispatched" className="space-y-6">
+          {/* No search or batch filters here */}
           <OperationsFilters
             locationFilter={locationFilter}
             setLocationFilter={setLocationFilter}
@@ -185,6 +187,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
         </TabsContent>
 
         <TabsContent value="cleaning" className="space-y-6">
+          {/* No search or batch filters here */}
           <CleaningTasksFilters
             locationFilter={locationFilter}
             setLocationFilter={setLocationFilter}
