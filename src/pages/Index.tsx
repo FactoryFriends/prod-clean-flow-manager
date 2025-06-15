@@ -34,7 +34,13 @@ const Index = () => {
       case "reports":
         return <Reports currentLocation={currentLocation} onSectionChange={setActiveTab} />;
       case "recipe-management":
-        return <RecipeManagement />;
+        // Only allow viewing recipe management if location is 'tothai'
+        if (currentLocation === "tothai") {
+          return <RecipeManagement />;
+        } else {
+          // Fallback: show dashboard
+          return <Dashboard currentLocation={currentLocation} onSectionChange={setActiveTab} />;
+        }
       default:
         return <Dashboard currentLocation={currentLocation} onSectionChange={setActiveTab} />;
     }

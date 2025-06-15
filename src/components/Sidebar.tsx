@@ -21,7 +21,8 @@ const menuItems = [
   { id: "cleaning", label: "Cleaning Tasks", mobileLabel: "Clean", icon: Brush, availableFor: ["tothai", "khin"] },
   { id: "invoicing", label: "Invoicing", mobileLabel: "Invoice", icon: Receipt, availableFor: ["tothai"] },
   { id: "reports", label: "Reports", mobileLabel: "Reports", icon: FileText, availableFor: ["tothai", "khin"] },
-  { id: "recipe-management", label: "Recipe Management", mobileLabel: "Recipes", icon: Building, availableFor: ["tothai", "khin"] },
+  // Only show Recipe Management in ToThai location:
+  { id: "recipe-management", label: "Recipe Management", mobileLabel: "Recipes", icon: Building, availableFor: ["tothai"] },
   { id: "settings", label: "Settings", mobileLabel: "Config", icon: Settings, availableFor: ["tothai", "khin"] },
 ];
 
