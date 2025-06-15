@@ -6,12 +6,13 @@ export function SettingsTabsList() {
   const isMobile = useIsMobile();
 
   return (
-    <TabsList className="grid w-full grid-cols-5">
+    <TabsList className="grid w-full grid-cols-6">
       <TabsTrigger value="products">{isMobile ? "Prod" : "Products"}</TabsTrigger>
       <TabsTrigger value="staff">{isMobile ? "Staff" : "Staff Codes"}</TabsTrigger>
       <TabsTrigger value="tasks">{isMobile ? "Tasks" : "Task Templates"}</TabsTrigger>
       <TabsTrigger value="customers">{isMobile ? "Cust" : "Customers"}</TabsTrigger>
       <TabsTrigger value="favv">FAVV</TabsTrigger>
+      <TabsTrigger value="suppliers">{isMobile ? "Supp" : "Suppliers"}</TabsTrigger>
     </TabsList>
   );
 }
