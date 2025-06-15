@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -27,6 +28,8 @@ interface PackingSlip {
       name: string;
       unit_size: number;
       unit_type: string;
+      product_type: string; // Added field
+      supplier_name: string | null; // Added field
     };
   }[];
 }
