@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAllProducts, useUpdateProduct } from "@/hooks/useProductionData";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -6,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { toast } from "sonner";
-import { BadgeDollarSign, filter as FilterIcon } from "lucide-react";
+import { BadgeDollarSign, Filter as FilterIcon } from "lucide-react";
 
 function calcMargin(cost: number, salesPrice: number) {
   if (!salesPrice || salesPrice <= 0) return null;
@@ -242,4 +241,3 @@ export function IngredientPriceManager() {
 }
 
 export default IngredientPriceManager;
-
