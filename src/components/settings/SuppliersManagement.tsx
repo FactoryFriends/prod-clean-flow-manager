@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function SuppliersManagement() {
-  const { data: suppliers, isLoading } = useAllSuppliers();
+  const { data: suppliers, isLoading, isError, error } = useAllSuppliers();
   const createSupplier = useCreateSupplier();
   const updateSupplier = useUpdateSupplier();
   const deactivateSupplier = useDeactivateSupplier();
@@ -96,12 +96,17 @@ export function SuppliersManagement() {
       </form>
       <div>
         {isLoading ? (
-          <div>Loading suppliers...</div>
+          <div className="text-center py-8 text-muted-foreground">
+            Loading suppliers...
+          </div>
+        ) : isError ? (
+          <div className="text-center py-8 text-red-600">
+            Failed to load suppliers. {error?.message || "Unknown error."}
+          </div>
+        ) : suppliers?.length === 0 ? (
+          <div className="text-muted-foreground">No suppliers found.</div>
         ) : (
           <div className="space-y-2">
-            {suppliers?.length === 0 && (
-              <div className="text-muted-foreground">No suppliers found.</div>
-            )}
             {suppliers?.map((s) => (
               <div
                 key={s.id}
