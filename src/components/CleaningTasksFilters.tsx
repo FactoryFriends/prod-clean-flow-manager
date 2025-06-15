@@ -22,18 +22,21 @@ export function CleaningTasksFilters({
   onToday,
 }: CleaningTasksFiltersProps) {
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-2 mb-2 w-full">
-      {/* Today Button inline left */}
+    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 mb-2 w-full">
+      {/* Today Button at far left, large and rounded, dark */}
       <Button
         variant="default"
-        className="font-semibold whitespace-nowrap h-10 px-5"
+        className={cn(
+          "bg-[#11182a] hover:bg-[#0d1422] text-white font-bold rounded-xl h-14 w-[150px] sm:w-[150px] text-lg shadow-none flex-shrink-0"
+        )}
         onClick={onToday}
+        tabIndex={0}
       >
         Today
       </Button>
-      {/* Start Date Filter */}
-      <div className="flex flex-col w-full min-w-[140px] max-w-[220px]">
-        <label className="block text-xs font-medium text-muted-foreground mb-1 whitespace-nowrap">
+      {/* Start Date Picker */}
+      <div className="flex flex-col w-full max-w-[260px]">
+        <label className="block text-xs font-semibold text-muted-foreground mb-1 ml-2 whitespace-nowrap">
           Start date:
         </label>
         <Popover>
@@ -41,13 +44,13 @@ export function CleaningTasksFilters({
             <Button
               variant="outline"
               className={cn(
-                "w-full min-w-[120px] max-w-[220px] justify-start text-left font-normal truncate",
+                "w-full h-14 border border-[#d6deea] bg-white px-5 justify-start text-left font-medium rounded-xl text-lg shadow-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 overflow-hidden",
                 !startDate && "text-muted-foreground"
               )}
             >
-              <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+              <CalendarIcon className="mr-3 h-6 w-6 text-[#11182a]" />
               <span className="truncate">
-                {startDate ? format(startDate, "PPP") : <span>Select</span>}
+                {startDate ? format(startDate, "PPPP") : <span>Select</span>}
               </span>
             </Button>
           </PopoverTrigger>
@@ -62,9 +65,9 @@ export function CleaningTasksFilters({
           </PopoverContent>
         </Popover>
       </div>
-      {/* End Date Filter */}
-      <div className="flex flex-col w-full min-w-[140px] max-w-[220px]">
-        <label className="block text-xs font-medium text-muted-foreground mb-1 whitespace-nowrap">
+      {/* End Date Picker */}
+      <div className="flex flex-col w-full max-w-[260px]">
+        <label className="block text-xs font-semibold text-muted-foreground mb-1 ml-2 whitespace-nowrap">
           End date:
         </label>
         <Popover>
@@ -72,13 +75,13 @@ export function CleaningTasksFilters({
             <Button
               variant="outline"
               className={cn(
-                "w-full min-w-[120px] max-w-[220px] justify-start text-left font-normal truncate",
+                "w-full h-14 border border-[#d6deea] bg-white px-5 justify-start text-left font-medium rounded-xl text-lg shadow-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 overflow-hidden",
                 !endDate && "text-muted-foreground"
               )}
             >
-              <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+              <CalendarIcon className="mr-3 h-6 w-6 text-[#11182a]" />
               <span className="truncate">
-                {endDate ? format(endDate, "PPP") : <span>Select</span>}
+                {endDate ? format(endDate, "PPPP") : <span>Select</span>}
               </span>
             </Button>
           </PopoverTrigger>
@@ -96,3 +99,4 @@ export function CleaningTasksFilters({
     </div>
   );
 }
+
