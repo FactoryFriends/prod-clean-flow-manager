@@ -21,7 +21,7 @@ const menuItems = [
   { id: "distribution", label: "Distribution", icon: Truck, availableFor: ["tothai"] },
   { id: "cleaning", label: "Cleaning Tasks", icon: Brush, availableFor: ["tothai", "khin"] },
   { id: "invoicing", label: "Invoicing", icon: Receipt, availableFor: ["tothai"] },
-  { id: "favv", label: "FAVV Reports", icon: FileText, availableFor: ["tothai", "khin"] },
+  { id: "reports", label: "Reports", icon: FileText, availableFor: ["tothai", "khin"] },
   { id: "settings", label: "Settings", icon: Settings, availableFor: ["tothai", "khin"] },
 ];
 

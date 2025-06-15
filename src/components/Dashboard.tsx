@@ -1,9 +1,10 @@
 
-import { Package, Truck, CheckCircle, Clock, AlertTriangle, TrendingUp, ChefHat, ClipboardList, AlertCircle } from "lucide-react";
+import { Package, Truck, CheckCircle, Clock, AlertTriangle, TrendingUp, ChefHat, ClipboardList, AlertCircle, Camera } from "lucide-react";
 import { StatusBadge } from "./StatusBadge";
 import { useProductionBatches } from "@/hooks/useProductionData";
 import { useCleaningTasks } from "@/hooks/useCleaningTasks";
-import { format } from "date-fns";
+import { useFAVVCompletedTasks } from "@/hooks/useFAVVCompletedTasks";
+import { format, startOfDay, endOfDay } from "date-fns";
 
 interface DashboardProps {
   currentLocation: string;
@@ -15,6 +16,15 @@ export function Dashboard({ currentLocation }: DashboardProps) {
   
   const { data: batches } = useProductionBatches(dbLocation);
   const { cleaningTasks, getOverdueTasksCount } = useCleaningTasks(dbLocation);
+
+  // Get today's completed tasks
+  const today = new Date();
+  const { data: todaysCompletedTasks = [] } = useFAVVCompletedTasks({
+    locationFilter: dbLocation,
+    startDate: startOfDay(today),
+    endDate: endOfDay(today),
+    taskNameFilter: ""
+  });
 
   const stats = [
     {
@@ -32,9 +42,9 @@ export function Dashboard({ currentLocation }: DashboardProps) {
       color: "text-purple-600",
     },
     {
-      title: "Cleaning Tasks",
-      value: "5",
-      change: "3 completed today",
+      title: "Tasks Completed Today",
+      value: todaysCompletedTasks.length.toString(),
+      change: `${todaysCompletedTasks.filter(task => task.photo_urls?.length).length} with photos`,
       icon: CheckCircle,
       color: "text-green-600",
     },
@@ -199,18 +209,40 @@ export function Dashboard({ currentLocation }: DashboardProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Task Completions Widget */}
         <div className="bg-card border border-border rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Recent Activity</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
+            <CheckCircle className="w-5 h-5" />
+            Recent Task Completions
+          </h2>
           <div className="space-y-4">
-            {recentActivity.map((activity) => (
-              <div key={activity.id} className="flex items-center justify-between p-3 bg-accent rounded-lg">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground">{activity.description}</p>
-                  <p className="text-xs text-muted-foreground">{activity.time}</p>
+            {todaysCompletedTasks.length > 0 ? (
+              todaysCompletedTasks.slice(0, 5).map((task) => (
+                <div key={task.id} className="flex items-center justify-between p-3 bg-accent rounded-lg">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-foreground">{task.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Completed {task.completed_at ? format(new Date(task.completed_at), "HH:mm") : "today"}
+                      {task.staff_codes?.initials && ` by ${task.staff_codes.initials}`}
+                    </p>
+                  </div>
+                  {task.photo_urls && task.photo_urls.length > 0 && (
+                    <div className="flex items-center gap-1 text-green-600">
+                      <Camera className="w-4 h-4" />
+                      <span className="text-xs">{task.photo_urls.length}</span>
+                    </div>
+                  )}
                 </div>
-                <StatusBadge status={activity.status} size="sm" />
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground py-4">No tasks completed today yet</p>
+            )}
+            <button 
+              onClick={() => window.location.hash = '#reports'}
+              className="w-full text-sm text-primary hover:text-primary/80 underline text-center py-2"
+            >
+              View All Completed Tasks →
+            </button>
           </div>
         </div>
 
@@ -236,11 +268,14 @@ export function Dashboard({ currentLocation }: DashboardProps) {
               className="p-4 bg-accent text-accent-foreground rounded-lg hover:bg-accent/80 transition-colors"
             >
               <ClipboardList className="w-6 h-6 mx-auto mb-2" />
-              <span className="text-sm font-medium">Cleaning Tasks for Today</span>
+              <span className="text-sm font-medium">Cleaning Tasks</span>
             </button>
-            <button className="p-4 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors">
-              <AlertTriangle className="w-6 h-6 mx-auto mb-2" />
-              <span className="text-sm font-medium">Report Issue</span>
+            <button 
+              onClick={() => window.location.hash = '#reports'}
+              className="p-4 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors"
+            >
+              <CheckCircle className="w-6 h-6 mx-auto mb-2" />
+              <span className="text-sm font-medium">View Reports</span>
             </button>
           </div>
         </div>

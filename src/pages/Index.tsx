@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Dashboard } from "@/components/Dashboard";
@@ -7,8 +6,7 @@ import { Distribution } from "@/components/Distribution";
 import { CleaningTasks } from "@/components/CleaningTasks";
 import { Settings } from "@/components/Settings";
 import { Invoicing } from "@/components/Invoicing";
-import { FAVVReport } from "@/components/FAVVReport";
-import { FAVVReports } from "@/components/FAVVReports";
+import { Reports } from "@/components/Reports";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
@@ -31,8 +29,8 @@ const Index = () => {
         return <Settings currentLocation={currentLocation} />;
       case "invoicing":
         return <Invoicing currentLocation={currentLocation} />;
-      case "favv":
-        return <FAVVReports currentLocation={currentLocation} />;
+      case "reports":
+        return <Reports currentLocation={currentLocation} />;
       default:
         return <Dashboard currentLocation={currentLocation} />;
     }
