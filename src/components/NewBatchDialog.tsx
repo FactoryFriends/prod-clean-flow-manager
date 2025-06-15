@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Button } from "./ui/button";
@@ -114,9 +113,14 @@ export function NewBatchDialog({ currentLocation }: NewBatchDialogProps) {
               min="1"
             />
             {selectedProduct && (
-              <p className="text-sm text-muted-foreground">
-                Standard batch size: {selectedProduct.packages_per_batch} packages of {selectedProduct.unit_size} {selectedProduct.unit_type}
-              </p>
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  Standard batch size: {selectedProduct.packages_per_batch} packages of {selectedProduct.unit_size} {selectedProduct.unit_type}
+                </p>
+                <p className="text-xs italic text-blue-800">
+                  Tip: You can adjust this value if you made a smaller or larger batch than usual.
+                </p>
+              </div>
             )}
           </div>
 

@@ -129,9 +129,14 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
               className="bg-white"
             />
             {selectedProduct && (
-              <p className="text-xs text-blue-600">
-                Standard: {selectedProduct.packages_per_batch} packages
-              </p>
+              <>
+                <p className="text-xs text-blue-600">
+                  Standard: {selectedProduct.packages_per_batch} packages
+                </p>
+                <p className="text-xs italic text-blue-800">
+                  You can change this if you produced more or less than the usual batch.
+                </p>
+              </>
             )}
           </div>
 
