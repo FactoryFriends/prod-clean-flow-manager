@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useCreateProduct, useUpdateProduct, Product } from "@/hooks/useProductionData";
+import { useSuppliers } from "@/hooks/useSuppliers";
+import { toast } from "react-toastify";
 
 interface ProductFormProps {
   editingProduct?: Product | null;
@@ -13,6 +15,8 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductFormProps) {
+  const { data: suppliers = [] } = useSuppliers();
+
   const [formData, setFormData] = useState({
     name: editingProduct?.name || "",
     unit_size: editingProduct?.unit_size || 1,
@@ -24,7 +28,40 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
     product_type: editingProduct?.product_type || "zelfgemaakt",
     supplier_name: editingProduct?.supplier_name || "TOTHAI PRODUCTION",
     pickable: editingProduct?.pickable ?? false,
+    supplier_id: editingProduct?.supplier_id || null,
+    product_fiche_url: editingProduct?.product_fiche_url || null,
   });
+
+  const [ficheFile, setFicheFile] = useState<File | null>(null);
+  const [uploadingFiche, setUploadingFiche] = useState(false);
+
+  useEffect(() => {
+    if (editingProduct?.product_fiche_url) setFicheFile(null);
+  }, [editingProduct]);
+
+  async function handleFicheUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingFiche(true);
+
+    const filePath = `product-fiches/${Date.now()}-${file.name}`;
+    const { data, error } = await supabase.storage
+      .from("public-files")
+      .upload(filePath, file, { upsert: true });
+
+    if (error) {
+      toast.error("Upload failed: " + error.message);
+      setUploadingFiche(false);
+      return;
+    }
+    setFicheFile(file);
+    setFormData((prev) => ({
+      ...prev,
+      product_fiche_url: data?.path,
+    }));
+    setUploadingFiche(false);
+    toast.success("Product fiche uploaded!");
+  }
 
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
@@ -50,6 +87,8 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
       supplier_name: supplier_name,
       product_kind: product_type,
       pickable: false,
+      supplier_id: formData.supplier_id || null,
+      product_fiche_url: formData.product_fiche_url || null,
     };
 
     if (product_type === "extern" && (!formData.supplier_name || formData.supplier_name.trim() === "")) {
@@ -168,6 +207,56 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
             </SelectContent>
           </Select>
         </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="supplier_id">Supplier</Label>
+          <select
+            id="supplier_id"
+            value={formData.supplier_id ?? ""}
+            onChange={(e) =>
+              setFormData({ ...formData, supplier_id: e.target.value || null })
+            }
+            disabled={formData.product_type === "zelfgemaakt"}
+            required={formData.product_type === "extern"}
+            className="w-full border rounded-md px-3 py-2 text-sm bg-white"
+          >
+            <option value="">
+              {formData.product_type === "extern"
+                ? "Select supplier…"
+                : "TOTHAI PRODUCTION"}
+            </option>
+            {suppliers.map((sup) => (
+              <option key={sup.id} value={sup.id}>
+                {sup.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Productfiche visible only for extern product */}
+        {formData.product_type === "extern" && (
+          <div className="space-y-2">
+            <Label htmlFor="fiche-upload">Product fiche (optional)</Label>
+            <input
+              id="fiche-upload"
+              type="file"
+              accept="application/pdf"
+              onChange={handleFicheUpload}
+              disabled={uploadingFiche}
+              className="block"
+            />
+            {formData.product_fiche_url && (
+              <a
+                href={`https://dtfhwnvclwbknycmcejb.supabase.co/storage/v1/object/public/public-files/${formData.product_fiche_url}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-primary text-xs underline mt-1"
+              >
+                Bekijk/upload productfiche
+              </a>
+            )}
+          </div>
+        )}
 
         <div className="space-y-2">
           <Label htmlFor="supplier_name">Leverancier</Label>

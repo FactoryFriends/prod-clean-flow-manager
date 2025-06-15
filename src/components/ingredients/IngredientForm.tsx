@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,10 @@ import { useCreateProduct, useAllProducts } from "@/hooks/useProductionData";
 import { toast } from "sonner";
 import { ALLERGENS, ALLERGENS_ENGLISH } from "./constants/allergens";
 import type { IngredientFormData } from "./types";
-
+import { useSuppliers } from "@/hooks/useSuppliers";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE"];
-const SUPPLIER_OPTIONS = ["Metro", "Bidfood", "Makro", "Asia Center", "Vandemoortele", "Anders"];
 
 export function IngredientForm() {
   const form = useForm<IngredientFormData>({
@@ -28,6 +29,29 @@ export function IngredientForm() {
 
   const createProduct = useCreateProduct();
   const { data: allProducts } = useAllProducts();
+  const { data: suppliers = [] } = useSuppliers();
+  const [ficheFile, setFicheFile] = useState<File | null>(null);
+  const [uploadingFiche, setUploadingFiche] = useState(false);
+  const productType = form.watch("product_kind");
+
+  async function handleFicheUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingFiche(true);
+    const filePath = `product-fiches/${Date.now()}-${file.name}`;
+    const { data, error } = await supabase.storage
+      .from("public-files")
+      .upload(filePath, file, { upsert: true });
+    if (error) {
+      toast.error("Upload failed: " + error.message);
+      setUploadingFiche(false);
+      return;
+    }
+    setFicheFile(file);
+    form.setValue("product_fiche_url", data?.path);
+    setUploadingFiche(false);
+    toast.success("Product fiche uploaded!");
+  }
 
   // Validatie voor unieke naam (case-insensitive)
   function validateUniqueName(value: string) {
@@ -140,10 +164,10 @@ export function IngredientForm() {
             )}
           />
 
-          {/* SUPPLIER (dropdown) */}
+          {/* SUPPLIER (dropdown, only extern selectable) */}
           <FormField
             control={form.control}
-            name="supplier_name"
+            name="supplier_id"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Supplier</FormLabel>
@@ -151,11 +175,17 @@ export function IngredientForm() {
                   <select
                     {...field}
                     className="w-full border rounded-md px-3 py-2 text-sm bg-white"
+                    disabled={form.watch("product_kind") === "zelfgemaakt"}
+                    required={form.watch("product_kind") === "extern"}
                   >
-                    <option value="">--</option>
-                    {SUPPLIER_OPTIONS.map((sup) => (
-                      <option value={sup} key={sup}>
-                        {sup}
+                    <option value="">
+                      {form.watch("product_kind") === "extern"
+                        ? "Select supplier…"
+                        : "TOTHAI PRODUCTION"}
+                    </option>
+                    {suppliers.map((sup) => (
+                      <option key={sup.id} value={sup.id}>
+                        {sup.name}
                       </option>
                     ))}
                   </select>
@@ -164,6 +194,30 @@ export function IngredientForm() {
               </FormItem>
             )}
           />
+
+          {/* PRODUCTFICHE (enkel voor extern product) */}
+          {productType === "extern" && (
+            <div>
+              <FormLabel>Product fiche (optional)</FormLabel>
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={handleFicheUpload}
+                disabled={uploadingFiche}
+                className="block"
+              />
+              {form.watch("product_fiche_url") && (
+                <a
+                  href={`https://dtfhwnvclwbknycmcejb.supabase.co/storage/v1/object/public/public-files/${form.watch("product_fiche_url")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-primary text-xs underline mt-1"
+                >
+                  Bekijk/upload productfiche
+                </a>
+              )}
+            </div>
+          )}
 
           {/* PRICE */}
           <FormField

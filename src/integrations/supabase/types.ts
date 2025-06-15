@@ -508,9 +508,11 @@ export type Database = {
           packages_per_batch: number
           pickable: boolean
           price_per_unit: number | null
+          product_fiche_url: string | null
           product_kind: string
           product_type: string
           shelf_life_days: number | null
+          supplier_id: string | null
           supplier_name: string | null
           unit_size: number
           unit_type: string
@@ -524,9 +526,11 @@ export type Database = {
           packages_per_batch?: number
           pickable?: boolean
           price_per_unit?: number | null
+          product_fiche_url?: string | null
           product_kind?: string
           product_type?: string
           shelf_life_days?: number | null
+          supplier_id?: string | null
           supplier_name?: string | null
           unit_size: number
           unit_type: string
@@ -540,15 +544,25 @@ export type Database = {
           packages_per_batch?: number
           pickable?: boolean
           price_per_unit?: number | null
+          product_fiche_url?: string | null
           product_kind?: string
           product_type?: string
           shelf_life_days?: number | null
+          supplier_id?: string | null
           supplier_name?: string | null
           unit_size?: number
           unit_type?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_supplier"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       staff_codes: {
         Row: {
@@ -586,6 +600,42 @@ export type Database = {
           permission_level?: string | null
           role?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      suppliers: {
+        Row: {
+          active: boolean
+          address: string | null
+          contact_person: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          address?: string | null
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          address?: string | null
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
