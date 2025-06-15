@@ -50,11 +50,10 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
     setFormData((prev) => ({
       ...prev,
       [field]: value,
-      // Automatically update price_per_unit when package fields change
       ...(field === "price_per_package" || field === "units_per_package"
         ? {
             price_per_unit:
-              value && (field === "price_per_package" || prev.units_per_package)
+              (field === "price_per_package" ? value : prev.price_per_package) && (field === "units_per_package" ? value : prev.units_per_package)
                 ? (
                     ((field === "price_per_package" ? value : prev.price_per_package) ?? 0) /
                     ((field === "units_per_package" ? value : prev.units_per_package) || 1)
@@ -79,7 +78,7 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
       product_type === "zelfgemaakt"
         ? "TOTHAI PRODUCTION"
         : formData.supplier_name;
-    // Calculate price_per_unit (for reporting, margin calculations)
+    // Calculate price_per_unit for reporting, margin calculations
     const pricePerUnit =
       formData.price_per_package && formData.units_per_package > 0
         ? formData.price_per_package / formData.units_per_package
@@ -90,21 +89,19 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
       unit_size: Number(formData.unit_size),
       unit_type: formData.unit_type,
       packages_per_batch: Number(formData.packages_per_batch),
-      // Only include shelf_life_days if relevant
       shelf_life_days:
         product_type === "zelfgemaakt"
           ? formData.shelf_life_days
             ? Number(formData.shelf_life_days)
             : null
           : null,
-      price_per_unit: formData.price_per_unit ? Number(formData.price_per_unit) : null,
+      price_per_unit: pricePerUnit,
       active: formData.active,
       product_type: product_type,
       supplier_name: supplier_name,
       product_kind: product_type,
       pickable: false,
       supplier_id: formData.supplier_id || null,
-      // Only include product_fiche_url if relevant
       product_fiche_url:
         product_type === "extern" || product_type === "ingredient"
           ? formData.product_fiche_url || null
@@ -117,7 +114,6 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
       units_per_package: formData.units_per_package,
       inner_unit_type: formData.inner_unit_type,
       price_per_package: formData.price_per_package,
-      price_per_unit: pricePerUnit,
     };
 
     if (

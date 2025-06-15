@@ -93,7 +93,9 @@ export function DrinkForm() {
         packages_per_batch: 1,
         supplier_name:
           suppliers.find((s) => s.id === data.supplier_id)?.name || null,
-        price_per_unit: Number(data.price_per_unit),
+        price_per_unit: data.price_per_package && data.units_per_package
+          ? Number(data.price_per_package) / Number(data.units_per_package)
+          : (data.price_per_package ?? data.price_per_unit ?? 0),
         shelf_life_days: null,
         product_type: "drink",
         product_kind: "extern",
@@ -110,9 +112,6 @@ export function DrinkForm() {
         units_per_package: data.units_per_package ? Number(data.units_per_package) : null,
         inner_unit_type: data.inner_unit_type,
         price_per_package: data.price_per_package ? Number(data.price_per_package) : null,
-        price_per_unit: data.price_per_package && data.units_per_package
-          ? Number(data.price_per_package) / Number(data.units_per_package)
-          : (data.price_per_package ?? data.price_per_unit ?? 0),
       },
       {
         onSuccess: () => {

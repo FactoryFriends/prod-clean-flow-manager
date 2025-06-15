@@ -8,22 +8,25 @@ export interface Product {
   unit_size: number;
   unit_type: string;
   packages_per_batch: number;
-  shelf_life_days: number | null;
-  price_per_unit: number | null;
+  shelf_life_days?: number | null;
+  price_per_unit?: number | null;
   active: boolean;
   product_type: string; // 'zelfgemaakt' | 'extern' | 'ingredient' | 'semi-finished' | 'dish'
-  supplier_name: string | null;
-  pickable?: boolean; // <-- ADDED to match database and UI usage
+  supplier_name?: string | null;
+  pickable: boolean; // <-- ADDED to match database and UI usage
   supplier_id?: string | null; // <-- ADDED!
   product_fiche_url?: string | null; // <-- ADDED!
-  description?: string;
-  labour_time_minutes?: number | null;
-  // NEW fields for margin/cost/tracking:
-  cost?: number | null;
-  markup_percent?: number | null;
-  sales_price?: number | null;
-  minimal_margin_threshold_percent?: number | null;
-  product_kind: string; // <-- Add this line for TS support!
+  cost?: number;
+  markup_percent?: number;
+  sales_price?: number;
+  minimal_margin_threshold_percent?: number;
+  // NEW FIELDS ADDED FOR PACKAGE STRUCTURE
+  supplier_package_unit?: string | null;
+  units_per_package?: number | null;
+  inner_unit_type?: string | null;
+  price_per_package?: number | null;
+  // Add any other fields present in your schema you need!
+  [key: string]: any; // enable extra props for function compatibility
 }
 
 export interface Chef {
