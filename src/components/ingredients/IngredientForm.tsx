@@ -1,29 +1,37 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { useCreateProduct, useAllProducts } from "@/hooks/useProductionData";
-import { toast } from "sonner";
-import { ALLERGENS, ALLERGENS_ENGLISH } from "./constants/allergens";
+import { ALLERGENS } from "./constants/allergens";
 import type { IngredientFormData } from "./types";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE"];
 
+// Extend the form type locally to add new fields if not present in types.ts
+type ExtendedIngredientFormData = IngredientFormData & {
+  supplier_id?: string;
+  product_fiche_url?: string;
+};
+
 export function IngredientForm() {
-  const form = useForm<IngredientFormData>({
+  const form = useForm<ExtendedIngredientFormData>({
     defaultValues: {
       name: "",
       unit_size: 1,
       unit_type: "KG",
       supplier_name: "",
+      supplier_id: "",
       price_per_unit: 0,
       product_kind: "zelfgemaakt",
       pickable: false,
       allergens: [],
+      product_fiche_url: "",
     },
   });
 
@@ -48,33 +56,36 @@ export function IngredientForm() {
       return;
     }
     setFicheFile(file);
-    form.setValue("product_fiche_url", data?.path);
+    // Instead of direct setValue, use correct name
+    form.setValue("product_fiche_url", data?.path || "");
     setUploadingFiche(false);
     toast.success("Product fiche uploaded!");
   }
 
-  // Validatie voor unieke naam (case-insensitive)
+  // Name uniqueness validation
   function validateUniqueName(value: string) {
-    if (!allProducts) return true; // Lijst nog niet geladen
+    if (!allProducts) return true;
     const exists = allProducts.some(
       (p) => p.name.trim().toLowerCase() === value.trim().toLowerCase()
     );
     return exists ? "Name already exists – please choose a unique name." : true;
   }
 
-  const onSubmit = (data: IngredientFormData) => {
+  const onSubmit = (data: ExtendedIngredientFormData) => {
     createProduct.mutate(
       {
         name: data.name,
         unit_size: Number(data.unit_size),
         unit_type: data.unit_type,
-        supplier_name: data.supplier_name || null,
+        supplier_name: (data.supplier_id && suppliers.find(s => s.id === data.supplier_id)?.name) || null,
         price_per_unit: Number(data.price_per_unit) || null,
         packages_per_batch: 1,
         shelf_life_days: null,
         product_type: data.product_kind,
         product_kind: data.product_kind,
         pickable: Boolean(data.pickable),
+        supplier_id: data.supplier_id || null,
+        product_fiche_url: data.product_fiche_url || null,
       },
       {
         onSuccess: () => {
@@ -177,6 +188,8 @@ export function IngredientForm() {
                     className="w-full border rounded-md px-3 py-2 text-sm bg-white"
                     disabled={form.watch("product_kind") === "zelfgemaakt"}
                     required={form.watch("product_kind") === "extern"}
+                    value={field.value || ""}
+                    onChange={(e) => field.onChange(e.target.value)}
                   >
                     <option value="">
                       {form.watch("product_kind") === "extern"
@@ -197,26 +210,32 @@ export function IngredientForm() {
 
           {/* PRODUCTFICHE (enkel voor extern product) */}
           {productType === "extern" && (
-            <div>
-              <FormLabel>Product fiche (optional)</FormLabel>
-              <input
-                type="file"
-                accept="application/pdf"
-                onChange={handleFicheUpload}
-                disabled={uploadingFiche}
-                className="block"
-              />
-              {form.watch("product_fiche_url") && (
-                <a
-                  href={`https://dtfhwnvclwbknycmcejb.supabase.co/storage/v1/object/public/public-files/${form.watch("product_fiche_url")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-primary text-xs underline mt-1"
-                >
-                  Bekijk/upload productfiche
-                </a>
+            <FormField
+              control={form.control}
+              name="product_fiche_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Product fiche (optional)</FormLabel>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handleFicheUpload}
+                    disabled={uploadingFiche}
+                    className="block"
+                  />
+                  {field.value && (
+                    <a
+                      href={`https://dtfhwnvclwbknycmcejb.supabase.co/storage/v1/object/public/public-files/${field.value}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-primary text-xs underline mt-1"
+                    >
+                      Bekijk/upload productfiche
+                    </a>
+                  )}
+                </FormItem>
               )}
-            </div>
+            />
           )}
 
           {/* PRICE */}
@@ -247,7 +266,7 @@ export function IngredientForm() {
               <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                 <FormControl>
                   <Checkbox
-                    checked={field.value}
+                    checked={!!field.value}
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
@@ -274,7 +293,7 @@ export function IngredientForm() {
                         checked={field.value?.includes(a.english)}
                         onChange={() => {
                           if (field.value?.includes(a.english)) {
-                            field.onChange(field.value.filter((val) => val !== a.english));
+                            field.onChange(field.value.filter((val: string) => val !== a.english));
                           } else {
                             field.onChange([...(field.value || []), a.english]);
                           }
