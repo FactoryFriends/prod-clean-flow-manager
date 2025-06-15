@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useUnitOptions } from "../shared/UnitOptionsContext";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
@@ -40,7 +39,7 @@ export function UnitOptionsSettings() {
             {purchaseUnits.map(unit => (
               <li key={unit} className="flex items-center gap-2">
                 <span>{unit}</span>
-                <Button variant="ghost" size="xs" onClick={() => removePurchaseUnit(unit)}>Remove</Button>
+                <Button variant="ghost" size="sm" onClick={() => removePurchaseUnit(unit)}>Remove</Button>
               </li>
             ))}
           </ul>
@@ -66,7 +65,7 @@ export function UnitOptionsSettings() {
             {innerUnits.map(unit => (
               <li key={unit} className="flex items-center gap-2">
                 <span>{unit}</span>
-                <Button variant="ghost" size="xs" onClick={() => removeInnerUnit(unit)}>Remove</Button>
+                <Button variant="ghost" size="sm" onClick={() => removeInnerUnit(unit)}>Remove</Button>
               </li>
             ))}
           </ul>
