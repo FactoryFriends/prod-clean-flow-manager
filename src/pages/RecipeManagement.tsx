@@ -3,8 +3,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IngredientForm } from "@/components/ingredients/IngredientForm";
 import { SemiFinishedForm } from "@/components/semi-finished/SemiFinishedForm";
 import { DishForm } from "@/components/dishes/DishForm";
-import { useAllProducts, useDeleteProduct, usePermanentDeleteProduct } from "@/hooks/useProductionData";
+import { useAllProducts, useDeleteProduct, usePermanentDeleteProduct, useReplaceIngredient } from "@/hooks/useProductionData";
 import { Button } from "@/components/ui/button";
+import ReplaceIngredientDialog from "@/components/ingredients/ReplaceIngredientDialog";
+import { toast } from "sonner";
 
 // Updated ProductList to include a permanent delete option and graceful handling of missing products
 function ProductList({
@@ -12,12 +14,14 @@ function ProductList({
   type,
   onEdit,
   onDeactivate,
+  onReplace,
   onPermanentlyDelete,
 }: {
   products: any[];
   type: string;
   onEdit: (product: any) => void;
   onDeactivate: (product: any) => void;
+  onReplace?: (product: any) => void;
   onPermanentlyDelete?: (product: any) => void;
 }) {
   if (!products?.length) {
@@ -59,6 +63,15 @@ function ProductList({
                 >
                   DEACTIVATE
                 </Button>
+                {type === "ingredient" && onReplace && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => onReplace(item)}
+                  >
+                    REPLACE
+                  </Button>
+                )}
                 {type === "ingredient" && (
                   <Button
                     variant="destructive"
@@ -87,8 +100,13 @@ function IngredientsTab() {
   const { data: allProducts = [] } = useAllProducts();
   const deleteProduct = useDeleteProduct();
   const permanentDeleteProduct = usePermanentDeleteProduct();
+  const replaceIngredient = useReplaceIngredient();
   const [showForm, setShowForm] = useState(false);
   const [editProduct, setEditProduct] = useState<any>(null);
+
+  // Replace dialog state
+  const [replaceOpen, setReplaceOpen] = useState(false);
+  const [ingredientToReplace, setIngredientToReplace] = useState<any>(null);
 
   // Filter for ingredients only
   const ingredients = allProducts.filter(
@@ -112,6 +130,32 @@ function IngredientsTab() {
   const handlePermanentDelete = (item: any) => {
     permanentDeleteProduct.mutate(item.id);
   };
+  const handleReplace = (item: any) => {
+    setIngredientToReplace(item);
+    setReplaceOpen(true);
+  };
+  const handleReplaceConfirmed = (newIngredientId: string) => {
+    if (!ingredientToReplace) return;
+    replaceIngredient.mutate(
+      {
+        oldIngredientId: ingredientToReplace.id,
+        newIngredientId,
+      },
+      {
+        onSuccess: (data: any) => {
+          toast.success(
+            `Ingredient "${ingredientToReplace.name}" replaced in all recipes!`
+          );
+          setIngredientToReplace(null);
+        },
+        onError: (err: any) => {
+          toast.error(
+            "Failed to replace ingredient: " + (err?.message ?? "Unknown error")
+          );
+        },
+      }
+    );
+  };
   const handleCancel = () => {
     setShowForm(false);
     setEditProduct(null);
@@ -126,7 +170,6 @@ function IngredientsTab() {
             <h3 className="text-lg font-semibold">{editProduct ? "Edit Ingredient" : "Add Ingredient"}</h3>
             <Button variant="outline" size="sm" onClick={handleCancel}>Cancel</Button>
           </div>
-          {/* Don't pass editProduct or onCompleted */}
           <IngredientForm />
         </div>
       ) : (
@@ -139,8 +182,21 @@ function IngredientsTab() {
             type="ingredient"
             onEdit={handleEdit}
             onDeactivate={handleDeactivate}
+            onReplace={handleReplace}
             onPermanentlyDelete={handlePermanentDelete}
           />
+          {ingredientToReplace && (
+            <ReplaceIngredientDialog
+              open={replaceOpen}
+              onOpenChange={(open) => {
+                setReplaceOpen(open);
+                if (!open) setIngredientToReplace(null);
+              }}
+              ingredient={ingredientToReplace}
+              allIngredients={ingredients}
+              onReplace={handleReplaceConfirmed}
+            />
+          )}
         </>
       )}
     </div>
