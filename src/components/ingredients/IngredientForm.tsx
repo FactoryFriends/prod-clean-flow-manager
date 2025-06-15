@@ -110,13 +110,13 @@ export function IngredientForm() {
             )}
           />
 
-          {/* PRODUCT TYPE */}
+          {/* SOURCE (was PRODUCT TYPE) */}
           <FormField
             control={form.control}
             name="product_kind"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Product Type</FormLabel>
+                <FormLabel>Source</FormLabel>
                 <FormControl>
                   <select
                     {...field}
