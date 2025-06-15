@@ -1,0 +1,34 @@
+
+import React from "react";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+
+const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE"];
+
+export function IngredientUnitTypeSelect({ control }: { control: any }) {
+  return (
+    <FormField
+      control={control}
+      name="unit_type"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Unit</FormLabel>
+          <FormControl>
+            <select
+              {...field}
+              className="w-full border rounded-md px-3 py-2 text-sm bg-white"
+            >
+              {UNIT_OPTIONS.map((u) => (
+                <option value={u} key={u}>
+                  {u}
+                </option>
+              ))}
+            </select>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+export default IngredientUnitTypeSelect;

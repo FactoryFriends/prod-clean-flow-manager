@@ -13,6 +13,12 @@ import { toast } from "sonner";
 import IngredientSupplierSelect from "./IngredientSupplierSelect";
 import IngredientAllergensInput from "./IngredientAllergensInput";
 import IngredientFicheUpload from "./IngredientFicheUpload";
+import IngredientNameInput from "./IngredientNameInput";
+import IngredientSourceSelect from "./IngredientSourceSelect";
+import IngredientUnitSizeInput from "./IngredientUnitSizeInput";
+import IngredientUnitTypeSelect from "./IngredientUnitTypeSelect";
+import IngredientPriceInput from "./IngredientPriceInput";
+import IngredientPickableInput from "./IngredientPickableInput";
 const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE"];
 
 // Extend the form type locally to add new fields if not present in types.ts
@@ -106,90 +112,16 @@ export function IngredientForm() {
       <h2 className="text-xl font-semibold mb-2">Add Ingredient</h2>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* NAME (unique) */}
-          <FormField
-            control={form.control}
-            name="name"
-            rules={{ required: "Name is required", validate: validateUniqueName }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. Scampi 13/15 frozen" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* SOURCE (was PRODUCT TYPE) */}
-          <FormField
-            control={form.control}
-            name="product_kind"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Source</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    className="w-full border rounded-md px-3 py-2 text-sm bg-white"
-                  >
-                    <option value="zelfgemaakt">Self-made</option>
-                    <option value="extern">Purchased externally</option>
-                  </select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          {/* PACKAGE SIZE */}
-          <FormField
-            control={form.control}
-            name="unit_size"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Package Size</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.01" min="0" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* UNIT (dropdown) */}
-          <FormField
-            control={form.control}
-            name="unit_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Unit</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    className="w-full border rounded-md px-3 py-2 text-sm bg-white"
-                  >
-                    {UNIT_OPTIONS.map((u) => (
-                      <option value={u} key={u}>
-                        {u}
-                      </option>
-                    ))}
-                  </select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* SUPPLIER (dropdown, only extern selectable) */}
+          <IngredientNameInput control={form.control} validateUniqueName={validateUniqueName} />
+          <IngredientSourceSelect control={form.control} />
+          <IngredientUnitSizeInput control={form.control} />
+          <IngredientUnitTypeSelect control={form.control} />
           <IngredientSupplierSelect
             control={form.control}
             suppliers={suppliers}
             productKind={productType}
             watch={form.watch}
           />
-
-          {/* PRODUCTFICHE (enkel voor extern product) */}
           {productType === "extern" && (
             <IngredientFicheUpload
               control={form.control}
@@ -199,47 +131,9 @@ export function IngredientForm() {
               fieldValue={form.getValues("product_fiche_url")}
             />
           )}
-
-          {/* PRICE */}
-          <FormField
-            control={form.control}
-            name="price_per_unit"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Price per unit (€)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* PICKABLE */}
-          <FormField
-            control={form.control}
-            name="pickable"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                <FormControl>
-                  <Checkbox
-                    checked={!!field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormLabel className="mb-0">Pickable for distribution</FormLabel>
-              </FormItem>
-            )}
-          />
-
-          {/* ALLERGENS */}
+          <IngredientPriceInput control={form.control} />
+          <IngredientPickableInput control={form.control} />
           <IngredientAllergensInput control={form.control} />
-
           <Button type="submit" className="w-full">
             Save Ingredient
           </Button>
