@@ -72,13 +72,10 @@ function IngredientsTab() {
   const [showForm, setShowForm] = useState(false);
   const [editProduct, setEditProduct] = useState<any>(null);
 
-  // DEBUG: Print out fetched products
-  console.log("All products (for IngredientsTab):", allProducts);
-
-  // FIXED: Ingredient = product_kind === 'extern', not a dish
+  // Filter for ingredients — using 'as any' to access product_kind without TS error
   const ingredients = allProducts.filter(
     (p) =>
-      p.product_kind === "extern" && p.product_type !== "dish"
+      (p as any).product_kind === "extern" && (p as any).product_type !== "dish"
   );
 
   const handleEdit = (item: any) => {
@@ -134,13 +131,10 @@ function SemiFinishedTab() {
   const [showForm, setShowForm] = useState(false);
   const [editProduct, setEditProduct] = useState<any>(null);
 
-  // DEBUG: Print out fetched products
-  console.log("All products (for SemiFinishedTab):", allProducts);
-
-  // FIXED: Semi-finished = product_kind === 'zelfgemaakt', not a dish
+  // Filter for semi-finished products — using 'as any' to access product_kind without TS error
   const semiFinished = allProducts.filter(
     (p) =>
-      p.product_kind === "zelfgemaakt" && p.product_type !== "dish"
+      (p as any).product_kind === "zelfgemaakt" && (p as any).product_type !== "dish"
   );
 
   const handleEdit = (item: any) => {
@@ -196,10 +190,8 @@ function DishesTab() {
   const [showForm, setShowForm] = useState(false);
   const [editProduct, setEditProduct] = useState<any>(null);
 
-  // DEBUG: Print out fetched products
-  console.log("All products (for DishesTab):", allProducts);
-
-  const dishes = allProducts.filter((p) => p.product_type === "dish");
+  // No debug log here
+  const dishes = allProducts.filter((p) => (p as any).product_type === "dish");
 
   const handleEdit = (item: any) => {
     setEditProduct(item);
