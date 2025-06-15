@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -88,11 +87,11 @@ export const exportPackingSlipsCSV = (packingSlips: PackingSlip[]) => {
     return;
   }
 
-  // Nieuwe headers inclusief product en batchnummer
+  // Header 'Location' vervangen door 'Produced By'
   const csvHeaders = [
     "Packing Slip Number",
     "Date Created",
-    "Location",
+    "Produced By", // was "Location"
     "Destination",
     "Dispatch Type",
     "Customer",
@@ -107,17 +106,26 @@ export const exportPackingSlipsCSV = (packingSlips: PackingSlip[]) => {
     "Batchnummer"
   ];
 
-  // Nieuwe data: per batch + product combinatie ook een regel
+  // Per lijn correcte waarde voor 'Produced By'
   const csvData: string[][] = [];
 
   packingSlips.forEach((slip) => {
-    // Als batches beschikbaar zijn, maken we voor elke batch/product een aparte lijn
+    // Functie om produced by te bepalen
+    let producedByVal = "";
+    if (slip.dispatch_records?.location === "tothai") {
+      producedByVal = "TOTHAI PRODUCTION";
+    } else if (slip.destination) {
+      producedByVal = slip.destination;
+    } else {
+      producedByVal = ""; // fallback leeg
+    }
+
     if (slip.batches && slip.batches.length > 0) {
       slip.batches.forEach((batch) => {
         csvData.push([
           slip.slip_number,
           format(new Date(slip.created_at), "yyyy-MM-dd HH:mm"),
-          slip.dispatch_records?.location || "",
+          producedByVal, // nieuwe waarde!
           slip.destination,
           slip.dispatch_records?.dispatch_type || "",
           slip.dispatch_records?.customer || "",
@@ -133,11 +141,10 @@ export const exportPackingSlipsCSV = (packingSlips: PackingSlip[]) => {
         ]);
       });
     } else {
-      // Geen batch-info: oude gedrag, 1 lijn per slip
       csvData.push([
         slip.slip_number,
         format(new Date(slip.created_at), "yyyy-MM-dd HH:mm"),
-        slip.dispatch_records?.location || "",
+        producedByVal, // nieuwe waarde!
         slip.destination,
         slip.dispatch_records?.dispatch_type || "",
         slip.dispatch_records?.customer || "",
