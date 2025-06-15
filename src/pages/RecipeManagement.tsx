@@ -2,14 +2,13 @@ import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IngredientForm } from "@/components/ingredients/IngredientForm";
 import { SemiFinishedForm } from "@/components/semi-finished/SemiFinishedForm";
+import { DishForm } from "@/components/dishes/DishForm";
 
 function DishesTab() {
   return (
     <div className="space-y-2">
       <h2 className="text-2xl font-bold">Dishes</h2>
-      <p className="text-muted-foreground text-sm">
-        Manage final products such as dishes here. (Coming soon)
-      </p>
+      <DishForm />
     </div>
   );
 }

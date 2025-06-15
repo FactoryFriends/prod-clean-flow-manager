@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { useCreateProduct, useAllProducts } from "@/hooks/useProductionData";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 
 import {
   SemiFinishedFormData,
@@ -41,6 +41,7 @@ export function SemiFinishedForm() {
       supplier_id: "",
       shelf_life_days: null,
       labour_time_minutes: null,
+      active: true,
     },
   });
 
@@ -113,6 +114,7 @@ export function SemiFinishedForm() {
         labour_time_minutes: data.labour_time_minutes
           ? Number(parseNumberComma(data.labour_time_minutes as any))
           : null,
+        active: data.active,
         recipe: recipe.map((ri) => ({
           product_id: ri.product_id,
           qty: Number(parseNumberComma(ri.qty as any)),
@@ -280,6 +282,20 @@ export function SemiFinishedForm() {
               Price is automatically calculated from the ingredient recipe per batch.
             </div>
           </div>
+
+          {/* Active / Inactive Toggle */}
+          <FormField
+            control={form.control}
+            name="active"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-center gap-2">
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  <FormLabel>{field.value ? "Active" : "Inactive"}</FormLabel>
+                </div>
+              </FormItem>
+            )}
+          />
 
           <Button type="submit" className="w-full">
             Save Semi-finished Product
