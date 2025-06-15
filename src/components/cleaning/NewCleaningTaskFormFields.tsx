@@ -3,6 +3,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Control } from "react-hook-form";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface NewTaskFormData {
   title: string;
@@ -18,6 +19,8 @@ interface NewCleaningTaskFormFieldsProps {
 }
 
 export function NewCleaningTaskFormFields({ control }: NewCleaningTaskFormFieldsProps) {
+  const isMobile = useIsMobile();
+
   return (
     <>
       <FormField
@@ -26,9 +29,9 @@ export function NewCleaningTaskFormFields({ control }: NewCleaningTaskFormFields
         rules={{ required: "Title is required" }}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Task Title</FormLabel>
+            <FormLabel>{isMobile ? "Title" : "Task Title"}</FormLabel>
             <FormControl>
-              <Input placeholder="Enter task title" {...field} />
+              <Input placeholder={isMobile ? "Title" : "Enter task title"} {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -43,7 +46,7 @@ export function NewCleaningTaskFormFields({ control }: NewCleaningTaskFormFields
             <FormLabel>Description</FormLabel>
             <FormControl>
               <Textarea 
-                placeholder="Enter task description" 
+                placeholder={isMobile ? "Description" : "Enter task description"} 
                 className="min-h-[80px]"
                 {...field} 
               />
@@ -60,7 +63,7 @@ export function NewCleaningTaskFormFields({ control }: NewCleaningTaskFormFields
           rules={{ required: "Scheduled date is required" }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Scheduled Date</FormLabel>
+              <FormLabel>{isMobile ? "Date" : "Scheduled Date"}</FormLabel>
               <FormControl>
                 <Input type="date" {...field} />
               </FormControl>
@@ -74,7 +77,7 @@ export function NewCleaningTaskFormFields({ control }: NewCleaningTaskFormFields
           name="due_time"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Due Time (Optional)</FormLabel>
+              <FormLabel>{isMobile ? "Time" : "Due Time (Optional)"}</FormLabel>
               <FormControl>
                 <Input type="time" {...field} />
               </FormControl>
@@ -93,7 +96,7 @@ export function NewCleaningTaskFormFields({ control }: NewCleaningTaskFormFields
         }}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Estimated Duration (minutes)</FormLabel>
+            <FormLabel>{isMobile ? "Duration (min)" : "Estimated Duration (minutes)"}</FormLabel>
             <FormControl>
               <Input 
                 type="number" 
@@ -123,7 +126,7 @@ export function NewCleaningTaskFormFields({ control }: NewCleaningTaskFormFields
               />
             </FormControl>
             <FormLabel className="text-sm font-normal">
-              FAVV Compliance Required
+              {isMobile ? "FAVV Required" : "FAVV Compliance Required"}
             </FormLabel>
             <FormMessage />
           </FormItem>

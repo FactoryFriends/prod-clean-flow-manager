@@ -15,13 +15,13 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { id: "dashboard", label: "Dashboard", icon: BarChart3, availableFor: ["tothai", "khin"] },
-  { id: "production", label: "Production", icon: Package, availableFor: ["tothai"] },
-  { id: "distribution", label: "Distribution", icon: Truck, availableFor: ["tothai"] },
-  { id: "cleaning", label: "Cleaning Tasks", icon: Brush, availableFor: ["tothai", "khin"] },
-  { id: "invoicing", label: "Invoicing", icon: Receipt, availableFor: ["tothai"] },
-  { id: "reports", label: "Reports", icon: FileText, availableFor: ["tothai", "khin"] },
-  { id: "settings", label: "Settings", icon: Settings, availableFor: ["tothai", "khin"] },
+  { id: "dashboard", label: "Dashboard", mobileLabel: "Home", icon: BarChart3, availableFor: ["tothai", "khin"] },
+  { id: "production", label: "Production", mobileLabel: "Prod", icon: Package, availableFor: ["tothai"] },
+  { id: "distribution", label: "Distribution", mobileLabel: "Distr", icon: Truck, availableFor: ["tothai"] },
+  { id: "cleaning", label: "Cleaning Tasks", mobileLabel: "Clean", icon: Brush, availableFor: ["tothai", "khin"] },
+  { id: "invoicing", label: "Invoicing", mobileLabel: "Invoice", icon: Receipt, availableFor: ["tothai"] },
+  { id: "reports", label: "Reports", mobileLabel: "Reports", icon: FileText, availableFor: ["tothai", "khin"] },
+  { id: "settings", label: "Settings", mobileLabel: "Config", icon: Settings, availableFor: ["tothai", "khin"] },
 ];
 
 export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleCollapse, currentLocation, onLocationChange }: SidebarProps) {
@@ -54,7 +54,9 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
           {(!isCollapsed || isMobile) && (
             <div>
               <h1 className="font-semibold text-sidebar-foreground">OptiThai</h1>
-              <p className="text-sm text-sidebar-foreground/60">Production Hub</p>
+              <p className="text-sm text-sidebar-foreground/60">
+                {isMobile ? "Hub" : "Production Hub"}
+              </p>
             </div>
           )}
         </div>
@@ -95,6 +97,7 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
       <nav className="p-4 space-y-2">
         {availableMenuItems.map((item) => {
           const Icon = item.icon;
+          const displayLabel = isMobile ? item.mobileLabel : item.label;
           return (
             <button
               key={item.id}
@@ -110,7 +113,7 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
               )}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
-              {(!isCollapsed || isMobile) && <span className="text-sm font-medium">{item.label}</span>}
+              {(!isCollapsed || isMobile) && <span className="text-sm font-medium">{displayLabel}</span>}
             </button>
           );
         })}

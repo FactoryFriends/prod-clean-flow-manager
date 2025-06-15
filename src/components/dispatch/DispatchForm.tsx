@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DispatchType, SelectedItem } from "@/types/dispatch";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useStaffCodes } from "@/hooks/useStaffCodes";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useEffect } from "react";
 
 interface DispatchFormProps {
@@ -40,6 +41,7 @@ export function DispatchForm({
 }: DispatchFormProps) {
   const { data: customers = [], isLoading: customersLoading, error: customersError } = useCustomers(true);
   const { data: staffCodes = [] } = useStaffCodes();
+  const isMobile = useIsMobile();
 
   // Debug logging
   console.log("DispatchForm customers debug:", {
@@ -101,10 +103,10 @@ export function DispatchForm({
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="picker-code">PIN Code</Label>
+              <Label htmlFor="picker-code">{isMobile ? "PIN" : "PIN Code"}</Label>
               <Input
                 id="picker-code"
-                placeholder="Enter 4-digit PIN"
+                placeholder={isMobile ? "PIN" : "Enter 4-digit PIN"}
                 value={pickerCode}
                 onChange={(e) => setPickerCode(e.target.value)}
                 maxLength={4}
@@ -114,10 +116,10 @@ export function DispatchForm({
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="picker-name">Staff Name</Label>
+              <Label htmlFor="picker-name">{isMobile ? "Name" : "Staff Name"}</Label>
               <Input
                 id="picker-name"
-                placeholder="Auto-filled from PIN"
+                placeholder={isMobile ? "Name" : "Auto-filled from PIN"}
                 value={pickerName}
                 onChange={(e) => setPickerName(e.target.value)}
                 disabled={!!pickerCode}
@@ -130,7 +132,7 @@ export function DispatchForm({
               <Label htmlFor="customer">Customer</Label>
               <Select value={customer} onValueChange={setCustomer}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select customer" />
+                  <SelectValue placeholder={isMobile ? "Customer" : "Select customer"} />
                 </SelectTrigger>
                 <SelectContent>
                   {customers.map((customerRecord) => (
@@ -146,16 +148,16 @@ export function DispatchForm({
                 </SelectContent>
               </Select>
               {customersLoading && (
-                <p className="text-sm text-muted-foreground">Loading customers...</p>
+                <p className="text-sm text-muted-foreground">{isMobile ? "Loading..." : "Loading customers..."}</p>
               )}
               {customersError && (
-                <p className="text-sm text-red-500">Error loading customers: {customersError.message}</p>
+                <p className="text-sm text-red-500">{isMobile ? "Error loading" : `Error loading customers: ${customersError.message}`}</p>
               )}
               {!customersLoading && !customersError && customers.length === 0 && (
-                <p className="text-sm text-orange-500">No customers found. Please add customers in Settings.</p>
+                <p className="text-sm text-orange-500">{isMobile ? "No customers" : "No customers found. Please add customers in Settings."}</p>
               )}
               {customers.length > 0 && (
-                <p className="text-sm text-green-600">Found {customers.length} customers</p>
+                <p className="text-sm text-green-600">{isMobile ? `${customers.length} customers` : `Found ${customers.length} customers`}</p>
               )}
             </div>
           )}
@@ -164,7 +166,7 @@ export function DispatchForm({
             <Label htmlFor="dispatch-notes">Notes</Label>
             <Textarea
               id="dispatch-notes"
-              placeholder="Add any dispatch notes..."
+              placeholder={isMobile ? "Notes..." : "Add any dispatch notes..."}
               value={dispatchNotes}
               onChange={(e) => setDispatchNotes(e.target.value)}
               rows={3}
@@ -179,7 +181,7 @@ export function DispatchForm({
               disabled={!canSubmit}
               className="flex-1 bg-blue-600 hover:bg-blue-700"
             >
-              Create Packing Slip ({selectedItems.length} items)
+              {isMobile ? `Slip (${selectedItems.length})` : `Create Packing Slip (${selectedItems.length} items)`}
             </Button>
           ) : (
             <Button 
@@ -187,7 +189,7 @@ export function DispatchForm({
               disabled={!canSubmit}
               className="flex-1 bg-green-600 hover:bg-green-700"
             >
-              Log Internal Use ({selectedItems.length} items)
+              {isMobile ? `Log (${selectedItems.length})` : `Log Internal Use (${selectedItems.length} items)`}
             </Button>
           )}
         </div>

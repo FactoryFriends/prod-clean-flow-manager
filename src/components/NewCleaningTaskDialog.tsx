@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { NewCleaningTaskForm } from "./cleaning/NewCleaningTaskForm";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface NewCleaningTaskDialogProps {
   currentLocation: "tothai" | "khin";
@@ -11,6 +12,7 @@ interface NewCleaningTaskDialogProps {
 
 export function NewCleaningTaskDialog({ currentLocation }: NewCleaningTaskDialogProps) {
   const [open, setOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const handleSuccess = () => {
     setOpen(false);
@@ -25,12 +27,14 @@ export function NewCleaningTaskDialog({ currentLocation }: NewCleaningTaskDialog
       <DialogTrigger asChild>
         <Button className="flex items-center gap-2 w-fit">
           <Plus className="w-4 h-4" />
-          New Cleaning Task
+          {isMobile ? "New Task" : "New Cleaning Task"}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Create New Cleaning Task</DialogTitle>
+          <DialogTitle>
+            {isMobile ? "New Task" : "Create New Cleaning Task"}
+          </DialogTitle>
         </DialogHeader>
         <NewCleaningTaskForm 
           currentLocation={currentLocation}
