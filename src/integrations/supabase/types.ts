@@ -442,6 +442,41 @@ export type Database = {
           },
         ]
       }
+      product_cost_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          id: string
+          new_cost: number
+          old_cost: number | null
+          product_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_cost: number
+          old_cost?: number | null
+          product_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_cost?: number
+          old_cost?: number | null
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_cost_history_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_batches: {
         Row: {
           batch_number: string
@@ -502,8 +537,11 @@ export type Database = {
       products: {
         Row: {
           active: boolean
+          cost: number | null
           created_at: string
           id: string
+          markup_percent: number | null
+          minimal_margin_threshold_percent: number | null
           name: string
           packages_per_batch: number
           pickable: boolean
@@ -511,6 +549,7 @@ export type Database = {
           product_fiche_url: string | null
           product_kind: string
           product_type: string
+          sales_price: number | null
           shelf_life_days: number | null
           supplier_id: string | null
           supplier_name: string | null
@@ -520,8 +559,11 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          cost?: number | null
           created_at?: string
           id?: string
+          markup_percent?: number | null
+          minimal_margin_threshold_percent?: number | null
           name: string
           packages_per_batch?: number
           pickable?: boolean
@@ -529,6 +571,7 @@ export type Database = {
           product_fiche_url?: string | null
           product_kind?: string
           product_type?: string
+          sales_price?: number | null
           shelf_life_days?: number | null
           supplier_id?: string | null
           supplier_name?: string | null
@@ -538,8 +581,11 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          cost?: number | null
           created_at?: string
           id?: string
+          markup_percent?: number | null
+          minimal_margin_threshold_percent?: number | null
           name?: string
           packages_per_batch?: number
           pickable?: boolean
@@ -547,6 +593,7 @@ export type Database = {
           product_fiche_url?: string | null
           product_kind?: string
           product_type?: string
+          sales_price?: number | null
           shelf_life_days?: number | null
           supplier_id?: string | null
           supplier_name?: string | null

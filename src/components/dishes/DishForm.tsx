@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -25,6 +24,10 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
       unit_type: editingProduct?.unit_type || "liter",
       active: editingProduct?.active ?? true,
       labour_time_minutes: editingProduct?.labour_time_minutes ?? "",
+      cost: editingProduct?.cost || 0,
+      markup_percent: editingProduct?.markup_percent || 0,
+      sales_price: editingProduct?.sales_price || 0,
+      minimal_margin_threshold_percent: editingProduct?.minimal_margin_threshold_percent || 25
     }
   });
 
@@ -71,6 +74,20 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
     return Math.round(cost * 100) / 100;
   }
 
+  // Effective margin calc
+  const salesPrice = form.watch("sales_price");
+  const cost = form.watch("cost");
+  const minimalMargin = form.watch("minimal_margin_threshold_percent");
+
+  const marginPct =
+    salesPrice && cost && Number(salesPrice) > 0
+      ? ((Number(salesPrice) - Number(cost)) / Number(salesPrice)) * 100
+      : null;
+  const showMarginAlarm =
+    marginPct !== null &&
+    minimalMargin !== undefined &&
+    marginPct < minimalMargin;
+
   function onSubmit(data: any) {
     if (recipe.length === 0) {
       toast.error("Please add at least one ingredient/semi-finished product to the recipe.");
@@ -82,9 +99,13 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
       description: data.description,
       unit_size: Number(data.unit_size),
       unit_type: data.unit_type,
-      packages_per_batch: 1, // not relevant for dish, setting to 1 for now
+      packages_per_batch: 1,
       price_per_unit: estimatedPrice(recipe, allProducts, data.labour_time_minutes),
-      shelf_life_days: null, // not relevant
+      cost: Number(data.cost) || 0,
+      markup_percent: Number(data.markup_percent) || 0,
+      sales_price: Number(data.sales_price) || 0,
+      minimal_margin_threshold_percent: Number(data.minimal_margin_threshold_percent) || 25,
+      shelf_life_days: null,
       product_type: "dish",
       product_kind: "dish",
       pickable: false,
@@ -277,6 +298,71 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
             <div className="text-xs text-muted-foreground italic mt-1">
               Price is calculated from the cost of selected ingredients/semi-finished per unit and labour time at €{FIXED_LABOUR_COST_PER_MIN.toFixed(2)}/min.
             </div>
+          </div>
+
+          {/* COST */}
+          <FormField
+            control={form.control}
+            name="cost"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cost (€)</FormLabel>
+                <FormControl>
+                  <Input type="number" min="0" step="0.01" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          {/* MARKUP % */}
+          <FormField
+            control={form.control}
+            name="markup_percent"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Markup (%)</FormLabel>
+                <FormControl>
+                  <Input type="number" min="0" step="0.01" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          {/* SALES PRICE */}
+          <FormField
+            control={form.control}
+            name="sales_price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Sales Price (€)</FormLabel>
+                <FormControl>
+                  <Input type="number" min="0" step="0.01" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          {/* Minimal margin threshold */}
+          <FormField
+            control={form.control}
+            name="minimal_margin_threshold_percent"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Minimal Margin Threshold (%)</FormLabel>
+                <FormControl>
+                  <Input type="number" min="0" step="0.01" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          {/* Margin */}
+          <div className="text-sm font-medium mt-2">
+            Effective Margin:{" "}
+            <span className={showMarginAlarm ? "text-red-600" : "text-green-700"}>
+              {marginPct !== null ? `${marginPct.toFixed(2)}%` : "—"}
+            </span>
+            {showMarginAlarm && (
+              <span className="ml-2 text-red-500 font-bold animate-pulse">
+                ⚠ Below minimal threshold!
+              </span>
+            )}
           </div>
 
           <Button type="submit" className="w-full">

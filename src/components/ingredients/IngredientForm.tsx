@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -17,6 +16,10 @@ const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE"];
 type ExtendedIngredientFormData = IngredientFormData & {
   supplier_id?: string;
   product_fiche_url?: string;
+  cost: number;
+  markup_percent: number;
+  sales_price: number;
+  minimal_margin_threshold_percent: number;
 };
 
 export function IngredientForm() {
@@ -32,6 +35,10 @@ export function IngredientForm() {
       pickable: false,
       allergens: [],
       product_fiche_url: "",
+      cost: 0,
+      markup_percent: 0,
+      sales_price: 0,
+      minimal_margin_threshold_percent: 25
     },
   });
 
@@ -74,18 +81,11 @@ export function IngredientForm() {
   const onSubmit = (data: ExtendedIngredientFormData) => {
     createProduct.mutate(
       {
-        name: data.name,
-        unit_size: Number(data.unit_size),
-        unit_type: data.unit_type,
-        supplier_name: (data.supplier_id && suppliers.find(s => s.id === data.supplier_id)?.name) || null,
-        price_per_unit: Number(data.price_per_unit) || null,
-        packages_per_batch: 1,
-        shelf_life_days: null,
-        product_type: data.product_kind,
-        product_kind: data.product_kind,
-        pickable: Boolean(data.pickable),
-        supplier_id: data.supplier_id || null,
-        product_fiche_url: data.product_fiche_url || null,
+        ...data,
+        cost: Number(data.cost) || 0,
+        markup_percent: Number(data.markup_percent) || 0,
+        sales_price: Number(data.sales_price) || 0,
+        minimal_margin_threshold_percent: Number(data.minimal_margin_threshold_percent) || 25
       },
       {
         onSuccess: () => {
@@ -94,6 +94,21 @@ export function IngredientForm() {
       }
     );
   };
+
+  // Effective margin calculation
+  const marginPct = (() => {
+    if (!form.watch("sales_price") || !form.watch("cost")) return null;
+    if (Number(form.watch("sales_price")) === 0) return null;
+    return (
+      ((Number(form.watch("sales_price")) - Number(form.watch("cost"))) / Number(form.watch("sales_price"))) *
+      100
+    );
+  })();
+
+  const showMarginAlarm =
+    marginPct !== null &&
+    form.watch("minimal_margin_threshold_percent") !== undefined &&
+    marginPct < form.watch("minimal_margin_threshold_percent");
 
   return (
     <div className="bg-white border p-6 rounded-xl shadow max-w-xl">
@@ -257,6 +272,75 @@ export function IngredientForm() {
               </FormItem>
             )}
           />
+
+          {/* COST */}
+          <FormField
+            control={form.control}
+            name="cost"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cost (€)</FormLabel>
+                <FormControl>
+                  <Input type="number" min="0" step="0.01" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          {/* MARKUP % */}
+          <FormField
+            control={form.control}
+            name="markup_percent"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Markup (%)</FormLabel>
+                <FormControl>
+                  <Input type="number" min="0" step="0.01" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          {/* SALES PRICE */}
+          <FormField
+            control={form.control}
+            name="sales_price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Sales Price (€)</FormLabel>
+                <FormControl>
+                  <Input type="number" min="0" step="0.01" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          {/* Minimal margin threshold */}
+          <FormField
+            control={form.control}
+            name="minimal_margin_threshold_percent"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Minimal Margin Threshold (%)</FormLabel>
+                <FormControl>
+                  <Input type="number" min="0" step="0.01" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          {/* Effective Margin */}
+          <div className="text-sm font-medium mt-2">
+            Effective Margin:{" "}
+            <span className={showMarginAlarm ? "text-red-600" : "text-green-700"}>
+              {marginPct !== null ? `${marginPct.toFixed(2)}%` : "—"}
+            </span>
+            {showMarginAlarm && (
+              <span className="ml-2 text-red-500 font-bold animate-pulse">
+                ⚠ Below minimal threshold!
+              </span>
+            )}
+          </div>
 
           {/* PICKABLE */}
           <FormField

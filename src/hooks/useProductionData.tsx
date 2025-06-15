@@ -11,13 +11,18 @@ export interface Product {
   shelf_life_days: number | null;
   price_per_unit: number | null;
   active: boolean;
-  product_type: string; // 'zelfgemaakt' | 'extern'
+  product_type: string; // 'zelfgemaakt' | 'extern' | 'ingredient' | 'semi-finished' | 'dish'
   supplier_name: string | null;
   pickable?: boolean; // <-- ADDED to match database and UI usage
   supplier_id?: string | null; // <-- ADDED!
   product_fiche_url?: string | null; // <-- ADDED!
   description?: string;
   labour_time_minutes?: number | null;
+  // NEW fields for margin/cost/tracking:
+  cost?: number | null;
+  markup_percent?: number | null;
+  sales_price?: number | null;
+  minimal_margin_threshold_percent?: number | null;
 }
 
 export interface Chef {
@@ -76,22 +81,9 @@ export const useAllProducts = () => {
 export const useCreateProduct = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (productData: {
-      name: string;
-      unit_size: number;
-      unit_type: string;
-      packages_per_batch: number;
-      shelf_life_days: number | null;
-      price_per_unit: number | null;
-      product_type: string;
-      product_kind: string;
-      supplier_name: string | null;
-      pickable: boolean;
-      supplier_id?: string | null;
-      product_fiche_url?: string | null;
-      labour_time_minutes?: number | null;
-      [key: string]: any;
-    }) => {
+    mutationFn: async (productData: any) => {
+      // Track cost history if cost is provided
+      // We'll create it after insert
       const { data, error } = await supabase
         .from("products")
         .insert(productData)
@@ -99,6 +91,19 @@ export const useCreateProduct = () => {
         .single();
 
       if (error) throw error;
+
+      // Insert cost history if needed
+      if (productData.cost != null) {
+        await supabase
+          .from("product_cost_history")
+          .insert({
+            product_id: data.id,
+            old_cost: null,
+            new_cost: productData.cost,
+            changed_by: "system or user", // Can replace with real user later
+          });
+      }
+
       return data;
     },
     onSuccess: () => {
@@ -115,25 +120,16 @@ export const useCreateProduct = () => {
 export const useUpdateProduct = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({
-      id,
-      ...productData
-    }: {
-      id: string;
-      name: string;
-      unit_size: number;
-      unit_type: string;
-      packages_per_batch: number;
-      shelf_life_days: number | null;
-      price_per_unit: number | null;
-      active: boolean;
-      product_type: string;
-      supplier_name: string | null;
-      product_kind: string;
-      pickable: boolean;
-      supplier_id?: string | null;
-      product_fiche_url?: string | null;
-    }) => {
+    mutationFn: async ({ id, ...productData }: any) => {
+      // Fetch current product cost first for history
+      const { data: existingProduct, error: fetchError } = await supabase
+        .from("products")
+        .select("cost")
+        .eq("id", id)
+        .maybeSingle();
+      if (fetchError) throw fetchError;
+
+      const currentCost = existingProduct?.cost ?? null;
       const { data, error } = await supabase
         .from("products")
         .update(productData)
@@ -142,6 +138,20 @@ export const useUpdateProduct = () => {
         .single();
 
       if (error) throw error;
+      // Track cost change if cost updated
+      if (
+        productData.cost != null &&
+        productData.cost !== currentCost
+      ) {
+        await supabase
+          .from("product_cost_history")
+          .insert({
+            product_id: id,
+            old_cost: currentCost,
+            new_cost: productData.cost,
+            changed_by: "system or user", // fill later
+          });
+      }
       return data;
     },
     onSuccess: () => {

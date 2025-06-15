@@ -28,11 +28,30 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
     pickable: editingProduct?.pickable ?? false,
     supplier_id: editingProduct?.supplier_id || null,
     product_fiche_url: editingProduct?.product_fiche_url || null,
+    cost: editingProduct?.cost || 0,
+    markup_percent: editingProduct?.markup_percent || 0,
+    sales_price: editingProduct?.sales_price || 0,
+    minimal_margin_threshold_percent: editingProduct?.minimal_margin_threshold_percent || 25,
   });
 
   useEffect(() => {
     if (editingProduct?.product_fiche_url) setFormData(f => ({ ...f, product_fiche_url: editingProduct.product_fiche_url }));
   }, [editingProduct]);
+
+  // Margin calculation helper
+  const marginPct = (() => {
+    if (!formData.sales_price || !formData.cost) return null;
+    if (Number(formData.sales_price) === 0) return null;
+    return (
+      ((Number(formData.sales_price) - Number(formData.cost)) / Number(formData.sales_price)) *
+      100
+    );
+  })();
+
+  const showMarginAlarm =
+    marginPct !== null &&
+    formData.minimal_margin_threshold_percent !== undefined &&
+    marginPct < formData.minimal_margin_threshold_percent;
 
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
@@ -67,6 +86,10 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
           ? formData.product_fiche_url || null
           : null
       ),
+      cost: Number(formData.cost) || 0,
+      markup_percent: Number(formData.markup_percent) || 0,
+      sales_price: Number(formData.sales_price) || 0,
+      minimal_margin_threshold_percent: Number(formData.minimal_margin_threshold_percent) || 25,
     };
 
     if (
@@ -252,6 +275,72 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
             }
           />
         </div>
+      </div>
+
+      {/* Cost */}
+      <div className="space-y-2">
+        <Label htmlFor="cost">Cost (€)</Label>
+        <Input
+          id="cost"
+          type="number"
+          step="0.01"
+          min="0"
+          value={formData.cost ?? ""}
+          onChange={e => setFormData({ ...formData, cost: e.target.value ? Number(e.target.value) : 0 })}
+          required
+        />
+      </div>
+
+      {/* Markup % */}
+      <div className="space-y-2">
+        <Label htmlFor="markup_percent">Markup (%)</Label>
+        <Input
+          id="markup_percent"
+          type="number"
+          step="0.01"
+          min="0"
+          value={formData.markup_percent ?? ""}
+          onChange={e => setFormData({ ...formData, markup_percent: e.target.value ? Number(e.target.value) : 0 })}
+        />
+      </div>
+
+      {/* Sales Price */}
+      <div className="space-y-2">
+        <Label htmlFor="sales_price">Sales Price (€)</Label>
+        <Input
+          id="sales_price"
+          type="number"
+          step="0.01"
+          min="0"
+          value={formData.sales_price ?? ""}
+          onChange={e => setFormData({ ...formData, sales_price: e.target.value ? Number(e.target.value) : 0 })}
+        />
+      </div>
+
+      {/* Minimal margin threshold */}
+      <div className="space-y-2">
+        <Label htmlFor="minimal_margin_threshold_percent">Minimal Margin Threshold (%)</Label>
+        <Input
+          id="minimal_margin_threshold_percent"
+          type="number"
+          step="0.01"
+          min="0"
+          value={formData.minimal_margin_threshold_percent ?? ""}
+          onChange={e => setFormData({ ...formData, minimal_margin_threshold_percent: e.target.value ? Number(e.target.value) : 25 })}
+        />
+      </div>
+
+      {/* Effective Margin */}
+      <div className="text-sm font-medium mt-2">
+        Effective Margin:{" "}
+        <span className={showMarginAlarm ? "text-red-600" : "text-green-700"}>
+          {marginPct !== null ? `${marginPct.toFixed(2)}%` : "—"}
+        </span>
+        {showMarginAlarm && (
+          <span className="ml-2 text-red-500 font-bold animate-pulse">
+            ⚠ Below minimal threshold!
+          </span>
+        )}
       </div>
 
       {editingProduct && (

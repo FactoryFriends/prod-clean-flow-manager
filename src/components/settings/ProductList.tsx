@@ -1,5 +1,4 @@
-
-import { Edit, Trash2, Package } from "lucide-react";
+import { Edit, Trash2, Package, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAllProducts, useDeleteProduct, Product } from "@/hooks/useProductionData";
@@ -11,6 +10,16 @@ interface ProductListProps {
 export function ProductList({ onEditProduct }: ProductListProps) {
   const { data: products, isLoading } = useAllProducts();
   const deleteProduct = useDeleteProduct();
+
+  // Helper for margin
+  function marginPct(product: any) {
+    if (!product.sales_price || !product.cost) return null;
+    if (Number(product.sales_price) === 0) return null;
+    return (
+      ((Number(product.sales_price) - Number(product.cost)) / Number(product.sales_price)) *
+      100
+    );
+  }
 
   const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to deactivate this product?")) {
@@ -33,53 +42,82 @@ export function ProductList({ onEditProduct }: ProductListProps) {
 
   return (
     <div className="space-y-4">
-      {products.map((product) => (
-        <div key={product.id} className="bg-card border border-border rounded-lg p-4">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-lg">{product.name}</h3>
-                <Badge variant={product.active ? "default" : "secondary"}>
-                  {product.active ? "Active" : "Inactive"}
-                </Badge>
+      {products.map((product) => {
+        const margin = marginPct(product);
+        const showMarginAlarm =
+          margin !== null &&
+          product.minimal_margin_threshold_percent !== undefined &&
+          margin < product.minimal_margin_threshold_percent;
+        return (
+          <div key={product.id} className="bg-card border border-border rounded-lg p-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-lg">{product.name}</h3>
+                  <Badge variant={product.active ? "default" : "secondary"}>
+                    {product.active ? "Active" : "Inactive"}
+                  </Badge>
+                  {showMarginAlarm && (
+                    <AlertTriangle className="w-5 h-5 text-red-600 animate-pulse" title="Margin below minimal threshold!" />
+                  )}
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
+                  <div>
+                    <span className="font-medium">Size:</span> {product.unit_size} {product.unit_type}
+                  </div>
+                  <div>
+                    <span className="font-medium">Packages/Batch:</span> {product.packages_per_batch}
+                  </div>
+                  <div>
+                    <span className="font-medium">Shelf Life:</span> {product.shelf_life_days ? `${product.shelf_life_days} days` : "Not set"}
+                  </div>
+                  <div>
+                    <span className="font-medium">Price:</span>{" "}
+                    {product.price_per_unit ? `€${Number(product.price_per_unit).toFixed(2)}` : "Not set"}
+                  </div>
+                  <div>
+                    <span className="font-medium">Cost:</span> {product.cost !== null && product.cost !== undefined ? `€${Number(product.cost).toFixed(2)}` : "Not set"}
+                  </div>
+                  <div>
+                    <span className="font-medium">Sales Price:</span> {product.sales_price !== null && product.sales_price !== undefined ? `€${Number(product.sales_price).toFixed(2)}` : "Not set"}
+                  </div>
+                  <div>
+                    <span className="font-medium">Margin:</span>{" "}
+                    {margin !== null ? (
+                      <span className={showMarginAlarm ? "text-red-600 font-bold" : ""}>
+                        {margin.toFixed(2)}%
+                      </span>
+                    ) : "—"}
+                  </div>
+                  <div>
+                    <span className="font-medium">Min Margin:</span>{" "}
+                    {product.minimal_margin_threshold_percent !== undefined
+                      ? `${Number(product.minimal_margin_threshold_percent).toFixed(2)}%`
+                      : "—"}
+                  </div>
+                </div>
               </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
-                <div>
-                  <span className="font-medium">Size:</span> {product.unit_size} {product.unit_type}
-                </div>
-                <div>
-                  <span className="font-medium">Packages/Batch:</span> {product.packages_per_batch}
-                </div>
-                <div>
-                  <span className="font-medium">Shelf Life:</span> {product.shelf_life_days ? `${product.shelf_life_days} days` : "Not set"}
-                </div>
-                <div>
-                  <span className="font-medium">Price:</span> {product.price_per_unit ? `$${product.price_per_unit.toFixed(2)}` : "Not set"}
-                </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEditProduct(product)}
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDelete(product.id)}
+                  disabled={deleteProduct.isPending}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onEditProduct(product)}
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDelete(product.id)}
-                disabled={deleteProduct.isPending}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
