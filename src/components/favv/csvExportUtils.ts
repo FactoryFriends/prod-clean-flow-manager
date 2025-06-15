@@ -19,6 +19,17 @@ interface PackingSlip {
     picker_name?: string;
     dispatch_notes?: string;
   } | null;
+  batches?: {
+    id: string;
+    batch_number: string;
+    production_date: string;
+    expiry_date: string;
+    products: {
+      name: string;
+      unit_size: number;
+      unit_type: string;
+    };
+  }[];
 }
 
 interface StockTake {
@@ -77,12 +88,13 @@ export const exportPackingSlipsCSV = (packingSlips: PackingSlip[]) => {
     return;
   }
 
+  // Nieuwe headers inclusief product en batchnummer
   const csvHeaders = [
     "Packing Slip Number",
     "Date Created",
     "Location",
     "Destination",
-    "Dispatch Type", 
+    "Dispatch Type",
     "Customer",
     "Picker Name",
     "Prepared By",
@@ -90,24 +102,57 @@ export const exportPackingSlipsCSV = (packingSlips: PackingSlip[]) => {
     "Total Items",
     "Total Packages",
     "Pickup Date",
-    "Notes"
+    "Notes",
+    "Productnaam",
+    "Batchnummer"
   ];
 
-  const csvData = packingSlips.map(slip => [
-    slip.slip_number,
-    format(new Date(slip.created_at), "yyyy-MM-dd HH:mm"),
-    slip.dispatch_records?.location || "",
-    slip.destination,
-    slip.dispatch_records?.dispatch_type || "",
-    slip.dispatch_records?.customer || "",
-    slip.dispatch_records?.picker_name || "",
-    slip.prepared_by || "",
-    slip.picked_up_by || "",
-    slip.total_items,
-    slip.total_packages,
-    slip.pickup_date ? format(new Date(slip.pickup_date), "yyyy-MM-dd") : "",
-    slip.dispatch_records?.dispatch_notes || ""
-  ]);
+  // Nieuwe data: per batch + product combinatie ook een regel
+  const csvData: string[][] = [];
+
+  packingSlips.forEach((slip) => {
+    // Als batches beschikbaar zijn, maken we voor elke batch/product een aparte lijn
+    if (slip.batches && slip.batches.length > 0) {
+      slip.batches.forEach((batch) => {
+        csvData.push([
+          slip.slip_number,
+          format(new Date(slip.created_at), "yyyy-MM-dd HH:mm"),
+          slip.dispatch_records?.location || "",
+          slip.destination,
+          slip.dispatch_records?.dispatch_type || "",
+          slip.dispatch_records?.customer || "",
+          slip.dispatch_records?.picker_name || "",
+          slip.prepared_by || "",
+          slip.picked_up_by || "",
+          slip.total_items.toString(),
+          slip.total_packages.toString(),
+          slip.pickup_date ? format(new Date(slip.pickup_date), "yyyy-MM-dd") : "",
+          slip.dispatch_records?.dispatch_notes || "",
+          batch.products?.name || "",
+          batch.batch_number || "",
+        ]);
+      });
+    } else {
+      // Geen batch-info: oude gedrag, 1 lijn per slip
+      csvData.push([
+        slip.slip_number,
+        format(new Date(slip.created_at), "yyyy-MM-dd HH:mm"),
+        slip.dispatch_records?.location || "",
+        slip.destination,
+        slip.dispatch_records?.dispatch_type || "",
+        slip.dispatch_records?.customer || "",
+        slip.dispatch_records?.picker_name || "",
+        slip.prepared_by || "",
+        slip.picked_up_by || "",
+        slip.total_items.toString(),
+        slip.total_packages.toString(),
+        slip.pickup_date ? format(new Date(slip.pickup_date), "yyyy-MM-dd") : "",
+        slip.dispatch_records?.dispatch_notes || "",
+        "",
+        "",
+      ]);
+    }
+  });
 
   const csvContent = [
     csvHeaders.join(";"),
