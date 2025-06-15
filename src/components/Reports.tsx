@@ -1,8 +1,8 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { FAVVReports } from "./FAVVReports";
 import { ManagementReports } from "./ManagementReports";
+import IngredientPriceManager from "./reports/IngredientPriceManager";
 
 interface ReportsProps {
   currentLocation: "tothai" | "khin";
@@ -22,9 +22,10 @@ export function Reports({ currentLocation, onSectionChange }: ReportsProps) {
       </div>
 
       <Tabs defaultValue="management" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="management">Management Dashboard</TabsTrigger>
           <TabsTrigger value="favv">FAVV Compliance</TabsTrigger>
+          <TabsTrigger value="ingredient-margins">Ingredient Margins</TabsTrigger>
         </TabsList>
 
         <TabsContent value="management" className="space-y-6">
@@ -33,6 +34,10 @@ export function Reports({ currentLocation, onSectionChange }: ReportsProps) {
 
         <TabsContent value="favv" className="space-y-6">
           <FAVVReports currentLocation={currentLocation} />
+        </TabsContent>
+
+        <TabsContent value="ingredient-margins" className="space-y-6">
+          <IngredientPriceManager />
         </TabsContent>
       </Tabs>
     </div>
