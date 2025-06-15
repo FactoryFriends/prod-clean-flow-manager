@@ -13,6 +13,7 @@ export interface Product {
   active: boolean;
   product_type: string; // 'zelfgemaakt' | 'extern'
   supplier_name: string | null;
+  pickable?: boolean; // <-- ADDED to match database and UI usage
 }
 
 export interface Chef {
