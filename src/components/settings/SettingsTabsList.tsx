@@ -1,3 +1,4 @@
+
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function SettingsTabsList() {
@@ -10,7 +11,7 @@ export function SettingsTabsList() {
       <TabsTrigger value="customers">Customers</TabsTrigger>
       <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
       <TabsTrigger value="unit-options">Unit Options</TabsTrigger>
-      <TabsTrigger value="ingredient-margins">Ingredient Margins</TabsTrigger>
+      <TabsTrigger value="ingredient-margins">Ingredient Cost</TabsTrigger>
     </TabsList>
   );
 }
