@@ -29,8 +29,9 @@ const TabsTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-2 text-sm font-semibold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-      // Active pill: green fill, white text, shadow. Inactive: transparent.
-      "data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:font-bold",
+      // Active: subtle green pill, strong green text, bold, subtle border.
+      "data-[state=active]:bg-green-100 data-[state=active]:text-green-800 data-[state=active]:font-bold data-[state=active]:border data-[state=active]:border-green-300 data-[state=active]:shadow-md",
+      // Inactive: no background, regular green-800 text
       "hover:bg-green-50 hover:text-green-700 text-green-800",
       className
     )}
