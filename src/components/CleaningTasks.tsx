@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useCleaningTasks } from "@/hooks/useCleaningTasks";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -117,15 +118,6 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
 
   return (
     <div className={cn("space-y-6 p-6", isMobile && "pt-16")}>
-      {/* Styled date/range picker */}
-      <CleaningTasksFilters
-        startDate={startDate}
-        setStartDate={setStartDate}
-        endDate={endDate}
-        setEndDate={setEndDate}
-        onToday={handleToday}
-      />
-
       {/* Location select stays the same */}
       <div className="flex gap-2 mb-2">
         <div>
@@ -142,6 +134,15 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
           </select>
         </div>
       </div>
+
+      {/* Moved the filter here, under the location */}
+      <CleaningTasksFilters
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        onToday={handleToday}
+      />
 
       <OverdueAlert
         overdueCount={overdueCount}

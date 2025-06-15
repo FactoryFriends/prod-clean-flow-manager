@@ -19,24 +19,28 @@ export function CleaningTasksFilters({
   setStartDate,
   endDate,
   setEndDate,
-  onToday
+  onToday,
 }: CleaningTasksFiltersProps) {
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-4 mb-2">
+    <div className="flex flex-col sm:flex-row items-center gap-4 mb-2 w-full">
       {/* Start Date */}
-      <div>
-        <label className="block text-sm font-medium text-muted-foreground mb-1">Start date:</label>
+      <div className="flex flex-col w-full min-w-[180px] max-w-[220px]">
+        <label className="block text-xs font-medium text-muted-foreground mb-1 whitespace-nowrap">
+          Start date:
+        </label>
         <Popover>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               className={cn(
-                "w-[150px] justify-start text-left font-normal",
+                "w-full min-w-[160px] max-w-[220px] justify-start text-left font-normal truncate",
                 !startDate && "text-muted-foreground"
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
-              {startDate ? format(startDate, "PPP") : <span>Select</span>}
+              <span className="truncate">
+                {startDate ? format(startDate, "PPP") : <span>Select</span>}
+              </span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
@@ -51,19 +55,23 @@ export function CleaningTasksFilters({
         </Popover>
       </div>
       {/* End Date */}
-      <div>
-        <label className="block text-sm font-medium text-muted-foreground mb-1">End date:</label>
+      <div className="flex flex-col w-full min-w-[180px] max-w-[220px]">
+        <label className="block text-xs font-medium text-muted-foreground mb-1 whitespace-nowrap">
+          End date:
+        </label>
         <Popover>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               className={cn(
-                "w-[150px] justify-start text-left font-normal",
+                "w-full min-w-[160px] max-w-[220px] justify-start text-left font-normal truncate",
                 !endDate && "text-muted-foreground"
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
-              {endDate ? format(endDate, "PPP") : <span>Select</span>}
+              <span className="truncate">
+                {endDate ? format(endDate, "PPP") : <span>Select</span>}
+              </span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
@@ -77,10 +85,10 @@ export function CleaningTasksFilters({
           </PopoverContent>
         </Popover>
       </div>
-      <div className="flex-1 flex items-end">
+      <div className="flex-1 flex items-end justify-center sm:justify-end">
         <Button
-          className="ml-0 sm:ml-4"
-          variant="link"
+          className="ml-0 sm:ml-4 mt-2 sm:mt-0 w-full sm:w-auto"
+          variant="default"
           onClick={onToday}
         >
           Today
