@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +23,7 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
     active: editingProduct?.active ?? true,
     product_type: editingProduct?.product_type || "zelfgemaakt",
     supplier_name: editingProduct?.supplier_name || "TOTHAI PRODUCTION",
+    pickable: editingProduct?.pickable ?? false,
   });
 
   const createProduct = useCreateProduct();
@@ -38,7 +38,7 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
         ? "TOTHAI PRODUCTION"
         : formData.supplier_name;
 
-    const productData = {
+    const productData: any = {
       name: formData.name,
       unit_size: Number(formData.unit_size),
       unit_type: formData.unit_type,
@@ -48,6 +48,8 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
       active: formData.active,
       product_type: product_type,
       supplier_name: supplier_name,
+      product_kind: product_type,
+      pickable: false,
     };
 
     if (product_type === "extern" && (!formData.supplier_name || formData.supplier_name.trim() === "")) {
