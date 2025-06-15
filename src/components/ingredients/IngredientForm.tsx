@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { useCreateProduct, useAllProducts } from "@/hooks/useProductionData";
 import { toast } from "sonner";
-import { ALLERGENS } from "./constants/allergens";
+import { ALLERGENS, ALLERGENS_ENGLISH } from "./constants/allergens";
 import type { IngredientFormData } from "./types";
 
 const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE"];
@@ -210,23 +210,23 @@ export function IngredientForm() {
               <FormItem>
                 <FormLabel>Allergens</FormLabel>
                 <div className="flex flex-wrap gap-2">
-                  {ALLERGENS.map((allergen) => (
+                  {ALLERGENS.map((a) => (
                     <label
-                      key={allergen}
+                      key={a.english}
                       className="flex items-center gap-1 text-xs bg-gray-50 border rounded px-2 py-1"
                     >
                       <input
                         type="checkbox"
-                        checked={field.value?.includes(allergen)}
+                        checked={field.value?.includes(a.english)}
                         onChange={() => {
-                          if (field.value?.includes(allergen)) {
-                            field.onChange(field.value.filter((a) => a !== allergen));
+                          if (field.value?.includes(a.english)) {
+                            field.onChange(field.value.filter((val) => val !== a.english));
                           } else {
-                            field.onChange([...(field.value || []), allergen]);
+                            field.onChange([...(field.value || []), a.english]);
                           }
                         }}
                       />
-                      {allergen}
+                      {a.english} / {a.dutch}
                     </label>
                   ))}
                 </div>
