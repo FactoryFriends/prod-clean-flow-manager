@@ -91,7 +91,7 @@ export function IngredientForm() {
                 <FormControl>
                   <select
                     {...field}
-                    className="w-full border rounded-md px-3 py-2 text-sm"
+                    className="w-full border rounded-md px-3 py-2 text-sm bg-white"
                   >
                     <option value="zelfgemaakt">Self-made</option>
                     <option value="extern">Purchased externally</option>
@@ -126,7 +126,7 @@ export function IngredientForm() {
                 <FormControl>
                   <select
                     {...field}
-                    className="w-full border rounded-md px-3 py-2 text-sm"
+                    className="w-full border rounded-md px-3 py-2 text-sm bg-white"
                   >
                     {UNIT_OPTIONS.map((u) => (
                       <option value={u} key={u}>
@@ -150,7 +150,7 @@ export function IngredientForm() {
                 <FormControl>
                   <select
                     {...field}
-                    className="w-full border rounded-md px-3 py-2 text-sm"
+                    className="w-full border rounded-md px-3 py-2 text-sm bg-white"
                   >
                     <option value="">--</option>
                     {SUPPLIER_OPTIONS.map((sup) => (
