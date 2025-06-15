@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useCleaningTasks } from "@/hooks/useCleaningTasks";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -8,21 +7,25 @@ import { OverdueAlert } from "./cleaning/OverdueAlert";
 import { TaskScheduleCard } from "./cleaning/TaskScheduleCard";
 import { RoleFilter } from "./cleaning/RoleFilter";
 import { TasksList } from "./cleaning/TasksList";
+import { TaskPhotoModal } from "./task/TaskPhotoModal";
+import { format } from "date-fns";
 
 interface CleaningTasksProps {
   currentLocation: string;
 }
 
 export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
+  // State for date navigation
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedLocation, setSelectedLocation] = useState<"tothai" | "khin">("tothai");
   const [filterRole, setFilterRole] = useState<"all" | "chef" | "cleaner">("all");
   const [showOverdueTasks, setShowOverdueTasks] = useState(false);
   const isMobile = useIsMobile();
-  
-  // Set help context
   const { setCurrentSection } = useHelp();
-  
+
+  // Photo modal
+  const [photoModalTask, setPhotoModalTask] = useState<{ photoUrls: string[], title: string } | null>(null);
+
   useEffect(() => {
     setCurrentSection("cleaning");
   }, [setCurrentSection]);
@@ -49,6 +52,13 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
     setFilterRole("all"); // Show all roles when viewing overdue tasks
   };
 
+  // Handle clicking on any completed task with photos
+  const handleCompletedTaskClick = (task: any) => {
+    if (task.status === "closed" && task.photo_urls && task.photo_urls.length) {
+      setPhotoModalTask({ photoUrls: task.photo_urls, title: task.title });
+    }
+  };
+
   // Filter tasks by selected date and role, or show overdue tasks
   const filteredTasks = cleaningTasks.filter(task => {
     if (showOverdueTasks) {
@@ -62,7 +72,7 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
       const taskDate = task.scheduled_date.split('T')[0];
       const matchesDate = taskDate === selectedDate;
       const matchesRole = filterRole === "all" || task.assigned_role === filterRole;
-      const isOpen = task.status === 'open';
+      const isOpen = task.status === 'open' || task.status === 'closed';
       return matchesDate && matchesRole && isOpen;
     }
   });
@@ -95,15 +105,46 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
 
   return (
     <div className={cn("space-y-6 p-6", isMobile && "pt-16")}>
-      <TaskScheduleCard
-        selectedDate={selectedDate}
-        onDateChange={setSelectedDate}
-        selectedLocation={selectedLocation}
-        onLocationChange={setSelectedLocation}
-      />
+      {/* Always-visible date picker */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-2">
+        <div>
+          <label className="block text-sm font-medium text-muted-foreground mb-1">
+            Browse cleaning tasks for date:
+          </label>
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={e => setSelectedDate(e.target.value)}
+            className="px-3 py-2 border border-border rounded-lg text-sm"
+            max={format(new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000), "yyyy-MM-dd")}
+            min="2020-01-01"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-muted-foreground mb-1">
+            Location:
+          </label>
+          <select
+            value={selectedLocation}
+            onChange={e => setSelectedLocation(e.target.value as "tothai" | "khin")}
+            className="px-3 py-2 border border-border rounded-lg text-sm"
+          >
+            <option value="tothai">ToThai</option>
+            <option value="khin">KHIN</option>
+          </select>
+        </div>
+        <div>
+          <button
+            className="mt-6 sm:mt-4 ml-0 sm:ml-4 underline text-blue-600 text-sm"
+            onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])}
+          >
+            Today
+          </button>
+        </div>
+      </div>
 
-      <OverdueAlert 
-        overdueCount={overdueCount} 
+      <OverdueAlert
+        overdueCount={overdueCount}
         locationName={selectedLocation === 'tothai' ? 'ToThai' : 'KHIN'}
         onClick={handleOverdueAlertClick}
       />
@@ -113,6 +154,7 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
         onRoleChange={setFilterRole}
       />
 
+      {/* Pass a click handler for completed tasks */}
       <TasksList
         selectedDate={showOverdueTasks ? "overdue" : selectedDate}
         filteredTasks={filteredTasks}
@@ -121,7 +163,18 @@ export function CleaningTasks({ currentLocation }: CleaningTasksProps) {
         isTaskOverdue={isTaskOverdue}
         showOverdueTasks={showOverdueTasks}
         onBackToSchedule={() => setShowOverdueTasks(false)}
+        onCompletedTaskClick={handleCompletedTaskClick}
       />
+
+      {/* Task Photo Modal */}
+      {photoModalTask && (
+        <TaskPhotoModal
+          open={!!photoModalTask}
+          onClose={() => setPhotoModalTask(null)}
+          photoUrls={photoModalTask.photoUrls}
+          taskTitle={photoModalTask.title}
+        />
+      )}
     </div>
   );
 }

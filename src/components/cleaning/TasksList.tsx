@@ -1,98 +1,110 @@
-
-import { Calendar, ArrowLeft } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { CleaningTaskCard } from "@/components/CleaningTaskCard";
-import { format } from "date-fns";
-
-interface CleaningTask {
-  id: string;
-  title: string;
-  description: string | null;
-  location: "tothai" | "khin";
-  scheduled_date: string;
-  due_time: string | null;
-  status: "open" | "closed";
-  assigned_to: string | null;
-  assigned_staff_name: string | null;
-  completed_at: string | null;
-  completed_by: string | null;
-  completion_notes: string | null;
-  photo_urls: string[] | null;
-  estimated_duration: number | null;
-  actual_duration: number | null;
-  favv_compliance: boolean | null;
-  template_id: string | null;
-  assigned_role: "chef" | "cleaner" | null;
-  requires_photo: boolean | null;
-}
+import React from "react";
+import { Button } from "../ui/button";
+import { CleaningTaskCard } from "../CleaningTaskCard";
 
 interface TasksListProps {
   selectedDate: string;
-  filteredTasks: CleaningTask[];
+  filteredTasks: any[];
   onCompleteTask: (taskId: string, photoUrls?: string[]) => void;
   onReopenTask: (taskId: string) => void;
-  isTaskOverdue: (task: CleaningTask) => boolean;
-  showOverdueTasks?: boolean;
-  onBackToSchedule?: () => void;
+  isTaskOverdue: (task: any) => boolean;
+  showOverdueTasks: boolean;
+  onBackToSchedule: () => void;
+  onCompletedTaskClick?: (task: any) => void;
 }
 
-export function TasksList({ 
-  selectedDate, 
-  filteredTasks, 
-  onCompleteTask, 
-  onReopenTask, 
+export function TasksList({
+  selectedDate,
+  filteredTasks,
+  onCompleteTask,
+  onReopenTask,
   isTaskOverdue,
-  showOverdueTasks = false,
-  onBackToSchedule
+  showOverdueTasks,
+  onBackToSchedule,
+  onCompletedTaskClick,
 }: TasksListProps) {
-  const getHeaderTitle = () => {
-    if (showOverdueTasks) {
-      return "OVERDUE TASKS";
-    }
-    return `TASKS FOR ${format(new Date(selectedDate), 'yyyy-MM-dd').toUpperCase()}`;
-  };
-
   return (
-    <div>
-      <div className="flex items-center gap-4 mb-4">
-        {showOverdueTasks && onBackToSchedule && (
-          <Button
-            variant="outline"
+    <div className="space-y-6">
+      {showOverdueTasks && (
+        <div>
+          <button
+            className="text-blue-600 underline text-sm mb-2"
             onClick={onBackToSchedule}
-            className="flex items-center gap-2"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Schedule
-          </Button>
-        )}
-        <h2 className="text-xl font-bold flex items-center gap-2">
-          <Calendar className="w-5 h-5" />
-          {getHeaderTitle()}
-        </h2>
-      </div>
-
+            ← Back to schedule view
+          </button>
+        </div>
+      )}
       {filteredTasks.length === 0 ? (
-        <Card className="bg-gray-50">
-          <CardContent className="p-8 text-center">
-            <p className="text-gray-500">
-              {showOverdueTasks 
-                ? "No overdue tasks found."
-                : "No tasks found for the selected date and filters."
-              }
-            </p>
-          </CardContent>
-        </Card>
+        <div className="border rounded-lg p-8 text-center text-muted-foreground bg-muted/30">
+          No cleaning tasks found for selected criteria.
+        </div>
       ) : (
         <div className="space-y-4">
           {filteredTasks.map((task) => (
-            <CleaningTaskCard
+            <div
               key={task.id}
-              task={task}
-              onCompleteTask={onCompleteTask}
-              onReopenTask={onReopenTask}
-              isOverdue={isTaskOverdue(task)}
-            />
+              className={`
+                ${task.status === 'closed' ? 'bg-green-50 border-green-300' : 'bg-card border-border'}
+                border rounded-lg p-4 transition-shadow hover:shadow
+                cursor-pointer
+              `}
+              onClick={() => {
+                if (task.status === "closed" && task.photo_urls && task.photo_urls.length && onCompletedTaskClick) {
+                  onCompletedTaskClick(task);
+                }
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-base">{task.title}</h3>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    Scheduled for {task.scheduled_date}
+                  </p>
+                  <span className={`inline-block text-xs px-2 py-1 rounded 
+                    ${task.status === 'closed' ? 'bg-green-100 text-green-700'
+                       : isTaskOverdue(task) ? 'bg-red-100 text-red-700'
+                       : 'bg-muted text-muted-foreground'}
+                  `}>
+                    {task.status === 'closed'
+                      ? 'Completed'
+                      : isTaskOverdue(task)
+                        ? 'Overdue'
+                        : 'Open'}
+                  </span>
+                  {task.status === "closed" && task.photo_urls && task.photo_urls.length > 0 && (
+                    <span className="ml-2 inline-flex text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                      {task.photo_urls.length} Photo{task.photo_urls.length > 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  {task.status === 'open' ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onCompleteTask(task.id);
+                      }}
+                    >
+                      Complete Task
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onReopenTask(task.id);
+                      }}
+                    >
+                      Reopen Task
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       )}
