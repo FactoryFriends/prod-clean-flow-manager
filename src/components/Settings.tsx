@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { SettingsAuth } from "@/components/settings/SettingsAuth";
@@ -11,7 +12,7 @@ import { CustomersTab } from "@/components/settings/tabs/CustomersTab";
 import { SettingsDialogs } from "@/components/settings/SettingsDialogs";
 import { SystemInfo } from "@/components/settings/SystemInfo";
 import { SuppliersTab } from "@/components/settings/tabs/SuppliersTab";
-import IngredientPriceManager from "../reports/IngredientPriceManager";
+import IngredientPriceManager from "./reports/IngredientPriceManager";
 
 interface SettingsProps {
   currentLocation: "tothai" | "khin";
