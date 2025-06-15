@@ -1,10 +1,9 @@
-
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function SettingsTabsList() {
   return (
     <TabsList>
-      <TabsTrigger value="products">Products</TabsTrigger>
+      <TabsTrigger value="products">Semi-finished</TabsTrigger>
       <TabsTrigger value="drinks">Drinks</TabsTrigger>
       <TabsTrigger value="staff">Staff</TabsTrigger>
       <TabsTrigger value="tasks">Tasks</TabsTrigger>
