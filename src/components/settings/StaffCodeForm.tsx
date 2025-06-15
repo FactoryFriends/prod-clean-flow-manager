@@ -62,6 +62,8 @@ export function StaffCodeForm({ editingStaffCode, onSuccess, onCancel }: StaffCo
           <Input
             id="code"
             type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             value={formData.code}
             onChange={(e) => setFormData({ ...formData, code: e.target.value })}
             placeholder="Enter 4-digit staff code"

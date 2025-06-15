@@ -108,6 +108,8 @@ export function DispatchForm({
                 value={pickerCode}
                 onChange={(e) => setPickerCode(e.target.value)}
                 maxLength={4}
+                inputMode="numeric"
+                pattern="[0-9]*"
               />
             </div>
             

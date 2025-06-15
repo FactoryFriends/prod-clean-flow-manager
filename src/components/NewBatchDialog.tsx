@@ -106,6 +106,8 @@ export function NewBatchDialog({ currentLocation }: NewBatchDialogProps) {
             <Input
               id="packages"
               type="number"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={packagesProduced}
               onChange={(e) => setPackagesProduced(e.target.value)}
               placeholder="Enter number of packages"
@@ -123,6 +125,8 @@ export function NewBatchDialog({ currentLocation }: NewBatchDialogProps) {
             <Input
               id="expiry"
               type="number"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={expiryDays}
               onChange={(e) => setExpiryDays(e.target.value)}
               min="1"

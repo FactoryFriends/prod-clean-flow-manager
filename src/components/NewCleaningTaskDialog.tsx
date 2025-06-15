@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "./ui/button";
@@ -180,6 +179,8 @@ export function NewCleaningTaskDialog({ currentLocation }: NewCleaningTaskDialog
                   <FormControl>
                     <Input 
                       type="number" 
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       placeholder="30"
                       {...field}
                       onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
