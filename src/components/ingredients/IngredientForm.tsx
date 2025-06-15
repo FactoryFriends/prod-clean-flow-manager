@@ -19,6 +19,7 @@ import IngredientUnitSizeInput from "./IngredientUnitSizeInput";
 import IngredientUnitTypeSelect from "./IngredientUnitTypeSelect";
 import IngredientPriceInput from "./IngredientPriceInput";
 import IngredientPickableInput from "./IngredientPickableInput";
+import SupplierPackagingFields from "../shared/SupplierPackagingFields";
 const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE"];
 
 // Extend the form type locally to add new fields if not present in types.ts
@@ -123,13 +124,40 @@ export function IngredientForm() {
             watch={form.watch}
           />
           {productType === "extern" && (
-            <IngredientFicheUpload
-              control={form.control}
-              ficheFile={ficheFile}
-              uploadingFiche={uploadingFiche}
-              onUpload={handleFicheUpload}
-              fieldValue={form.getValues("product_fiche_url")}
-            />
+            <>
+              <IngredientFicheUpload
+                control={form.control}
+                ficheFile={ficheFile}
+                uploadingFiche={uploadingFiche}
+                onUpload={handleFicheUpload}
+                fieldValue={form.getValues("product_fiche_url")}
+              />
+              {/* New supplier packaging fields for extern only */}
+              <SupplierPackagingFields control={form.control} show={productType === "extern"} />
+              {/* Calculated per unit price for extern logic */}
+              <div>
+                <label className="block font-medium mb-1">Price per Unit (€)</label>
+                <Input
+                  value={
+                    (() => {
+                      const unitsPerPackage = Number(form.watch("units_per_package")) || 1;
+                      const pricePerPackage = Number(form.watch("price_per_package")) || 0;
+                      if (pricePerPackage && unitsPerPackage > 0) return (pricePerPackage / unitsPerPackage).toFixed(4);
+                      if (pricePerPackage) return pricePerPackage.toFixed(4);
+                      return "";
+                    })()
+                  }
+                  readOnly
+                  disabled
+                  className="bg-gray-100 cursor-not-allowed"
+                />
+                <div className="text-xs text-muted-foreground italic mt-1">
+                  {form.watch("price_per_package") && form.watch("units_per_package") > 0
+                    ? `Calculated: ${form.watch("price_per_package")} / ${form.watch("units_per_package")}`
+                    : `Equal to package price if not packed as units`}
+                </div>
+              </div>
+            </>
           )}
           <IngredientPriceInput control={form.control} />
           <IngredientPickableInput control={form.control} />

@@ -27,15 +27,14 @@ interface DrinkFormData {
   cost: number;
   markup_percent: number;
   sales_price: number;
+  supplier_package_unit?: string;
+  units_per_package?: number;
+  inner_unit_type?: string;
+  price_per_package?: number;
 }
 
 export function DrinkForm() {
-  const form = useForm<DrinkFormData & {
-    supplier_package_unit?: string;
-    units_per_package?: number;
-    inner_unit_type?: string;
-    price_per_package?: number;
-  }>({
+  const form = useForm<DrinkFormData>({
     defaultValues: {
       name: "",
       unit_size: 1,
@@ -79,12 +78,7 @@ export function DrinkForm() {
   const deltaSalesPrice = calculatedSalesPrice - fixedSalesPrice;
   const deltaColor = deltaSalesPrice >= 0 ? "text-green-700" : "text-red-600";
 
-  const onSubmit = (data: DrinkFormData & {
-    supplier_package_unit?: string;
-    units_per_package?: number;
-    inner_unit_type?: string;
-    price_per_package?: number;
-  }) => {
+  const onSubmit = (data: DrinkFormData) => {
     createProduct.mutate(
       {
         name: data.name,
@@ -208,18 +202,82 @@ export function DrinkForm() {
 
           <FormField
             control={form.control}
-            name="price_per_unit"
-            rules={{ required: "Price is required" }}
+            name="supplier_package_unit"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price per unit (€)</FormLabel>
+                <FormLabel>Purchase Unit (e.g. CASE, BOX)</FormLabel>
                 <FormControl>
-                  <Input type="number" min="0" step="0.01" {...field} />
+                  <Input placeholder="e.g. CASE, BOX" {...field} />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="units_per_package"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Units per Package{" "}
+                  <span className="text-xs text-muted-foreground">(if relevant)</span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 24"
+                    {...field}
+                  />
+                </FormControl>
+                <div className="text-xs text-muted-foreground">
+                  Leave blank if not packed as identical units.
+                </div>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="inner_unit_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Inner Unit Type (e.g. BOTTLE, LITER, CAN)</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. BOTTLE" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="price_per_package"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Price per Purchase Package (€)</FormLabel>
+                <FormControl>
+                  <Input type="number" min="0" step="0.01" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          {/* Calculated per unit price */}
+          <div>
+            <FormLabel>Price per Unit (€)</FormLabel>
+            <Input
+              value={
+                pricePerPackage && unitsPerPackage > 0
+                  ? (pricePerPackage / unitsPerPackage).toFixed(4)
+                  : (pricePerPackage ? pricePerPackage.toFixed(4) : "")
+              }
+              readOnly
+              disabled
+              className="bg-gray-100 cursor-not-allowed"
+            />
+            <div className="text-xs text-muted-foreground italic mt-1">
+              {pricePerPackage && unitsPerPackage > 0
+                ? `Calculated: ${pricePerPackage} / ${unitsPerPackage}`
+                : `Equal to package price if not packed as units`}
+            </div>
+          </div>
 
           <FormField
             control={form.control}
@@ -304,85 +362,6 @@ export function DrinkForm() {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="supplier_package_unit"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Purchase Unit (e.g. CASE, BOX)</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. CASE, BOX" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="units_per_package"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Units per Package{" "}
-                  <span className="text-xs text-muted-foreground">(if relevant)</span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min="1"
-                    placeholder="e.g. 24"
-                    {...field}
-                  />
-                </FormControl>
-                <div className="text-xs text-muted-foreground">
-                  Leave blank if not packed as identical units.
-                </div>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="inner_unit_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Inner Unit Type (e.g. BOTTLE, LITER, CAN)</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. BOTTLE" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="price_per_package"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Price per Purchase Package (€)</FormLabel>
-                <FormControl>
-                  <Input type="number" min="0" step="0.01" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          {/* Calculated per unit price */}
-          <div>
-            <FormLabel>Price per Unit (€)</FormLabel>
-            <Input
-              value={
-                pricePerPackage && unitsPerPackage > 0
-                  ? (pricePerPackage / unitsPerPackage).toFixed(4)
-                  : (pricePerPackage ? pricePerPackage.toFixed(4) : "")
-              }
-              readOnly
-              disabled
-              className="bg-gray-100 cursor-not-allowed"
-            />
-            <div className="text-xs text-muted-foreground italic mt-1">
-              {pricePerPackage && unitsPerPackage > 0
-                ? `Calculated: ${pricePerPackage} / ${unitsPerPackage}`
-                : `Equal to package price if not packed as units`}
-            </div>
-          </div>
-
           <Button type="submit" className="w-full">
             Save Drink
           </Button>
@@ -393,5 +372,3 @@ export function DrinkForm() {
 }
 
 export default DrinkForm;
-
-// File is now over 293 lines. This file is getting long – consider asking me to refactor it into smaller components for maintainability!
