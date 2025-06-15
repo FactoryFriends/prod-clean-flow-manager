@@ -1,7 +1,9 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { useUnitOptions } from "./UnitOptionsContext";
+import { Button } from "@/components/ui/button";
 
 export interface SupplierPackagingFieldsProps {
   control: any;
@@ -10,6 +12,10 @@ export interface SupplierPackagingFieldsProps {
 }
 
 export function SupplierPackagingFields({ control, fieldPrefix = "", show }: SupplierPackagingFieldsProps) {
+  const { purchaseUnits, innerUnits } = useUnitOptions();
+  const [addingPurchaseUnit, setAddingPurchaseUnit] = useState(false);
+  const [addingInnerUnit, setAddingInnerUnit] = useState(false);
+
   if (!show) return null;
   return (
     <>
@@ -18,9 +24,22 @@ export function SupplierPackagingFields({ control, fieldPrefix = "", show }: Sup
         name={fieldPrefix + "supplier_package_unit"}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Purchase Unit (e.g. CASE, BOX)</FormLabel>
+            <FormLabel>
+              Purchase Unit
+              {/* Optionally: <Button onClick={() => setAddingPurchaseUnit(true)} size="xs" variant="ghost" className="ml-2">＋</Button> */}
+            </FormLabel>
             <FormControl>
-              <Input placeholder="e.g. CASE, BOX" {...field} />
+              <select
+                {...field}
+                className="w-full border rounded-md px-3 py-2 text-sm bg-white"
+                value={field.value || ""}
+                onChange={(e) => field.onChange(e.target.value)}
+              >
+                <option value="">Select purchase unit…</option>
+                {purchaseUnits.map((item) => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
+              </select>
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -54,9 +73,22 @@ export function SupplierPackagingFields({ control, fieldPrefix = "", show }: Sup
         name={fieldPrefix + "inner_unit_type"}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Inner Unit Type (e.g. BOTTLE, LITER, CAN)</FormLabel>
+            <FormLabel>
+              Inner Unit Type
+              {/* Optionally: <Button onClick={() => setAddingInnerUnit(true)} size="xs" variant="ghost" className="ml-2">＋</Button> */}
+            </FormLabel>
             <FormControl>
-              <Input placeholder="e.g. BOTTLE" {...field} />
+              <select
+                {...field}
+                className="w-full border rounded-md px-3 py-2 text-sm bg-white"
+                value={field.value || ""}
+                onChange={(e) => field.onChange(e.target.value)}
+              >
+                <option value="">Select inner unit…</option>
+                {innerUnits.map((item) => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
+              </select>
             </FormControl>
             <FormMessage />
           </FormItem>
