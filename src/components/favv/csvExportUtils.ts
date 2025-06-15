@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -109,8 +110,8 @@ export const exportPackingSlipsCSV = (packingSlips: PackingSlip[]) => {
   ]);
 
   const csvContent = [
-    csvHeaders.join(","),
-    ...csvData.map(row => row.map(cell => `"${cell || ""}"`).join(","))
+    csvHeaders.join(";"),
+    ...csvData.map(row => row.map(cell => `"${cell || ""}"`).join(";"))
   ].join("\n");
 
   downloadCSV(csvContent, `FAVV_Packing_Slips_${format(new Date(), "yyyy-MM-dd")}.csv`);
@@ -147,8 +148,8 @@ export const exportStockTakesCSV = (stockTakes: StockTake[]) => {
   ]);
 
   const csvContent = [
-    csvHeaders.join(","),
-    ...csvData.map(row => row.map(cell => `"${cell || ""}"`).join(","))
+    csvHeaders.join(";"),
+    ...csvData.map(row => row.map(cell => `"${cell || ""}"`).join(";"))
   ].join("\n");
 
   downloadCSV(csvContent, `FAVV_Stock_Takes_${format(new Date(), "yyyy-MM-dd")}.csv`);
@@ -189,8 +190,8 @@ export const exportCompletedTasksCSV = (completedTasks: CompletedTask[]) => {
   ]);
 
   const csvContent = [
-    csvHeaders.join(","),
-    ...csvData.map(row => row.map(cell => `"${cell || ""}"`).join(","))
+    csvHeaders.join(";"),
+    ...csvData.map(row => row.map(cell => `"${cell || ""}"`).join(";"))
   ].join("\n");
 
   downloadCSV(csvContent, `FAVV_Completed_Tasks_${format(new Date(), "yyyy-MM-dd")}.csv`);
