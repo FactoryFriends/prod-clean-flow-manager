@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -20,16 +21,14 @@ import IngredientUnitTypeSelect from "./IngredientUnitTypeSelect";
 import IngredientPriceInput from "./IngredientPriceInput";
 import IngredientPickableInput from "./IngredientPickableInput";
 import SupplierPackagingFields from "../shared/SupplierPackagingFields";
-const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE"];
 
 // Extend the form type locally to add new fields if not present in types.ts
 type ExtendedIngredientFormData = IngredientFormData & {
-  supplier_id?: string;
-  product_fiche_url?: string;
+  // All new fields are already declared in IngredientFormData now.
 };
 
 export function IngredientForm() {
-  const form = useForm<ExtendedIngredientFormData>({
+  const form = useForm<IngredientFormData>({
     defaultValues: {
       name: "",
       unit_size: 1,
@@ -41,6 +40,10 @@ export function IngredientForm() {
       pickable: false,
       allergens: [],
       product_fiche_url: "",
+      supplier_package_unit: "",
+      units_per_package: undefined,
+      inner_unit_type: "",
+      price_per_package: undefined,
     },
   });
 
@@ -80,8 +83,8 @@ export function IngredientForm() {
   }
 
   // --- FIX: set supplier_name per constraint and set product_type to match product_kind
-  const onSubmit = (data: ExtendedIngredientFormData) => {
-    let updated: ExtendedIngredientFormData & { supplier_name: string } = { ...data, supplier_name: "" };
+  const onSubmit = (data: IngredientFormData) => {
+    let updated: IngredientFormData & { supplier_name: string } = { ...data, supplier_name: "" };
 
     if (data.product_kind === "extern") {
       const sup = suppliers.find(s => s.id === data.supplier_id);
@@ -108,6 +111,10 @@ export function IngredientForm() {
     );
   };
 
+  // Watch package fields, safely typed now
+  const unitsPerPackage = Number(form.watch("units_per_package")) || 1;
+  const pricePerPackage = Number(form.watch("price_per_package")) || 0;
+
   return (
     <div className="bg-white border p-6 rounded-xl shadow max-w-xl">
       <h2 className="text-xl font-semibold mb-2">Add Ingredient</h2>
@@ -132,28 +139,26 @@ export function IngredientForm() {
                 onUpload={handleFicheUpload}
                 fieldValue={form.getValues("product_fiche_url")}
               />
-              {/* New supplier packaging fields for extern only */}
+              {/* Supplier packaging fields for extern only */}
               <SupplierPackagingFields control={form.control} show={productType === "extern"} />
               {/* Calculated per unit price for extern logic */}
               <div>
                 <label className="block font-medium mb-1">Price per Unit (€)</label>
                 <Input
                   value={
-                    (() => {
-                      const unitsPerPackage = Number(form.watch("units_per_package")) || 1;
-                      const pricePerPackage = Number(form.watch("price_per_package")) || 0;
-                      if (pricePerPackage && unitsPerPackage > 0) return (pricePerPackage / unitsPerPackage).toFixed(4);
-                      if (pricePerPackage) return pricePerPackage.toFixed(4);
-                      return "";
-                    })()
+                    pricePerPackage && unitsPerPackage > 0
+                      ? (pricePerPackage / unitsPerPackage).toFixed(4)
+                      : pricePerPackage
+                      ? pricePerPackage.toFixed(4)
+                      : ""
                   }
                   readOnly
                   disabled
                   className="bg-gray-100 cursor-not-allowed"
                 />
                 <div className="text-xs text-muted-foreground italic mt-1">
-                  {form.watch("price_per_package") && form.watch("units_per_package") > 0
-                    ? `Calculated: ${form.watch("price_per_package")} / ${form.watch("units_per_package")}`
+                  {pricePerPackage && unitsPerPackage > 0
+                    ? `Calculated: ${pricePerPackage} / ${unitsPerPackage}`
                     : `Equal to package price if not packed as units`}
                 </div>
               </div>
