@@ -9,6 +9,7 @@ import { RoleFilter } from "./cleaning/RoleFilter";
 import { TasksList } from "./cleaning/TasksList";
 import { TaskPhotoModal } from "./task/TaskPhotoModal";
 import { format } from "date-fns";
+import { CleaningTasksFilters } from "./CleaningTasksFilters";
 
 interface CleaningTasksProps {
   currentLocation: string;
