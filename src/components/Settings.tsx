@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,9 +13,9 @@ import { TaskTemplateForm } from "./settings/TaskTemplateForm";
 import { TaskTemplateList } from "./settings/TaskTemplateList";
 import { CustomerManagement } from "./settings/CustomerManagement";
 import { CustomerForm } from "./settings/CustomerForm";
-import { AuditTrail } from "./settings/AuditTrail";
 import { SystemInfo } from "./settings/SystemInfo";
 import { SettingsAuth } from "./settings/SettingsAuth";
+import { FAVVReports } from "./FAVVReports";
 
 interface SettingsProps {
   currentLocation: "tothai" | "khin";
@@ -37,7 +36,6 @@ export function Settings({ currentLocation }: SettingsProps) {
   const [staffCodeFilter, setStaffCodeFilter] = useState("");
   const [templateFilter, setTemplateFilter] = useState("");
   const [customerFilter, setCustomerFilter] = useState("");
-  const [auditFilter, setAuditFilter] = useState("");
 
   if (!isAuthenticated) {
     return <SettingsAuth onAuthenticated={() => setIsAuthenticated(true)} />;
@@ -109,7 +107,7 @@ export function Settings({ currentLocation }: SettingsProps) {
           <TabsTrigger value="staff">Staff Codes</TabsTrigger>
           <TabsTrigger value="tasks">Task Templates</TabsTrigger>
           <TabsTrigger value="customers">Customers</TabsTrigger>
-          <TabsTrigger value="audit">Audit Trail</TabsTrigger>
+          <TabsTrigger value="favv">FAVV</TabsTrigger>
         </TabsList>
 
         <TabsContent value="products" className="space-y-4">
@@ -228,25 +226,8 @@ export function Settings({ currentLocation }: SettingsProps) {
           </Card>
         </TabsContent>
 
-        <TabsContent value="audit" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Audit Trail</CardTitle>
-              <CardDescription>View system activity and changes</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input
-                  placeholder="Filter audit logs..."
-                  value={auditFilter}
-                  onChange={(e) => setAuditFilter(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <AuditTrail />
-            </CardContent>
-          </Card>
+        <TabsContent value="favv" className="space-y-4">
+          <FAVVReports currentLocation={currentLocation} />
         </TabsContent>
       </Tabs>
 

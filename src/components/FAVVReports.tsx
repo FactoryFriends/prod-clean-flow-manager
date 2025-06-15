@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { CleaningTaskDetailsModal } from "./task/CleaningTaskDetailsModal";
 import { OperationsFilters } from "./favv/OperationsFilters";
 import { CleaningTasksFilters } from "./favv/CleaningTasksFilters";
@@ -11,6 +12,7 @@ import { exportPackingSlipsCSV, exportStockTakesCSV, exportCompletedTasksCSV } f
 import { useFAVVPackingSlips } from "../hooks/useFAVVPackingSlips";
 import { useFAVVStockTakes } from "../hooks/useFAVVStockTakes";
 import { useFAVVCompletedTasks } from "../hooks/useFAVVCompletedTasks";
+import { Package, FileText, Broom } from "lucide-react";
 
 interface FAVVReportsProps {
   currentLocation: "tothai" | "khin";
@@ -51,22 +53,32 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">FAVV Reports</h1>
-          <p className="text-muted-foreground">
-            Compliance reports and documentation for FAVV inspections
-          </p>
-        </div>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">FAVV Compliance Reports</CardTitle>
+          <CardDescription>
+            Complete overview of production, distribution, and cleaning compliance for FAVV inspections
+          </CardDescription>
+        </CardHeader>
+      </Card>
 
-      <Tabs defaultValue="operations" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="operations">Operations Reports</TabsTrigger>
-          <TabsTrigger value="cleaning">Cleaning Tasks</TabsTrigger>
+      <Tabs defaultValue="produced" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="produced" className="flex items-center gap-2">
+            <Package className="w-4 h-4" />
+            Produced Batches
+          </TabsTrigger>
+          <TabsTrigger value="dispatched" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            Packing Lists
+          </TabsTrigger>
+          <TabsTrigger value="cleaning" className="flex items-center gap-2">
+            <Broom className="w-4 h-4" />
+            Cleaning Tasks
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="operations" className="space-y-6">
+        <TabsContent value="produced" className="space-y-6">
           <OperationsFilters
             locationFilter={locationFilter}
             setLocationFilter={setLocationFilter}
@@ -74,15 +86,30 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
             setStartDate={setStartDate}
             endDate={endDate}
             setEndDate={setEndDate}
-            onExport={locationFilter === "tothai" ? () => exportStockTakesCSV(stockTakes) : () => exportPackingSlipsCSV(packingSlips)}
-            exportDisabled={locationFilter === "tothai" ? !stockTakes.length : !packingSlips.length}
+            onExport={() => exportStockTakesCSV(stockTakes)}
+            exportDisabled={!stockTakes.length}
+            title="Production Overview"
+            description="Filter and view all produced batches"
           />
 
-          {locationFilter === "tothai" ? (
-            <StockTakesTable stockTakes={stockTakes} isLoading={isLoadingStockTakes} />
-          ) : (
-            <PackingSlipsTable packingSlips={packingSlips} isLoading={isLoadingPackingSlips} />
-          )}
+          <StockTakesTable stockTakes={stockTakes} isLoading={isLoadingStockTakes} />
+        </TabsContent>
+
+        <TabsContent value="dispatched" className="space-y-6">
+          <OperationsFilters
+            locationFilter={locationFilter}
+            setLocationFilter={setLocationFilter}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            onExport={() => exportPackingSlipsCSV(packingSlips)}
+            exportDisabled={!packingSlips.length}
+            title="Dispatch Overview"
+            description="Filter and view all packing slips and dispatches"
+          />
+
+          <PackingSlipsTable packingSlips={packingSlips} isLoading={isLoadingPackingSlips} />
         </TabsContent>
 
         <TabsContent value="cleaning" className="space-y-6">
