@@ -16,6 +16,8 @@ interface InvoiceFiltersProps {
   onCustomEndDateChange: (date: string) => void;
   currentLocation: "tothai" | "khin";
   onGenerateProposal: () => void;
+  productTypeFilter: "self-produced" | "external" | "both";
+  onProductTypeFilterChange: (type: "self-produced" | "external" | "both") => void;
 }
 
 export function InvoiceFilters({
@@ -26,7 +28,9 @@ export function InvoiceFilters({
   customEndDate,
   onCustomEndDateChange,
   currentLocation,
-  onGenerateProposal
+  onGenerateProposal,
+  productTypeFilter,
+  onProductTypeFilterChange
 }: InvoiceFiltersProps) {
 
   const handlePeriodChange = (period: "all" | "current" | "custom" | "2weeks" | "1month") => {
@@ -78,6 +82,20 @@ export function InvoiceFilters({
             </Select>
           </div>
 
+          <div className="flex-1">
+            <Label htmlFor="product-type-select">Product Type</Label>
+            <Select value={productTypeFilter} onValueChange={onProductTypeFilterChange}>
+              <SelectTrigger id="product-type-select">
+                <SelectValue placeholder="Selecteer product type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="self-produced">Alleen zelf geproduceerd</SelectItem>
+                <SelectItem value="external">Alleen externe producten</SelectItem>
+                <SelectItem value="both">Beide</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {(filterPeriod === "custom" || filterPeriod === "2weeks" || filterPeriod === "1month") && (
             <>
               <div className="flex-1">
@@ -112,9 +130,11 @@ export function InvoiceFilters({
         </div>
         
         <div className="text-sm text-muted-foreground">
-          <p>• Alleen zelf geproduceerde producten worden meegenomen</p>
-          <p>• Externe producten worden voorlopig niet doorgefactureerd</p>
+          <p>• Producten worden gefilterd op basis van geselecteerd type</p>
           <p>• Gebaseerd op packing slip datums en geleverde hoeveelheden</p>
+          <p>• {productTypeFilter === "self-produced" && "Alleen zelf geproduceerde producten worden meegenomen"}</p>
+          <p>• {productTypeFilter === "external" && "Alleen externe producten worden meegenomen"}</p>
+          <p>• {productTypeFilter === "both" && "Zowel zelf geproduceerde als externe producten worden meegenomen"}</p>
         </div>
       </CardContent>
     </Card>

@@ -11,6 +11,7 @@ interface InvoicingProps {
 
 export function Invoicing({ currentLocation }: InvoicingProps) {
   const [filterPeriod, setFilterPeriod] = useState<"all" | "current" | "custom" | "2weeks" | "1month">("2weeks");
+  const [productTypeFilter, setProductTypeFilter] = useState<"self-produced" | "external" | "both">("self-produced");
   const [showProposal, setShowProposal] = useState(false);
   
   // Initialize with previous 2 weeks
@@ -56,6 +57,8 @@ export function Invoicing({ currentLocation }: InvoicingProps) {
         onCustomEndDateChange={setCustomEndDate}
         currentLocation={currentLocation}
         onGenerateProposal={handleGenerateProposal}
+        productTypeFilter={productTypeFilter}
+        onProductTypeFilterChange={setProductTypeFilter}
       />
 
       {showProposal && customStartDate && customEndDate && (
@@ -63,6 +66,7 @@ export function Invoicing({ currentLocation }: InvoicingProps) {
           currentLocation={currentLocation}
           startDate={customStartDate}
           endDate={customEndDate}
+          productTypeFilter={productTypeFilter}
         />
       )}
     </div>

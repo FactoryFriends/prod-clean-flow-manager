@@ -9,10 +9,11 @@ interface InvoiceProposalProps {
   currentLocation: "tothai" | "khin";
   startDate: string;
   endDate: string;
+  productTypeFilter: "self-produced" | "external" | "both";
 }
 
-export function InvoiceProposal({ currentLocation, startDate, endDate }: InvoiceProposalProps) {
-  const { data: proposal, isLoading, error } = useInvoiceProposal(currentLocation, startDate, endDate);
+export function InvoiceProposal({ currentLocation, startDate, endDate, productTypeFilter }: InvoiceProposalProps) {
+  const { data: proposal, isLoading, error } = useInvoiceProposal(currentLocation, startDate, endDate, productTypeFilter);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("nl-NL", {
@@ -23,6 +24,19 @@ export function InvoiceProposal({ currentLocation, startDate, endDate }: Invoice
 
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), "dd-MM-yyyy");
+  };
+
+  const getProductTypeLabel = () => {
+    switch (productTypeFilter) {
+      case "self-produced":
+        return "zelf geproduceerde producten";
+      case "external":
+        return "externe producten";
+      case "both":
+        return "alle producten";
+      default:
+        return "producten";
+    }
   };
 
   if (isLoading) {
@@ -64,7 +78,7 @@ export function InvoiceProposal({ currentLocation, startDate, endDate }: Invoice
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
             <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>Geen geproduceerde producten gevonden voor de geselecteerde periode.</p>
+            <p>Geen {getProductTypeLabel()} gevonden voor de geselecteerde periode.</p>
             <p className="text-sm mt-2">
               Periode: {formatDate(startDate)} - {formatDate(endDate)}
             </p>
@@ -84,7 +98,9 @@ export function InvoiceProposal({ currentLocation, startDate, endDate }: Invoice
         <div className="text-sm text-muted-foreground">
           <p>Periode: {formatDate(proposal.periodStart)} - {formatDate(proposal.periodEnd)}</p>
           <p>Gebaseerd op {proposal.packingSlipCount} packing slips</p>
-          <p className="text-orange-600 font-medium">Alleen zelf geproduceerde producten</p>
+          <p className="text-orange-600 font-medium capitalize">
+            Alleen {getProductTypeLabel()}
+          </p>
         </div>
       </CardHeader>
       <CardContent>
@@ -135,6 +151,7 @@ export function InvoiceProposal({ currentLocation, startDate, endDate }: Invoice
             <TableHeader>
               <TableRow>
                 <TableHead>Product</TableHead>
+                <TableHead>Type</TableHead>
                 <TableHead>Eenheid</TableHead>
                 <TableHead className="text-right">Hoeveelheid</TableHead>
                 <TableHead className="text-right">Prijs per Eenheid</TableHead>
@@ -146,15 +163,24 @@ export function InvoiceProposal({ currentLocation, startDate, endDate }: Invoice
               {proposal.items.map((item) => (
                 <TableRow key={item.productId}>
                   <TableCell className="font-medium">{item.productName}</TableCell>
+                  <TableCell>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      item.isExternal 
+                        ? 'bg-purple-100 text-purple-800' 
+                        : 'bg-green-100 text-green-800'
+                    }`}>
+                      {item.isExternal ? 'Extern' : 'Eigen'}
+                    </span>
+                  </TableCell>
                   <TableCell>{item.unitSize} {item.unitType}</TableCell>
                   <TableCell className="text-right font-medium">
                     {item.totalQuantity}
                   </TableCell>
                   <TableCell className="text-right">
-                    {formatCurrency(item.pricePerUnit)}
+                    {item.pricePerUnit ? formatCurrency(item.pricePerUnit) : 'Geen prijs'}
                   </TableCell>
                   <TableCell className="text-right font-medium">
-                    {formatCurrency(item.totalAmount)}
+                    {item.pricePerUnit ? formatCurrency(item.totalAmount) : '-'}
                   </TableCell>
                   <TableCell className="text-center">
                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -164,7 +190,7 @@ export function InvoiceProposal({ currentLocation, startDate, endDate }: Invoice
                 </TableRow>
               ))}
               <TableRow className="border-t-2 border-primary/20">
-                <TableCell colSpan={4} className="font-semibold text-right">
+                <TableCell colSpan={5} className="font-semibold text-right">
                   Totaal te Factureren:
                 </TableCell>
                 <TableCell className="text-right font-bold text-lg text-green-600">
