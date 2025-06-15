@@ -168,6 +168,16 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
   return (
     <div className="bg-white border p-6 rounded-xl shadow max-w-xl">
       <h2 className="text-xl font-semibold mb-2">{editingProduct ? "Edit Dish" : "Add Dish"}</h2>
+      
+      {/* DEBUGGER TO SHOW ALL PRODUCTS */}
+      <div className="mb-4 p-2 rounded bg-gray-50 border text-xs text-gray-800 font-mono">
+        <div className="font-bold mb-1">DEBUG: allProducts:</div>
+        <pre style={{ maxHeight: 150, overflowY: "auto" }}>{JSON.stringify(allProducts, null, 2)}</pre>
+        <div className="font-bold mt-1">DEBUG: ingredientOptions:</div>
+        <pre style={{ maxHeight: 80, overflowY: "auto" }}>{JSON.stringify(ingredientOptions, null, 2)}</pre>
+      </div>
+      {/* END DEBUGGER */}
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* Basic info fields */}
