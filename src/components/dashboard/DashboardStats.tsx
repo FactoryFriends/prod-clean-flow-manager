@@ -1,4 +1,3 @@
-
 import { Package, CheckCircle, Clock, TrendingUp } from "lucide-react";
 import { useProductionBatches } from "@/hooks/useProductionData";
 import { useCleaningTasks } from "@/hooks/useCleaningTasks";
@@ -12,23 +11,16 @@ interface DashboardStatsProps {
 export function DashboardStats({ todaysCompletedTasksCount, tasksWithPhotosCount }: DashboardStatsProps) {
   // Get data for both locations
   const { data: tothaiProduction } = useProductionBatches("tothai");
-  const { data: khinProduction } = useProductionBatches("khin");
   const { cleaningTasks: tothaiTasks } = useCleaningTasks("tothai");
   const { cleaningTasks: khinTasks } = useCleaningTasks("khin");
 
-  // Calculate batches produced this week
+  // Calculate batches produced this week (only ToThai produces)
   const thisWeekStart = startOfWeek(new Date());
   const thisWeekEnd = endOfWeek(new Date());
   
   const tothaiWeeklyBatches = tothaiProduction?.filter(batch => 
     isWithinInterval(new Date(batch.created_at), { start: thisWeekStart, end: thisWeekEnd })
   ).length || 0;
-  
-  const khinWeeklyBatches = khinProduction?.filter(batch => 
-    isWithinInterval(new Date(batch.created_at), { start: thisWeekStart, end: thisWeekEnd })
-  ).length || 0;
-
-  const totalWeeklyBatches = tothaiWeeklyBatches + khinWeeklyBatches;
 
   // Calculate completed cleaning tasks
   const tothaiCompletedTasks = tothaiTasks?.filter(task => task.status === 'closed').length || 0;
@@ -57,8 +49,8 @@ export function DashboardStats({ todaysCompletedTasksCount, tasksWithPhotosCount
   const stats = [
     {
       title: "Produced Batches This Week",
-      value: totalWeeklyBatches.toString(),
-      change: `ToThai: ${tothaiWeeklyBatches} | Khin: ${khinWeeklyBatches}`,
+      value: tothaiWeeklyBatches.toString(),
+      change: "ToThai production facility",
       icon: Package,
       color: "text-blue-600",
     },
