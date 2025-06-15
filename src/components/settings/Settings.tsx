@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import { Tabs } from "@/components/ui/tabs";
 import { SettingsAuth } from "@/components/settings/SettingsAuth";
 import { SettingsHeader } from "@/components/settings/SettingsHeader";
 import { SettingsTabsList } from "@/components/settings/SettingsTabsList";
 import { ProductsTab } from "@/components/settings/tabs/ProductsTab";
+import { DrinksTab } from "@/components/settings/tabs/DrinksTab";
 import { StaffTab } from "@/components/settings/tabs/StaffTab";
 import { TasksTab } from "@/components/settings/tabs/TasksTab";
 import { CustomersTab } from "@/components/settings/tabs/CustomersTab";
@@ -27,6 +29,7 @@ export function Settings({ currentLocation }: SettingsProps) {
   
   // Filter states
   const [productFilter, setProductFilter] = useState("");
+  const [drinkFilter, setDrinkFilter] = useState("");
   const [staffCodeFilter, setStaffCodeFilter] = useState("");
   const [templateFilter, setTemplateFilter] = useState("");
   const [customerFilter, setCustomerFilter] = useState("");
@@ -70,6 +73,11 @@ export function Settings({ currentLocation }: SettingsProps) {
     setProductDialogOpen(true);
   };
 
+  const handleAddNewDrink = () => {
+    setEditingProduct(null);
+    setProductDialogOpen(true);
+  };
+
   const handleAddNewStaffCode = () => {
     setEditingStaffCode(null);
     setStaffCodeDialogOpen(true);
@@ -94,6 +102,13 @@ export function Settings({ currentLocation }: SettingsProps) {
           productFilter={productFilter}
           setProductFilter={setProductFilter}
           onAddNewProduct={handleAddNewProduct}
+          onEditProduct={handleEditProduct}
+        />
+
+        <DrinksTab
+          drinkFilter={drinkFilter}
+          setDrinkFilter={setDrinkFilter}
+          onAddNewDrink={handleAddNewDrink}
           onEditProduct={handleEditProduct}
         />
 
