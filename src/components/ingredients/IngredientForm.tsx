@@ -72,7 +72,7 @@ export function IngredientForm() {
     return exists ? "Name already exists – please choose a unique name." : true;
   }
 
-  // --- FIX: set supplier_name per constraint before creating product
+  // --- FIX: set supplier_name per constraint and set product_type to match product_kind
   const onSubmit = (data: ExtendedIngredientFormData) => {
     let updated: ExtendedIngredientFormData & { supplier_name: string } = { ...data, supplier_name: "" };
 
@@ -91,7 +91,7 @@ export function IngredientForm() {
       {
         ...updated,
         allergens: data.allergens ?? [],
-        product_type: "ingredient", // ensure correct product_type
+        product_type: data.product_kind, // <-- FIXED: set product_type in the DB to correct value
       },
       {
         onSuccess: () => {
