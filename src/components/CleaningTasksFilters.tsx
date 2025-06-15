@@ -23,6 +23,16 @@ export function CleaningTasksFilters({
 }: CleaningTasksFiltersProps) {
   return (
     <div className="flex flex-col sm:flex-row items-center gap-4 mb-2 w-full">
+      {/* Today Button on the left */}
+      <div className="flex flex-row sm:flex-col w-full sm:w-auto sm:min-w-[80px]">
+        <Button
+          className="w-full sm:w-auto mb-0 sm:mb-2 font-semibold"
+          variant="default"
+          onClick={onToday}
+        >
+          Today
+        </Button>
+      </div>
       {/* Start Date */}
       <div className="flex flex-col w-full min-w-[180px] max-w-[220px]">
         <label className="block text-xs font-medium text-muted-foreground mb-1 whitespace-nowrap">
@@ -84,15 +94,6 @@ export function CleaningTasksFilters({
             />
           </PopoverContent>
         </Popover>
-      </div>
-      <div className="flex-1 flex items-end justify-center sm:justify-end">
-        <Button
-          className="ml-0 sm:ml-4 mt-2 sm:mt-0 w-full sm:w-auto"
-          variant="default"
-          onClick={onToday}
-        >
-          Today
-        </Button>
       </div>
     </div>
   );
