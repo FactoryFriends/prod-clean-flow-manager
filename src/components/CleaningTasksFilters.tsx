@@ -22,19 +22,17 @@ export function CleaningTasksFilters({
   onToday,
 }: CleaningTasksFiltersProps) {
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-4 mb-2 w-full">
-      {/* Today Button on the left */}
-      <div className="flex flex-row sm:flex-col w-full sm:w-auto sm:min-w-[80px]">
-        <Button
-          className="w-full sm:w-auto mb-0 sm:mb-2 font-semibold"
-          variant="default"
-          onClick={onToday}
-        >
-          Today
-        </Button>
-      </div>
-      {/* Start Date */}
-      <div className="flex flex-col w-full min-w-[180px] max-w-[220px]">
+    <div className="flex flex-col sm:flex-row items-center gap-2 mb-2 w-full">
+      {/* Today Button inline left */}
+      <Button
+        variant="default"
+        className="font-semibold whitespace-nowrap h-10 px-5"
+        onClick={onToday}
+      >
+        Today
+      </Button>
+      {/* Start Date Filter */}
+      <div className="flex flex-col w-full min-w-[140px] max-w-[220px]">
         <label className="block text-xs font-medium text-muted-foreground mb-1 whitespace-nowrap">
           Start date:
         </label>
@@ -43,7 +41,7 @@ export function CleaningTasksFilters({
             <Button
               variant="outline"
               className={cn(
-                "w-full min-w-[160px] max-w-[220px] justify-start text-left font-normal truncate",
+                "w-full min-w-[120px] max-w-[220px] justify-start text-left font-normal truncate",
                 !startDate && "text-muted-foreground"
               )}
             >
@@ -64,8 +62,8 @@ export function CleaningTasksFilters({
           </PopoverContent>
         </Popover>
       </div>
-      {/* End Date */}
-      <div className="flex flex-col w-full min-w-[180px] max-w-[220px]">
+      {/* End Date Filter */}
+      <div className="flex flex-col w-full min-w-[140px] max-w-[220px]">
         <label className="block text-xs font-medium text-muted-foreground mb-1 whitespace-nowrap">
           End date:
         </label>
@@ -74,7 +72,7 @@ export function CleaningTasksFilters({
             <Button
               variant="outline"
               className={cn(
-                "w-full min-w-[160px] max-w-[220px] justify-start text-left font-normal truncate",
+                "w-full min-w-[120px] max-w-[220px] justify-start text-left font-normal truncate",
                 !endDate && "text-muted-foreground"
               )}
             >
