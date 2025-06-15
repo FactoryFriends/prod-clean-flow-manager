@@ -70,7 +70,7 @@ export const useAllProducts = () => {
 
 export const useCreateProduct = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (productData: {
       name: string;
@@ -80,14 +80,16 @@ export const useCreateProduct = () => {
       shelf_life_days: number | null;
       price_per_unit: number | null;
       product_type: string;
+      product_kind: string;
       supplier_name: string;
+      pickable: boolean;
     }) => {
       const { data, error } = await supabase
         .from("products")
         .insert(productData)
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     },

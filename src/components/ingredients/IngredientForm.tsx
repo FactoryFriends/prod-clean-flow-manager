@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { useCreateProduct } from "@/hooks/useProductionData";
+import { useCreateProduct, useAllProducts } from "@/hooks/useProductionData";
 import { toast } from "sonner";
 
 type IngredientFormData = {
@@ -21,17 +20,31 @@ type IngredientFormData = {
 };
 
 const ALLERGENS = [
-  "Gluten", "Schaaldieren", "Eieren", "Vis", "Pinda’s",
-  "Soja", "Melk", "Noten", "Selderij", "Mosterd",
-  "Sesamzaad", "Sulfiet", "Lupine", "Weekdieren"
+  "Glutenbevattende granen (tarwe, rogge, gerst, haver en spelt)",
+  "Schaaldieren",
+  "Eieren",
+  "Vis",
+  "Pinda's (aardnoten)",
+  "Soja",
+  "Melk en zuivelproducten (incl. lactose)",
+  "Schaalvruchten (amandel, hazelnoot, walnoot, cashewnoot, pecannoot, paranoot, pistachnoot, macadamianoot)",
+  "Selder",
+  "Mosterd",
+  "Sesamzaad",
+  "Sulfieten (>10mg/kg of >10ml/liter)",
+  "Lupine",
+  "Weekdieren (zoals mosselen en oesters)",
 ];
+
+const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE"];
+const SUPPLIER_OPTIONS = ["Metro", "Bidfood", "Makro", "Asia Center", "Vandemoortele", "Anders"];
 
 export function IngredientForm() {
   const form = useForm<IngredientFormData>({
     defaultValues: {
       name: "",
       unit_size: 1,
-      unit_type: "kg",
+      unit_type: "KG",
       supplier_name: "",
       price_per_unit: 0,
       product_kind: "zelfgemaakt",
@@ -41,22 +54,30 @@ export function IngredientForm() {
   });
 
   const createProduct = useCreateProduct();
+  const { data: allProducts } = useAllProducts();
+
+  // Validatie voor unieke naam (case-insensitive)
+  function validateUniqueName(value: string) {
+    if (!allProducts) return true; // Lijst nog niet geladen
+    const exists = allProducts.some(
+      (p) => p.name.trim().toLowerCase() === value.trim().toLowerCase()
+    );
+    return exists ? "Naam bestaat al – kies een unieke naam." : true;
+  }
 
   const onSubmit = (data: IngredientFormData) => {
     createProduct.mutate(
       {
         name: data.name,
-        unit_size: data.unit_size,
+        unit_size: Number(data.unit_size),
         unit_type: data.unit_type,
         supplier_name: data.supplier_name || null,
         price_per_unit: Number(data.price_per_unit) || null,
         packages_per_batch: 1,
         shelf_life_days: null,
         product_type: data.product_kind,
-        supplier_name: data.supplier_name,
-        pickable: data.pickable,
         product_kind: data.product_kind,
-        // Allergenen en afbeelding voorlopig niet naar database (kan later)
+        pickable: Boolean(data.pickable),
       },
       {
         onSuccess: () => {
@@ -71,9 +92,11 @@ export function IngredientForm() {
       <h2 className="text-xl font-semibold mb-2">Ingrediënt toevoegen</h2>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {/* NAAM (uniek) */}
           <FormField
             control={form.control}
             name="name"
+            rules={{ required: "Naam is verplicht", validate: validateUniqueName }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Naam</FormLabel>
@@ -85,7 +108,7 @@ export function IngredientForm() {
             )}
           />
 
-          {/* Productsoort: dropdown */}
+          {/* PRODUCTSOORT */}
           <FormField
             control={form.control}
             name="product_kind"
@@ -105,6 +128,7 @@ export function IngredientForm() {
             )}
           />
 
+          {/* VERPAKKINGSEENHEID */}
           <FormField
             control={form.control}
             name="unit_size"
@@ -119,6 +143,7 @@ export function IngredientForm() {
             )}
           />
 
+          {/* EENHEID (dropdown) */}
           <FormField
             control={form.control}
             name="unit_type"
@@ -126,13 +151,23 @@ export function IngredientForm() {
               <FormItem>
                 <FormLabel>Eenheid</FormLabel>
                 <FormControl>
-                  <Input placeholder="bv. kg, stuks, liter" {...field} />
+                  <select
+                    {...field}
+                    className="w-full border rounded-md px-3 py-2 text-sm"
+                  >
+                    {UNIT_OPTIONS.map((u) => (
+                      <option value={u} key={u}>
+                        {u}
+                      </option>
+                    ))}
+                  </select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
+          {/* LEVERANCIER (dropdown) */}
           <FormField
             control={form.control}
             name="supplier_name"
@@ -140,13 +175,24 @@ export function IngredientForm() {
               <FormItem>
                 <FormLabel>Leverancier</FormLabel>
                 <FormControl>
-                  <Input placeholder="bv. Metro, Bidfood..." {...field} />
+                  <select
+                    {...field}
+                    className="w-full border rounded-md px-3 py-2 text-sm"
+                  >
+                    <option value="">--</option>
+                    {SUPPLIER_OPTIONS.map((sup) => (
+                      <option value={sup} key={sup}>
+                        {sup}
+                      </option>
+                    ))}
+                  </select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
+          {/* PRIJS */}
           <FormField
             control={form.control}
             name="price_per_unit"
@@ -166,7 +212,7 @@ export function IngredientForm() {
             )}
           />
 
-          {/* Pickbaar checkbox */}
+          {/* PICKBAAR */}
           <FormField
             control={form.control}
             name="pickable"
@@ -183,7 +229,7 @@ export function IngredientForm() {
             )}
           />
 
-          {/* Allergenenlijst */}
+          {/* ALLERGENEN */}
           <FormField
             control={form.control}
             name="allergens"
@@ -214,9 +260,6 @@ export function IngredientForm() {
               </FormItem>
             )}
           />
-
-          {/* Later: Afbeelding upload */}
-          {/* <div>Afbeelding (optioneel): kan later toegevoegd worden</div> */}
 
           <Button type="submit" className="w-full">
             Ingrediënt opslaan
