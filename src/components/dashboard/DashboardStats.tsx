@@ -1,5 +1,8 @@
 
-import { Package, Truck, CheckCircle, TrendingUp } from "lucide-react";
+import { Package, CheckCircle, Clock, TrendingUp } from "lucide-react";
+import { useProductionBatches } from "@/hooks/useProductionData";
+import { useCleaningTasks } from "@/hooks/useCleaningTasks";
+import { startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
 
 interface DashboardStatsProps {
   todaysCompletedTasksCount: number;
@@ -7,32 +10,76 @@ interface DashboardStatsProps {
 }
 
 export function DashboardStats({ todaysCompletedTasksCount, tasksWithPhotosCount }: DashboardStatsProps) {
+  // Get data for both locations
+  const { data: tothaiProduction } = useProductionBatches("tothai");
+  const { data: khinProduction } = useProductionBatches("khin");
+  const { cleaningTasks: tothaiTasks } = useCleaningTasks("tothai");
+  const { cleaningTasks: khinTasks } = useCleaningTasks("khin");
+
+  // Calculate batches produced this week
+  const thisWeekStart = startOfWeek(new Date());
+  const thisWeekEnd = endOfWeek(new Date());
+  
+  const tothaiWeeklyBatches = tothaiProduction?.filter(batch => 
+    isWithinInterval(new Date(batch.created_at), { start: thisWeekStart, end: thisWeekEnd })
+  ).length || 0;
+  
+  const khinWeeklyBatches = khinProduction?.filter(batch => 
+    isWithinInterval(new Date(batch.created_at), { start: thisWeekStart, end: thisWeekEnd })
+  ).length || 0;
+
+  const totalWeeklyBatches = tothaiWeeklyBatches + khinWeeklyBatches;
+
+  // Calculate completed cleaning tasks
+  const tothaiCompletedTasks = tothaiTasks?.filter(task => task.status === 'closed').length || 0;
+  const khinCompletedTasks = khinTasks?.filter(task => task.status === 'closed').length || 0;
+  const totalCompletedTasks = tothaiCompletedTasks + khinCompletedTasks;
+
+  // Calculate on-time completion rates
+  const calculateOnTimeRate = (tasks: any[]) => {
+    const completedTasks = tasks?.filter(task => task.status === 'closed') || [];
+    if (completedTasks.length === 0) return 0;
+    
+    const onTimeTasks = completedTasks.filter(task => {
+      if (!task.completed_at || !task.scheduled_date) return false;
+      const completedDate = new Date(task.completed_at);
+      const scheduledDate = new Date(task.scheduled_date);
+      // Consider on-time if completed on the same day or before
+      return completedDate.toDateString() <= scheduledDate.toDateString();
+    });
+    
+    return Math.round((onTimeTasks.length / completedTasks.length) * 100);
+  };
+
+  const tothaiOnTimeRate = calculateOnTimeRate(tothaiTasks);
+  const khinOnTimeRate = calculateOnTimeRate(khinTasks);
+
   const stats = [
     {
-      title: "Active Production",
-      value: "12",
-      change: "+2 from yesterday",
+      title: "Produced Batches This Week",
+      value: totalWeeklyBatches.toString(),
+      change: `ToThai: ${tothaiWeeklyBatches} | Khin: ${khinWeeklyBatches}`,
       icon: Package,
       color: "text-blue-600",
     },
     {
-      title: "Pending Shipments",
-      value: "8",
-      change: "-1 from yesterday", 
-      icon: Truck,
-      color: "text-purple-600",
-    },
-    {
-      title: "Tasks Completed Today",
-      value: todaysCompletedTasksCount.toString(),
-      change: `${tasksWithPhotosCount} with photos`,
+      title: "Cleaning Tasks Completed",
+      value: totalCompletedTasks.toString(),
+      change: `ToThai: ${tothaiCompletedTasks} | Khin: ${khinCompletedTasks}`,
       icon: CheckCircle,
       color: "text-green-600",
     },
     {
-      title: "Efficiency Rate",
-      value: "94%",
-      change: "+2% this week",
+      title: "On-Time Completion Rate - ToThai",
+      value: `${tothaiOnTimeRate}%`,
+      change: "Cleaning tasks completed on schedule",
+      icon: Clock,
+      color: "text-purple-600",
+    },
+    {
+      title: "On-Time Completion Rate - Khin",
+      value: `${khinOnTimeRate}%`,
+      change: "Cleaning tasks completed on schedule",
       icon: TrendingUp,
       color: "text-orange-600",
     },
