@@ -4,14 +4,17 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 export type UnitOptionsContextType = {
   purchaseUnits: string[];
   innerUnits: string[];
+  laborCostPerMinute: number;
   addPurchaseUnit: (value: string) => void;
   addInnerUnit: (value: string) => void;
   removePurchaseUnit: (value: string) => void;
   removeInnerUnit: (value: string) => void;
+  updateLaborCostPerMinute: (cost: number) => void;
 };
 
 const defaultPurchaseUnits = ["CASE", "BOX", "BAG"];
 const defaultInnerUnits = ["BOTTLE", "LITER", "CAN", "PIECE"];
+const defaultLaborCostPerMinute = 0.5; // Euro per minute
 
 const UnitOptionsContext = createContext<UnitOptionsContextType | undefined>(undefined);
 
@@ -22,6 +25,7 @@ function toUpperTrim(value: string) {
 export function UnitOptionsProvider({ children }: { children: ReactNode }) {
   const [purchaseUnits, setPurchaseUnits] = useState<string[]>(defaultPurchaseUnits);
   const [innerUnits, setInnerUnits] = useState<string[]>(defaultInnerUnits);
+  const [laborCostPerMinute, setLaborCostPerMinute] = useState<number>(defaultLaborCostPerMinute);
 
   const addPurchaseUnit = (value: string) => {
     const normalized = toUpperTrim(value);
@@ -43,10 +47,20 @@ export function UnitOptionsProvider({ children }: { children: ReactNode }) {
   const removeInnerUnit = (value: string) => setInnerUnits((units) =>
     units.filter((v) => toUpperTrim(v) !== toUpperTrim(value))
   );
+  const updateLaborCostPerMinute = (cost: number) => setLaborCostPerMinute(cost);
 
   return (
     <UnitOptionsContext.Provider
-      value={{ purchaseUnits, innerUnits, addPurchaseUnit, addInnerUnit, removePurchaseUnit, removeInnerUnit }}
+      value={{ 
+        purchaseUnits, 
+        innerUnits, 
+        laborCostPerMinute,
+        addPurchaseUnit, 
+        addInnerUnit, 
+        removePurchaseUnit, 
+        removeInnerUnit,
+        updateLaborCostPerMinute
+      }}
     >
       {children}
     </UnitOptionsContext.Provider>

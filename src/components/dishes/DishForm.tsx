@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { RecipeIngredientsInput } from "../semi-finished/RecipeIngredientsInput";
 import { estimatedDishPrice } from "./useEstimatedDishCost";
 import DishPriceSummary from "./DishPriceSummary";
+import { useUnitOptions } from "../shared/UnitOptionsContext";
 
 export interface DishFormProps {
   editingProduct?: Product | null;
@@ -16,6 +17,8 @@ export interface DishFormProps {
 }
 
 export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
+  const { laborCostPerMinute } = useUnitOptions();
+  
   const form = useForm({
     defaultValues: {
       name: editingProduct?.name || "",
@@ -84,7 +87,7 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
       unit_size: Number(data.unit_size),
       unit_type: data.unit_type,
       packages_per_batch: 1,
-      price_per_unit: estimatedDishPrice(recipe, allProducts, data.labour_time_minutes),
+      price_per_unit: estimatedDishPrice(recipe, allProducts, data.labour_time_minutes, laborCostPerMinute),
       cost: Number(data.cost) || 0,
       markup_percent: Number(data.markup_percent) || 0,
       sales_price: Number(data.sales_price) || 0,
@@ -136,7 +139,8 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
   const estimatedPriceValue = estimatedDishPrice(
     recipe,
     allProducts,
-    Number(form.watch("labour_time_minutes"))
+    Number(form.watch("labour_time_minutes")),
+    laborCostPerMinute
   );
 
   return (
@@ -256,6 +260,9 @@ export function DishForm({ editingProduct, onSuccess }: DishFormProps) {
                     {...field}
                   />
                 </FormControl>
+                <div className="text-xs text-muted-foreground">
+                  Labor cost rate: €{laborCostPerMinute.toFixed(2)}/minute
+                </div>
                 <FormMessage />
               </FormItem>
             )}

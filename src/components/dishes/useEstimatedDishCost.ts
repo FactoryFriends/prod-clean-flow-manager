@@ -1,9 +1,7 @@
 
 import { Product } from "@/hooks/useProductionData";
 
-const FIXED_LABOUR_COST_PER_MIN = 0.5; // Euro per minute
-
-export function estimatedDishPrice(recipeArr: any[], allProductsArr: Product[], labourMinutes: number): number {
+export function estimatedDishPrice(recipeArr: any[], allProductsArr: Product[], labourMinutes: number, laborCostPerMinute: number = 0.5): number {
   let cost = 0;
   for (const ri of recipeArr) {
     const matched = allProductsArr?.find(p => p.id === ri.product_id);
@@ -14,7 +12,7 @@ export function estimatedDishPrice(recipeArr: any[], allProductsArr: Product[], 
     }
   }
   if (labourMinutes && !isNaN(labourMinutes)) {
-    cost += Number(labourMinutes) * FIXED_LABOUR_COST_PER_MIN;
+    cost += Number(labourMinutes) * laborCostPerMinute;
   }
   return Math.round(cost * 100) / 100;
 }
