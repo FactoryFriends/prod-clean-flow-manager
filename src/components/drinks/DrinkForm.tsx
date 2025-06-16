@@ -171,24 +171,10 @@ export function DrinkForm({ onSuccess }: DrinkFormProps) {
 
           <FormField
             control={form.control}
-            name="unit_size"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Package Size</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.01" min="0" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="unit_type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Unit</FormLabel>
+                <FormLabel>Unit Type</FormLabel>
                 <FormControl>
                   <select
                     {...field}
