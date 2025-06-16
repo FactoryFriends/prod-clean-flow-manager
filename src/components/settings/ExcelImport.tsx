@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Download, Upload, FileSpreadsheet, CheckCircle, XCircle } from "lucide-react";
+import { Download, Upload, FileSpreadsheet, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import { downloadExcelTemplate } from "./excel/templateGenerator";
 import { parseExcelFile, validateIngredientData } from "./excel/excelParser";
 import { ImportPreview } from "./excel/ImportPreview";
 import { useBulkCreateIngredients } from "./excel/useBulkCreateIngredients";
+import { useAllSuppliers } from "@/hooks/useSuppliers";
 
 export function ExcelImport() {
   const [file, setFile] = useState<File | null>(null);
@@ -19,6 +20,7 @@ export function ExcelImport() {
   const [importComplete, setImportComplete] = useState(false);
 
   const bulkCreateMutation = useBulkCreateIngredients();
+  const { data: suppliers = [] } = useAllSuppliers();
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -31,13 +33,14 @@ export function ExcelImport() {
       const data = await parseExcelFile(selectedFile);
       setParsedData(data);
       
-      const validation = await validateIngredientData(data);
+      const validation = await validateIngredientData(data, suppliers);
       setValidationResults(validation);
     } catch (error) {
       console.error("Error parsing file:", error);
       setValidationResults({
         valid: [],
-        errors: [{ row: 0, error: "Failed to parse Excel file" }]
+        errors: [{ row: 0, error: "Failed to parse Excel file" }],
+        warnings: []
       });
     } finally {
       setIsProcessing(false);
@@ -74,7 +77,7 @@ export function ExcelImport() {
             Excel Import - Ingredients
           </CardTitle>
           <CardDescription>
-            Import multiple ingredients at once using an Excel template
+            Import multiple ingredients at once using an Excel template with built-in validation
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -84,7 +87,7 @@ export function ExcelImport() {
               <div className="space-y-3">
                 <h3 className="font-semibold">Step 1: Download Template</h3>
                 <p className="text-sm text-muted-foreground">
-                  Download the Excel template, fill it out with your ingredient data, and upload it back.
+                  Download the Excel template with validation rules, example data, and detailed instructions.
                 </p>
                 <Button 
                   onClick={downloadExcelTemplate} 
@@ -114,6 +117,9 @@ export function ExcelImport() {
                     </Badge>
                   )}
                 </div>
+                {isProcessing && (
+                  <p className="text-sm text-muted-foreground">Processing file...</p>
+                )}
               </div>
 
               {/* Step 3: Preview & Import */}
@@ -126,6 +132,15 @@ export function ExcelImport() {
                       <XCircle className="w-4 h-4" />
                       <AlertDescription>
                         Found {validationResults.errors.length} error(s) that need to be fixed before importing.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {validationResults.warnings?.length > 0 && (
+                    <Alert>
+                      <AlertTriangle className="w-4 h-4" />
+                      <AlertDescription>
+                        {validationResults.warnings.length} warning(s): suppliers will be created automatically.
                       </AlertDescription>
                     </Alert>
                   )}
@@ -165,7 +180,7 @@ export function ExcelImport() {
               <CheckCircle className="w-16 h-16 text-green-600 mx-auto" />
               <h3 className="text-xl font-semibold">Import Complete!</h3>
               <p className="text-muted-foreground">
-                All ingredients have been successfully imported.
+                All ingredients have been successfully imported, and any new suppliers have been created.
               </p>
               <Button onClick={resetImport}>Import More Ingredients</Button>
             </div>

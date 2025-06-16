@@ -1,5 +1,6 @@
 
 import * as XLSX from 'xlsx';
+import { ALLERGENS_ENGLISH } from '@/components/ingredients/constants/allergens';
 
 export interface ParsedIngredient {
   name: string;
@@ -19,6 +20,11 @@ export interface ValidationResult {
     row: number;
     field?: string;
     error: string;
+    data?: any;
+  }>;
+  warnings: Array<{
+    row: number;
+    message: string;
     data?: any;
   }>;
 }
@@ -71,15 +77,19 @@ const findHeaderRow = (worksheet: XLSX.WorkSheet): number => {
   return 0; // Default to first row if not found
 };
 
-export const validateIngredientData = async (data: any[]): Promise<ValidationResult> => {
+export const validateIngredientData = async (data: any[], existingSuppliers: any[] = []): Promise<ValidationResult> => {
   const valid: ParsedIngredient[] = [];
   const errors: ValidationResult['errors'] = [];
+  const warnings: ValidationResult['warnings'] = [];
   
   // Skip empty rows and header row
   const dataRows = data.filter((row, index) => {
     if (index === 0) return false; // Skip header
     return Array.isArray(row) && row.some(cell => cell && cell.toString().trim());
   });
+  
+  // Track names to avoid duplicates within the import
+  const seenNames = new Set<string>();
   
   dataRows.forEach((row, index) => {
     const actualRowNumber = index + 2; // +2 because we skip header and arrays are 0-indexed
@@ -98,10 +108,18 @@ export const validateIngredientData = async (data: any[]): Promise<ValidationRes
       ] = row;
       
       const errors_for_row: string[] = [];
+      const warnings_for_row: string[] = [];
       
       // Validate required fields
       if (!name || !name.toString().trim()) {
         errors_for_row.push('Name is required');
+      } else {
+        const trimmedName = name.toString().trim();
+        if (seenNames.has(trimmedName.toLowerCase())) {
+          errors_for_row.push(`Duplicate name "${trimmedName}" found in import`);
+        } else {
+          seenNames.add(trimmedName.toLowerCase());
+        }
       }
       
       if (!packageUnit || !packageUnit.toString().trim()) {
@@ -130,10 +148,46 @@ export const validateIngredientData = async (data: any[]): Promise<ValidationRes
         errors_for_row.push(`Product Type must be one of: ${VALID_PRODUCT_TYPES.join(', ')}`);
       }
       
+      // Validate supplier for external products
+      if (productType && productType.toString().toLowerCase() === 'extern') {
+        if (!supplierName || !supplierName.toString().trim()) {
+          errors_for_row.push('Supplier is required for external products');
+        } else {
+          const supplierExists = existingSuppliers.some(s => 
+            s.name.toLowerCase() === supplierName.toString().trim().toLowerCase()
+          );
+          if (!supplierExists) {
+            warnings_for_row.push(`Supplier "${supplierName}" will be created automatically`);
+          }
+        }
+      }
+      
       // Validate pickable
       const pickableStr = pickable?.toString().toLowerCase();
       if (pickableStr && !['yes', 'no', 'true', 'false'].includes(pickableStr)) {
         errors_for_row.push('Pickable must be "Yes" or "No"');
+      }
+      
+      // Validate allergens
+      let validatedAllergens: string[] = [];
+      if (allergens && allergens.toString().trim()) {
+        const allergenList = allergens.toString().split(',').map(a => a.trim()).filter(a => a);
+        const invalidAllergens: string[] = [];
+        
+        allergenList.forEach(allergen => {
+          const found = ALLERGENS_ENGLISH.find(valid => 
+            valid.toLowerCase() === allergen.toLowerCase()
+          );
+          if (found) {
+            validatedAllergens.push(found);
+          } else {
+            invalidAllergens.push(allergen);
+          }
+        });
+        
+        if (invalidAllergens.length > 0) {
+          errors_for_row.push(`Invalid allergens: ${invalidAllergens.join(', ')}. Valid options: ${ALLERGENS_ENGLISH.join(', ')}`);
+        }
       }
       
       if (errors_for_row.length > 0) {
@@ -151,14 +205,21 @@ export const validateIngredientData = async (data: any[]): Promise<ValidationRes
           price_per_package: Number(pricePerPackage),
           units_per_package: Number(unitsPerPackage),
           inner_unit_type: innerUnitType.toString().toLowerCase(),
-          allergens: allergens ? 
-            allergens.toString().split(',').map(a => a.trim()).filter(a => a) : 
-            [],
+          allergens: validatedAllergens,
           pickable: ['yes', 'true'].includes(pickableStr),
           product_type: productType.toString().toLowerCase()
         };
         
         valid.push(ingredient);
+        
+        // Add warnings for this row
+        warnings_for_row.forEach(warning => {
+          warnings.push({
+            row: actualRowNumber,
+            message: warning,
+            data: { name: ingredient.name }
+          });
+        });
       }
       
     } catch (error) {
@@ -170,5 +231,5 @@ export const validateIngredientData = async (data: any[]): Promise<ValidationRes
     }
   });
   
-  return { valid, errors };
+  return { valid, errors, warnings };
 };
