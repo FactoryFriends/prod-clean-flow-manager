@@ -4,6 +4,7 @@ import { useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
+import { BatchAndUnitFields } from "./BatchAndUnitFields";
 
 interface SemiFinishedFormFieldsProps {
   suppliers: any[];
@@ -40,6 +41,9 @@ export function SemiFinishedFormFields({
           </FormItem>
         )}
       />
+
+      {/* BATCH section - moved up here after NAME */}
+      <BatchAndUnitFields />
 
       {/* Auto-calculated unit size */}
       <div>

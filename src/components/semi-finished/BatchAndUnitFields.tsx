@@ -1,12 +1,12 @@
 
-import { useFormContext, Controller } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { UNIT_OPTIONS, formatNumberComma } from "./semifinishedFormUtils";
+import { UNIT_OPTIONS } from "./semifinishedFormUtils";
 
 export function BatchAndUnitFields() {
-  const { control, watch } = useFormContext();
-  // No other state here – all logic in main form
+  const { control } = useFormContext();
+  
   return (
     <div className="flex gap-2 flex-col md:flex-row">
       <FormField
@@ -18,13 +18,14 @@ export function BatchAndUnitFields() {
             <FormLabel>Batch Size</FormLabel>
             <FormControl>
               <Input
-                type="text"
-                inputMode="decimal"
+                type="number"
+                step="0.1"
+                placeholder="e.g. 20"
                 {...field}
-                value={formatNumberComma(field.value)}
+                value={field.value || ""}
                 onChange={(e) => {
-                  const cleaned = e.target.value.replace(/[^\d,]/g, "");
-                  field.onChange(cleaned);
+                  const value = e.target.value;
+                  field.onChange(value === "" ? "" : Number(value));
                 }}
               />
             </FormControl>
@@ -66,13 +67,15 @@ export function BatchAndUnitFields() {
             <FormLabel>Packages per Batch</FormLabel>
             <FormControl>
               <Input
-                type="text"
-                inputMode="numeric"
+                type="number"
+                min="1"
+                step="1"
+                placeholder="e.g. 5"
                 {...field}
-                value={formatNumberComma(field.value)}
+                value={field.value || ""}
                 onChange={(e) => {
-                  const cleaned = e.target.value.replace(/[^\d,]/g, "");
-                  field.onChange(cleaned);
+                  const value = e.target.value;
+                  field.onChange(value === "" ? "" : Number(value));
                 }}
               />
             </FormControl>

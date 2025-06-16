@@ -13,7 +13,6 @@ import {
   parseNumberComma,
   calculateUnitSize,
 } from "./semifinishedFormUtils";
-import { BatchAndUnitFields } from "./BatchAndUnitFields";
 import { RecipeIngredientsInput } from "./RecipeIngredientsInput";
 import { SemiFinishedFormFields } from "./SemiFinishedFormFields";
 import { PricingFields } from "./PricingFields";
@@ -135,9 +134,6 @@ export function SemiFinishedForm() {
             unitSize={unitSize}
             batchUnit={batchUnit}
           />
-
-          {/* BATCH section */}
-          <BatchAndUnitFields />
 
           {/* Recipe (per batch) */}
           <div>
