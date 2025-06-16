@@ -50,8 +50,9 @@ export function SettingsDialogs({
             </DialogTitle>
           </DialogHeader>
           <ProductForm
-            product={editingProduct}
+            editingProduct={editingProduct}
             onSuccess={handleProductSuccess}
+            onCancel={() => setProductDialogOpen(false)}
           />
         </DialogContent>
       </Dialog>
@@ -61,7 +62,7 @@ export function SettingsDialogs({
           <DialogHeader>
             <DialogTitle>Add New Drink</DialogTitle>
           </DialogHeader>
-          <DrinkForm />
+          <DrinkForm onSuccess={handleDrinkSuccess} />
         </DialogContent>
       </Dialog>
 
@@ -73,8 +74,9 @@ export function SettingsDialogs({
             </DialogTitle>
           </DialogHeader>
           <StaffCodeForm
-            staffCode={editingStaffCode}
+            editingStaffCode={editingStaffCode}
             onSuccess={handleStaffCodeSuccess}
+            onCancel={() => setStaffCodeDialogOpen(false)}
           />
         </DialogContent>
       </Dialog>
@@ -87,8 +89,9 @@ export function SettingsDialogs({
             </DialogTitle>
           </DialogHeader>
           <TaskTemplateForm
-            template={editingTemplate}
+            editingTemplate={editingTemplate}
             onSuccess={handleTemplateSuccess}
+            onCancel={() => setTemplateDialogOpen(false)}
           />
         </DialogContent>
       </Dialog>
