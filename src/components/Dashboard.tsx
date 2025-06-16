@@ -88,6 +88,7 @@ export function Dashboard({ currentLocation, onSectionChange }: DashboardProps) 
         expiringBatches={expiringBatches}
         expiredBatches={expiredBatches}
         overdueCleaningTasks={overdueCleaningTasks}
+        currentLocation={dbLocation}
       />
 
       <DashboardStats 
