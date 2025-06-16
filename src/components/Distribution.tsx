@@ -1,13 +1,13 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Truck, Home } from "lucide-react";
 import { Dispatch } from "./Dispatch";
 
 interface DistributionProps {
   currentLocation: "tothai" | "khin";
+  initialTab?: "external" | "internal";
 }
 
-export function Distribution({ currentLocation }: DistributionProps) {
+export function Distribution({ currentLocation, initialTab = "external" }: DistributionProps) {
   const getLocationName = (location: string) => {
     return location === "tothai" ? "To Thai Restaurant" : "Khin Takeaway";
   };
@@ -23,7 +23,7 @@ export function Distribution({ currentLocation }: DistributionProps) {
         </div>
       </div>
 
-      <Tabs defaultValue="external" className="w-full">
+      <Tabs defaultValue={initialTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 h-16">
           <TabsTrigger value="external" className="flex items-center gap-3 h-full text-lg">
             <div className="p-2 bg-blue-100 rounded-lg">

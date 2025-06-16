@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Dashboard } from "@/components/Dashboard";
@@ -18,15 +19,23 @@ const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const isMobile = useIsMobile();
   const [favvTabActive, setFavvTabActive] = useState(false);
+  const [distributionInitialTab, setDistributionInitialTab] = useState<"external" | "internal">("external");
 
-  // handle deep linking for "reports:favv"
+  // handle deep linking for "reports:favv" and "distribution:internal"
   const handleSectionChange = (section: string) => {
     if (section === "reports:favv") {
       setActiveTab("reports");
       setFavvTabActive(true);
+    } else if (section === "distribution:internal") {
+      setActiveTab("distribution");
+      setDistributionInitialTab("internal");
+      setFavvTabActive(false);
     } else {
       setActiveTab(section);
       setFavvTabActive(false);
+      if (section !== "distribution") {
+        setDistributionInitialTab("external");
+      }
     }
   };
 
@@ -37,7 +46,7 @@ const Index = () => {
       case "production":
         return <Production currentLocation={currentLocation} />;
       case "distribution":
-        return <Distribution currentLocation={currentLocation} />;
+        return <Distribution currentLocation={currentLocation} initialTab={distributionInitialTab} />;
       case "cleaning":
         return <CleaningTasks currentLocation={currentLocation} />;
       case "settings":

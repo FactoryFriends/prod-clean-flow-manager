@@ -2,7 +2,7 @@
 import { Package, Truck, ClipboardList, ShieldCheck, ChefHat } from "lucide-react";
 
 interface DashboardQuickActionsProps {
-  // onSectionChange now allows `'reports:favv'` as well!
+  // onSectionChange now allows `'reports:favv'` and `'distribution:internal'` as well!
   onSectionChange: (section: string) => void;
 }
 
@@ -40,17 +40,7 @@ export function DashboardQuickActions({ onSectionChange }: DashboardQuickActions
           <span className="text-sm font-medium">FAVV Compliance</span>
         </button>
         <button 
-          onClick={() => {
-            // Navigate to distribution page and set active tab to internal
-            onSectionChange('distribution');
-            // We'll need to modify the Distribution component to handle this
-            setTimeout(() => {
-              const internalTab = document.querySelector('[value="internal"]') as HTMLButtonElement;
-              if (internalTab) {
-                internalTab.click();
-              }
-            }, 100);
-          }}
+          onClick={() => onSectionChange('distribution:internal')}
           className="p-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
         >
           <ChefHat className="w-6 h-6 mx-auto mb-2" />
