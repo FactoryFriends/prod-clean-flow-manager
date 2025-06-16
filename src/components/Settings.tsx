@@ -12,6 +12,7 @@ import { CustomersTab } from "@/components/settings/tabs/CustomersTab";
 import { SettingsDialogs } from "@/components/settings/SettingsDialogs";
 import { SystemInfo } from "@/components/settings/SystemInfo";
 import { SuppliersTab } from "@/components/settings/tabs/SuppliersTab";
+import { ExcelImport } from "@/components/settings/ExcelImport";
 import IngredientPriceManager from "./reports/IngredientPriceManager";
 
 interface SettingsProps {
@@ -132,6 +133,10 @@ export function Settings({ currentLocation }: SettingsProps) {
         />
 
         <SuppliersTab />
+
+        <TabsContent value="excel-import" className="space-y-4">
+          <ExcelImport />
+        </TabsContent>
 
         <TabsContent value="ingredient-margins" className="space-y-4">
           <IngredientPriceManager />
