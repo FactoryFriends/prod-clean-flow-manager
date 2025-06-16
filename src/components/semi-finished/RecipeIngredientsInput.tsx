@@ -19,6 +19,9 @@ export function RecipeIngredientsInput({
   const [selectedIngredientId, setSelectedIngredientId] = useState<string>("");
   const [ingredientQty, setIngredientQty] = useState<number>(0);
 
+  console.log("Available ingredient options:", ingredientOptions);
+  console.log("Current search:", ingredientSearch);
+
   function handleAddIngredient() {
     if (!selectedIngredientId) {
       toast.error("Select an ingredient");
@@ -26,7 +29,7 @@ export function RecipeIngredientsInput({
     }
     const ingredient = ingredientOptions.find((i) => i.id === selectedIngredientId);
     if (!ingredient) return;
-    if (!ingredientQty || parseNumberComma(ingredientQty as any) <= 0) {
+    if (!ingredientQty || ingredientQty <= 0) {
       toast.error("Quantity must be greater than zero");
       return;
     }
@@ -39,7 +42,7 @@ export function RecipeIngredientsInput({
       {
         product_id: ingredient.id,
         name: ingredient.name,
-        qty: Number(parseNumberComma(ingredientQty as any)),
+        qty: Number(ingredientQty),
         unit: ingredient.unit_type || "",
       },
     ]);
@@ -50,6 +53,14 @@ export function RecipeIngredientsInput({
   function handleRemoveRecipeIngredient(id: string) {
     setRecipe(recipe.filter((r) => r.product_id !== id));
   }
+
+  const filteredIngredients = ingredientOptions.filter((ing) =>
+    ingredientSearch.trim().length === 0
+      ? true
+      : ing.name.toLowerCase().includes(ingredientSearch.toLowerCase())
+  );
+
+  console.log("Filtered ingredients:", filteredIngredients);
 
   return (
     <div>
@@ -66,31 +77,23 @@ export function RecipeIngredientsInput({
             onChange={(e) => setSelectedIngredientId(e.target.value)}
             className="w-full border rounded-md bg-white text-sm px-2 py-1"
           >
-            <option value="">Select ingredient</option>
-            {ingredientOptions
-              .filter((ing) =>
-                ingredientSearch.trim().length === 0
-                  ? true
-                  : ing.name
-                      .toLowerCase()
-                      .includes(ingredientSearch.toLowerCase())
-              )
-              .map((ing) => (
-                <option key={ing.id} value={ing.id}>
-                  {ing.name} ({ing.unit_type})
-                </option>
-              ))}
+            <option value="">Select ingredient ({filteredIngredients.length} available)</option>
+            {filteredIngredients.map((ing) => (
+              <option key={ing.id} value={ing.id}>
+                {ing.name} ({ing.unit_type})
+              </option>
+            ))}
           </select>
         </div>
         <Input
           className="w-28"
           placeholder="Qty"
-          type="text"
-          inputMode="decimal"
-          value={ingredientQty === 0 ? "" : formatNumberComma(ingredientQty)}
+          type="number"
+          step="0.1"
+          value={ingredientQty === 0 ? "" : ingredientQty}
           onChange={(e) => {
-            const cleaned = e.target.value.replace(/[^\d,]/g, "");
-            setIngredientQty(cleaned ? parseNumberComma(cleaned) ?? 0 : 0);
+            const value = e.target.value;
+            setIngredientQty(value === "" ? 0 : Number(value));
           }}
         />
         <span className="text-xs mb-2">
