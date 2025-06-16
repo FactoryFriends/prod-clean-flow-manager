@@ -1,4 +1,5 @@
 
+
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -211,7 +212,7 @@ export function SemiFinishedForm() {
             )}
           />
 
-          {/* Shelf life input */}
+          {/* Shelf life input - FIXED: improved input handling */}
           <FormField
             control={form.control}
             name="shelf_life_days"
@@ -224,10 +225,15 @@ export function SemiFinishedForm() {
                     inputMode="numeric"
                     placeholder="e.g. 7"
                     {...field}
-                    value={formatNumberComma(field.value)}
+                    value={field.value ? formatNumberComma(field.value) : ""}
                     onChange={(e) => {
-                      const cleaned = e.target.value.replace(/[^\d,.]/g, "");
-                      field.onChange(cleaned);
+                      const value = e.target.value;
+                      if (value === "") {
+                        field.onChange(null);
+                      } else {
+                        const cleaned = value.replace(/[^\d,.]/g, "");
+                        field.onChange(cleaned);
+                      }
                     }}
                   />
                 </FormControl>
@@ -236,7 +242,7 @@ export function SemiFinishedForm() {
             )}
           />
 
-          {/* Labour time input - FIXED: allow decimal points */}
+          {/* Labour time input - FIXED: improved input handling */}
           <FormField
             control={form.control}
             name="labour_time_minutes"
@@ -249,10 +255,15 @@ export function SemiFinishedForm() {
                     inputMode="decimal"
                     placeholder="e.g. 45 or 45,5"
                     {...field}
-                    value={formatNumberComma(field.value)}
+                    value={field.value ? formatNumberComma(field.value) : ""}
                     onChange={(e) => {
-                      const cleaned = e.target.value.replace(/[^\d,.]/g, "");
-                      field.onChange(cleaned);
+                      const value = e.target.value;
+                      if (value === "") {
+                        field.onChange(null);
+                      } else {
+                        const cleaned = value.replace(/[^\d,.]/g, "");
+                        field.onChange(cleaned);
+                      }
                     }}
                   />
                 </FormControl>
@@ -312,3 +323,4 @@ export function SemiFinishedForm() {
 }
 
 export default SemiFinishedForm;
+
