@@ -1,10 +1,11 @@
 
 import React from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-
-const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE"];
+import { useUnitOptions } from "../shared/UnitOptionsContext";
 
 export function IngredientUnitTypeSelect({ control }: { control: any }) {
+  const { innerUnits } = useUnitOptions();
+
   return (
     <FormField
       control={control}
@@ -17,7 +18,7 @@ export function IngredientUnitTypeSelect({ control }: { control: any }) {
               {...field}
               className="w-full border rounded-md px-3 py-2 text-sm bg-white"
             >
-              {UNIT_OPTIONS.map((u) => (
+              {innerUnits.map((u) => (
                 <option value={u} key={u}>
                   {u}
                 </option>
