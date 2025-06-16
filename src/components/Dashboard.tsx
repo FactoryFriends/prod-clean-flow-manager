@@ -79,6 +79,9 @@ export function Dashboard({ currentLocation, onSectionChange }: DashboardProps) 
         </p>
       </div>
 
+      {/* Quick Actions moved to top */}
+      <DashboardQuickActions onSectionChange={onSectionChange ?? (() => {})} />
+
       <DashboardAlerts 
         expiringBatches={expiringBatches}
         expiredBatches={expiredBatches}
@@ -90,13 +93,11 @@ export function Dashboard({ currentLocation, onSectionChange }: DashboardProps) 
         tasksWithPhotosCount={tasksWithPhotos.length}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
         <DashboardRecentTasks 
           todaysCompletedTasks={todaysCompletedTasks} 
           onSectionChange={onSectionChange}
         />
-        {/* Pass onSectionChange as-is; Index.tsx will parse the "reports:favv" value */}
-        <DashboardQuickActions onSectionChange={onSectionChange ?? (() => {})} />
       </div>
     </div>
   );
