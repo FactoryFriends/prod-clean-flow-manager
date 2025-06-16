@@ -48,7 +48,17 @@ export function Settings({ currentLocation }: SettingsProps) {
           description="Manage system configuration and data" 
         />
 
-        <SettingsContent currentLocation={currentLocation} />
+        <SettingsContent 
+          currentLocation={currentLocation}
+          {...settingsState}
+          onEditProduct={settingsState.handlers.handleEditProduct}
+          onEditStaffCode={settingsState.handlers.handleEditStaffCode}
+          onEditTemplate={settingsState.handlers.handleEditTemplate}
+          onAddNewProduct={settingsState.handlers.handleAddNewProduct}
+          onAddNewDrink={settingsState.handlers.handleAddNewDrink}
+          onAddNewStaffCode={settingsState.handlers.handleAddNewStaffCode}
+          onAddNewTemplate={settingsState.handlers.handleAddNewTemplate}
+        />
 
         <SystemInfo currentLocation={currentLocation} />
         
