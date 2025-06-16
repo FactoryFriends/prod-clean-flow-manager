@@ -1,14 +1,16 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { ProductionBatch } from "@/hooks/useProductionData";
 import { format } from "date-fns";
-import { Printer } from "lucide-react";
+import { Printer, AlertCircle, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { LabelPrintService, LabelData } from "@/services/labelPrintService";
+import { Alert, AlertDescription } from "./ui/alert";
 
 interface LabelPrintDialogProps {
   open: boolean;
@@ -19,13 +21,32 @@ interface LabelPrintDialogProps {
 export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialogProps) {
   const [printingLabels, setPrintingLabels] = useState(false);
   const [numLabelsToPrint, setNumLabelsToPrint] = useState<number>(0);
+  const [serviceAvailable, setServiceAvailable] = useState<boolean | null>(null);
+  const [printerStatus, setPrinterStatus] = useState<any>(null);
+
+  // Check print service availability when dialog opens
+  useEffect(() => {
+    if (open) {
+      checkPrintService();
+    }
+  }, [open]);
 
   // Update the number of labels when batch changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (batch) {
       setNumLabelsToPrint(batch.packages_produced);
     }
   }, [batch]);
+
+  const checkPrintService = async () => {
+    const available = await LabelPrintService.checkServiceAvailable();
+    setServiceAvailable(available);
+    
+    if (available) {
+      const status = await LabelPrintService.getPrinterStatus();
+      setPrinterStatus(status);
+    }
+  };
 
   if (!batch) return null;
 
@@ -35,11 +56,16 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
       return;
     }
 
+    if (!serviceAvailable) {
+      toast.error("Print service is not available. Please ensure the local print service is running.");
+      return;
+    }
+
     setPrintingLabels(true);
     
     try {
       // Generate label data for each package
-      const labelData = Array.from({ length: numLabelsToPrint }, (_, index) => {
+      const labelData: LabelData[] = Array.from({ length: numLabelsToPrint }, (_, index) => {
         const labelNumber = index + 1;
         return {
           batch_id: batch.id,
@@ -57,6 +83,16 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
         };
       });
 
+      // Send to local print service
+      await LabelPrintService.printLabels({
+        labels: labelData,
+        printer_config: {
+          copies: 1,
+          paper_size: "50.8x25.4mm",
+          print_speed: 2
+        }
+      });
+
       // Save label records to database
       const { error } = await supabase
         .from("batch_labels")
@@ -65,20 +101,13 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
       if (error) {
         throw error;
       }
-
-      // Here you would integrate with your thermal printer
-      // For now, we'll just simulate the printing process
-      console.log("Printing labels:", labelData);
       
-      // You could open a print dialog or send to a thermal printer service
-      window.print(); // This would print the preview
-      
-      toast.success(`${numLabelsToPrint} labels printed successfully`);
+      toast.success(`${numLabelsToPrint} labels sent to printer successfully`);
       onOpenChange(false);
       
     } catch (error) {
       console.error("Error printing labels:", error);
-      toast.error("Failed to print labels");
+      toast.error("Failed to print labels: " + error.message);
     } finally {
       setPrintingLabels(false);
     }
@@ -92,6 +121,24 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
         </DialogHeader>
         
         <div className="space-y-4">
+          {/* Print Service Status */}
+          <Alert className={serviceAvailable ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
+            <div className="flex items-center gap-2">
+              {serviceAvailable ? (
+                <CheckCircle className="h-4 w-4 text-green-600" />
+              ) : (
+                <AlertCircle className="h-4 w-4 text-red-600" />
+              )}
+              <AlertDescription className={serviceAvailable ? "text-green-800" : "text-red-800"}>
+                {serviceAvailable 
+                  ? `Print service connected - ARGOX D2-250 ${printerStatus?.status || 'ready'}`
+                  : "Print service unavailable - Please ensure the local print service is running on the mini-pc"
+                }
+              </AlertDescription>
+            </div>
+          </Alert>
+
+          {/* Batch Information */}
           <div className="bg-muted p-4 rounded-lg">
             <h3 className="font-semibold mb-2">Batch Information</h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
@@ -104,6 +151,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             </div>
           </div>
 
+          {/* Number of Labels Input */}
           <div className="space-y-2">
             <Label htmlFor="numLabels">Number of Labels to Print</Label>
             <Input
@@ -119,10 +167,11 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             </p>
           </div>
 
+          {/* Label Preview */}
           <div className="border rounded-lg p-4">
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <Printer className="w-4 h-4" />
-              Label Preview (1 of {numLabelsToPrint})
+              Label Preview (ARGOX D2-250 format - 1 of {numLabelsToPrint})
             </h3>
             
             {/* Thermal Label Preview - 50.8 x 25.4mm landscape format */}
@@ -164,17 +213,18 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             </div>
             
             <p className="text-sm text-muted-foreground mt-3">
-              Thermal label format: 50.8 x 25.4mm (landscape). Contains: product name, batch number, production date, expiry date, and chef name.
+              Thermal label format: 50.8 x 25.4mm (landscape). Will be sent to ARGOX D2-250 via local print service.
             </p>
           </div>
 
+          {/* Action Buttons */}
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button 
               onClick={handlePrintLabels} 
-              disabled={printingLabels || numLabelsToPrint <= 0}
+              disabled={printingLabels || numLabelsToPrint <= 0 || !serviceAvailable}
               className="flex items-center gap-2"
             >
               <Printer className="w-4 h-4" />
