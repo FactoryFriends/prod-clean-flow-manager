@@ -10,7 +10,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { DRINK_UNIT_OPTIONS } from "./DrinkFormData";
-import { useSuppliers } from "@/hooks/useSuppliers";
 import { useAllProducts } from "@/hooks/useProductionData";
 import SupplierPackagingFields from "../shared/SupplierPackagingFields";
 
@@ -52,6 +51,20 @@ export function DrinkFormFields({
             <FormLabel>Name</FormLabel>
             <FormControl>
               <Input placeholder="e.g. Coca Cola 330ml" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={control}
+        name="unit_size"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Unit Size</FormLabel>
+            <FormControl>
+              <Input type="number" min="0" step="0.01" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>

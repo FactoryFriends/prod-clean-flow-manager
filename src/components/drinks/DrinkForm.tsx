@@ -3,7 +3,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { useCreateProduct, useAllProducts } from "@/hooks/useProductionData";
+import { useCreateProduct } from "@/hooks/useProductionData";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { toast } from "sonner";
 import { useUnitOptions } from "../shared/UnitOptionsContext";
