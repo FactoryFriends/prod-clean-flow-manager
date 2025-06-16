@@ -4,7 +4,7 @@ import { Dashboard } from "@/components/Dashboard";
 import { Production } from "@/components/Production";
 import { Distribution } from "@/components/Distribution";
 import { CleaningTasks } from "@/components/CleaningTasks";
-import { Settings } from "@/components/settings/Settings";
+import { SettingsWithErrorBoundary } from "@/components/settings/SettingsWithErrorBoundary";
 import { Invoicing } from "@/components/Invoicing";
 import { Reports } from "@/components/Reports";
 import { LocationHeader } from "@/components/LocationHeader";
@@ -41,7 +41,7 @@ const Index = () => {
       case "cleaning":
         return <CleaningTasks currentLocation={currentLocation} />;
       case "settings":
-        return <Settings currentLocation={currentLocation} />;
+        return <SettingsWithErrorBoundary currentLocation={currentLocation} />;
       case "invoicing":
         return <Invoicing currentLocation={currentLocation} />;
       case "reports":

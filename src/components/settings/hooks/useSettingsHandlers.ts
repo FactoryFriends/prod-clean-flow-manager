@@ -1,57 +1,107 @@
 
 import { useSettingsState } from "./useSettingsState";
+import { useErrorHandler } from "@/hooks/useErrorHandler";
+import { Logger } from "@/utils/logger";
 
 export function useSettingsHandlers() {
   const state = useSettingsState();
+  const { handleError, executeWithErrorHandling } = useErrorHandler({
+    component: 'SettingsHandlers',
+    showToast: true
+  });
 
   const handleEditProduct = (product: any) => {
-    state.setEditingProduct(product);
-    state.setProductDialogOpen(true);
+    Logger.trace('SettingsHandlers', 'handleEditProduct', { productId: product?.id });
+    try {
+      state.setEditingProduct(product);
+      state.setProductDialogOpen(true);
+    } catch (error) {
+      handleError(error as Error, { action: 'editProduct', product });
+    }
   };
 
   const handleEditStaffCode = (staffCode: any) => {
-    state.setEditingStaffCode(staffCode);
-    state.setStaffCodeDialogOpen(true);
+    Logger.trace('SettingsHandlers', 'handleEditStaffCode', { staffCodeId: staffCode?.id });
+    try {
+      state.setEditingStaffCode(staffCode);
+      state.setStaffCodeDialogOpen(true);
+    } catch (error) {
+      handleError(error as Error, { action: 'editStaffCode', staffCode });
+    }
   };
 
   const handleEditTemplate = (template: any) => {
-    state.setEditingTemplate(template);
-    state.setTemplateDialogOpen(true);
+    Logger.trace('SettingsHandlers', 'handleEditTemplate', { templateId: template?.id });
+    try {
+      state.setEditingTemplate(template);
+      state.setTemplateDialogOpen(true);
+    } catch (error) {
+      handleError(error as Error, { action: 'editTemplate', template });
+    }
   };
 
-  const handleProductSuccess = () => {
-    state.setProductDialogOpen(false);
-    state.setEditingProduct(null);
+  const handleProductSuccess = async () => {
+    Logger.trace('SettingsHandlers', 'handleProductSuccess');
+    await executeWithErrorHandling(async () => {
+      state.setProductDialogOpen(false);
+      state.setEditingProduct(null);
+    }, { action: 'productSuccess' });
   };
 
-  const handleStaffCodeSuccess = () => {
-    state.setStaffCodeDialogOpen(false);
-    state.setEditingStaffCode(null);
+  const handleStaffCodeSuccess = async () => {
+    Logger.trace('SettingsHandlers', 'handleStaffCodeSuccess');
+    await executeWithErrorHandling(async () => {
+      state.setStaffCodeDialogOpen(false);
+      state.setEditingStaffCode(null);
+    }, { action: 'staffCodeSuccess' });
   };
 
-  const handleTemplateSuccess = () => {
-    state.setTemplateDialogOpen(false);
-    state.setEditingTemplate(null);
+  const handleTemplateSuccess = async () => {
+    Logger.trace('SettingsHandlers', 'handleTemplateSuccess');
+    await executeWithErrorHandling(async () => {
+      state.setTemplateDialogOpen(false);
+      state.setEditingTemplate(null);
+    }, { action: 'templateSuccess' });
   };
 
   const handleAddNewProduct = () => {
-    state.setEditingProduct(null);
-    state.setProductDialogOpen(true);
+    Logger.trace('SettingsHandlers', 'handleAddNewProduct');
+    try {
+      state.setEditingProduct(null);
+      state.setProductDialogOpen(true);
+    } catch (error) {
+      handleError(error as Error, { action: 'addNewProduct' });
+    }
   };
 
   const handleAddNewDrink = () => {
-    state.setEditingProduct(null);
-    state.setProductDialogOpen(true);
+    Logger.trace('SettingsHandlers', 'handleAddNewDrink');
+    try {
+      state.setEditingProduct(null);
+      state.setProductDialogOpen(true);
+    } catch (error) {
+      handleError(error as Error, { action: 'addNewDrink' });
+    }
   };
 
   const handleAddNewStaffCode = () => {
-    state.setEditingStaffCode(null);
-    state.setStaffCodeDialogOpen(true);
+    Logger.trace('SettingsHandlers', 'handleAddNewStaffCode');
+    try {
+      state.setEditingStaffCode(null);
+      state.setStaffCodeDialogOpen(true);
+    } catch (error) {
+      handleError(error as Error, { action: 'addNewStaffCode' });
+    }
   };
 
   const handleAddNewTemplate = () => {
-    state.setEditingTemplate(null);
-    state.setTemplateDialogOpen(true);
+    Logger.trace('SettingsHandlers', 'handleAddNewTemplate');
+    try {
+      state.setEditingTemplate(null);
+      state.setTemplateDialogOpen(true);
+    } catch (error) {
+      handleError(error as Error, { action: 'addNewTemplate' });
+    }
   };
 
   return {
