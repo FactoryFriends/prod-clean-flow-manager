@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -73,19 +74,23 @@ export function SemiFinishedForm() {
       : true;
   }
 
-  // For units, sync unit_type to batch_unit unless you support conversions
+  // FIXED: Remove the infinite loop by simplifying the unit size calculation
+  const batchSize = form.watch("batch_size");
+  const packagesPerBatch = form.watch("packages_per_batch");
+  const batchUnit = form.watch("batch_unit");
+  
+  const unitSize = React.useMemo(() => {
+    return calculateUnitSize(
+      parseNumberComma(batchSize as any) ?? 0,
+      parseNumberComma(packagesPerBatch as any) ?? 1,
+    );
+  }, [batchSize, packagesPerBatch]);
+
+  // Update unit_type to match batch_unit and unit_size when batch values change
   React.useEffect(() => {
-    // Auto-update unit_type and unit_size based on batch/unit fields
-    const sub = form.watch(({ batch_size, batch_unit, packages_per_batch }) => {
-      const autoUnitSize =
-        batch_size && packages_per_batch
-          ? Number(batch_size) / Number(packages_per_batch)
-          : 0;
-      form.setValue("unit_size", autoUnitSize);
-      form.setValue("unit_type", batch_unit);
-    });
-    return () => sub?.unsubscribe?.();
-  }, [form]);
+    form.setValue("unit_type", batchUnit);
+    form.setValue("unit_size", parseNumberComma(unitSize) ?? 0);
+  }, [batchUnit, unitSize, form]);
 
   const onSubmit = (data: SemiFinishedFormData) => {
     if (recipe.length === 0) {
@@ -166,11 +171,8 @@ export function SemiFinishedForm() {
             <Input
               readOnly
               value={
-                calculateUnitSize(
-                  parseNumberComma(form.watch("batch_size") as any) ?? 0,
-                  parseNumberComma(form.watch("packages_per_batch") as any) ?? 1,
-                ) +
-                (form.watch("batch_unit") ? ` ${form.watch("batch_unit")}` : "")
+                unitSize +
+                (batchUnit ? ` ${batchUnit}` : "")
               }
               className="bg-gray-100 cursor-not-allowed"
             />
@@ -224,7 +226,7 @@ export function SemiFinishedForm() {
                     {...field}
                     value={formatNumberComma(field.value)}
                     onChange={(e) => {
-                      const cleaned = e.target.value.replace(/[^\d,]/g, "");
+                      const cleaned = e.target.value.replace(/[^\d,.]/g, "");
                       field.onChange(cleaned);
                     }}
                   />
@@ -234,7 +236,7 @@ export function SemiFinishedForm() {
             )}
           />
 
-          {/* Labour time input */}
+          {/* Labour time input - FIXED: allow decimal points */}
           <FormField
             control={form.control}
             name="labour_time_minutes"
@@ -244,12 +246,12 @@ export function SemiFinishedForm() {
                 <FormControl>
                   <Input
                     type="text"
-                    inputMode="numeric"
-                    placeholder="e.g. 45"
+                    inputMode="decimal"
+                    placeholder="e.g. 45 or 45,5"
                     {...field}
                     value={formatNumberComma(field.value)}
                     onChange={(e) => {
-                      const cleaned = e.target.value.replace(/[^\d,]/g, "");
+                      const cleaned = e.target.value.replace(/[^\d,.]/g, "");
                       field.onChange(cleaned);
                     }}
                   />
