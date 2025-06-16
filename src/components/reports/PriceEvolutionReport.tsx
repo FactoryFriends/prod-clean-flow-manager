@@ -17,16 +17,16 @@ interface PriceEvolutionReportProps {
 }
 
 export function PriceEvolutionReport({ currentLocation }: PriceEvolutionReportProps) {
-  const [startDate, setStartDate] = useState<Date | undefined>(
+  const [startDate, setStartDate] = useState<Date | null>(
     new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1)
   );
-  const [endDate, setEndDate] = useState<Date | undefined>(new Date());
+  const [endDate, setEndDate] = useState<Date | null>(new Date());
   const [productType, setProductType] = useState<string>("all");
   const [supplierId, setSupplierId] = useState<string>("all");
 
   const { data: priceHistory = [], isLoading } = useProductPriceHistory({
-    startDate,
-    endDate,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
     productType,
     supplierId,
   });
@@ -78,9 +78,9 @@ export function PriceEvolutionReport({ currentLocation }: PriceEvolutionReportPr
           <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
             <DateRangePicker
               startDate={startDate}
+              setStartDate={setStartDate}
               endDate={endDate}
-              onStartDateChange={setStartDate}
-              onEndDateChange={setEndDate}
+              setEndDate={setEndDate}
             />
             
             <Select value={productType} onValueChange={setProductType}>
