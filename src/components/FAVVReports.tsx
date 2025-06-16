@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
@@ -29,8 +28,8 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
-  // New tabs: "in-stock", "movements", "clear"
-  const [batchTab, setBatchTab] = useState<"in-stock" | "movements" | "clear">("in-stock");
+  // Updated tabs: "in-stock", "movements", "partially-used", "fully-used"
+  const [batchTab, setBatchTab] = useState<"in-stock" | "movements" | "partially-used" | "fully-used">("in-stock");
   const [batchSearch, setBatchSearch] = useState("");
 
   // Use the extracted hooks
@@ -59,7 +58,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
     search: batchSearch,
     inStockOnly: batchTab === "in-stock",
   });
-  // All batches for clear tab (show all, filter on batchSearch)
+  // All batches for other tabs
   const { data: allBatches = [], isLoading: isLoadingAll } = useBatchStock({
     location: currentLocation,
     search: batchSearch,
@@ -71,7 +70,14 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
     setIsTaskModalOpen(true);
   };
 
-  // Tab UI
+  // Filter batches for partially used (have stock but less than produced)
+  const partiallyUsedBatches = allBatches.filter(b => 
+    b.packages_in_stock > 0 && b.packages_in_stock < b.packages_produced
+  );
+
+  // Filter batches for fully used (no stock remaining)
+  const fullyUsedBatches = allBatches.filter(b => b.packages_in_stock === 0);
+
   return (
     <div className="space-y-6">
       <Card>
@@ -125,10 +131,16 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
                 Stock Movements
               </button>
               <button 
-                className={`px-3 py-1 rounded-lg border ${batchTab==="clear"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
-                onClick={() => setBatchTab("clear")}
+                className={`px-3 py-1 rounded-lg border ${batchTab==="partially-used"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
+                onClick={() => setBatchTab("partially-used")}
               >
-                Clear/Used
+                Partially Used
+              </button>
+              <button 
+                className={`px-3 py-1 rounded-lg border ${batchTab==="fully-used"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
+                onClick={() => setBatchTab("fully-used")}
+              >
+                Fully Used
               </button>
             </div>
           </div>
@@ -148,9 +160,16 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
             />
           )}
 
-          {batchTab === "clear" && (
+          {batchTab === "partially-used" && (
             <BatchesInStockTable
-              batches={allBatches.filter(b => b.packages_in_stock < b.packages_produced)}
+              batches={partiallyUsedBatches}
+              isLoading={isLoadingAll}
+            />
+          )}
+
+          {batchTab === "fully-used" && (
+            <BatchesInStockTable
+              batches={fullyUsedBatches}
               isLoading={isLoadingAll}
             />
           )}
