@@ -23,107 +23,116 @@ export function SupplierPackagingFields({
   if (!show) return null;
   
   return (
-    <div className="space-y-4 bg-gray-50 p-4 rounded-lg border">
-      <h3 className="font-medium text-gray-900">Packaging Information</h3>
-      <p className="text-sm text-gray-600">
-        Tell us how {supplierName} packages this ingredient:
-      </p>
-      
-      <FormField
-        control={control}
-        name={fieldPrefix + "supplier_package_unit"}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>
-              My supplier delivers this ingredient in a:
-            </FormLabel>
-            <FormControl>
-              <select
-                {...field}
-                className="w-full border rounded-md px-3 py-2 text-sm bg-white"
-                value={field.value || ""}
-                onChange={(e) => field.onChange(e.target.value)}
-              >
-                <option value="">Select how it's packaged...</option>
-                {purchaseUnits.map((unit) => (
-                  <option key={unit} value={unit}>{unit}</option>
-                ))}
-              </select>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+    <div className="space-y-6 bg-blue-50 p-6 rounded-lg border border-blue-200">
+      <div className="text-center">
+        <h3 className="font-semibold text-lg text-blue-900 mb-2">Tell us about your supplier's packaging</h3>
+        <p className="text-sm text-blue-700">
+          Help us calculate the exact cost per unit by describing how {supplierName} packages this ingredient.
+        </p>
+      </div>
 
-      <FormField
-        control={control}
-        name={fieldPrefix + "price_per_package"}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>And it costs me (€):</FormLabel>
-            <FormControl>
-              <Input 
-                type="number" 
-                min="0" 
-                step="0.01" 
-                placeholder="0.00"
-                {...field} 
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name={fieldPrefix + "units_per_package"}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>
-              Each package contains this many units:
-            </FormLabel>
-            <FormControl>
-              <Input
-                type="number"
-                min="1"
-                placeholder="e.g. 24"
-                {...field}
-              />
-            </FormControl>
-            <div className="text-xs text-muted-foreground">
-              Leave blank if the package can't be divided into identical units.
-            </div>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name={fieldPrefix + "inner_unit_type"}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>
-              Each unit is measured as:
-            </FormLabel>
-            <FormControl>
-              <select
-                {...field}
-                className="w-full border rounded-md px-3 py-2 text-sm bg-white"
-                value={field.value || ""}
-                onChange={(e) => field.onChange(e.target.value)}
-              >
-                <option value="">Select unit type...</option>
-                {innerUnits.map((unit) => (
-                  <option key={unit} value={unit}>{unit}</option>
-                ))}
-              </select>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="bg-white p-4 rounded-lg border">
+        <p className="text-lg text-gray-800 mb-4 leading-relaxed">
+          My supplier <strong className="text-blue-600">{supplierName}</strong> delivers this ingredient in a{" "}
+          <span className="inline-block min-w-[120px] text-blue-600 font-semibold">
+            <FormField
+              control={control}
+              name={fieldPrefix + "supplier_package_unit"}
+              render={({ field }) => (
+                <FormItem className="inline-block">
+                  <FormControl>
+                    <select
+                      {...field}
+                      className="inline border-b-2 border-blue-300 bg-transparent px-2 py-1 text-blue-600 font-semibold focus:border-blue-500 focus:outline-none"
+                      value={field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value)}
+                    >
+                      <option value="">___</option>
+                      {purchaseUnits.map((unit) => (
+                        <option key={unit} value={unit}>{unit}</option>
+                      ))}
+                    </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </span>
+          , and it costs me{" "}
+          <span className="inline-block min-w-[80px] text-blue-600 font-semibold">
+            €<FormField
+              control={control}
+              name={fieldPrefix + "price_per_package"}
+              render={({ field }) => (
+                <FormItem className="inline-block">
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      min="0" 
+                      step="0.01" 
+                      placeholder="0.00"
+                      className="inline w-20 border-b-2 border-blue-300 bg-transparent px-1 py-0 text-blue-600 font-semibold focus:border-blue-500 border-t-0 border-l-0 border-r-0 rounded-none"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </span>
+          .
+        </p>
+        
+        <p className="text-lg text-gray-800 mb-4 leading-relaxed">
+          Each package contains{" "}
+          <span className="inline-block min-w-[60px] text-blue-600 font-semibold">
+            <FormField
+              control={control}
+              name={fieldPrefix + "units_per_package"}
+              render={({ field }) => (
+                <FormItem className="inline-block">
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="1"
+                      placeholder="1"
+                      className="inline w-16 border-b-2 border-blue-300 bg-transparent px-1 py-0 text-blue-600 font-semibold focus:border-blue-500 border-t-0 border-l-0 border-r-0 rounded-none"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </span>
+          {" "}units, and each unit is measured as{" "}
+          <span className="inline-block min-w-[100px] text-blue-600 font-semibold">
+            <FormField
+              control={control}
+              name={fieldPrefix + "inner_unit_type"}
+              render={({ field }) => (
+                <FormItem className="inline-block">
+                  <FormControl>
+                    <select
+                      {...field}
+                      className="inline border-b-2 border-blue-300 bg-transparent px-2 py-1 text-blue-600 font-semibold focus:border-blue-500 focus:outline-none"
+                      value={field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value)}
+                    >
+                      <option value="">___</option>
+                      {innerUnits.map((unit) => (
+                        <option key={unit} value={unit}>{unit}</option>
+                      ))}
+                    </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </span>
+          .
+        </p>
+      </div>
     </div>
   );
 }

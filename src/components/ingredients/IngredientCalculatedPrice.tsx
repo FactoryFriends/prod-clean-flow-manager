@@ -31,21 +31,6 @@ export function IngredientCalculatedPrice({
           calculatedPricePerUnit={calculatedPrice}
         />
       )}
-      
-      <div>
-        <label className="block font-medium mb-1">Calculated Cost per Unit (€)</label>
-        <Input
-          value={calculatedPrice.toFixed(4)}
-          readOnly
-          disabled
-          className="bg-gray-100 cursor-not-allowed"
-        />
-        <div className="text-xs text-muted-foreground italic mt-1">
-          {pricePerPackage && unitsPerPackage > 0
-            ? `This will be used as your ingredient cost`
-            : `Enter packaging details above to calculate unit cost`}
-        </div>
-      </div>
     </div>
   );
 }

@@ -21,14 +21,19 @@ export function PackagingExplanation({
   }
 
   return (
-    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
-      <p className="text-blue-800">
-        My supplier <strong>{supplierName}</strong> delivers this ingredient in a{" "}
-        <strong>{purchaseUnit}</strong>, and it costs me <strong>€{pricePerPackage.toFixed(2)}</strong>.{" "}
-        Each <strong>{purchaseUnit}</strong> contains{" "}
-        <strong>{unitsPerPackage}</strong> units, so the cost per unit is{" "}
-        <strong>€{calculatedPricePerUnit.toFixed(4)}</strong>.
-      </p>
+    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+      <div className="text-center">
+        <h4 className="font-semibold text-green-800 mb-2">✓ Calculation Complete</h4>
+        <p className="text-lg text-green-700 leading-relaxed">
+          So the cost per unit is{" "}
+          <span className="text-2xl font-bold text-green-800">
+            €{calculatedPricePerUnit.toFixed(4)}
+          </span>
+        </p>
+        <p className="text-sm text-green-600 mt-2">
+          (€{pricePerPackage.toFixed(2)} ÷ {unitsPerPackage} units = €{calculatedPricePerUnit.toFixed(4)} per unit)
+        </p>
+      </div>
     </div>
   );
 }
