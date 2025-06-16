@@ -121,11 +121,13 @@ export function DrinkFormFields({
         )}
       />
 
-      <SupplierPackagingFields 
-        control={control} 
-        show={!!selectedSupplierId} 
-        supplierName={supplierName}
-      />
+      {selectedSupplierId && (
+        <SupplierPackagingFields 
+          control={control} 
+          show={true} 
+          supplierName={supplierName}
+        />
+      )}
 
       {pricePerPackage > 0 && unitsPerPackage > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
