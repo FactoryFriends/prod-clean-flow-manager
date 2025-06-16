@@ -1,35 +1,22 @@
 
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Form, FormLabel } from "@/components/ui/form";
 import { useCreateProduct, useAllProducts } from "@/hooks/useProductionData";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { toast } from "sonner";
-import { Switch } from "@/components/ui/switch";
 
 import {
   SemiFinishedFormData,
   RecipeIngredient,
-  formatNumberComma,
   parseNumberComma,
   calculateUnitSize,
-  UNIT_OPTIONS,
 } from "./semifinishedFormUtils";
 import { BatchAndUnitFields } from "./BatchAndUnitFields";
 import { RecipeIngredientsInput } from "./RecipeIngredientsInput";
-
-// Placeholder for calculated price (implement actual logic later)
-function calculatePricePlaceholder(
-  recipe: RecipeIngredient[],
-  allProducts: any[] | undefined
-) {
-  // TODO: fetch ingredient prices and compute for now just a placeholder
-  // You could sum ingredient cost here if available
-  return "Calculated from recipe";
-}
+import { SemiFinishedFormFields } from "./SemiFinishedFormFields";
+import { PricingFields } from "./PricingFields";
 
 export function SemiFinishedForm() {
   const form = useForm<SemiFinishedFormData>({
@@ -142,135 +129,15 @@ export function SemiFinishedForm() {
       <h2 className="text-xl font-semibold mb-2">Add Semi-finished Product</h2>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* Basic info fields */}
-          <FormField
-            control={form.control}
-            name="name"
-            rules={{
-              required: "Name is required",
-              validate: validateUniqueName,
-            }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. Homemade Curry Base" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          <SemiFinishedFormFields
+            suppliers={suppliers}
+            validateUniqueName={validateUniqueName}
+            unitSize={unitSize}
+            batchUnit={batchUnit}
           />
 
           {/* BATCH section */}
           <BatchAndUnitFields />
-
-          {/* Auto-calculated unit size */}
-          <div>
-            <FormLabel>
-              Unit Size (auto-calculated)
-            </FormLabel>
-            <Input
-              readOnly
-              value={
-                unitSize +
-                (batchUnit ? ` ${batchUnit}` : "")
-              }
-              className="bg-gray-100 cursor-not-allowed"
-            />
-            <div className="text-xs text-muted-foreground italic mt-1">
-              <span>
-                Each unit will have this size. <br />
-                For example: If a batch is 20 liters and makes 5 units, then unit size = 4,00 liters.
-              </span>
-            </div>
-          </div>
-
-          {/* Supplier */}
-          <FormField
-            control={form.control}
-            name="supplier_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Supplier (optional)</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    className="w-full border rounded-md px-3 py-2 text-sm bg-white"
-                    value={field.value || ""}
-                    onChange={(e) => field.onChange(e.target.value)}
-                  >
-                    <option value="">None</option>
-                    {suppliers.map((sup) => (
-                      <option key={sup.id} value={sup.id}>
-                        {sup.name}
-                      </option>
-                    ))}
-                  </select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Shelf life input - FIXED: improved input handling */}
-          <FormField
-            control={form.control}
-            name="shelf_life_days"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Shelf life (days)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="e.g. 7"
-                    {...field}
-                    value={field.value ? formatNumberComma(field.value) : ""}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value === "") {
-                        field.onChange(null);
-                      } else {
-                        const cleaned = value.replace(/[^\d,.]/g, "");
-                        field.onChange(cleaned);
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Labour time input - FIXED: improved input handling */}
-          <FormField
-            control={form.control}
-            name="labour_time_minutes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Labour time (minutes)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="text"
-                    inputMode="decimal"
-                    placeholder="e.g. 45 or 45,5"
-                    {...field}
-                    value={field.value ? formatNumberComma(field.value) : ""}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value === "") {
-                        field.onChange(null);
-                      } else {
-                        const cleaned = value.replace(/[^\d,.]/g, "");
-                        field.onChange(cleaned);
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           {/* Recipe (per batch) */}
           <div>
@@ -282,36 +149,7 @@ export function SemiFinishedForm() {
             />
           </div>
 
-          {/* Calculated price/batch field */}
-          <div>
-            <FormLabel>Estimated price/batch (€)</FormLabel>
-            <Input
-              value={calculatePricePlaceholder(recipe, allProducts)}
-              readOnly
-              disabled
-              className="bg-gray-100 cursor-not-allowed"
-            />
-            <div className="text-xs text-muted-foreground italic mt-1">
-              Price is automatically calculated from the ingredient recipe per batch.
-            </div>
-          </div>
-
-          {/* Active / Inactive Toggle */}
-          <FormField
-            control={form.control}
-            name="active"
-            render={({ field }) => (
-              <FormItem>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={!!field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                  <FormLabel>{field.value ? "Active" : "Inactive"}</FormLabel>
-                </div>
-              </FormItem>
-            )}
-          />
+          <PricingFields recipe={recipe} allProducts={allProducts} />
 
           <Button type="submit" className="w-full">
             Save Semi-finished Product
@@ -323,4 +161,3 @@ export function SemiFinishedForm() {
 }
 
 export default SemiFinishedForm;
-
