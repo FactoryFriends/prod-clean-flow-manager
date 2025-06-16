@@ -38,19 +38,6 @@ export function DrinkPricingFields({
     <>
       <FormField
         control={control}
-        name="cost"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Cost (€)</FormLabel>
-            <FormControl>
-              <Input type="number" min="0" step="0.01" {...field} />
-            </FormControl>
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
         name="markup_percent"
         render={({ field }) => (
           <FormItem>
