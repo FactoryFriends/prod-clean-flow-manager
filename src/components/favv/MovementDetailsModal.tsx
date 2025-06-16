@@ -2,8 +2,10 @@
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Package, FileText, User, Calendar, MapPin, Clipboard } from "lucide-react";
+import { Package, FileText, User, Calendar, MapPin, Clipboard, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
+import { useCustomers } from "@/hooks/useCustomers";
+import { Button } from "../ui/button";
 
 interface Movement {
   id: string;
@@ -15,6 +17,7 @@ interface Movement {
   quantity: number;
   dispatch_notes?: string;
   created_at: string;
+  packing_slip_id?: string | null;
 }
 
 interface MovementDetailsModalProps {
@@ -24,9 +27,24 @@ interface MovementDetailsModalProps {
 }
 
 export function MovementDetailsModal({ movement, isOpen, onClose }: MovementDetailsModalProps) {
+  const { data: customers = [] } = useCustomers();
+  
   if (!movement) return null;
 
   const isExternal = movement.dispatch_type === "external";
+  
+  // Find customer name if this is an external dispatch
+  const getCustomerName = () => {
+    if (!isExternal || !movement.customer) return movement.destination || "External Customer";
+    
+    const customer = customers.find(c => c.id === movement.customer);
+    return customer ? customer.name : movement.customer;
+  };
+
+  const handleViewPackingSlip = () => {
+    // TODO: Implement navigation to packing slip details
+    console.log("Navigate to packing slip:", movement.packing_slip_id);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -79,36 +97,46 @@ export function MovementDetailsModal({ movement, isOpen, onClose }: MovementDeta
           </Card>
 
           {/* Destination/Customer Information */}
-          {isExternal && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <MapPin className="w-5 h-5" />
-                  Destination
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Customer</label>
-                  <p className="font-medium">{movement.customer || movement.destination || "External Customer"}</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <MapPin className="w-5 h-5" />
+                {isExternal ? "Customer" : "Internal Destination"}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">
+                  {isExternal ? "Customer" : "Location"}
+                </label>
+                <p className="font-medium">{getCustomerName()}</p>
+              </div>
+            </CardContent>
+          </Card>
 
-          {movement.destination && !isExternal && (
+          {/* Packing Slip Reference */}
+          {movement.packing_slip_id && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <MapPin className="w-5 h-5" />
-                  Internal Destination
+                  <FileText className="w-5 h-5" />
+                  Packing Slip
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">Location</label>
-                  <p className="font-medium">{movement.destination}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Reference</label>
+                  <p className="font-mono text-sm">{movement.packing_slip_id}</p>
                 </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleViewPackingSlip}
+                  className="flex items-center gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View Archived Packing Slip
+                </Button>
               </CardContent>
             </Card>
           )}

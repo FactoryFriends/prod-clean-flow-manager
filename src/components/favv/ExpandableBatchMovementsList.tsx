@@ -16,6 +16,7 @@ interface Movement {
   quantity: number;
   dispatch_notes?: string;
   created_at: string;
+  packing_slip_id?: string | null;
 }
 
 interface ExpandableBatchMovementsListProps {
