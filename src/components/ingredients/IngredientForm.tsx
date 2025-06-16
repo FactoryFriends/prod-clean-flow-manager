@@ -45,6 +45,7 @@ export function IngredientForm() {
 
   const { data: suppliers = [] } = useSuppliers();
   const productType = form.watch("product_kind");
+  const selectedSupplierId = form.watch("supplier_id");
   
   // Use custom hooks for different concerns
   const { onSubmit, error } = useIngredientFormSubmission({ form });
@@ -54,6 +55,11 @@ export function IngredientForm() {
   // Watch package fields
   const unitsPerPackage = Number(form.watch("units_per_package")) || 1;
   const pricePerPackage = Number(form.watch("price_per_package")) || 0;
+  const purchaseUnit = form.watch("supplier_package_unit") || "";
+  
+  // Get supplier name for display
+  const selectedSupplier = suppliers.find(s => s.id === selectedSupplierId);
+  const supplierName = selectedSupplier?.name || "your supplier";
 
   return (
     <div className="bg-white border p-6 rounded-xl shadow max-w-xl">
@@ -80,10 +86,16 @@ export function IngredientForm() {
                 onUpload={handleFicheUpload}
                 fieldValue={form.getValues("product_fiche_url")}
               />
-              <SupplierPackagingFields control={form.control} show={productType === "extern"} />
+              <SupplierPackagingFields 
+                control={form.control} 
+                show={productType === "extern"} 
+                supplierName={supplierName}
+              />
               <IngredientCalculatedPrice 
                 pricePerPackage={pricePerPackage}
                 unitsPerPackage={unitsPerPackage}
+                supplierName={supplierName}
+                purchaseUnit={purchaseUnit}
               />
             </>
           )}

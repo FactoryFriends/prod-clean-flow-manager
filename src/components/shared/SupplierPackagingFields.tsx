@@ -7,26 +7,35 @@ import { Button } from "@/components/ui/button";
 
 export interface SupplierPackagingFieldsProps {
   control: any;
-  fieldPrefix?: string; // for nested keys if needed, usually blank
+  fieldPrefix?: string;
   show: boolean;
+  supplierName?: string;
 }
 
-export function SupplierPackagingFields({ control, fieldPrefix = "", show }: SupplierPackagingFieldsProps) {
+export function SupplierPackagingFields({ 
+  control, 
+  fieldPrefix = "", 
+  show, 
+  supplierName = "your supplier" 
+}: SupplierPackagingFieldsProps) {
   const { purchaseUnits, innerUnits } = useUnitOptions();
-  const [addingPurchaseUnit, setAddingPurchaseUnit] = useState(false);
-  const [addingInnerUnit, setAddingInnerUnit] = useState(false);
 
   if (!show) return null;
+  
   return (
-    <>
+    <div className="space-y-4 bg-gray-50 p-4 rounded-lg border">
+      <h3 className="font-medium text-gray-900">Packaging Information</h3>
+      <p className="text-sm text-gray-600">
+        Tell us how {supplierName} packages this ingredient:
+      </p>
+      
       <FormField
         control={control}
         name={fieldPrefix + "supplier_package_unit"}
         render={({ field }) => (
           <FormItem>
             <FormLabel>
-              Purchase Unit
-              {/* Optionally: <Button onClick={() => setAddingPurchaseUnit(true)} size="xs" variant="ghost" className="ml-2">＋</Button> */}
+              My supplier delivers this ingredient in a:
             </FormLabel>
             <FormControl>
               <select
@@ -35,9 +44,9 @@ export function SupplierPackagingFields({ control, fieldPrefix = "", show }: Sup
                 value={field.value || ""}
                 onChange={(e) => field.onChange(e.target.value)}
               >
-                <option value="">Select purchase unit…</option>
-                {purchaseUnits.map((item) => (
-                  <option key={item} value={item}>{item}</option>
+                <option value="">Select how it's packaged...</option>
+                {purchaseUnits.map((unit) => (
+                  <option key={unit} value={unit}>{unit}</option>
                 ))}
               </select>
             </FormControl>
@@ -45,14 +54,34 @@ export function SupplierPackagingFields({ control, fieldPrefix = "", show }: Sup
           </FormItem>
         )}
       />
+
+      <FormField
+        control={control}
+        name={fieldPrefix + "price_per_package"}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>And it costs me (€):</FormLabel>
+            <FormControl>
+              <Input 
+                type="number" 
+                min="0" 
+                step="0.01" 
+                placeholder="0.00"
+                {...field} 
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       <FormField
         control={control}
         name={fieldPrefix + "units_per_package"}
         render={({ field }) => (
           <FormItem>
             <FormLabel>
-              Units per Package{" "}
-              <span className="text-xs text-muted-foreground">(if relevant)</span>
+              Each package contains this many units:
             </FormLabel>
             <FormControl>
               <Input
@@ -63,19 +92,20 @@ export function SupplierPackagingFields({ control, fieldPrefix = "", show }: Sup
               />
             </FormControl>
             <div className="text-xs text-muted-foreground">
-              Leave blank if not packed as identical units.
+              Leave blank if the package can't be divided into identical units.
             </div>
+            <FormMessage />
           </FormItem>
         )}
       />
+
       <FormField
         control={control}
         name={fieldPrefix + "inner_unit_type"}
         render={({ field }) => (
           <FormItem>
             <FormLabel>
-              Inner Unit Type
-              {/* Optionally: <Button onClick={() => setAddingInnerUnit(true)} size="xs" variant="ghost" className="ml-2">＋</Button> */}
+              Each unit is measured as:
             </FormLabel>
             <FormControl>
               <select
@@ -84,9 +114,9 @@ export function SupplierPackagingFields({ control, fieldPrefix = "", show }: Sup
                 value={field.value || ""}
                 onChange={(e) => field.onChange(e.target.value)}
               >
-                <option value="">Select inner unit…</option>
-                {innerUnits.map((item) => (
-                  <option key={item} value={item}>{item}</option>
+                <option value="">Select unit type...</option>
+                {innerUnits.map((unit) => (
+                  <option key={unit} value={unit}>{unit}</option>
                 ))}
               </select>
             </FormControl>
@@ -94,20 +124,7 @@ export function SupplierPackagingFields({ control, fieldPrefix = "", show }: Sup
           </FormItem>
         )}
       />
-      <FormField
-        control={control}
-        name={fieldPrefix + "price_per_package"}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Price per Purchase Package (€)</FormLabel>
-            <FormControl>
-              <Input type="number" min="0" step="0.01" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </>
+    </div>
   );
 }
 
