@@ -29,9 +29,9 @@ export function DrinkPricingFields({
   vatRate,
 }: DrinkPricingFieldsProps) {
   const calculatedSalesPriceWithVAT = calculatedSalesPrice * (1 + vatRate / 100);
-  const finalSalesPriceExclVAT = Number(control._formValues?.sales_price) || 0;
-  const finalSalesPriceWithVAT = finalSalesPriceExclVAT * (1 + vatRate / 100);
-  const deltaWithVAT = calculatedSalesPriceWithVAT - finalSalesPriceWithVAT;
+  const finalSalesPriceInclVAT = Number(control._formValues?.sales_price) || 0;
+  const finalSalesPriceExclVAT = finalSalesPriceInclVAT / (1 + vatRate / 100);
+  const deltaWithVAT = calculatedSalesPriceWithVAT - finalSalesPriceInclVAT;
   const deltaVATColor = deltaWithVAT >= 0 ? "text-green-700" : "text-red-600";
 
   return (
@@ -117,7 +117,7 @@ export function DrinkPricingFields({
         name="sales_price"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Final Sales Price (excl. VAT) (€)</FormLabel>
+            <FormLabel>Final Sales Price (incl. VAT) (€)</FormLabel>
             <FormControl>
               <Input type="number" min="0" step="0.01" {...field} />
             </FormControl>
@@ -126,15 +126,15 @@ export function DrinkPricingFields({
       />
 
       <div>
-        <FormLabel>Final Sales Price (incl. VAT) (€)</FormLabel>
+        <FormLabel>Final Sales Price (excl. VAT) (€)</FormLabel>
         <Input
-          value={finalSalesPriceWithVAT.toFixed(2)}
+          value={finalSalesPriceExclVAT.toFixed(2)}
           readOnly
           disabled
-          className="bg-green-100 cursor-not-allowed font-semibold text-green-800"
+          className="bg-gray-100 cursor-not-allowed"
         />
-        <div className="text-xs text-green-600 italic mt-1">
-          Customer pays: €{finalSalesPriceWithVAT.toFixed(2)} (incl. {vatRate}% VAT)
+        <div className="text-xs text-gray-600 italic mt-1">
+          Excluding {vatRate}% VAT from final price
         </div>
       </div>
 

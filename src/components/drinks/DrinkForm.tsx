@@ -45,11 +45,12 @@ export function DrinkForm({ onSuccess }: DrinkFormProps) {
 
   const cost = Number(form.watch("cost")) || 0;
   const markupPercent = Number(form.watch("markup_percent")) || 0;
-  const fixedSalesPrice = Number(form.watch("sales_price")) || 0;
+  const finalSalesPriceInclVAT = Number(form.watch("sales_price")) || 0;
   const vatRate = Number(form.watch("vat_rate")) || 6;
 
   const calculatedSalesPrice = cost + (cost * markupPercent / 100);
-  const deltaSalesPrice = calculatedSalesPrice - fixedSalesPrice;
+  const calculatedSalesPriceWithVAT = calculatedSalesPrice * (1 + vatRate / 100);
+  const deltaSalesPrice = calculatedSalesPriceWithVAT - finalSalesPriceInclVAT;
   const deltaColor = deltaSalesPrice >= 0 ? "text-green-700" : "text-red-600";
 
   const onSubmit = (data: DrinkFormData) => {

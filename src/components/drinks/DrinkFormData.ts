@@ -15,7 +15,7 @@ export interface DrinkFormData {
   active: boolean;
   cost: number;
   markup_percent: number;
-  sales_price: number;
+  sales_price: number; // This is inclusive of VAT
   vat_rate: number;
   supplier_package_unit?: string;
   units_per_package?: number;
@@ -32,7 +32,7 @@ export const defaultDrinkFormValues: DrinkFormData = {
   active: true,
   cost: 0,
   markup_percent: 0,
-  sales_price: 0,
+  sales_price: 0, // This is inclusive of VAT
   vat_rate: 6,
   supplier_package_unit: "",
   units_per_package: undefined,
