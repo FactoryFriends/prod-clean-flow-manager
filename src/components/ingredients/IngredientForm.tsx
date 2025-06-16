@@ -28,11 +28,13 @@ type ExtendedIngredientFormData = IngredientFormData & {
 };
 
 export function IngredientForm() {
+  const { innerUnits } = useUnitOptions();
+  
   const form = useForm<IngredientFormData>({
     defaultValues: {
       name: "",
       unit_size: 1,
-      unit_type: "KG",
+      unit_type: innerUnits[0] || "PIECE", // Use first available unit from context
       supplier_name: "",
       supplier_id: "",
       price_per_unit: 0,
@@ -53,7 +55,6 @@ export function IngredientForm() {
   const [ficheFile, setFicheFile] = useState<File | null>(null);
   const [uploadingFiche, setUploadingFiche] = useState(false);
   const productType = form.watch("product_kind");
-  const { innerUnits } = useUnitOptions();
   const [error, setError] = useState<string | null>(null);
 
   async function handleFicheUpload(e: React.ChangeEvent<HTMLInputElement>) {
