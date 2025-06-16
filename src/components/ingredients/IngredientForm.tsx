@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
@@ -61,6 +61,14 @@ export function IngredientForm() {
   const selectedSupplier = suppliers.find(s => s.id === selectedSupplierId);
   const supplierName = selectedSupplier?.name || "your supplier";
 
+  // Auto-populate price_per_unit when packaging calculation is available
+  useEffect(() => {
+    if (productType === "extern" && pricePerPackage > 0 && unitsPerPackage > 0) {
+      const calculatedPrice = pricePerPackage / unitsPerPackage;
+      form.setValue("price_per_unit", calculatedPrice);
+    }
+  }, [pricePerPackage, unitsPerPackage, productType, form]);
+
   return (
     <div className="bg-white border p-6 rounded-xl shadow max-w-xl">
       <h2 className="text-xl font-semibold mb-2">Add Ingredient</h2>
@@ -99,7 +107,6 @@ export function IngredientForm() {
               />
             </>
           )}
-          <IngredientPriceInput control={form.control} />
           <IngredientPickableInput control={form.control} />
           <IngredientAllergensInput control={form.control} />
           <Button type="submit" className="w-full">

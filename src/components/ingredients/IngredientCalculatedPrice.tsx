@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Input } from "@/components/ui/input";
 import PackagingExplanation from "../shared/PackagingExplanation";
 
 interface IngredientCalculatedPriceProps {
@@ -23,13 +22,20 @@ export function IngredientCalculatedPrice({
   return (
     <div className="space-y-3">
       {pricePerPackage && unitsPerPackage > 0 && (
-        <PackagingExplanation
-          supplierName={supplierName}
-          purchaseUnit={purchaseUnit}
-          pricePerPackage={pricePerPackage}
-          unitsPerPackage={unitsPerPackage}
-          calculatedPricePerUnit={calculatedPrice}
-        />
+        <>
+          <PackagingExplanation
+            supplierName={supplierName}
+            purchaseUnit={purchaseUnit}
+            pricePerPackage={pricePerPackage}
+            unitsPerPackage={unitsPerPackage}
+            calculatedPricePerUnit={calculatedPrice}
+          />
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <p className="text-sm text-blue-700">
+              ✓ This calculated price (€{calculatedPrice.toFixed(4)} per unit) will be automatically used for all recipe cost calculations.
+            </p>
+          </div>
+        </>
       )}
     </div>
   );
