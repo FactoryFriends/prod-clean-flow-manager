@@ -1,7 +1,6 @@
-
 import { useState, useCallback } from 'react';
 import { Logger } from '@/utils/logger';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 interface ErrorHandlerOptions {
   component?: string;
