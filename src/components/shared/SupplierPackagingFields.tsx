@@ -32,7 +32,7 @@ export function SupplierPackagingFields({
       </div>
 
       <div className="bg-white p-4 rounded-lg border">
-        <p className="text-lg text-gray-800 mb-4 leading-relaxed">
+        <p className="text-base text-gray-800 mb-4 leading-relaxed">
           My supplier <strong className="text-blue-600">{supplierName}</strong> delivers this ingredient in a{" "}
           <span className="inline-block min-w-[120px] text-blue-600 font-semibold">
             <FormField
@@ -43,7 +43,7 @@ export function SupplierPackagingFields({
                   <FormControl>
                     <select
                       {...field}
-                      className="inline border-b-2 border-blue-300 bg-transparent px-2 py-1 text-blue-600 font-semibold focus:border-blue-500 focus:outline-none"
+                      className="inline border-b-2 border-blue-300 bg-transparent px-2 py-1 text-blue-600 font-semibold focus:border-blue-500 focus:outline-none text-base"
                       value={field.value || ""}
                       onChange={(e) => field.onChange(e.target.value)}
                     >
@@ -71,7 +71,7 @@ export function SupplierPackagingFields({
                       min="0" 
                       step="0.01" 
                       placeholder="0.00"
-                      className="inline w-20 border-b-2 border-blue-300 bg-transparent px-1 py-0 text-blue-600 font-semibold focus:border-blue-500 border-t-0 border-l-0 border-r-0 rounded-none"
+                      className="inline w-20 border-b-2 border-blue-300 bg-transparent px-1 py-0 text-blue-600 font-semibold focus:border-blue-500 border-t-0 border-l-0 border-r-0 rounded-none text-base"
                       {...field} 
                     />
                   </FormControl>
@@ -83,7 +83,7 @@ export function SupplierPackagingFields({
           .
         </p>
         
-        <p className="text-lg text-gray-800 mb-4 leading-relaxed">
+        <p className="text-base text-gray-800 mb-4 leading-relaxed">
           Each package contains{" "}
           <span className="inline-block min-w-[60px] text-blue-600 font-semibold">
             <FormField
@@ -96,7 +96,7 @@ export function SupplierPackagingFields({
                       type="number"
                       min="1"
                       placeholder="1"
-                      className="inline w-16 border-b-2 border-blue-300 bg-transparent px-1 py-0 text-blue-600 font-semibold focus:border-blue-500 border-t-0 border-l-0 border-r-0 rounded-none"
+                      className="inline w-16 border-b-2 border-blue-300 bg-transparent px-1 py-0 text-blue-600 font-semibold focus:border-blue-500 border-t-0 border-l-0 border-r-0 rounded-none text-base"
                       {...field}
                     />
                   </FormControl>
@@ -115,7 +115,7 @@ export function SupplierPackagingFields({
                   <FormControl>
                     <select
                       {...field}
-                      className="inline border-b-2 border-blue-300 bg-transparent px-2 py-1 text-blue-600 font-semibold focus:border-blue-500 focus:outline-none"
+                      className="inline border-b-2 border-blue-300 bg-transparent px-2 py-1 text-blue-600 font-semibold focus:border-blue-500 focus:outline-none text-base"
                       value={field.value || ""}
                       onChange={(e) => field.onChange(e.target.value)}
                     >
