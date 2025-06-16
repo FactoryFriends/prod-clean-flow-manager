@@ -30,10 +30,15 @@ export class LabelPrintService {
   // Check if local print service is available
   static async checkServiceAvailable(): Promise<boolean> {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      
       const response = await fetch(`${PRINT_SERVICE_URL}/health`, {
         method: 'GET',
-        timeout: 2000,
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
       return response.ok;
     } catch (error) {
       console.log('Print service not available:', error);
