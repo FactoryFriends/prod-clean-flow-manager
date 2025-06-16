@@ -1,6 +1,11 @@
 
 export const DRINK_UNIT_OPTIONS = ["BOTTLE", "CAN", "LITER", "PIECE"];
 
+export const DRINK_VAT_OPTIONS = [
+  { value: 6, label: "6% (Non-alcoholic drinks)" },
+  { value: 21, label: "21% (Alcoholic drinks)" }
+];
+
 export interface DrinkFormData {
   name: string;
   unit_size: number;
@@ -11,6 +16,7 @@ export interface DrinkFormData {
   cost: number;
   markup_percent: number;
   sales_price: number;
+  vat_rate: number;
   supplier_package_unit?: string;
   units_per_package?: number;
   inner_unit_type?: string;
@@ -27,6 +33,7 @@ export const defaultDrinkFormValues: DrinkFormData = {
   cost: 0,
   markup_percent: 0,
   sales_price: 0,
+  vat_rate: 6,
   supplier_package_unit: "",
   units_per_package: undefined,
   inner_unit_type: "",

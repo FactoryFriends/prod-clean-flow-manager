@@ -46,6 +46,7 @@ export function DrinkForm({ onSuccess }: DrinkFormProps) {
   const cost = Number(form.watch("cost")) || 0;
   const markupPercent = Number(form.watch("markup_percent")) || 0;
   const fixedSalesPrice = Number(form.watch("sales_price")) || 0;
+  const vatRate = Number(form.watch("vat_rate")) || 6;
 
   const calculatedSalesPrice = cost + (cost * markupPercent / 100);
   const deltaSalesPrice = calculatedSalesPrice - fixedSalesPrice;
@@ -80,6 +81,7 @@ export function DrinkForm({ onSuccess }: DrinkFormProps) {
         cost: Number(data.cost) || 0,
         markup_percent: Number(data.markup_percent) || 0,
         sales_price: Number(data.sales_price) || 0,
+        vat_rate: Number(data.vat_rate) || 6,
         supplier_package_unit: data.supplier_package_unit ? data.supplier_package_unit.toUpperCase() : undefined,
         inner_unit_type: data.inner_unit_type ? data.inner_unit_type.toUpperCase() : undefined,
       },
@@ -120,6 +122,7 @@ export function DrinkForm({ onSuccess }: DrinkFormProps) {
             calculatedSalesPrice={calculatedSalesPrice}
             deltaSalesPrice={deltaSalesPrice}
             deltaColor={deltaColor}
+            vatRate={vatRate}
           />
 
           <Button type="submit" className="w-full">
