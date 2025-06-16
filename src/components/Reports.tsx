@@ -7,7 +7,7 @@ import { ManagementReports } from "./ManagementReports";
 interface ReportsProps {
   currentLocation: "tothai" | "khin";
   onSectionChange?: (section: string) => void;
-  favvTabActive?: boolean; // <--- New optional prop
+  favvTabActive?: boolean;
 }
 
 export function Reports({ currentLocation, onSectionChange, favvTabActive }: ReportsProps) {
@@ -32,7 +32,7 @@ export function Reports({ currentLocation, onSectionChange, favvTabActive }: Rep
 
       <Tabs value={tab} onValueChange={setTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="management">Management Dashboard</TabsTrigger>
+          <TabsTrigger value="management">Management Reports</TabsTrigger>
           <TabsTrigger value="favv">FAVV Compliance</TabsTrigger>
         </TabsList>
 
