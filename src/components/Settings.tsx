@@ -31,7 +31,8 @@ export function Settings({ currentLocation }: SettingsProps) {
     dialogStates: {
       productDialog: settingsState.productDialogOpen,
       staffCodeDialog: settingsState.staffCodeDialogOpen,
-      templateDialog: settingsState.templateDialogOpen
+      templateDialog: settingsState.templateDialogOpen,
+      drinkDialog: settingsState.drinkDialogOpen
     }
   });
 
@@ -64,6 +65,9 @@ export function Settings({ currentLocation }: SettingsProps) {
           setTemplateDialogOpen={settingsState.setTemplateDialogOpen}
           editingTemplate={settingsState.editingTemplate}
           handleTemplateSuccess={settingsState.handlers.handleTemplateSuccess}
+          drinkDialogOpen={settingsState.drinkDialogOpen}
+          setDrinkDialogOpen={settingsState.setDrinkDialogOpen}
+          handleDrinkSuccess={settingsState.handlers.handleDrinkSuccess}
         />
       </div>
     </UnitOptionsProvider>

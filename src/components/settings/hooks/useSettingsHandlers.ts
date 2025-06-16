@@ -64,6 +64,13 @@ export function useSettingsHandlers() {
     }, { action: 'templateSuccess' });
   };
 
+  const handleDrinkSuccess = async () => {
+    Logger.trace('SettingsHandlers', 'handleDrinkSuccess');
+    await executeWithErrorHandling(async () => {
+      state.setDrinkDialogOpen(false);
+    }, { action: 'drinkSuccess' });
+  };
+
   const handleAddNewProduct = () => {
     Logger.trace('SettingsHandlers', 'handleAddNewProduct');
     try {
@@ -77,8 +84,7 @@ export function useSettingsHandlers() {
   const handleAddNewDrink = () => {
     Logger.trace('SettingsHandlers', 'handleAddNewDrink');
     try {
-      state.setEditingProduct(null);
-      state.setProductDialogOpen(true);
+      state.setDrinkDialogOpen(true);
     } catch (error) {
       handleError(error as Error, { action: 'addNewDrink' });
     }
@@ -113,6 +119,7 @@ export function useSettingsHandlers() {
       handleProductSuccess,
       handleStaffCodeSuccess,
       handleTemplateSuccess,
+      handleDrinkSuccess,
       handleAddNewProduct,
       handleAddNewDrink,
       handleAddNewStaffCode,

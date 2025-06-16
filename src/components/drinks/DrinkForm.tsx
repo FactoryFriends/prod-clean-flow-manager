@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -36,7 +35,11 @@ interface DrinkFormData {
   price_per_package?: number;
 }
 
-export function DrinkForm() {
+interface DrinkFormProps {
+  onSuccess?: () => void;
+}
+
+export function DrinkForm({ onSuccess }: DrinkFormProps) {
   const form = useForm<DrinkFormData>({
     defaultValues: {
       name: "",
@@ -136,6 +139,9 @@ export function DrinkForm() {
       {
         onSuccess: () => {
           form.reset();
+          if (onSuccess) {
+            onSuccess();
+          }
         },
       }
     );

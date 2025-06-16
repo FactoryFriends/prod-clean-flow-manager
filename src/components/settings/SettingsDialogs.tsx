@@ -3,25 +3,24 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ProductForm } from "./ProductForm";
 import { StaffCodeForm } from "./StaffCodeForm";
 import { TaskTemplateForm } from "./TaskTemplateForm";
+import { DrinkForm } from "../drinks/DrinkForm";
 
 interface SettingsDialogsProps {
-  // Product dialog
   productDialogOpen: boolean;
   setProductDialogOpen: (open: boolean) => void;
   editingProduct: any;
   handleProductSuccess: () => void;
-  
-  // Staff code dialog
   staffCodeDialogOpen: boolean;
   setStaffCodeDialogOpen: (open: boolean) => void;
   editingStaffCode: any;
   handleStaffCodeSuccess: () => void;
-  
-  // Template dialog
   templateDialogOpen: boolean;
   setTemplateDialogOpen: (open: boolean) => void;
   editingTemplate: any;
   handleTemplateSuccess: () => void;
+  drinkDialogOpen?: boolean;
+  setDrinkDialogOpen?: (open: boolean) => void;
+  handleDrinkSuccess?: () => void;
 }
 
 export function SettingsDialogs({
@@ -37,47 +36,59 @@ export function SettingsDialogs({
   setTemplateDialogOpen,
   editingTemplate,
   handleTemplateSuccess,
+  drinkDialogOpen = false,
+  setDrinkDialogOpen = () => {},
+  handleDrinkSuccess = () => {},
 }: SettingsDialogsProps) {
   return (
     <>
-      {/* Product Dialog */}
       <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingProduct ? "Edit Product" : "Add New Product"}</DialogTitle>
+            <DialogTitle>
+              {editingProduct ? "Edit Product" : "Add New Product"}
+            </DialogTitle>
           </DialogHeader>
-          <ProductForm 
-            editingProduct={editingProduct}
+          <ProductForm
+            product={editingProduct}
             onSuccess={handleProductSuccess}
-            onCancel={() => setProductDialogOpen(false)}
           />
         </DialogContent>
       </Dialog>
 
-      {/* Staff Code Dialog */}
+      <Dialog open={drinkDialogOpen} onOpenChange={setDrinkDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Drink</DialogTitle>
+          </DialogHeader>
+          <DrinkForm />
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={staffCodeDialogOpen} onOpenChange={setStaffCodeDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingStaffCode ? "Edit Staff Code" : "Add New Staff Code"}</DialogTitle>
+            <DialogTitle>
+              {editingStaffCode ? "Edit Staff Code" : "Add New Staff Code"}
+            </DialogTitle>
           </DialogHeader>
-          <StaffCodeForm 
-            editingStaffCode={editingStaffCode}
+          <StaffCodeForm
+            staffCode={editingStaffCode}
             onSuccess={handleStaffCodeSuccess}
-            onCancel={() => setStaffCodeDialogOpen(false)}
           />
         </DialogContent>
       </Dialog>
 
-      {/* Template Dialog */}
       <Dialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingTemplate ? "Edit Template" : "Add New Template"}</DialogTitle>
+            <DialogTitle>
+              {editingTemplate ? "Edit Template" : "Add New Template"}
+            </DialogTitle>
           </DialogHeader>
-          <TaskTemplateForm 
-            editingTemplate={editingTemplate}
+          <TaskTemplateForm
+            template={editingTemplate}
             onSuccess={handleTemplateSuccess}
-            onCancel={() => setTemplateDialogOpen(false)}
           />
         </DialogContent>
       </Dialog>

@@ -8,6 +8,7 @@ export function useSettingsState() {
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [staffCodeDialogOpen, setStaffCodeDialogOpen] = useState(false);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [drinkDialogOpen, setDrinkDialogOpen] = useState(false);
   
   // Filter states
   const [productFilter, setProductFilter] = useState("");
@@ -32,6 +33,8 @@ export function useSettingsState() {
     setStaffCodeDialogOpen,
     templateDialogOpen,
     setTemplateDialogOpen,
+    drinkDialogOpen,
+    setDrinkDialogOpen,
     
     // Filter states
     productFilter,
