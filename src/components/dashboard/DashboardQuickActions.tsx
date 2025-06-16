@@ -8,8 +8,8 @@ interface DashboardQuickActionsProps {
 }
 
 export function DashboardQuickActions({ onSectionChange, currentLocation }: DashboardQuickActionsProps) {
-  // Map location IDs to database values
-  const dbLocation = currentLocation === "location1" ? "tothai" : "khin";
+  // currentLocation should already be "tothai" or "khin"
+  const dbLocation = currentLocation;
   
   // Define all buttons
   const allButtons = [
