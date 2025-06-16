@@ -13,9 +13,9 @@ import { SettingsDialogs } from "@/components/settings/SettingsDialogs";
 import { SystemInfo } from "@/components/settings/SystemInfo";
 import { SuppliersTab } from "@/components/settings/tabs/SuppliersTab";
 import { ExcelImport } from "@/components/settings/ExcelImport";
-import IngredientPriceManager from "../reports/IngredientPriceManager";
-import UnitOptionsSettings from "./settings/UnitOptionsSettings";
-import { UnitOptionsProvider } from "./shared/UnitOptionsContext";
+import IngredientPriceManager from "@/components/reports/IngredientPriceManager";
+import UnitOptionsSettings from "@/components/settings/UnitOptionsSettings";
+import { UnitOptionsProvider } from "@/components/shared/UnitOptionsContext";
 
 interface SettingsProps {
   currentLocation: "tothai" | "khin";
