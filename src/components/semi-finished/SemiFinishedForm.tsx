@@ -37,16 +37,28 @@ export function SemiFinishedForm() {
   const [recipe, setRecipe] = React.useState<RecipeIngredient[]>([]);
 
   const createProduct = useCreateProduct();
-  const { data: allProducts } = useAllProducts();
+  const { data: allProducts, isLoading: productsLoading } = useAllProducts();
   const { data: suppliers = [] } = useSuppliers();
 
+  console.log("All products data:", allProducts);
+  console.log("Products loading:", productsLoading);
+
   // Pick only ingredient and semi-finished type products for selectable recipe items
-  const ingredientOptions =
-    allProducts?.filter(
+  const ingredientOptions = React.useMemo(() => {
+    if (!allProducts) {
+      console.log("No allProducts data available");
+      return [];
+    }
+    
+    const filtered = allProducts.filter(
       (p) =>
         (p.product_type === "ingredient" || p.product_type === "semi-finished") &&
         p.active
-    ) || [];
+    );
+    
+    console.log("Filtered ingredient options:", filtered);
+    return filtered;
+  }, [allProducts]);
 
   // Name uniqueness validation
   function validateUniqueName(value: string) {
@@ -122,6 +134,14 @@ export function SemiFinishedForm() {
       }
     );
   };
+
+  if (productsLoading) {
+    return (
+      <div className="bg-white border p-6 rounded-xl shadow max-w-xl">
+        <div className="text-center">Loading products...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white border p-6 rounded-xl shadow max-w-xl">
