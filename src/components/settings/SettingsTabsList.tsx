@@ -19,7 +19,7 @@ export function SettingsTabsList() {
       <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 w-full">
         <TabsTrigger value="products" className="flex items-center gap-2">
           <Package className="w-4 h-4" />
-          <span className="hidden sm:inline">Products</span>
+          <span className="hidden sm:inline">Semi-finished</span>
         </TabsTrigger>
         <TabsTrigger value="drinks" className="flex items-center gap-2">
           <Coffee className="w-4 h-4" />
