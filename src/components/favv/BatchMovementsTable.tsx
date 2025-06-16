@@ -7,14 +7,27 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { useBatchMovements } from "@/hooks/useBatchMovements";
 
+interface Movement {
+  id: string;
+  dispatch_type: string;
+  dispatch_date: string;
+  destination?: string | null;
+  customer?: string | null;
+  picker_name: string;
+  quantity: number;
+  dispatch_notes?: string;
+  created_at: string;
+}
+
 interface BatchMovementsTableProps {
   batchId: string;
   batchNumber: string;
   isExpanded: boolean;
   onToggle: () => void;
+  onMovementClick: (movement: Movement) => void;
 }
 
-export function BatchMovementsTable({ batchId, batchNumber, isExpanded, onToggle }: BatchMovementsTableProps) {
+export function BatchMovementsTable({ batchId, batchNumber, isExpanded, onToggle, onMovementClick }: BatchMovementsTableProps) {
   const { data = [], isLoading } = useBatchMovements(batchId);
 
   return (
@@ -49,7 +62,11 @@ export function BatchMovementsTable({ batchId, batchNumber, isExpanded, onToggle
                 </TableHeader>
                 <TableBody>
                   {data.map((move) => (
-                    <TableRow key={move.id}>
+                    <TableRow 
+                      key={move.id}
+                      className="cursor-pointer hover:bg-blue-50"
+                      onClick={() => onMovementClick(move)}
+                    >
                       <TableCell>{format(new Date(move.dispatch_date), "MMM dd, yyyy HH:mm")}</TableCell>
                       <TableCell className="capitalize">{move.dispatch_type}</TableCell>
                       <TableCell>
