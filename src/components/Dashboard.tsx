@@ -1,4 +1,3 @@
-
 import { useProductionBatches } from "@/hooks/useProductionData";
 import { useCleaningTasks } from "@/hooks/useCleaningTasks";
 import { useFAVVCompletedTasks } from "@/hooks/useFAVVCompletedTasks";
@@ -80,7 +79,10 @@ export function Dashboard({ currentLocation, onSectionChange }: DashboardProps) 
       </div>
 
       {/* Quick Actions moved to top */}
-      <DashboardQuickActions onSectionChange={onSectionChange ?? (() => {})} />
+      <DashboardQuickActions 
+        onSectionChange={onSectionChange ?? (() => {})} 
+        currentLocation={currentLocation}
+      />
 
       <DashboardAlerts 
         expiringBatches={expiringBatches}
