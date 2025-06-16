@@ -4,7 +4,6 @@ import { useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
-import { formatNumberComma } from "./semifinishedFormUtils";
 
 interface SemiFinishedFormFieldsProps {
   suppliers: any[];
@@ -90,7 +89,7 @@ export function SemiFinishedFormFields({
         )}
       />
 
-      {/* Shelf life input - FIXED: improved input handling */}
+      {/* Shelf life input - SIMPLE NUMERIC INPUT */}
       <FormField
         control={control}
         name="shelf_life_days"
@@ -99,19 +98,13 @@ export function SemiFinishedFormFields({
             <FormLabel>Shelf life (days)</FormLabel>
             <FormControl>
               <Input
-                type="text"
-                inputMode="numeric"
+                type="number"
                 placeholder="e.g. 7"
                 {...field}
-                value={field.value ? formatNumberComma(field.value) : ""}
+                value={field.value || ""}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (value === "") {
-                    field.onChange(null);
-                  } else {
-                    const cleaned = value.replace(/[^\d,.]/g, "");
-                    field.onChange(cleaned);
-                  }
+                  field.onChange(value === "" ? null : Number(value));
                 }}
               />
             </FormControl>
@@ -120,7 +113,7 @@ export function SemiFinishedFormFields({
         )}
       />
 
-      {/* Labour time input - FIXED: improved input handling */}
+      {/* Labour time input - SIMPLE NUMERIC INPUT */}
       <FormField
         control={control}
         name="labour_time_minutes"
@@ -129,19 +122,14 @@ export function SemiFinishedFormFields({
             <FormLabel>Labour time (minutes)</FormLabel>
             <FormControl>
               <Input
-                type="text"
-                inputMode="decimal"
-                placeholder="e.g. 45 or 45,5"
+                type="number"
+                step="0.1"
+                placeholder="e.g. 45 or 45.5"
                 {...field}
-                value={field.value ? formatNumberComma(field.value) : ""}
+                value={field.value || ""}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (value === "") {
-                    field.onChange(null);
-                  } else {
-                    const cleaned = value.replace(/[^\d,.]/g, "");
-                    field.onChange(cleaned);
-                  }
+                  field.onChange(value === "" ? null : Number(value));
                 }}
               />
             </FormControl>
