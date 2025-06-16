@@ -50,10 +50,10 @@ export function DashboardQuickActions({ onSectionChange, currentLocation }: Dash
     }
   ];
 
-  // Filter buttons based on location
+  // Filter buttons based on location - only restrict for KHIN
   const visibleButtons = dbLocation === "khin" 
     ? allButtons.filter(button => button.id === 'favv' || button.id === 'cleaning')
-    : allButtons;
+    : allButtons; // Show all buttons for ToThai
 
   return (
     <div className="bg-card border border-border rounded-lg p-6">
