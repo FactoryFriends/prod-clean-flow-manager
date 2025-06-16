@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import { useCreateProduct, useAllProducts } from "@/hooks/useProductionData";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { toast } from "sonner";
 import { useUnitOptions } from "../shared/UnitOptionsContext";
+import SupplierPackagingFields from "../shared/SupplierPackagingFields";
 
 const DRINK_UNIT_OPTIONS = ["BOTTLE", "CAN", "LITER", "PIECE"];
 
@@ -74,11 +76,22 @@ export function DrinkForm() {
     return true;
   }
 
-  const supplierPackageUnit = form.watch("supplier_package_unit");
+  const selectedSupplierId = form.watch("supplier_id");
   const unitsPerPackage = Number(form.watch("units_per_package")) || 1;
-  const innerUnitType = form.watch("inner_unit_type");
   const pricePerPackage = Number(form.watch("price_per_package")) || 0;
-  const pricePerUnit = unitsPerPackage > 0 ? pricePerPackage / unitsPerPackage : pricePerPackage || 0;
+
+  // Get supplier name for display
+  const selectedSupplier = suppliers.find(s => s.id === selectedSupplierId);
+  const supplierName = selectedSupplier?.name || "your supplier";
+
+  // Auto-populate price_per_unit when packaging calculation is available
+  React.useEffect(() => {
+    if (pricePerPackage > 0 && unitsPerPackage > 0) {
+      const calculatedPrice = pricePerPackage / unitsPerPackage;
+      form.setValue("price_per_unit", calculatedPrice);
+      form.setValue("cost", calculatedPrice);
+    }
+  }, [pricePerPackage, unitsPerPackage, form]);
 
   const cost = Number(form.watch("cost")) || 0;
   const markupPercent = Number(form.watch("markup_percent")) || 0;
@@ -90,7 +103,7 @@ export function DrinkForm() {
 
   const onSubmit = (data: DrinkFormData) => {
     setError(null);
-    // Prevent empty/invalid units
+    
     if (!data.unit_type || !innerUnits.map(u => u.toUpperCase()).includes((data.unit_type + '').toUpperCase())) {
       setError("Unit type must be selected from the dropdown.");
       return;
@@ -99,7 +112,7 @@ export function DrinkForm() {
       setError("Units per package must be greater than 0 if set.");
       return;
     }
-    // Normalize supplier name
+    
     if (data.supplier_id && suppliers.length) {
       const sup = suppliers.find((s) => s.id === data.supplier_id);
       if (!sup) {
@@ -112,6 +125,7 @@ export function DrinkForm() {
     createProduct.mutate(
       {
         ...data,
+        product_type: "drink",
         unit_type: data.unit_type.toUpperCase(),
         cost: Number(data.cost) || 0,
         markup_percent: Number(data.markup_percent) || 0,
@@ -212,84 +226,19 @@ export function DrinkForm() {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="supplier_package_unit"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Purchase Unit (e.g. CASE, BOX)</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. CASE, BOX" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
+          <SupplierPackagingFields 
+            control={form.control} 
+            show={!!selectedSupplierId} 
+            supplierName={supplierName}
           />
-          <FormField
-            control={form.control}
-            name="units_per_package"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Units per Package{" "}
-                  <span className="text-xs text-muted-foreground">(if relevant)</span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min="1"
-                    placeholder="e.g. 24"
-                    {...field}
-                  />
-                </FormControl>
-                <div className="text-xs text-muted-foreground">
-                  Leave blank if not packed as identical units.
-                </div>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="inner_unit_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Inner Unit Type (e.g. BOTTLE, LITER, CAN)</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. BOTTLE" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="price_per_package"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Price per Purchase Package (€)</FormLabel>
-                <FormControl>
-                  <Input type="number" min="0" step="0.01" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          {/* Calculated per unit price */}
-          <div>
-            <FormLabel>Price per Unit (€)</FormLabel>
-            <Input
-              value={
-                pricePerPackage && unitsPerPackage > 0
-                  ? (pricePerPackage / unitsPerPackage).toFixed(4)
-                  : (pricePerPackage ? pricePerPackage.toFixed(4) : "")
-              }
-              readOnly
-              disabled
-              className="bg-gray-100 cursor-not-allowed"
-            />
-            <div className="text-xs text-muted-foreground italic mt-1">
-              {pricePerPackage && unitsPerPackage > 0
-                ? `Calculated: ${pricePerPackage} / ${unitsPerPackage}`
-                : `Equal to package price if not packed as units`}
+
+          {pricePerPackage > 0 && unitsPerPackage > 0 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-700">
+                ✓ Calculated price per unit: €{(pricePerPackage / unitsPerPackage).toFixed(4)}
+              </p>
             </div>
-          </div>
+          )}
 
           <FormField
             control={form.control}
@@ -335,7 +284,7 @@ export function DrinkForm() {
             name="sales_price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Fixed Sales Price (€)</FormLabel>
+                <FormLabel>Final Sales Price (€)</FormLabel>
                 <FormControl>
                   <Input type="number" min="0" step="0.01" {...field} />
                 </FormControl>
@@ -353,8 +302,8 @@ export function DrinkForm() {
             />
             <div className={`text-xs mt-1 italic ${deltaColor}`}>
               {deltaSalesPrice >= 0
-                ? "Fixed sales price is equal or below calculated (OK)"
-                : "Fixed sales price is higher than calculated!"}
+                ? "Final sales price is equal or below calculated (OK)"
+                : "Final sales price is higher than calculated!"}
             </div>
           </div>
 
