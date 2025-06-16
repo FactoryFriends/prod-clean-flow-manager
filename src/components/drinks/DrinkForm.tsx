@@ -29,12 +29,13 @@ export function DrinkForm({ onSuccess }: DrinkFormProps) {
   const selectedSupplierId = form.watch("supplier_id");
   const unitsPerPackage = Number(form.watch("units_per_package")) || 1;
   const pricePerPackage = Number(form.watch("price_per_package")) || 0;
+  const innerUnitType = form.watch("inner_unit_type");
 
   // Get supplier name for display
   const selectedSupplier = suppliers.find(s => s.id === selectedSupplierId);
   const supplierName = selectedSupplier?.name || "your supplier";
 
-  // Auto-populate price_per_unit when packaging calculation is available
+  // Auto-populate price_per_unit and unit info when packaging calculation is available
   React.useEffect(() => {
     if (pricePerPackage > 0 && unitsPerPackage > 0) {
       const calculatedPrice = pricePerPackage / unitsPerPackage;
@@ -42,6 +43,14 @@ export function DrinkForm({ onSuccess }: DrinkFormProps) {
       form.setValue("cost", calculatedPrice);
     }
   }, [pricePerPackage, unitsPerPackage, form]);
+
+  // Set unit_type and unit_size from packaging inputs
+  React.useEffect(() => {
+    if (innerUnitType) {
+      form.setValue("unit_type", innerUnitType);
+      form.setValue("unit_size", 1); // Default to 1 for drinks
+    }
+  }, [innerUnitType, form]);
 
   const cost = Number(form.watch("cost")) || 0;
   const markupPercent = Number(form.watch("markup_percent")) || 0;
@@ -56,10 +65,11 @@ export function DrinkForm({ onSuccess }: DrinkFormProps) {
   const onSubmit = (data: DrinkFormData) => {
     setError(null);
     
-    if (!data.unit_type || !innerUnits.map(u => u.toUpperCase()).includes((data.unit_type + '').toUpperCase())) {
-      setError("Unit type must be selected from the dropdown.");
+    if (!data.inner_unit_type) {
+      setError("Please specify the unit type in the packaging section.");
       return;
     }
+    
     if (data.units_per_package !== undefined && Number(data.units_per_package) <= 0) {
       setError("Units per package must be greater than 0 if set.");
       return;
@@ -78,7 +88,8 @@ export function DrinkForm({ onSuccess }: DrinkFormProps) {
       {
         ...data,
         product_type: "drink",
-        unit_type: data.unit_type.toUpperCase(),
+        unit_type: data.inner_unit_type?.toUpperCase() || "BOTTLE",
+        unit_size: 1, // Default to 1 for drinks
         cost: Number(data.cost) || 0,
         markup_percent: Number(data.markup_percent) || 0,
         sales_price: Number(data.sales_price) || 0,

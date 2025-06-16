@@ -59,43 +59,6 @@ export function DrinkFormFields({
 
       <FormField
         control={control}
-        name="unit_size"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Unit Size</FormLabel>
-            <FormControl>
-              <Input type="number" min="0" step="0.01" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name="unit_type"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Unit Type</FormLabel>
-            <FormControl>
-              <select
-                {...field}
-                className="w-full border rounded-md px-3 py-2 text-sm bg-white"
-              >
-                {DRINK_UNIT_OPTIONS.map((u) => (
-                  <option value={u} key={u}>
-                    {u}
-                  </option>
-                ))}
-              </select>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
         name="supplier_id"
         rules={{ required: "Supplier is required for drinks" }}
         render={({ field }) => (
