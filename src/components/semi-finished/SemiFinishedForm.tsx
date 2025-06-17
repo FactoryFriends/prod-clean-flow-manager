@@ -43,7 +43,7 @@ export function SemiFinishedForm() {
   console.log("All products data:", allProducts);
   console.log("Products loading:", productsLoading);
 
-  // Pick ingredients (extern products) and semi-finished (zelfgemaakt but not dishes) for recipe
+  // Pick ONLY extern products (ingredients) for recipe
   const ingredientOptions = React.useMemo(() => {
     if (!allProducts) {
       console.log("No allProducts data available");
@@ -52,16 +52,14 @@ export function SemiFinishedForm() {
     
     const filtered = allProducts.filter(
       (p) => {
-        // Include extern products (ingredients) and zelfgemaakt products that are not dishes
+        // Only include extern products (actual ingredients)
         const isIngredient = p.product_type === "extern";
-        const isSemiFinished = p.product_type === "zelfgemaakt" && p.product_kind !== "dish";
-        return (isIngredient || isSemiFinished) && p.active;
+        return isIngredient && p.active;
       }
     );
     
     console.log("Filtered ingredient options:", filtered);
     console.log("Filter criteria - extern products:", allProducts.filter(p => p.product_type === "extern"));
-    console.log("Filter criteria - zelfgemaakt products:", allProducts.filter(p => p.product_type === "zelfgemaakt"));
     return filtered;
   }, [allProducts]);
 
