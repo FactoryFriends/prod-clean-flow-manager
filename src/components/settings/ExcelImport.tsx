@@ -5,12 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { Download, Upload, FileSpreadsheet, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import { downloadExcelTemplate } from "./excel/templateGenerator";
 import { parseExcelFile, validateIngredientData } from "./excel/excelParser";
 import { ImportPreview } from "./excel/ImportPreview";
 import { useBulkCreateIngredients } from "./excel/useBulkCreateIngredients";
 import { useAllSuppliers } from "@/hooks/useSuppliers";
+import { useAllProducts } from "@/hooks/useProductionData";
+import { exportIngredientsToExcel } from "./excel/ingredientExporter";
 
 export function ExcelImport() {
   const [file, setFile] = useState<File | null>(null);
@@ -21,6 +24,7 @@ export function ExcelImport() {
 
   const bulkCreateMutation = useBulkCreateIngredients();
   const { data: suppliers = [] } = useAllSuppliers();
+  const { data: allProducts = [] } = useAllProducts();
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -61,6 +65,10 @@ export function ExcelImport() {
     }
   };
 
+  const handleExport = () => {
+    exportIngredientsToExcel(allProducts);
+  };
+
   const resetImport = () => {
     setFile(null);
     setParsedData([]);
@@ -68,24 +76,47 @@ export function ExcelImport() {
     setImportComplete(false);
   };
 
+  // Count actual ingredients (extern products)
+  const ingredientCount = allProducts.filter(p => p.product_type === "extern").length;
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileSpreadsheet className="w-5 h-5" />
-            Excel Import - Ingredients
+            Excel Import/Export - Ingredients
           </CardTitle>
           <CardDescription>
-            Import multiple ingredients at once using an Excel template with built-in validation
+            Import multiple ingredients using Excel templates or export existing ingredients as backup
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Export Section */}
+          <div className="space-y-3">
+            <h3 className="font-semibold">Export Current Ingredients</h3>
+            <p className="text-sm text-muted-foreground">
+              Download all your current ingredients ({ingredientCount} total) as Excel backup file.
+            </p>
+            <Button 
+              onClick={handleExport}
+              variant="outline"
+              className="flex items-center gap-2"
+              disabled={ingredientCount === 0}
+            >
+              <Download className="w-4 h-4" />
+              Export {ingredientCount} Ingredients to Excel
+            </Button>
+          </div>
+
+          <Separator />
+
           {!importComplete ? (
             <>
               {/* Step 1: Download Template */}
               <div className="space-y-3">
-                <h3 className="font-semibold">Step 1: Download Template</h3>
+                <h3 className="font-semibold">Import New Ingredients</h3>
+                <h4 className="font-medium">Step 1: Download Template</h4>
                 <p className="text-sm text-muted-foreground">
                   Download the Excel template with validation rules, example data, and detailed instructions.
                 </p>
@@ -101,7 +132,7 @@ export function ExcelImport() {
 
               {/* Step 2: Upload File */}
               <div className="space-y-3">
-                <h3 className="font-semibold">Step 2: Upload Your File</h3>
+                <h4 className="font-medium">Step 2: Upload Your File</h4>
                 <div className="flex items-center gap-4">
                   <Input
                     type="file"
@@ -125,7 +156,7 @@ export function ExcelImport() {
               {/* Step 3: Preview & Import */}
               {validationResults && (
                 <div className="space-y-3">
-                  <h3 className="font-semibold">Step 3: Review & Import</h3>
+                  <h4 className="font-medium">Step 3: Review & Import</h4>
                   
                   {validationResults.errors?.length > 0 && (
                     <Alert variant="destructive">
