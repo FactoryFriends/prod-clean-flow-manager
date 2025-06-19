@@ -6,11 +6,12 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { ProductionBatch } from "@/hooks/useProductionData";
 import { format } from "date-fns";
-import { Printer, AlertCircle, CheckCircle } from "lucide-react";
+import { Printer, AlertCircle, CheckCircle, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LabelPrintService, LabelData } from "@/services/labelPrintService";
+import { QZTrayService, LabelData } from "@/services/qzTrayService";
 import { Alert, AlertDescription } from "./ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 interface LabelPrintDialogProps {
   open: boolean;
@@ -23,11 +24,13 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
   const [numLabelsToPrint, setNumLabelsToPrint] = useState<number>(0);
   const [serviceAvailable, setServiceAvailable] = useState<boolean | null>(null);
   const [printerStatus, setPrinterStatus] = useState<any>(null);
+  const [availablePrinters, setAvailablePrinters] = useState<string[]>([]);
+  const [selectedPrinter, setSelectedPrinter] = useState<string>("");
 
-  // Check print service availability when dialog opens
+  // Check QZ Tray service availability when dialog opens
   useEffect(() => {
     if (open) {
-      checkPrintService();
+      checkQZTrayService();
     }
   }, [open]);
 
@@ -38,14 +41,27 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
     }
   }, [batch]);
 
-  const checkPrintService = async () => {
-    const available = await LabelPrintService.checkServiceAvailable();
+  const checkQZTrayService = async () => {
+    const available = await QZTrayService.checkServiceAvailable();
     setServiceAvailable(available);
     
     if (available) {
-      const status = await LabelPrintService.getPrinterStatus();
+      const status = await QZTrayService.getPrinterStatus();
       setPrinterStatus(status);
+      setAvailablePrinters(status.available_printers || []);
+      
+      // Auto-select ARGOX printer if found
+      const argoxPrinter = await QZTrayService.findArgoxPrinter();
+      if (argoxPrinter) {
+        setSelectedPrinter(argoxPrinter);
+        QZTrayService.setPrinter(argoxPrinter);
+      }
     }
+  };
+
+  const handlePrinterSelect = (printerName: string) => {
+    setSelectedPrinter(printerName);
+    QZTrayService.setPrinter(printerName);
   };
 
   if (!batch) return null;
@@ -57,7 +73,12 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
     }
 
     if (!serviceAvailable) {
-      toast.error("Print service is not available. Please ensure the local print service is running.");
+      toast.error("QZ Tray is not available. Please ensure QZ Tray is installed and running.");
+      return;
+    }
+
+    if (!selectedPrinter) {
+      toast.error("Please select a printer first.");
       return;
     }
 
@@ -73,8 +94,8 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
           qr_code_data: {
             batch_number: batch.batch_number,
             product: batch.products.name,
-            production_date: batch.production_date,
-            expiry_date: batch.expiry_date,
+            production_date: format(new Date(batch.production_date), "dd/MM/yy"),
+            expiry_date: format(new Date(batch.expiry_date), "dd/MM/yyyy"),
             package_number: labelNumber,
             chef: batch.chefs.name,
             location: batch.location,
@@ -83,8 +104,8 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
         };
       });
 
-      // Send to local print service
-      await LabelPrintService.printLabels({
+      // Send to thermal printer via QZ Tray
+      await QZTrayService.printLabels({
         labels: labelData,
         printer_config: {
           copies: 1,
@@ -102,7 +123,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
         throw error;
       }
       
-      toast.success(`${numLabelsToPrint} labels sent to printer successfully`);
+      toast.success(`${numLabelsToPrint} labels sent to ${selectedPrinter} successfully`);
       onOpenChange(false);
       
     } catch (error) {
@@ -117,11 +138,11 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
-          <DialogTitle>Print Labels - {batch.batch_number}</DialogTitle>
+          <DialogTitle>Print Labels via QZ Tray - {batch.batch_number}</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
-          {/* Print Service Status */}
+          {/* QZ Tray Service Status */}
           <Alert className={serviceAvailable ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
             <div className="flex items-center gap-2">
               {serviceAvailable ? (
@@ -131,12 +152,31 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
               )}
               <AlertDescription className={serviceAvailable ? "text-green-800" : "text-red-800"}>
                 {serviceAvailable 
-                  ? `Print service connected - ARGOX D2-250 ${printerStatus?.status || 'ready'}`
-                  : "Print service unavailable - Please ensure the local print service is running on the mini-pc"
+                  ? `QZ Tray connected - ${availablePrinters.length} printer(s) available`
+                  : "QZ Tray unavailable - Please ensure QZ Tray is installed and running on your system"
                 }
               </AlertDescription>
             </div>
           </Alert>
+
+          {/* Printer Selection */}
+          {serviceAvailable && availablePrinters.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="printer">Select Printer</Label>
+              <Select value={selectedPrinter} onValueChange={handlePrinterSelect}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a printer" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availablePrinters.map((printer) => (
+                    <SelectItem key={printer} value={printer}>
+                      {printer} {printer.toLowerCase().includes('argox') ? '(Recommended)' : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Batch Information */}
           <div className="bg-muted p-4 rounded-lg">
@@ -171,7 +211,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
           <div className="border rounded-lg p-4">
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <Printer className="w-4 h-4" />
-              Label Preview (ARGOX D2-250 format - 1 of {numLabelsToPrint})
+              Thermal Label Preview (50.8 x 25.4mm - 1 of {numLabelsToPrint})
             </h3>
             
             {/* Thermal Label Preview - 50.8 x 25.4mm landscape format */}
@@ -213,7 +253,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             </div>
             
             <p className="text-sm text-muted-foreground mt-3">
-              Thermal label format: 50.8 x 25.4mm (landscape). Will be sent to ARGOX D2-250 via local print service.
+              Thermal label format: 50.8 x 25.4mm (landscape). Sent via QZ Tray to {selectedPrinter || 'selected printer'}.
             </p>
           </div>
 
@@ -224,11 +264,11 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             </Button>
             <Button 
               onClick={handlePrintLabels} 
-              disabled={printingLabels || numLabelsToPrint <= 0 || !serviceAvailable}
+              disabled={printingLabels || numLabelsToPrint <= 0 || !serviceAvailable || !selectedPrinter}
               className="flex items-center gap-2"
             >
               <Printer className="w-4 h-4" />
-              {printingLabels ? "Printing..." : `Print ${numLabelsToPrint} Labels`}
+              {printingLabels ? "Printing..." : `Print ${numLabelsToPrint} Labels via QZ Tray`}
             </Button>
           </div>
         </div>
