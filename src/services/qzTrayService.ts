@@ -112,19 +112,22 @@ export class QZTrayService {
   private static generateEPLCommands(labelData: LabelData): string {
     const { qr_code_data } = labelData;
     
-    // EPL commands for 50.8 x 25.4mm label (landscape)
-    return `
-N
-q203
-Q104,26
-B5,1,0,1,2,5,40,N,"${qr_code_data.batch_number}"
-A10,45,0,3,1,1,N,"${qr_code_data.product}"
-A10,75,0,2,1,1,N,"${qr_code_data.batch_number}"
-A10,95,0,2,1,1,N,"Chef: ${qr_code_data.chef}"
-A10,115,0,2,1,1,N,"Prod: ${qr_code_data.production_date}"
-A10,145,0,3,1,1,N,"EXPIRES: ${qr_code_data.expiry_date}"
-P1
-`.trim();
+    // EPL commands for ARGOX D2-250 (50.8 x 25.4mm label)
+    // Clear buffer, set label size, and print commands
+    return [
+      'N',                                      // Clear buffer
+      'q203',                                   // Set label width (203 DPI)
+      'Q104,26',                               // Set label height (104 dots = ~13mm)
+      'S4',                                    // Set print speed to 4
+      `A10,5,0,2,1,1,N,"${qr_code_data.product.substring(0, 20)}"`,        // Product name
+      `A10,25,0,1,1,1,N,"${qr_code_data.batch_number}"`,                    // Batch number  
+      `A10,40,0,1,1,1,N,"Chef: ${qr_code_data.chef}"`,                      // Chef
+      `A10,55,0,1,1,1,N,"Prod: ${qr_code_data.production_date}"`,           // Production date
+      `A10,70,0,1,1,1,N,"EXP: ${qr_code_data.expiry_date}"`,               // Expiry date
+      `B250,5,0,1,2,2,30,N,"${qr_code_data.batch_number}"`,                // Barcode
+      'P1',                                    // Print 1 label
+      ''                                       // Empty line for proper termination
+    ].join('\r\n');
   }
 
   // Send labels to printer via QZ Tray
