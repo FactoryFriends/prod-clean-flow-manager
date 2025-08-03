@@ -60,12 +60,16 @@ export class QZTrayService {
   // Check if QZ Tray is available and connected
   static async checkServiceAvailable(): Promise<boolean> {
     try {
+      console.log('Checking QZ Tray service availability...');
       if (!this.isConnected) {
+        console.log('Not connected, attempting to connect...');
         await this.connect();
       }
-      return this.isConnected && qz.websocket.isActive();
+      const isActive = qz.websocket.isActive();
+      console.log('QZ Tray status:', { isConnected: this.isConnected, isActive });
+      return this.isConnected && isActive;
     } catch (error) {
-      console.log('QZ Tray not available:', error);
+      console.error('QZ Tray not available:', error);
       return false;
     }
   }
