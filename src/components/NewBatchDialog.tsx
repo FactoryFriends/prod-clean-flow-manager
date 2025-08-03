@@ -117,6 +117,7 @@ export function NewBatchDialog({ currentLocation }: NewBatchDialogProps) {
                   : "Enter number of packages"
               }
               min="1"
+              autoComplete="off"
             />
             {selectedProduct && (
               <div>
