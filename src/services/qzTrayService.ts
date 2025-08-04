@@ -113,21 +113,22 @@ export class QZTrayService {
     const { qr_code_data } = labelData;
     
     // EPL commands for ARGOX D2-250 (50.8 x 25.4mm label)
-    // Clear buffer, set label size, and print commands
     return [
       'N',                                      // Clear buffer
-      'q203',                                   // Set label width (203 DPI)
-      'Q104,26',                               // Set label height (104 dots = ~13mm)
-      'S4',                                    // Set print speed to 4
-      `A10,5,0,2,1,1,N,"${qr_code_data.product.substring(0, 20)}"`,        // Product name
-      `A10,25,0,1,1,1,N,"${qr_code_data.batch_number}"`,                    // Batch number  
-      `A10,40,0,1,1,1,N,"Chef: ${qr_code_data.chef}"`,                      // Chef
-      `A10,55,0,1,1,1,N,"Prod: ${qr_code_data.production_date}"`,           // Production date
-      `A10,70,0,1,1,1,N,"EXP: ${qr_code_data.expiry_date}"`,               // Expiry date
-      `B250,5,0,1,2,2,30,N,"${qr_code_data.batch_number}"`,                // Barcode
-      'P1',                                    // Print 1 label
+      'S4',                                     // Set print speed to 4
+      'D7',                                     // Set density to 7
+      'ZT',                                     // Set top of form backup
+      'q406',                                   // Set label width (406 dots for 50.8mm at 203 DPI)
+      'Q203,24',                               // Set label height and gap
+      `A10,10,0,2,1,1,N,"${qr_code_data.product.substring(0, 18)}"`,       // Product name
+      `A10,35,0,1,1,1,N,"${qr_code_data.batch_number}"`,                   // Batch number  
+      `A10,55,0,1,1,1,N,"Chef: ${qr_code_data.chef}"`,                     // Chef
+      `A10,75,0,1,1,1,N,"${qr_code_data.production_date}"`,                // Production date
+      `A10,95,0,1,1,1,N,"EXP: ${qr_code_data.expiry_date}"`,              // Expiry date
+      `B280,10,0,1,2,2,30,B,"${qr_code_data.batch_number}"`,              // Barcode
+      'P1,1',                                  // Print 1 label, 1 copy
       ''                                       // Empty line for proper termination
-    ].join('\r\n');
+    ].join('\n');
   }
 
   // Send labels to printer via QZ Tray
