@@ -145,6 +145,8 @@ export class QZTrayService {
         }
       }
 
+      console.log('Selected printer:', this.selectedPrinter);
+      
       const copies = printRequest.printer_config?.copies || 1;
       
       // Generate EPL commands for each label
@@ -152,19 +154,29 @@ export class QZTrayService {
         this.generateEPLCommands(label)
       );
 
-      // Create print configuration
+      console.log('Generated EPL commands:', printData);
+
+      // Create print configuration specifically for thermal printers
       const config = qz.configs.create(this.selectedPrinter, {
         copies: copies,
-        jobName: `OptiThai_Labels_${new Date().getTime()}`
+        jobName: `OptiThai_Labels_${new Date().getTime()}`,
+        encoding: 'UTF-8',
+        margins: { top: 0, right: 0, bottom: 0, left: 0 },
+        orientation: 'portrait',
+        colorType: 'blackwhite',
+        units: 'in'
       });
+
+      console.log('Print config:', config);
 
       // Send to printer
       await qz.print(config, printData);
       
-      console.log(`Successfully sent ${printRequest.labels.length} labels to printer`);
+      console.log(`Successfully sent ${printRequest.labels.length} labels to printer: ${this.selectedPrinter}`);
       return true;
     } catch (error) {
       console.error('Failed to print labels:', error);
+      console.error('Error details:', error);
       throw error;
     }
   }
