@@ -60,8 +60,6 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
         labelDiv.style.justifyContent = 'space-between';
         labelDiv.style.alignItems = 'stretch';
         labelDiv.style.boxSizing = 'border-box';
-        labelDiv.style.transform = 'rotate(90deg) scale(0.9)';
-        labelDiv.style.transformOrigin = 'center center';
 
         labelDiv.innerHTML = `
           <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 8px;">
@@ -249,9 +247,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
                 justifyContent: 'space-between',
                 alignItems: 'stretch',
                 boxSizing: 'border-box',
-                margin: '0 auto',
-                transform: 'rotate(90deg) scale(0.9)',
-                transformOrigin: 'center center'
+                margin: '0 auto'
               }}
             >
               {/* Header */}
