@@ -33,9 +33,24 @@ export function SemiFinishedFormFields({
         }}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Name</FormLabel>
+            <FormLabel>Name (English)</FormLabel>
             <FormControl>
               <Input placeholder="e.g. Homemade Curry Base" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Thai name field */}
+      <FormField
+        control={control}
+        name="name_thai"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Name (Thai) - Optional</FormLabel>
+            <FormControl>
+              <Input placeholder="e.g. น้ำแกงโฮมเมด" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
