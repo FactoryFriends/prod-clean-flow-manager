@@ -38,13 +38,8 @@ export class WebSerialPrinterService {
         throw new Error('Web Serial API not supported. Please use Chrome or Edge browser.');
       }
 
-      // Request port with LW650XL vendor/product filters
-      this.port = await (navigator as any).serial.requestPort({
-        filters: [
-          { usbVendorId: 0x0547 }, // Citizen (common for LW650XL)
-          { usbVendorId: 0x04b8 }, // Epson (alternative)
-        ]
-      });
+      // Request port - allow user to select any USB device
+      this.port = await (navigator as any).serial.requestPort();
 
       console.log('Serial port selected:', this.port.getInfo());
       return true;
