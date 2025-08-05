@@ -112,16 +112,12 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
 
         labelDiv.innerHTML = `
           <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 6px;">
-            <div style="font-size: 15px; font-weight: bold;">TOTHAI</div>
-            <div style="font-size: 10px;">Production Kitchen</div>
+            <div style="font-size: 15px; font-weight: bold;">${batch.products.name}</div>
           </div>
 
           <div style="flex: 1; display: flex; flex-direction: column;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
               <div style="flex: 2; padding-right: 10px;">
-                <div style="font-size: 13px; font-weight: bold; margin-bottom: 4px;">
-                  ${batch.products.name}
-                </div>
                 <div style="font-size: 11px; margin-bottom: 2px; font-weight: bold;">
                   <strong>Batch:</strong> ${batch.batch_number}
                 </div>
@@ -147,8 +143,9 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             </div>
           </div>
 
-          <div style="text-align: center; font-size: 8px; margin-top: 6px; padding-top: 6px; border-top: 1px solid #ccc;">
-            Label ${i} of ${numLabelsToPrint}
+          <div style="text-align: center; font-size: 8px; margin-top: 6px; padding-top: 6px; border-top: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 7px;">TOTHAI Production Kitchen</span>
+            <span>Label ${i} of ${numLabelsToPrint}</span>
           </div>
         `;
 
@@ -302,8 +299,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             >
               {/* Header */}
               <div style={{ textAlign: 'center', borderBottom: '2px solid #000', paddingBottom: '6px', marginBottom: '6px' }}>
-                <div style={{ fontSize: '15px', fontWeight: 'bold' }}>TOTHAI</div>
-                <div style={{ fontSize: '10px' }}>Production Kitchen</div>
+                <div style={{ fontSize: '15px', fontWeight: 'bold' }}>{batch.products.name}</div>
               </div>
 
               {/* Main Content */}
@@ -311,9 +307,6 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
                   {/* Product Info */}
                   <div style={{ flex: 2, paddingRight: '10px' }}>
-                    <div style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '4px' }}>
-                      {batch.products.name}
-                    </div>
                     <div style={{ fontSize: '11px', marginBottom: '2px', fontWeight: 'bold' }}>
                       <strong>Batch:</strong> {batch.batch_number}
                     </div>
@@ -361,8 +354,9 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
               </div>
 
               {/* Footer */}
-              <div style={{ textAlign: 'center', fontSize: '8px', marginTop: '6px', paddingTop: '6px', borderTop: '1px solid #ccc' }}>
-                Label 1 of {numLabelsToPrint}
+              <div style={{ textAlign: 'center', fontSize: '8px', marginTop: '6px', paddingTop: '6px', borderTop: '1px solid #ccc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '7px' }}>TOTHAI Production Kitchen</span>
+                <span>Label 1 of {numLabelsToPrint}</span>
               </div>
             </div>
             
