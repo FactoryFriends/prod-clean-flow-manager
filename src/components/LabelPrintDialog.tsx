@@ -9,7 +9,7 @@ import { format } from "date-fns";
 import { Printer, AlertCircle, CheckCircle, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { QZTrayService, LabelData } from "@/services/qzTrayService";
+import { WebSerialPrinterService, LabelData } from "@/services/webSerialPrinterService";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
@@ -24,13 +24,12 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
   const [numLabelsToPrint, setNumLabelsToPrint] = useState<number>(0);
   const [serviceAvailable, setServiceAvailable] = useState<boolean | null>(null);
   const [printerStatus, setPrinterStatus] = useState<any>(null);
-  const [availablePrinters, setAvailablePrinters] = useState<string[]>([]);
-  const [selectedPrinter, setSelectedPrinter] = useState<string>("");
+  const [browserSupported, setBrowserSupported] = useState<boolean>(false);
 
-  // Check QZ Tray service availability when dialog opens
+  // Check Web Serial service availability when dialog opens
   useEffect(() => {
     if (open) {
-      checkQZTrayService();
+      checkWebSerialService();
     }
   }, [open]);
 
@@ -41,27 +40,19 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
     }
   }, [batch]);
 
-  const checkQZTrayService = async () => {
-    const available = await QZTrayService.checkServiceAvailable();
-    setServiceAvailable(available);
+  const checkWebSerialService = async () => {
+    const supported = WebSerialPrinterService.isSupported();
+    setBrowserSupported(supported);
     
-    if (available) {
-      const status = await QZTrayService.getPrinterStatus();
-      setPrinterStatus(status);
-      setAvailablePrinters(status.available_printers || []);
+    if (supported) {
+      const available = await WebSerialPrinterService.checkServiceAvailable();
+      setServiceAvailable(available);
       
-      // Auto-select LW650XL printer if found
-      const lw650xlPrinter = await QZTrayService.findLW650XLPrinter();
-      if (lw650xlPrinter) {
-        setSelectedPrinter(lw650xlPrinter);
-        QZTrayService.setPrinter(lw650xlPrinter);
-      }
+      const status = await WebSerialPrinterService.getPrinterStatus();
+      setPrinterStatus(status);
+    } else {
+      setServiceAvailable(false);
     }
-  };
-
-  const handlePrinterSelect = (printerName: string) => {
-    setSelectedPrinter(printerName);
-    QZTrayService.setPrinter(printerName);
   };
 
   if (!batch) return null;
@@ -72,13 +63,13 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
       return;
     }
 
-    if (!serviceAvailable) {
-      toast.error("QZ Tray is not available. Please ensure QZ Tray is installed and running.");
+    if (!browserSupported) {
+      toast.error("Web Serial API not supported. Please use Chrome or Edge browser.");
       return;
     }
 
-    if (!selectedPrinter) {
-      toast.error("Please select a printer first.");
+    if (!serviceAvailable) {
+      toast.error("Printer not connected. Click the connect button first.");
       return;
     }
 
@@ -104,8 +95,8 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
         };
       });
 
-      // Send to thermal printer via QZ Tray
-      await QZTrayService.printLabels({
+      // Send to thermal printer via Web Serial
+      await WebSerialPrinterService.printLabels({
         labels: labelData,
         printer_config: {
           copies: 1,
@@ -123,7 +114,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
         throw error;
       }
       
-      toast.success(`${numLabelsToPrint} labels sent to ${selectedPrinter} successfully`);
+      toast.success(`${numLabelsToPrint} labels sent to printer successfully`);
       onOpenChange(false);
       
     } catch (error) {
@@ -138,11 +129,11 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
-          <DialogTitle>Print Labels via QZ Tray - {batch.batch_number}</DialogTitle>
+          <DialogTitle>Print Labels via Web Serial - {batch.batch_number}</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
-          {/* QZ Tray Service Status */}
+          {/* Web Serial Service Status */}
           <Alert className={serviceAvailable ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
             <div className="flex items-center gap-2">
               {serviceAvailable ? (
@@ -151,30 +142,38 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
                 <AlertCircle className="h-4 w-4 text-red-600" />
               )}
               <AlertDescription className={serviceAvailable ? "text-green-800" : "text-red-800"}>
-                {serviceAvailable 
-                  ? `QZ Tray connected - ${availablePrinters.length} printer(s) available`
-                  : "QZ Tray unavailable - Please ensure QZ Tray is installed and running on your system"
+                {!browserSupported 
+                  ? "Web Serial not supported - Please use Chrome or Edge browser"
+                  : serviceAvailable 
+                    ? "Printer connected via Web Serial API"
+                    : "Printer not connected - Click connect button below"
                 }
               </AlertDescription>
             </div>
           </Alert>
 
-          {/* Printer Selection */}
-          {serviceAvailable && availablePrinters.length > 0 && (
+          {/* Connect Button */}
+          {browserSupported && !serviceAvailable && (
             <div className="space-y-2">
-              <Label htmlFor="printer">Select Printer</Label>
-              <Select value={selectedPrinter} onValueChange={handlePrinterSelect}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a printer" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availablePrinters.map((printer) => (
-                    <SelectItem key={printer} value={printer}>
-                      {printer} {printer.toLowerCase().includes('lw650xl') || printer.toLowerCase().includes('lw-650xl') ? '(Recommended)' : ''}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Button 
+                onClick={async () => {
+                  const requested = await WebSerialPrinterService.requestPort();
+                  if (requested) {
+                    const connected = await WebSerialPrinterService.connect();
+                    setServiceAvailable(connected);
+                    if (connected) {
+                      toast.success("Printer connected successfully!");
+                    }
+                  }
+                }}
+                className="flex items-center gap-2"
+              >
+                <Settings className="w-4 h-4" />
+                Connect to LW650XL Printer
+              </Button>
+              <p className="text-sm text-muted-foreground">
+                Click to select and connect to your LW650XL printer via USB
+              </p>
             </div>
           )}
 
@@ -253,7 +252,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             </div>
             
             <p className="text-sm text-muted-foreground mt-3">
-              Thermal label format: 50.8 x 25.4mm (landscape). Sent via QZ Tray to {selectedPrinter || 'selected printer'}.
+              Thermal label format: 50.8 x 25.4mm (landscape). Sent via Web Serial API to LW650XL printer.
             </p>
           </div>
 
@@ -264,11 +263,11 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             </Button>
             <Button 
               onClick={handlePrintLabels} 
-              disabled={printingLabels || numLabelsToPrint <= 0 || !serviceAvailable || !selectedPrinter}
+              disabled={printingLabels || numLabelsToPrint <= 0 || !serviceAvailable}
               className="flex items-center gap-2"
             >
               <Printer className="w-4 h-4" />
-              {printingLabels ? "Printing..." : `Print ${numLabelsToPrint} Labels via QZ Tray`}
+              {printingLabels ? "Printing..." : `Print ${numLabelsToPrint} Labels via Web Serial`}
             </Button>
           </div>
         </div>
