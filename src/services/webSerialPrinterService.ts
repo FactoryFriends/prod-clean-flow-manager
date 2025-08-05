@@ -57,7 +57,7 @@ export class WebSerialPrinterService {
       }
 
       await this.port.open({ 
-        baudRate: 9600,  // Standard for LW650XL
+        baudRate: 115200,  // Try higher baud rate for LW650XL
         dataBits: 8,
         stopBits: 1,
         parity: 'none',
@@ -95,25 +95,25 @@ export class WebSerialPrinterService {
     };
   }
 
-  // Generate ZPL commands for LW650XL thermal printer
+  // Generate simple test commands for LW650XL
+  private static generateTestCommands(): string {
+    return [
+      '\x1B@',        // ESC @ - Initialize printer
+      'TEST PRINT\n',  // Simple text
+      '\x1D\x56\x00'  // Cut paper command
+    ].join('');
+  }
+
+  // Generate ZPL commands for LW650XL thermal printer  
   private static generateZPLCommands(labelData: LabelData): string {
     const { qr_code_data } = labelData;
     
     return [
       '^XA',                                                    // Start format
-      '^MMT',                                                   // Media type: Thermal transfer
-      '^PW406',                                                 // Print width (406 dots for 50.8mm at 203 DPI)
-      '^LL203',                                                 // Label length (203 dots for 25.4mm at 203 DPI)
-      '^PR4',                                                   // Print speed 4 ips
-      '^MD15',                                                  // Media darkness 15
-      '^LH0,0',                                                 // Label home position
-      '^CF0,20',                                                // Default font
-      `^FO10,10^A0N,24,24^FD${qr_code_data.product.substring(0, 18)}^FS`,          // Product name - large and bold
-      `^FO10,40^A0N,16,16^FD${qr_code_data.batch_number}^FS`,                      // Batch number
-      `^FO10,60^A0N,14,14^FDChef: ${qr_code_data.chef}^FS`,                        // Chef name
-      `^FO10,80^A0N,12,12^FD${qr_code_data.production_date}^FS`,                   // Production date
-      `^FO10,100^A0N,16,16^FDEXP: ${qr_code_data.expiry_date}^FS`,                 // Expiry date - emphasized
-      `^FO280,10^BY2^BCN,60,Y,N,N^FD${qr_code_data.batch_number}^FS`,             // Barcode
+      '^CF0,30',                                                // Larger default font
+      `^FO50,50^A0N,30,30^FD${qr_code_data.product.substring(0, 15)}^FS`,        // Product name
+      `^FO50,100^A0N,20,20^FD${qr_code_data.batch_number}^FS`,                   // Batch number
+      `^FO50,130^A0N,20,20^FDExp: ${qr_code_data.expiry_date}^FS`,               // Expiry date
       '^PQ1,0,1,Y',                                            // Print quantity: 1 label
       '^XZ'                                                    // End format
     ].join('\n');
@@ -177,6 +177,37 @@ export class WebSerialPrinterService {
       return true;
     } catch (error) {
       console.error('Failed to print labels via Web Serial:', error);
+      throw error;
+    }
+  }
+
+  // Test printer connection with simple command
+  static async testPrinter(): Promise<boolean> {
+    try {
+      if (!this.isConnected) {
+        throw new Error('Printer not connected');
+      }
+
+      console.log('Testing printer with simple command...');
+      const testCmd = this.generateTestCommands();
+      await this.sendToPrinter(testCmd);
+      
+      // Also try a simple ZPL test
+      const zplTest = [
+        '^XA',
+        '^CF0,30',
+        '^FO50,50^A0N,30,30^FDTEST PRINT^FS',
+        '^PQ1,0,1,Y',
+        '^XZ'
+      ].join('\n');
+      
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await this.sendToPrinter(zplTest);
+      
+      console.log('Test commands sent successfully');
+      return true;
+    } catch (error) {
+      console.error('Test print failed:', error);
       throw error;
     }
   }

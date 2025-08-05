@@ -179,7 +179,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
 
           {/* Disconnect Button */}
           {browserSupported && serviceAvailable && (
-            <div className="space-y-2">
+            <div className="space-y-2 flex gap-2">
               <Button 
                 variant="outline"
                 onClick={async () => {
@@ -191,6 +191,21 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
               >
                 <Settings className="w-4 h-4" />
                 Disconnect Printer
+              </Button>
+              <Button 
+                variant="secondary"
+                onClick={async () => {
+                  try {
+                    await WebSerialPrinterService.testPrinter();
+                    toast.success("Test print sent! Check printer for output.");
+                  } catch (error) {
+                    toast.error("Test failed: " + error.message);
+                  }
+                }}
+                className="flex items-center gap-2"
+              >
+                <Printer className="w-4 h-4" />
+                Test Print
               </Button>
             </div>
           )}
