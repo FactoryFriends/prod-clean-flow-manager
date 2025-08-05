@@ -15,8 +15,28 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-    <!-- QZ Tray library - Updated to latest version -->
-    <script src="https://cdn.jsdelivr.net/npm/qz-tray@2.2.5/dist/qz-tray.min.js"></script>
+    <!-- QZ Tray library - Multiple fallback sources -->
+    <script src="https://cdn.jsdelivr.net/npm/qz-tray@2.2.5/dist/qz-tray.min.js" 
+            onerror="this.onerror=null; this.src='https://unpkg.com/qz-tray@2.2.5/dist/qz-tray.min.js';"
+            crossorigin="anonymous"></script>
+    <script>
+      // Fallback for local QZ Tray connection
+      if (typeof window !== 'undefined') {
+        window.addEventListener('load', () => {
+          setTimeout(() => {
+            if (!window.qz) {
+              console.warn('QZ Tray library not loaded from CDN, attempting local connection...');
+              // This creates a basic QZ object for testing
+              const script = document.createElement('script');
+              script.src = 'http://localhost:8181/js/qz-tray.js';
+              script.crossOrigin = 'anonymous';
+              script.onerror = () => console.error('Failed to load QZ Tray from localhost');
+              document.head.appendChild(script);
+            }
+          }, 1000);
+        });
+      }
+    </script>
   </head>
 
   <body>
