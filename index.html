@@ -23,20 +23,36 @@
           connect: function() {
             return new Promise((resolve, reject) => {
               try {
-                const ws = new WebSocket('ws://localhost:8181/websockets');
+                console.log('Attempting to connect to QZ Tray websocket...');
+                const ws = new WebSocket('ws://localhost:8181');
+                
+                const timeout = setTimeout(() => {
+                  ws.close();
+                  reject(new Error('Connection timeout - QZ Tray might not be running'));
+                }, 5000);
+                
                 ws.onopen = () => {
-                  console.log('QZ Tray websocket connected');
+                  clearTimeout(timeout);
+                  console.log('QZ Tray websocket connected successfully');
                   window.qz._ws = ws;
                   resolve();
                 };
+                
                 ws.onerror = (error) => {
+                  clearTimeout(timeout);
                   console.error('QZ Tray websocket error:', error);
-                  reject(error);
+                  reject(new Error('Failed to connect to QZ Tray. Make sure QZ Tray is running and accepting connections.'));
                 };
-                ws.onclose = () => {
-                  console.log('QZ Tray websocket closed');
+                
+                ws.onclose = (event) => {
+                  clearTimeout(timeout);
+                  console.log('QZ Tray websocket closed. Code:', event.code, 'Reason:', event.reason);
+                  if (event.code !== 1000) {
+                    reject(new Error(`Connection closed unexpectedly. Code: ${event.code}`));
+                  }
                 };
               } catch (error) {
+                console.error('Error creating websocket:', error);
                 reject(error);
               }
             });
