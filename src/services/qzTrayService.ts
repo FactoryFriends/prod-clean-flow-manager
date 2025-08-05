@@ -88,17 +88,18 @@ export class QZTrayService {
     }
   }
 
-  // Find ARGOX printer or return default
-  static async findArgoxPrinter(): Promise<string | null> {
+  // Find LW650XL printer or return default
+  static async findLW650XLPrinter(): Promise<string | null> {
     try {
       const printers = await this.getPrinters();
-      const argoxPrinter = printers.find(printer => 
-        printer.toLowerCase().includes('argox') || 
-        printer.toLowerCase().includes('d2-250')
+      const lw650xlPrinter = printers.find(printer => 
+        printer.toLowerCase().includes('lw650xl') || 
+        printer.toLowerCase().includes('lw-650xl') ||
+        printer.toLowerCase().includes('lw 650xl')
       );
-      return argoxPrinter || (printers.length > 0 ? printers[0] : null);
+      return lw650xlPrinter || (printers.length > 0 ? printers[0] : null);
     } catch (error) {
-      console.error('Error finding ARGOX printer:', error);
+      console.error('Error finding LW650XL printer:', error);
       return null;
     }
   }
@@ -108,26 +109,28 @@ export class QZTrayService {
     this.selectedPrinter = printerName;
   }
 
-  // Generate EPL commands for ARGOX D2-250 thermal printer
-  private static generateEPLCommands(labelData: LabelData): string {
+  // Generate ZPL commands for LW650XL thermal printer
+  private static generateZPLCommands(labelData: LabelData): string {
     const { qr_code_data } = labelData;
     
-    // EPL commands for ARGOX D2-250 (50.8 x 25.4mm label)
+    // ZPL commands for LW650XL (50.8 x 25.4mm label)
     return [
-      'N',                                      // Clear buffer
-      'S4',                                     // Set print speed to 4
-      'D7',                                     // Set density to 7
-      'ZT',                                     // Set top of form backup
-      'q406',                                   // Set label width (406 dots for 50.8mm at 203 DPI)
-      'Q203,24',                               // Set label height and gap
-      `A10,10,0,2,1,1,N,"${qr_code_data.product.substring(0, 18)}"`,       // Product name
-      `A10,35,0,1,1,1,N,"${qr_code_data.batch_number}"`,                   // Batch number  
-      `A10,55,0,1,1,1,N,"Chef: ${qr_code_data.chef}"`,                     // Chef
-      `A10,75,0,1,1,1,N,"${qr_code_data.production_date}"`,                // Production date
-      `A10,95,0,1,1,1,N,"EXP: ${qr_code_data.expiry_date}"`,              // Expiry date
-      `B280,10,0,1,2,2,30,B,"${qr_code_data.batch_number}"`,              // Barcode
-      'P1,1',                                  // Print 1 label, 1 copy
-      ''                                       // Empty line for proper termination
+      '^XA',                                                    // Start format
+      '^MMT',                                                   // Media type: Thermal transfer
+      '^PW406',                                                 // Print width (406 dots for 50.8mm at 203 DPI)
+      '^LL203',                                                 // Label length (203 dots for 25.4mm at 203 DPI)
+      '^PR4',                                                   // Print speed 4 ips
+      '^MD15',                                                  // Media darkness 15
+      '^LH0,0',                                                 // Label home position
+      '^CF0,20',                                                // Default font
+      `^FO10,10^A0N,24,24^FD${qr_code_data.product.substring(0, 18)}^FS`,          // Product name - large and bold
+      `^FO10,40^A0N,16,16^FD${qr_code_data.batch_number}^FS`,                      // Batch number
+      `^FO10,60^A0N,14,14^FDChef: ${qr_code_data.chef}^FS`,                        // Chef name
+      `^FO10,80^A0N,12,12^FD${qr_code_data.production_date}^FS`,                   // Production date
+      `^FO10,100^A0N,16,16^FDEXP: ${qr_code_data.expiry_date}^FS`,                 // Expiry date - emphasized
+      `^FO280,10^BY2^BCN,60,Y,N,N^FD${qr_code_data.batch_number}^FS`,             // Barcode
+      '^PQ1,0,1,Y',                                            // Print quantity: 1 label
+      '^XZ'                                                    // End format
     ].join('\n');
   }
 
@@ -139,7 +142,7 @@ export class QZTrayService {
       }
 
       if (!this.selectedPrinter) {
-        this.selectedPrinter = await this.findArgoxPrinter();
+        this.selectedPrinter = await this.findLW650XLPrinter();
         if (!this.selectedPrinter) {
           throw new Error('No printer available');
         }
@@ -149,14 +152,14 @@ export class QZTrayService {
       
       const copies = printRequest.printer_config?.copies || 1;
       
-      // Generate EPL commands for each label
+      // Generate ZPL commands for each label
       const printData = printRequest.labels.map(label => 
-        this.generateEPLCommands(label)
+        this.generateZPLCommands(label)
       );
 
-      console.log('Generated EPL commands:', printData);
+      console.log('Generated ZPL commands:', printData);
 
-      // Create print configuration specifically for thermal printers
+      // Create print configuration for LW650XL thermal printer
       const config = qz.configs.create(this.selectedPrinter, {
         copies: copies,
         jobName: `OptiThai_Labels_${new Date().getTime()}`,
@@ -164,7 +167,9 @@ export class QZTrayService {
         margins: { top: 0, right: 0, bottom: 0, left: 0 },
         orientation: 'portrait',
         colorType: 'blackwhite',
-        units: 'in'
+        units: 'dots',
+        density: 8,
+        speed: 4
       });
 
       console.log('Print config:', config);

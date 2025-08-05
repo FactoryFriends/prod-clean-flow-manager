@@ -50,11 +50,11 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
       setPrinterStatus(status);
       setAvailablePrinters(status.available_printers || []);
       
-      // Auto-select ARGOX printer if found
-      const argoxPrinter = await QZTrayService.findArgoxPrinter();
-      if (argoxPrinter) {
-        setSelectedPrinter(argoxPrinter);
-        QZTrayService.setPrinter(argoxPrinter);
+      // Auto-select LW650XL printer if found
+      const lw650xlPrinter = await QZTrayService.findLW650XLPrinter();
+      if (lw650xlPrinter) {
+        setSelectedPrinter(lw650xlPrinter);
+        QZTrayService.setPrinter(lw650xlPrinter);
       }
     }
   };
@@ -170,7 +170,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
                 <SelectContent>
                   {availablePrinters.map((printer) => (
                     <SelectItem key={printer} value={printer}>
-                      {printer} {printer.toLowerCase().includes('argox') ? '(Recommended)' : ''}
+                      {printer} {printer.toLowerCase().includes('lw650xl') || printer.toLowerCase().includes('lw-650xl') ? '(Recommended)' : ''}
                     </SelectItem>
                   ))}
                 </SelectContent>
