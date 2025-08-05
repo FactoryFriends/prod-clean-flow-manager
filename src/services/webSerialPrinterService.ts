@@ -223,11 +223,16 @@ export class WebSerialPrinterService {
       return true;
     }
 
-    // Check if we have a previously selected port
-    const ports = await (navigator as any).serial.getPorts();
-    if (ports.length > 0) {
-      this.port = ports[0];
-      return await this.connect();
+    try {
+      // Check if we have a previously selected port
+      const ports = await (navigator as any).serial.getPorts();
+      if (ports.length > 0) {
+        this.port = ports[0];
+        return await this.connect();
+      }
+    } catch (error) {
+      console.error('Web Serial API blocked by permissions policy:', error);
+      return false;
     }
 
     return false;
