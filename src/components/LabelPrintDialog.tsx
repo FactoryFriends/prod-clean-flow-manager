@@ -49,50 +49,43 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
         labelDiv.style.pageBreakAfter = 'always';
         labelDiv.style.width = '89mm';
         labelDiv.style.height = '36mm';
-        labelDiv.style.padding = '8px';
+        labelDiv.style.padding = '4px';
         labelDiv.style.border = '1px solid #000';
         labelDiv.style.fontFamily = 'Arial, sans-serif';
-        labelDiv.style.fontSize = '12px';
+        labelDiv.style.fontSize = '8px';
         labelDiv.style.backgroundColor = 'white';
         labelDiv.style.color = 'black';
         labelDiv.style.display = 'flex';
-        labelDiv.style.flexDirection = 'column';
+        labelDiv.style.flexDirection = 'row';
         labelDiv.style.justifyContent = 'space-between';
+        labelDiv.style.alignItems = 'center';
         labelDiv.style.boxSizing = 'border-box';
 
         labelDiv.innerHTML = `
-          <div style="text-align: center; border-bottom: 1px solid #000; padding-bottom: 4px;">
-            <div style="font-size: 16px; font-weight: bold;">TOTHAI</div>
-            <div style="font-size: 10px;">Production Kitchen</div>
+          <div style="flex: 0 0 auto; text-align: center; padding-right: 8px; border-right: 1px solid #ccc;">
+            <div style="font-size: 10px; font-weight: bold;">TOTHAI</div>
+            <div style="font-size: 6px;">Kitchen</div>
           </div>
 
-          <div style="flex: 1; padding: 8px 0;">
-            <div style="font-size: 14px; font-weight: bold; margin-bottom: 4px;">
+          <div style="flex: 1; padding: 0 8px;">
+            <div style="font-size: 10px; font-weight: bold; margin-bottom: 1px;">
               ${batch.products.name}
             </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+            <div style="display: flex; justify-content: space-between; font-size: 7px; margin-bottom: 1px;">
               <span><strong>Batch:</strong> ${batch.batch_number}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-              <span><strong>Prod:</strong> ${format(new Date(batch.production_date), 'dd/MM/yyyy')}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-              <span><strong>Exp:</strong> ${format(new Date(batch.expiry_date), 'dd/MM/yyyy')}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
               <span><strong>Chef:</strong> ${batch.chefs.name}</span>
             </div>
-          </div>
-
-          <div style="text-align: center; border: 1px dashed #666; padding: 8px; background-color: #f5f5f5;">
-            <div style="font-size: 8px; margin-bottom: 2px;">QR Code Data</div>
-            <div style="font-size: 6px; word-break: break-all;">
-              BATCH:${batch.batch_number}|PROD:${format(new Date(batch.production_date), 'dd/MM/yyyy')}|EXP:${format(new Date(batch.expiry_date), 'dd/MM/yyyy')}
+            <div style="display: flex; justify-content: space-between; font-size: 7px;">
+              <span><strong>Prod:</strong> ${format(new Date(batch.production_date), 'dd/MM/yy')}</span>
+              <span><strong>Exp:</strong> ${format(new Date(batch.expiry_date), 'dd/MM/yy')}</span>
             </div>
           </div>
 
-          <div style="text-align: center; font-size: 8px; margin-top: 4px;">
-            Label ${i} of ${numLabelsToPrint}
+          <div style="flex: 0 0 auto; text-align: center; border-left: 1px solid #ccc; padding-left: 8px;">
+            <div style="font-size: 6px; margin-bottom: 1px;">QR</div>
+            <div style="width: 20px; height: 20px; border: 1px dashed #666; font-size: 4px; display: flex; align-items: center; justify-content: center;">
+              ${i}
+            </div>
           </div>
         `;
 
@@ -230,60 +223,55 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
               style={{
                 width: '89mm',
                 height: '36mm',
-                padding: '8px',
+                padding: '4px',
                 border: '1px solid #000',
                 fontFamily: 'Arial, sans-serif',
-                fontSize: '12px',
+                fontSize: '8px',
                 backgroundColor: 'white',
                 color: 'black',
                 display: 'flex',
-                flexDirection: 'column',
+                flexDirection: 'row',
                 justifyContent: 'space-between',
+                alignItems: 'center',
                 boxSizing: 'border-box',
                 margin: '0 auto'
               }}
             >
               {/* Header */}
-              <div style={{ textAlign: 'center', borderBottom: '1px solid #000', paddingBottom: '4px' }}>
-                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>TOTHAI</div>
-                <div style={{ fontSize: '10px' }}>Production Kitchen</div>
+              <div style={{ flex: '0 0 auto', textAlign: 'center', paddingRight: '8px', borderRight: '1px solid #ccc' }}>
+                <div style={{ fontSize: '10px', fontWeight: 'bold' }}>TOTHAI</div>
+                <div style={{ fontSize: '6px' }}>Kitchen</div>
               </div>
 
               {/* Product Info */}
-              <div style={{ flex: 1, padding: '8px 0' }}>
-                <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '4px' }}>
+              <div style={{ flex: 1, padding: '0 8px' }}>
+                <div style={{ fontSize: '10px', fontWeight: 'bold', marginBottom: '1px' }}>
                   {batch.products.name}
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '7px', marginBottom: '1px' }}>
                   <span><strong>Batch:</strong> {batch.batch_number}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-                  <span><strong>Prod:</strong> {format(new Date(batch.production_date), 'dd/MM/yyyy')}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-                  <span><strong>Exp:</strong> {format(new Date(batch.expiry_date), 'dd/MM/yyyy')}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
                   <span><strong>Chef:</strong> {batch.chefs.name}</span>
                 </div>
-              </div>
-
-              {/* QR Code placeholder */}
-              <div style={{ 
-                textAlign: 'center', 
-                border: '1px dashed #666', 
-                padding: '8px',
-                backgroundColor: '#f5f5f5'
-              }}>
-                <div style={{ fontSize: '8px', marginBottom: '2px' }}>QR Code Data</div>
-                <div style={{ fontSize: '6px', wordBreak: 'break-all' }}>
-                  BATCH:{batch.batch_number}|PROD:{format(new Date(batch.production_date), 'dd/MM/yyyy')}|EXP:{format(new Date(batch.expiry_date), 'dd/MM/yyyy')}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '7px' }}>
+                  <span><strong>Prod:</strong> {format(new Date(batch.production_date), 'dd/MM/yy')}</span>
+                  <span><strong>Exp:</strong> {format(new Date(batch.expiry_date), 'dd/MM/yy')}</span>
                 </div>
               </div>
 
-              {/* Footer */}
-              <div style={{ textAlign: 'center', fontSize: '8px', marginTop: '4px' }}>
-                Label 1 of {numLabelsToPrint}
+              {/* QR Code */}
+              <div style={{ flex: '0 0 auto', textAlign: 'center', borderLeft: '1px solid #ccc', paddingLeft: '8px' }}>
+                <div style={{ fontSize: '6px', marginBottom: '1px' }}>QR</div>
+                <div style={{ 
+                  width: '20px', 
+                  height: '20px', 
+                  border: '1px dashed #666', 
+                  fontSize: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  1
+                </div>
               </div>
             </div>
             
