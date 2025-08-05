@@ -15,27 +15,107 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-    <!-- QZ Tray library - Multiple fallback sources -->
-    <script src="https://cdn.jsdelivr.net/npm/qz-tray@2.2.5/dist/qz-tray.min.js" 
-            onerror="this.onerror=null; this.src='https://unpkg.com/qz-tray@2.2.5/dist/qz-tray.min.js';"
-            crossorigin="anonymous"></script>
+    <!-- QZ Tray Direct Connection -->
     <script>
-      // Fallback for local QZ Tray connection
-      if (typeof window !== 'undefined') {
-        window.addEventListener('load', () => {
-          setTimeout(() => {
-            if (!window.qz) {
-              console.warn('QZ Tray library not loaded from CDN, attempting local connection...');
-              // This creates a basic QZ object for testing
-              const script = document.createElement('script');
-              script.src = 'http://localhost:8181/js/qz-tray.js';
-              script.crossOrigin = 'anonymous';
-              script.onerror = () => console.error('Failed to load QZ Tray from localhost');
-              document.head.appendChild(script);
+      // Create QZ object directly without external libraries
+      window.qz = {
+        websocket: {
+          connect: function() {
+            return new Promise((resolve, reject) => {
+              try {
+                const ws = new WebSocket('ws://localhost:8181');
+                ws.onopen = () => {
+                  console.log('QZ Tray websocket connected');
+                  window.qz._ws = ws;
+                  resolve();
+                };
+                ws.onerror = (error) => {
+                  console.error('QZ Tray websocket error:', error);
+                  reject(error);
+                };
+                ws.onclose = () => {
+                  console.log('QZ Tray websocket closed');
+                };
+              } catch (error) {
+                reject(error);
+              }
+            });
+          },
+          disconnect: function() {
+            if (window.qz._ws) {
+              window.qz._ws.close();
+              window.qz._ws = null;
             }
-          }, 1000);
-        });
-      }
+          },
+          isActive: function() {
+            return window.qz._ws && window.qz._ws.readyState === WebSocket.OPEN;
+          }
+        },
+        printers: {
+          find: function() {
+            return new Promise((resolve, reject) => {
+              if (!window.qz.websocket.isActive()) {
+                reject(new Error('QZ Tray not connected'));
+                return;
+              }
+              
+              const id = Math.random().toString(36).substr(2, 9);
+              const message = {
+                call: 'printers.find',
+                params: [],
+                uid: id
+              };
+              
+              const handleMessage = (event) => {
+                const response = JSON.parse(event.data);
+                if (response.uid === id) {
+                  window.qz._ws.removeEventListener('message', handleMessage);
+                  if (response.error) {
+                    reject(new Error(response.error));
+                  } else {
+                    resolve(response.result);
+                  }
+                }
+              };
+              
+              window.qz._ws.addEventListener('message', handleMessage);
+              window.qz._ws.send(JSON.stringify(message));
+            });
+          }
+        },
+        print: function(config, data) {
+          return new Promise((resolve, reject) => {
+            if (!window.qz.websocket.isActive()) {
+              reject(new Error('QZ Tray not connected'));
+              return;
+            }
+            
+            const id = Math.random().toString(36).substr(2, 9);
+            const message = {
+              call: 'print',
+              params: [config, data],
+              uid: id
+            };
+            
+            const handleMessage = (event) => {
+              const response = JSON.parse(event.data);
+              if (response.uid === id) {
+                window.qz._ws.removeEventListener('message', handleMessage);
+                if (response.error) {
+                  reject(new Error(response.error));
+                } else {
+                  resolve(response.result);
+                }
+              }
+            };
+            
+            window.qz._ws.addEventListener('message', handleMessage);
+            window.qz._ws.send(JSON.stringify(message));
+          });
+        }
+      };
+      
+      console.log('QZ Tray direct connection object created');
     </script>
   </head>
 
