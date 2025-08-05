@@ -122,7 +122,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
                 <div style="font-size: 13px; font-weight: bold; margin-bottom: 4px;">
                   ${batch.products.name}
                 </div>
-                <div style="font-size: 9px; margin-bottom: 2px;">
+                <div style="font-size: 11px; margin-bottom: 2px; font-weight: bold;">
                   <strong>Batch:</strong> ${batch.batch_number}
                 </div>
                 <div style="font-size: 9px; margin-bottom: 2px;">
@@ -314,7 +314,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
                     <div style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '4px' }}>
                       {batch.products.name}
                     </div>
-                    <div style={{ fontSize: '9px', marginBottom: '2px' }}>
+                    <div style={{ fontSize: '11px', marginBottom: '2px', fontWeight: 'bold' }}>
                       <strong>Batch:</strong> {batch.batch_number}
                     </div>
                     <div style={{ fontSize: '9px', marginBottom: '2px' }}>
