@@ -212,15 +212,67 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
               Label Preview (4" x 3")
             </h3>
             
-            <LabelTemplate
-              batchId={batch.id}
-              productName={batch.products.name}
-              batchNumber={batch.batch_number}
-              productionDate={batch.production_date}
-              expiryDate={batch.expiry_date}
-              labelNumber={1}
-              totalLabels={numLabelsToPrint}
-            />
+            {/* Direct HTML preview */}
+            <div 
+              style={{
+                width: '4in',
+                height: '3in',
+                padding: '8px',
+                border: '1px solid #000',
+                fontFamily: 'Arial, sans-serif',
+                fontSize: '12px',
+                backgroundColor: 'white',
+                color: 'black',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                boxSizing: 'border-box',
+                margin: '0 auto'
+              }}
+            >
+              {/* Header */}
+              <div style={{ textAlign: 'center', borderBottom: '1px solid #000', paddingBottom: '4px' }}>
+                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>TOTHAI</div>
+                <div style={{ fontSize: '10px' }}>Production Kitchen</div>
+              </div>
+
+              {/* Product Info */}
+              <div style={{ flex: 1, padding: '8px 0' }}>
+                <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '4px' }}>
+                  {batch.products.name}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                  <span><strong>Batch:</strong> {batch.batch_number}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                  <span><strong>Prod:</strong> {format(new Date(batch.production_date), 'dd/MM/yyyy')}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                  <span><strong>Exp:</strong> {format(new Date(batch.expiry_date), 'dd/MM/yyyy')}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                  <span><strong>Chef:</strong> {batch.chefs.name}</span>
+                </div>
+              </div>
+
+              {/* QR Code placeholder */}
+              <div style={{ 
+                textAlign: 'center', 
+                border: '1px dashed #666', 
+                padding: '8px',
+                backgroundColor: '#f5f5f5'
+              }}>
+                <div style={{ fontSize: '8px', marginBottom: '2px' }}>QR Code Data</div>
+                <div style={{ fontSize: '6px', wordBreak: 'break-all' }}>
+                  BATCH:{batch.batch_number}|PROD:{format(new Date(batch.production_date), 'dd/MM/yyyy')}|EXP:{format(new Date(batch.expiry_date), 'dd/MM/yyyy')}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div style={{ textAlign: 'center', fontSize: '8px', marginTop: '4px' }}>
+                Label 1 of {numLabelsToPrint}
+              </div>
+            </div>
             
             <p className="text-sm text-muted-foreground mt-3">
               Print format: 4" x 3" labels. Browser will open print dialog where you can select your printer.
