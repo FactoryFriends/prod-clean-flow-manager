@@ -130,8 +130,8 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
               <div style="font-size: 10px; margin-bottom: 3px;">
                 <strong>Production:</strong> ${format(new Date(batch.production_date), 'dd/MM/yyyy')}
               </div>
-              <div style="font-size: 10px; margin-bottom: 3px;">
-                <strong>Expiry:</strong> ${format(new Date(batch.expiry_date), 'dd/MM/yyyy')}
+              <div style="font-size: 13px; margin-bottom: 3px; color: #d63384; font-weight: bold; border: 2px solid #d63384; padding: 2px 4px; text-align: center;">
+                <strong>EXPIRY:</strong> ${format(new Date(batch.expiry_date), 'dd/MM/yyyy')} (${format(new Date(batch.expiry_date), 'EEEE')})
               </div>
               <div style="font-size: 10px;">
                 <strong>Size:</strong> ${batch.products.unit_size} ${batch.products.unit_type}
@@ -319,9 +319,9 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
                   <div style={{ fontSize: '10px', marginBottom: '3px' }}>
                     <strong>Production:</strong> {format(new Date(batch.production_date), 'dd/MM/yyyy')}
                   </div>
-                  <div style={{ fontSize: '10px', marginBottom: '3px' }}>
-                    <strong>Expiry:</strong> {format(new Date(batch.expiry_date), 'dd/MM/yyyy')}
-                  </div>
+                   <div style={{ fontSize: '13px', marginBottom: '3px', color: '#d63384', fontWeight: 'bold', border: '2px solid #d63384', padding: '2px 4px', textAlign: 'center' }}>
+                     <strong>EXPIRY:</strong> {format(new Date(batch.expiry_date), 'dd/MM/yyyy')} ({format(new Date(batch.expiry_date), 'EEEE')})
+                   </div>
                   <div style={{ fontSize: '10px' }}>
                     <strong>Size:</strong> {batch.products.unit_size} {batch.products.unit_type}
                   </div>
