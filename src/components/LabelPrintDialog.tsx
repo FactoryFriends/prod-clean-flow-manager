@@ -8,8 +8,6 @@ import { format } from "date-fns";
 import { Printer } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LabelTemplate } from "./LabelTemplate";
-import printJS from "print-js";
 
 interface LabelPrintDialogProps {
   open: boolean;
@@ -104,29 +102,44 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
       // Add to document
       document.body.appendChild(labelsContainer);
 
-      // Print using PrintJS
-      printJS({
-        printable: 'labels-to-print',
-        type: 'html',
-        targetStyles: ['*'],
-        style: `
-          @media print {
-            @page {
-              size: 4in 3in;
-              margin: 0;
-            }
-            .label-page {
-              page-break-after: always;
-              width: 4in !important;
-              height: 3in !important;
-              margin: 0 !important;
-            }
-            .label-page:last-child {
-              page-break-after: avoid;
-            }
+      // Add print styles
+      const printStyle = document.createElement('style');
+      printStyle.innerHTML = `
+        @media print {
+          @page {
+            size: 4in 3in;
+            margin: 0;
           }
-        `
-      });
+          .label-page {
+            page-break-after: always;
+            width: 4in !important;
+            height: 3in !important;
+            margin: 0 !important;
+          }
+          .label-page:last-child {
+            page-break-after: avoid;
+          }
+          body > *:not(#labels-to-print) {
+            display: none !important;
+          }
+          #labels-to-print {
+            display: block !important;
+          }
+        }
+      `;
+      document.head.appendChild(printStyle);
+
+      // Show the labels temporarily
+      labelsContainer.style.display = 'block';
+      
+      // Use simple window.print
+      window.print();
+      
+      // Cleanup after print
+      setTimeout(() => {
+        document.head.removeChild(printStyle);
+        labelsContainer.style.display = 'none';
+      }, 100);
 
       // Save label records to database
       const labelData = Array.from({ length: numLabelsToPrint }, (_, index) => ({
