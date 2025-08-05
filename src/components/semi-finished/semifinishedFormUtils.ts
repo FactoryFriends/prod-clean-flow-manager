@@ -1,6 +1,7 @@
 
 export type SemiFinishedFormData = {
   name: string;
+  name_thai?: string;
   batch_size: number;
   batch_unit: string;
   packages_per_batch: number;

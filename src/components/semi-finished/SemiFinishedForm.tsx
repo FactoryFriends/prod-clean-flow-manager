@@ -21,6 +21,7 @@ export function SemiFinishedForm() {
   const form = useForm<SemiFinishedFormData>({
     defaultValues: {
       name: "",
+      name_thai: "",
       batch_size: 20,
       batch_unit: "LITER",
       packages_per_batch: 1,
@@ -102,6 +103,7 @@ export function SemiFinishedForm() {
     createProduct.mutate(
       {
         name: data.name,
+        name_thai: data.name_thai || null,
         unit_size: Number(parseNumberComma(data.unit_size as any)),
         unit_type: data.unit_type,
         packages_per_batch: Number(parseNumberComma(data.packages_per_batch as any)),
