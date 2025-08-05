@@ -152,7 +152,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             </div>
           </Alert>
 
-          {/* Connect Button */}
+          {/* Connect/Disconnect Buttons */}
           {browserSupported && !serviceAvailable && (
             <div className="space-y-2">
               <Button 
@@ -174,6 +174,24 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
               <p className="text-sm text-muted-foreground">
                 Click to select and connect to your LW650XL printer via USB
               </p>
+            </div>
+          )}
+
+          {/* Disconnect Button */}
+          {browserSupported && serviceAvailable && (
+            <div className="space-y-2">
+              <Button 
+                variant="outline"
+                onClick={async () => {
+                  await WebSerialPrinterService.disconnect();
+                  setServiceAvailable(false);
+                  toast.success("Printer disconnected");
+                }}
+                className="flex items-center gap-2"
+              >
+                <Settings className="w-4 h-4" />
+                Disconnect Printer
+              </Button>
             </div>
           )}
 
