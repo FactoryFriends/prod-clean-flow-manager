@@ -19,12 +19,22 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
-        <Label htmlFor="name">Product Name</Label>
+        <Label htmlFor="name">Product Name (English)</Label>
         <Input
           id="name"
           value={formData.name}
           onChange={(e) => onFieldChange("name", e.target.value)}
           required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="name_thai">Product Name (Thai) - Optional</Label>
+        <Input
+          id="name_thai"
+          value={formData.name_thai || ""}
+          onChange={(e) => onFieldChange("name_thai", e.target.value)}
+          placeholder="e.g. น้ำแกงโฮมเมด"
         />
       </div>
 
