@@ -113,6 +113,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
         labelDiv.innerHTML = `
           <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 6px;">
             <div style="font-size: 15px; font-weight: bold;">${batch.products.name}</div>
+            ${batch.products.name_thai ? `<div style="font-size: 12px; margin-top: 2px;">${batch.products.name_thai}</div>` : ''}
           </div>
 
           <div style="flex: 1; display: flex; flex-direction: column;">
@@ -300,6 +301,9 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
               {/* Header */}
               <div style={{ textAlign: 'center', borderBottom: '2px solid #000', paddingBottom: '6px', marginBottom: '6px' }}>
                 <div style={{ fontSize: '15px', fontWeight: 'bold' }}>{batch.products.name}</div>
+                {batch.products.name_thai && (
+                  <div style={{ fontSize: '12px', marginTop: '2px' }}>{batch.products.name_thai}</div>
+                )}
               </div>
 
               {/* Main Content */}
