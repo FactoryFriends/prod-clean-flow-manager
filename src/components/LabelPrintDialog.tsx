@@ -116,31 +116,34 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             <div style="font-size: 10px;">Production Kitchen</div>
           </div>
 
-          <div style="flex: 1; display: flex; justify-content: space-between; align-items: flex-start;">
-            <div style="flex: 2; padding-right: 10px;">
-              <div style="font-size: 14px; font-weight: bold; margin-bottom: 6px;">
-                ${batch.products.name}
+          <div style="flex: 1; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+              <div style="flex: 2; padding-right: 10px;">
+                <div style="font-size: 13px; font-weight: bold; margin-bottom: 4px;">
+                  ${batch.products.name}
+                </div>
+                <div style="font-size: 9px; margin-bottom: 2px;">
+                  <strong>Batch:</strong> ${batch.batch_number}
+                </div>
+                <div style="font-size: 9px; margin-bottom: 2px;">
+                  <strong>Chef:</strong> ${batch.chefs.name}
+                </div>
+                <div style="font-size: 9px; margin-bottom: 2px;">
+                  <strong>Production:</strong> ${format(new Date(batch.production_date), 'dd/MM/yyyy')}
+                </div>
+                <div style="font-size: 9px;">
+                  <strong>Size:</strong> ${batch.products.unit_size} ${batch.products.unit_type}
+                </div>
               </div>
-              <div style="font-size: 10px; margin-bottom: 3px;">
-                <strong>Batch Number:</strong> ${batch.batch_number}
-              </div>
-              <div style="font-size: 10px; margin-bottom: 3px;">
-                <strong>Chef:</strong> ${batch.chefs.name}
-              </div>
-              <div style="font-size: 10px; margin-bottom: 3px;">
-                <strong>Production:</strong> ${format(new Date(batch.production_date), 'dd/MM/yyyy')}
-              </div>
-              <div style="font-size: 14px; margin-bottom: 3px; font-weight: bold; border: 3px solid #000; padding: 3px 6px; text-align: center; background-color: #000; color: #fff;">
-                EXPIRY: ${format(new Date(batch.expiry_date), 'dd/MM/yyyy')} (${format(new Date(batch.expiry_date), 'EEEE')})
-              </div>
-              <div style="font-size: 10px;">
-                <strong>Size:</strong> ${batch.products.unit_size} ${batch.products.unit_type}
+
+              <div style="flex: 1; text-align: center; border-left: 2px solid #ccc; padding-left: 10px;">
+                <div style="font-size: 8px; margin-bottom: 6px; font-weight: bold;">QR CODE</div>
+                <img src="${qrCodeDataURL}" style="width: 42px; height: 42px; margin: 0 auto; display: block;" alt="QR Code ${i}" />
               </div>
             </div>
-
-            <div style="flex: 1; text-align: center; border-left: 2px solid #ccc; padding-left: 10px;">
-              <div style="font-size: 8px; margin-bottom: 6px; font-weight: bold;">QR CODE</div>
-              <img src="${qrCodeDataURL}" style="width: 42px; height: 42px; margin: 0 auto; display: block;" alt="QR Code ${i}" />
+            
+            <div style="font-size: 12px; font-weight: bold; border: 2px solid #000; padding: 4px; text-align: center; margin-top: 4px;">
+              EXPIRY: ${format(new Date(batch.expiry_date), 'dd/MM/yyyy')} (${format(new Date(batch.expiry_date), 'EEEE')})
             </div>
           </div>
 
@@ -304,53 +307,56 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
               </div>
 
               {/* Main Content */}
-              <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                {/* Product Info */}
-                <div style={{ flex: 2, paddingRight: '10px' }}>
-                  <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '6px' }}>
-                    {batch.products.name}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                  {/* Product Info */}
+                  <div style={{ flex: 2, paddingRight: '10px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '4px' }}>
+                      {batch.products.name}
+                    </div>
+                    <div style={{ fontSize: '9px', marginBottom: '2px' }}>
+                      <strong>Batch:</strong> {batch.batch_number}
+                    </div>
+                    <div style={{ fontSize: '9px', marginBottom: '2px' }}>
+                      <strong>Chef:</strong> {batch.chefs.name}
+                    </div>
+                    <div style={{ fontSize: '9px', marginBottom: '2px' }}>
+                      <strong>Production:</strong> {format(new Date(batch.production_date), 'dd/MM/yyyy')}
+                    </div>
+                    <div style={{ fontSize: '9px' }}>
+                      <strong>Size:</strong> {batch.products.unit_size} {batch.products.unit_type}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '10px', marginBottom: '3px' }}>
-                    <strong>Batch Number:</strong> {batch.batch_number}
-                  </div>
-                  <div style={{ fontSize: '10px', marginBottom: '3px' }}>
-                    <strong>Chef:</strong> {batch.chefs.name}
-                  </div>
-                  <div style={{ fontSize: '10px', marginBottom: '3px' }}>
-                    <strong>Production:</strong> {format(new Date(batch.production_date), 'dd/MM/yyyy')}
-                  </div>
-                   <div style={{ fontSize: '14px', marginBottom: '3px', fontWeight: 'bold', border: '3px solid #000', padding: '3px 6px', textAlign: 'center', backgroundColor: '#000', color: '#fff' }}>
-                     EXPIRY: {format(new Date(batch.expiry_date), 'dd/MM/yyyy')} ({format(new Date(batch.expiry_date), 'EEEE')})
-                   </div>
-                  <div style={{ fontSize: '10px' }}>
-                    <strong>Size:</strong> {batch.products.unit_size} {batch.products.unit_type}
+
+                  {/* QR Code */}
+                  <div style={{ flex: 1, textAlign: 'center', borderLeft: '2px solid #ccc', paddingLeft: '10px' }}>
+                    <div style={{ fontSize: '8px', marginBottom: '6px', fontWeight: 'bold' }}>QR CODE</div>
+                    {previewQRCode ? (
+                      <img 
+                        src={previewQRCode} 
+                        style={{ width: '42px', height: '42px', margin: '0 auto', display: 'block' }}
+                        alt="Preview QR Code"
+                      />
+                    ) : (
+                      <div style={{ 
+                        width: '42px', 
+                        height: '42px', 
+                        border: '2px dashed #666', 
+                        margin: '0 auto',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '7px',
+                        backgroundColor: '#f5f5f5'
+                      }}>
+                        1
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                {/* QR Code */}
-                <div style={{ flex: 1, textAlign: 'center', borderLeft: '2px solid #ccc', paddingLeft: '10px' }}>
-                  <div style={{ fontSize: '8px', marginBottom: '6px', fontWeight: 'bold' }}>QR CODE</div>
-                  {previewQRCode ? (
-                    <img 
-                      src={previewQRCode} 
-                      style={{ width: '42px', height: '42px', margin: '0 auto', display: 'block' }}
-                      alt="Preview QR Code"
-                    />
-                  ) : (
-                    <div style={{ 
-                      width: '42px', 
-                      height: '42px', 
-                      border: '2px dashed #666', 
-                      margin: '0 auto',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '7px',
-                      backgroundColor: '#f5f5f5'
-                    }}>
-                      1
-                    </div>
-                  )}
+                
+                <div style={{ fontSize: '12px', fontWeight: 'bold', border: '2px solid #000', padding: '4px', textAlign: 'center', marginTop: '4px' }}>
+                  EXPIRY: {format(new Date(batch.expiry_date), 'dd/MM/yyyy')} ({format(new Date(batch.expiry_date), 'EEEE')})
                 </div>
               </div>
 
