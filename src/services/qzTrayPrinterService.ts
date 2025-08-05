@@ -34,9 +34,23 @@ export class QZTrayPrinterService {
 
   // Check if QZ Tray is available
   static isAvailable(): boolean {
-    console.log('Checking QZ Tray availability...');
+    console.log('=== QZ TRAY DEBUG INFO ===');
+    console.log('window object exists:', typeof window !== 'undefined');
     console.log('window.qz exists:', !!window.qz);
-    console.log('window object:', typeof window);
+    
+    if (typeof window !== 'undefined') {
+      console.log('QZ object details:', window.qz);
+      console.log('Available QZ properties:', window.qz ? Object.keys(window.qz) : 'N/A');
+      
+      // Check if QZ script is loaded
+      const qzScript = document.querySelector('script[src*="qz-tray"]');
+      console.log('QZ script element found:', !!qzScript);
+      if (qzScript) {
+        console.log('QZ script src:', qzScript.getAttribute('src'));
+      }
+    }
+    
+    console.log('=== END QZ DEBUG ===');
     return typeof window !== 'undefined' && !!window.qz;
   }
 
