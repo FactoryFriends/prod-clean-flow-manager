@@ -49,7 +49,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
         labelDiv.style.pageBreakAfter = 'always';
         labelDiv.style.width = '102mm';
         labelDiv.style.height = '59mm';
-        labelDiv.style.padding = '8px';
+        labelDiv.style.padding = '8px 8px 8px 13mm';
         labelDiv.style.border = '1px solid #000';
         labelDiv.style.fontFamily = 'Arial, sans-serif';
         labelDiv.style.fontSize = '12px';
@@ -236,7 +236,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
               style={{
                 width: '102mm',
                 height: '59mm',
-                padding: '8px',
+                padding: '8px 8px 8px 13mm',
                 border: '1px solid #000',
                 fontFamily: 'Arial, sans-serif',
                 fontSize: '12px',
