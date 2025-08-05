@@ -47,8 +47,8 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
         const labelDiv = document.createElement('div');
         labelDiv.className = 'label-page';
         labelDiv.style.pageBreakAfter = 'always';
-        labelDiv.style.width = '4in';
-        labelDiv.style.height = '3in';
+        labelDiv.style.width = '89mm';
+        labelDiv.style.height = '36mm';
         labelDiv.style.padding = '8px';
         labelDiv.style.border = '1px solid #000';
         labelDiv.style.fontFamily = 'Arial, sans-serif';
@@ -106,14 +106,14 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
       const printStyle = document.createElement('style');
       printStyle.innerHTML = `
         @media print {
-          @page {
-            size: 4in 3in;
-            margin: 0;
-          }
-          .label-page {
-            page-break-after: always;
-            width: 4in !important;
-            height: 3in !important;
+           @page {
+             size: 89mm 36mm;
+             margin: 0;
+           }
+           .label-page {
+             page-break-after: always;
+             width: 89mm !important;
+             height: 36mm !important;
             margin: 0 !important;
           }
           .label-page:last-child {
@@ -222,14 +222,14 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
           <div className="border rounded-lg p-4">
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <Printer className="w-4 h-4" />
-              Label Preview (4" x 3")
+              Label Preview (89mm x 36mm)
             </h3>
             
             {/* Direct HTML preview */}
             <div 
               style={{
-                width: '4in',
-                height: '3in',
+                width: '89mm',
+                height: '36mm',
                 padding: '8px',
                 border: '1px solid #000',
                 fontFamily: 'Arial, sans-serif',
@@ -288,7 +288,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             </div>
             
             <p className="text-sm text-muted-foreground mt-3">
-              Print format: 4" x 3" labels. Browser will open print dialog where you can select your printer.
+              Print format: 89mm x 36mm labels. Browser will open print dialog where you can select your printer.
             </p>
           </div>
 
