@@ -145,9 +145,14 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
                 {!browserSupported 
                   ? "Web Serial not supported - Please use Chrome or Edge browser"
                   : serviceAvailable 
-                    ? "Printer connected via Web Serial API"
+                    ? `Printer connected: ${printerStatus?.current_port?.usbProductId ? 'USB Device' : 'Serial Port'}`
                     : "Printer not connected - Click connect button below"
                 }
+                {printerStatus?.available_ports > 0 && (
+                  <div className="text-xs mt-1">
+                    Browser heeft toegang tot {printerStatus.available_ports} poort(en)
+                  </div>
+                )}
               </AlertDescription>
             </div>
           </Alert>
