@@ -104,21 +104,18 @@ export function NewBatchDialog({ currentLocation }: NewBatchDialogProps) {
             <Label htmlFor="packages">
               Number of Packages{selectedProduct?.unit_type === "PIECE" ? "/Bags" : ""} Produced
             </Label>
-            <Input
-              id="packages"
-              type="number"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={packagesProduced}
-              onChange={(e) => setPackagesProduced(e.target.value)}
-              placeholder={
-                selectedProduct?.unit_type === "PIECE"
-                  ? "e.g. 20 (bags of 30 pieces)"
-                  : "Enter number of packages"
-              }
-              min="1"
-              autoComplete="off"
-            />
+            <Select value={packagesProduced} onValueChange={setPackagesProduced}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select number of packages" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border border-gray-200 shadow-lg z-50">
+                {Array.from({ length: 15 }, (_, i) => i + 1).map((num) => (
+                  <SelectItem key={num} value={num.toString()}>
+                    {num} {selectedProduct?.unit_type === "PIECE" ? `bag${num > 1 ? 's' : ''}` : `package${num > 1 ? 's' : ''}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {selectedProduct && (
               <div>
                 <p className="text-sm text-muted-foreground">
