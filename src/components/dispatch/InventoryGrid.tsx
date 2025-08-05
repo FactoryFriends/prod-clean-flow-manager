@@ -3,13 +3,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Minus, Eye, EyeOff, Filter } from "lucide-react";
+import { Plus, Minus, Eye, EyeOff, Filter, QrCode } from "lucide-react";
 import { format } from "date-fns";
 import { useProductionBatches } from "@/hooks/useProductionData";
 import { SelectedItem } from "@/types/dispatch";
 import { externalProducts } from "@/data/dispatchData";
 import { BatchDetailsDialog } from "../BatchDetailsDialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { QRScanner } from "../QRScanner";
+import { toast } from "sonner";
 
 interface InventoryGridProps {
   currentLocation: "tothai" | "khin";
@@ -23,6 +25,7 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [showExpired, setShowExpired] = useState(false);
   const [filter, setFilter] = useState<"self-produced" | "external">("self-produced");
+  const [qrScannerOpen, setQrScannerOpen] = useState(false);
 
   const getSelectedQuantity = (itemId: string) => {
     return selectedItems.find(si => si.id === itemId)?.selectedQuantity || 0;
@@ -47,6 +50,33 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
     };
     setSelectedBatch(batchDetails);
     setDetailsOpen(true);
+  };
+
+  const handleQRScan = (scannedData: any) => {
+    try {
+      let batchToAdd;
+      
+      if (typeof scannedData === 'string') {
+        // Handle batch number string
+        batchToAdd = availableBatches.find(batch => 
+          batch.batchNumber === scannedData
+        );
+      } else if (scannedData.batch_id || scannedData.batch_number) {
+        // Handle QR code JSON data
+        batchToAdd = availableBatches.find(batch => 
+          batch.id === scannedData.batch_id || batch.batchNumber === scannedData.batch_number
+        );
+      }
+      
+      if (batchToAdd) {
+        onQuantityChange(batchToAdd.id, 1);
+        toast.success(`Added 1 package of ${batchToAdd.name} (${batchToAdd.batchNumber})`);
+      } else {
+        toast.error("Batch not found in available inventory");
+      }
+    } catch (error) {
+      toast.error("Invalid QR code data");
+    }
   };
 
   // Convert batches to available inventory and sort alphabetically
@@ -192,7 +222,7 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {/* Filter Toggle */}
+            {/* Filter Toggle and QR Scanner */}
             <div className="flex items-center gap-4">
               <ToggleGroup type="single" value={filter} onValueChange={(value) => value && setFilter(value as "self-produced" | "external")}>
                 <ToggleGroupItem 
@@ -208,6 +238,18 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
                   External
                 </ToggleGroupItem>
               </ToggleGroup>
+
+              {filter === "self-produced" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setQrScannerOpen(true)}
+                  className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                >
+                  <QrCode className="w-4 h-4" />
+                  Scan QR Code
+                </Button>
+              )}
 
               {filter === "self-produced" && expiredBatches.length > 0 && (
                 <Button
@@ -235,6 +277,13 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
         open={detailsOpen}
         onOpenChange={setDetailsOpen}
         batch={selectedBatch}
+      />
+
+      <QRScanner
+        open={qrScannerOpen}
+        onOpenChange={setQrScannerOpen}
+        onScan={handleQRScan}
+        title="Scan Product QR Code"
       />
     </>
   );

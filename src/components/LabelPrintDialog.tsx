@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { Printer } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import QRCode from "qrcode";
 
 interface LabelPrintDialogProps {
   open: boolean;
@@ -18,11 +19,35 @@ interface LabelPrintDialogProps {
 export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialogProps) {
   const [printingLabels, setPrintingLabels] = useState(false);
   const [numLabelsToPrint, setNumLabelsToPrint] = useState<number>(0);
+  const [previewQRCode, setPreviewQRCode] = useState<string>("");
 
   // Update the number of labels when batch changes
   useEffect(() => {
     if (batch) {
       setNumLabelsToPrint(batch.packages_produced);
+      
+      // Generate QR code for preview
+      const qrData = JSON.stringify({
+        batch_id: batch.id,
+        batch_number: batch.batch_number,
+        product: batch.products.name,
+        production_date: format(new Date(batch.production_date), "dd/MM/yyyy"),
+        expiry_date: format(new Date(batch.expiry_date), "dd/MM/yyyy"),
+        package_number: 1,
+        chef: batch.chefs.name,
+        location: batch.location,
+        package_size: `${batch.products.unit_size} ${batch.products.unit_type}`,
+        product_id: batch.product_id
+      });
+
+      QRCode.toDataURL(qrData, {
+        width: 42,
+        margin: 1,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      }).then(setPreviewQRCode);
     }
   }, [batch]);
 
@@ -44,12 +69,36 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
       
       // Generate HTML for each label
       for (let i = 1; i <= numLabelsToPrint; i++) {
+        // Create QR code data
+        const qrData = JSON.stringify({
+          batch_id: batch.id,
+          batch_number: batch.batch_number,
+          product: batch.products.name,
+          production_date: format(new Date(batch.production_date), "dd/MM/yyyy"),
+          expiry_date: format(new Date(batch.expiry_date), "dd/MM/yyyy"),
+          package_number: i,
+          chef: batch.chefs.name,
+          location: batch.location,
+          package_size: `${batch.products.unit_size} ${batch.products.unit_type}`,
+          product_id: batch.product_id
+        });
+
+        // Generate QR code image
+        const qrCodeDataURL = await QRCode.toDataURL(qrData, {
+          width: 42,
+          margin: 1,
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+          }
+        });
+
         const labelDiv = document.createElement('div');
         labelDiv.className = 'label-page';
         labelDiv.style.pageBreakAfter = 'always';
         labelDiv.style.width = '102mm';
         labelDiv.style.height = '59mm';
-        labelDiv.style.padding = '8px 8px 8px 13mm';
+        labelDiv.style.padding = '8px 13mm 8px 13mm';
         labelDiv.style.border = '1px solid #000';
         labelDiv.style.fontFamily = 'Arial, sans-serif';
         labelDiv.style.fontSize = '12px';
@@ -91,9 +140,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
 
             <div style="flex: 1; text-align: center; border-left: 2px solid #ccc; padding-left: 10px;">
               <div style="font-size: 8px; margin-bottom: 6px; font-weight: bold;">QR CODE</div>
-              <div style="width: 42px; height: 42px; border: 2px dashed #666; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 7px; background-color: #f5f5f5;">
-                ${i}
-              </div>
+              <img src="${qrCodeDataURL}" style="width: 42px; height: 42px; margin: 0 auto; display: block;" alt="QR Code ${i}" />
             </div>
           </div>
 
@@ -236,7 +283,7 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
               style={{
                 width: '102mm',
                 height: '59mm',
-                padding: '8px 8px 8px 13mm',
+                padding: '8px 13mm 8px 13mm',
                 border: '1px solid #000',
                 fontFamily: 'Arial, sans-serif',
                 fontSize: '12px',
@@ -283,19 +330,27 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
                 {/* QR Code */}
                 <div style={{ flex: 1, textAlign: 'center', borderLeft: '2px solid #ccc', paddingLeft: '10px' }}>
                   <div style={{ fontSize: '8px', marginBottom: '6px', fontWeight: 'bold' }}>QR CODE</div>
-                  <div style={{ 
-                    width: '42px', 
-                    height: '42px', 
-                    border: '2px dashed #666', 
-                    margin: '0 auto',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '7px',
-                    backgroundColor: '#f5f5f5'
-                  }}>
-                    1
-                  </div>
+                  {previewQRCode ? (
+                    <img 
+                      src={previewQRCode} 
+                      style={{ width: '42px', height: '42px', margin: '0 auto', display: 'block' }}
+                      alt="Preview QR Code"
+                    />
+                  ) : (
+                    <div style={{ 
+                      width: '42px', 
+                      height: '42px', 
+                      border: '2px dashed #666', 
+                      margin: '0 auto',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '7px',
+                      backgroundColor: '#f5f5f5'
+                    }}>
+                      1
+                    </div>
+                  )}
                 </div>
               </div>
 
