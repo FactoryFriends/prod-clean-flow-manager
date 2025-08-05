@@ -34,6 +34,9 @@ export class QZTrayPrinterService {
 
   // Check if QZ Tray is available
   static isAvailable(): boolean {
+    console.log('Checking QZ Tray availability...');
+    console.log('window.qz exists:', !!window.qz);
+    console.log('window object:', typeof window);
     return typeof window !== 'undefined' && !!window.qz;
   }
 
