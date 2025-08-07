@@ -54,10 +54,12 @@ export function Settings({ currentLocation }: SettingsProps) {
           onEditProduct={settingsState.handlers.handleEditProduct}
           onEditStaffCode={settingsState.handlers.handleEditStaffCode}
           onEditTemplate={settingsState.handlers.handleEditTemplate}
+          onEditChef={settingsState.handlers.handleEditChef}
           onAddNewProduct={settingsState.handlers.handleAddNewProduct}
           onAddNewDrink={settingsState.handlers.handleAddNewDrink}
           onAddNewStaffCode={settingsState.handlers.handleAddNewStaffCode}
           onAddNewTemplate={settingsState.handlers.handleAddNewTemplate}
+          onAddNewChef={settingsState.handlers.handleAddNewChef}
         />
 
         <SystemInfo currentLocation={currentLocation} />
@@ -78,6 +80,10 @@ export function Settings({ currentLocation }: SettingsProps) {
           drinkDialogOpen={settingsState.drinkDialogOpen}
           setDrinkDialogOpen={settingsState.setDrinkDialogOpen}
           handleDrinkSuccess={settingsState.handlers.handleDrinkSuccess}
+          chefDialogOpen={settingsState.chefDialogOpen}
+          setChefDialogOpen={settingsState.setChefDialogOpen}
+          editingChef={settingsState.editingChef}
+          handleChefSuccess={settingsState.handlers.handleChefSuccess}
         />
       </div>
     </UnitOptionsProvider>

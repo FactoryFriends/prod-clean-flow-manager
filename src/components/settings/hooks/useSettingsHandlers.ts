@@ -40,6 +40,16 @@ export function useSettingsHandlers() {
     }
   };
 
+  const handleEditChef = (chef: any) => {
+    Logger.trace('SettingsHandlers', 'handleEditChef', { chefId: chef?.id });
+    try {
+      state.setEditingChef(chef);
+      state.setChefDialogOpen(true);
+    } catch (error) {
+      handleError(error as Error, { action: 'editChef', chef });
+    }
+  };
+
   const handleProductSuccess = async () => {
     Logger.trace('SettingsHandlers', 'handleProductSuccess');
     await executeWithErrorHandling(async () => {
@@ -69,6 +79,14 @@ export function useSettingsHandlers() {
     await executeWithErrorHandling(async () => {
       state.setDrinkDialogOpen(false);
     }, { action: 'drinkSuccess' });
+  };
+
+  const handleChefSuccess = async () => {
+    Logger.trace('SettingsHandlers', 'handleChefSuccess');
+    await executeWithErrorHandling(async () => {
+      state.setChefDialogOpen(false);
+      state.setEditingChef(null);
+    }, { action: 'chefSuccess' });
   };
 
   const handleAddNewProduct = () => {
@@ -110,20 +128,33 @@ export function useSettingsHandlers() {
     }
   };
 
+  const handleAddNewChef = () => {
+    Logger.trace('SettingsHandlers', 'handleAddNewChef');
+    try {
+      state.setEditingChef(null);
+      state.setChefDialogOpen(true);
+    } catch (error) {
+      handleError(error as Error, { action: 'addNewChef' });
+    }
+  };
+
   return {
     ...state,
     handlers: {
       handleEditProduct,
       handleEditStaffCode,
       handleEditTemplate,
+      handleEditChef,
       handleProductSuccess,
       handleStaffCodeSuccess,
       handleTemplateSuccess,
       handleDrinkSuccess,
+      handleChefSuccess,
       handleAddNewProduct,
       handleAddNewDrink,
       handleAddNewStaffCode,
       handleAddNewTemplate,
+      handleAddNewChef,
     },
   };
 }

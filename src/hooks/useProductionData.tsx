@@ -34,6 +34,7 @@ export interface Chef {
   name: string;
   location: "tothai" | "khin";
   active: boolean;
+  created_at: string;
 }
 
 export interface ProductionBatch {

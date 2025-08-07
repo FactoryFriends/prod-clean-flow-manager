@@ -5,10 +5,12 @@ export function useSettingsState() {
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [editingStaffCode, setEditingStaffCode] = useState<any>(null);
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
+  const [editingChef, setEditingChef] = useState<any>(null);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [staffCodeDialogOpen, setStaffCodeDialogOpen] = useState(false);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [drinkDialogOpen, setDrinkDialogOpen] = useState(false);
+  const [chefDialogOpen, setChefDialogOpen] = useState(false);
   
   // Filter states
   const [productFilter, setProductFilter] = useState("");
@@ -16,6 +18,7 @@ export function useSettingsState() {
   const [staffCodeFilter, setStaffCodeFilter] = useState("");
   const [templateFilter, setTemplateFilter] = useState("");
   const [customerFilter, setCustomerFilter] = useState("");
+  const [chefFilter, setChefFilter] = useState("");
 
   return {
     // Editing states
@@ -25,6 +28,8 @@ export function useSettingsState() {
     setEditingStaffCode,
     editingTemplate,
     setEditingTemplate,
+    editingChef,
+    setEditingChef,
     
     // Dialog states
     productDialogOpen,
@@ -35,6 +40,8 @@ export function useSettingsState() {
     setTemplateDialogOpen,
     drinkDialogOpen,
     setDrinkDialogOpen,
+    chefDialogOpen,
+    setChefDialogOpen,
     
     // Filter states
     productFilter,
@@ -47,5 +54,7 @@ export function useSettingsState() {
     setTemplateFilter,
     customerFilter,
     setCustomerFilter,
+    chefFilter,
+    setChefFilter,
   };
 }

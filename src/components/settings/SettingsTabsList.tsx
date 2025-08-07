@@ -9,7 +9,8 @@ import {
   Settings as SettingsIcon,
   Truck,
   TrendingUp,
-  FileSpreadsheet
+  FileSpreadsheet,
+  ChefHat
 } from "lucide-react";
 
 export function SettingsTabsList() {
@@ -48,6 +49,10 @@ export function SettingsTabsList() {
         <TabsTrigger value="suppliers" className="flex items-center gap-2">
           <Truck className="w-4 h-4" />
           <span className="hidden sm:inline">Suppliers</span>
+        </TabsTrigger>
+        <TabsTrigger value="chefs" className="flex items-center gap-2">
+          <ChefHat className="w-4 h-4" />
+          <span className="hidden sm:inline">Chefs</span>
         </TabsTrigger>
         <TabsTrigger value="unit-options" className="flex items-center gap-2">
           <SettingsIcon className="w-4 h-4" />

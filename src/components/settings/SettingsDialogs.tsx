@@ -4,6 +4,7 @@ import { ProductForm } from "./ProductForm";
 import { StaffCodeForm } from "./StaffCodeForm";
 import { TaskTemplateForm } from "./TaskTemplateForm";
 import { DrinkForm } from "../drinks/DrinkForm";
+import { ChefForm } from "./ChefForm";
 
 interface SettingsDialogsProps {
   productDialogOpen: boolean;
@@ -21,6 +22,10 @@ interface SettingsDialogsProps {
   drinkDialogOpen?: boolean;
   setDrinkDialogOpen?: (open: boolean) => void;
   handleDrinkSuccess?: () => void;
+  chefDialogOpen?: boolean;
+  setChefDialogOpen?: (open: boolean) => void;
+  editingChef?: any;
+  handleChefSuccess?: () => void;
 }
 
 export function SettingsDialogs({
@@ -39,6 +44,10 @@ export function SettingsDialogs({
   drinkDialogOpen = false,
   setDrinkDialogOpen = () => {},
   handleDrinkSuccess = () => {},
+  chefDialogOpen = false,
+  setChefDialogOpen = () => {},
+  editingChef,
+  handleChefSuccess = () => {},
 }: SettingsDialogsProps) {
   return (
     <>
@@ -94,6 +103,10 @@ export function SettingsDialogs({
             onCancel={() => setTemplateDialogOpen(false)}
           />
         </DialogContent>
+      </Dialog>
+
+      <Dialog open={chefDialogOpen} onOpenChange={setChefDialogOpen}>
+        <ChefForm chef={editingChef} onSuccess={handleChefSuccess} />
       </Dialog>
     </>
   );

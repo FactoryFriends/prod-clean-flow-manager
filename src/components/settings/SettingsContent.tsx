@@ -8,6 +8,7 @@ import { TasksTab } from "@/components/settings/tabs/TasksTab";
 import { CustomersTab } from "@/components/settings/tabs/CustomersTab";
 import { FAVVTab } from "@/components/settings/tabs/FAVVTab";
 import { SuppliersTab } from "@/components/settings/tabs/SuppliersTab";
+import { ChefsTab } from "@/components/settings/tabs/ChefsTab";
 import IngredientPriceManager from "../reports/IngredientPriceManager";
 import UnitOptionsSettings from "./UnitOptionsSettings";
 
@@ -23,13 +24,17 @@ interface SettingsContentProps {
   setTemplateFilter: (filter: string) => void;
   customerFilter: string;
   setCustomerFilter: (filter: string) => void;
+  chefFilter: string;
+  setChefFilter: (filter: string) => void;
   onEditProduct: (product: any) => void;
   onEditStaffCode: (staffCode: any) => void;
   onEditTemplate: (template: any) => void;
+  onEditChef: (chef: any) => void;
   onAddNewProduct: () => void;
   onAddNewDrink: () => void;
   onAddNewStaffCode: () => void;
   onAddNewTemplate: () => void;
+  onAddNewChef: () => void;
 }
 
 export function SettingsContent({
@@ -44,13 +49,17 @@ export function SettingsContent({
   setTemplateFilter,
   customerFilter,
   setCustomerFilter,
+  chefFilter,
+  setChefFilter,
   onEditProduct,
   onEditStaffCode,
   onEditTemplate,
+  onEditChef,
   onAddNewProduct,
   onAddNewDrink,
   onAddNewStaffCode,
   onAddNewTemplate,
+  onAddNewChef,
 }: SettingsContentProps) {
   return (
     <Tabs defaultValue="products" className="space-y-4">
@@ -85,6 +94,12 @@ export function SettingsContent({
       />
       <FAVVTab currentLocation={currentLocation} />
       <SuppliersTab />
+      <ChefsTab
+        chefFilter={chefFilter}
+        setChefFilter={setChefFilter}
+        onAddNewChef={onAddNewChef}
+        onEditChef={onEditChef}
+      />
       <TabsContent value="unit-options" className="space-y-4">
         <UnitOptionsSettings />
       </TabsContent>
