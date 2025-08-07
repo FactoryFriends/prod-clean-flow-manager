@@ -8,6 +8,8 @@ export function BatchAndUnitFields() {
   const { control } = useFormContext();
   const { innerUnits } = useUnitOptions();
   
+  console.log("BatchAndUnitFields - innerUnits:", innerUnits);
+  
   return (
     <div className="flex gap-2 flex-col md:flex-row">
       <FormField

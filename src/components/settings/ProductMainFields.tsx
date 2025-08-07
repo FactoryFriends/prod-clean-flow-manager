@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProductFicheUpload } from "./ProductFicheUpload";
 import { ProductSupplierSelect } from "./ProductSupplierSelect";
+import { useUnitOptions } from "../shared/UnitOptionsContext";
 import React from "react";
 
 interface ProductMainFieldsProps {
@@ -11,6 +12,7 @@ interface ProductMainFieldsProps {
 }
 
 export function ProductMainFields({ formData, onFieldChange }: ProductMainFieldsProps) {
+  const { innerUnits } = useUnitOptions();
   const showSupplierPackageFields =
     formData.product_type === "extern" ||
     formData.product_type === "ingredient" ||
@@ -48,11 +50,11 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="liter">Liter</SelectItem>
-            <SelectItem value="kg">Kilogram</SelectItem>
-            <SelectItem value="pieces">Pieces</SelectItem>
-            <SelectItem value="ml">Milliliter</SelectItem>
-            <SelectItem value="g">Gram</SelectItem>
+            {innerUnits.map((unit) => (
+              <SelectItem key={unit} value={unit.toLowerCase()}>
+                {unit}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
