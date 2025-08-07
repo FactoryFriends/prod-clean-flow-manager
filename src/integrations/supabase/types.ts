@@ -709,6 +709,33 @@ export type Database = {
         }
         Relationships: []
       }
+      unit_options: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          unit_type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          unit_type: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          unit_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

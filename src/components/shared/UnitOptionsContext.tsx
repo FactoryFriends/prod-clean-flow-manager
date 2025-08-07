@@ -1,5 +1,6 @@
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, ReactNode } from "react";
+import { usePurchaseUnits, useInnerUnits } from "@/hooks/useUnitOptions";
 
 export type UnitOptionsContextType = {
   purchaseUnits: string[];
@@ -12,41 +13,32 @@ export type UnitOptionsContextType = {
   updateLaborCostPerMinute: (cost: number) => void;
 };
 
-const defaultPurchaseUnits = ["CASE", "BOX", "BAG", "CONTAINER"];
-const defaultInnerUnits = ["BOTTLE", "LITER", "CAN", "PIECE", "CONTAINER"];
 const defaultLaborCostPerMinute = 0.5; // Euro per minute
 
 const UnitOptionsContext = createContext<UnitOptionsContextType | undefined>(undefined);
 
-function toUpperTrim(value: string) {
-  return (value ?? "").trim().toUpperCase();
-}
-
 export function UnitOptionsProvider({ children }: { children: ReactNode }) {
-  const [purchaseUnits, setPurchaseUnits] = useState<string[]>(defaultPurchaseUnits);
-  const [innerUnits, setInnerUnits] = useState<string[]>(defaultInnerUnits);
-  const [laborCostPerMinute, setLaborCostPerMinute] = useState<number>(defaultLaborCostPerMinute);
+  const purchaseUnits = usePurchaseUnits();
+  const innerUnits = useInnerUnits();
+  const [laborCostPerMinute, setLaborCostPerMinute] = React.useState<number>(defaultLaborCostPerMinute);
 
+  // These functions are now legacy - unit management happens through the database
   const addPurchaseUnit = (value: string) => {
-    const normalized = toUpperTrim(value);
-    if (!normalized) return;
-    setPurchaseUnits((units) =>
-      units.map(u => toUpperTrim(u)).includes(normalized) ? units : [...units, normalized]
-    );
+    console.warn("addPurchaseUnit is deprecated - use the Settings UI to manage units");
   };
+  
   const addInnerUnit = (value: string) => {
-    const normalized = toUpperTrim(value);
-    if (!normalized) return;
-    setInnerUnits((units) =>
-      units.map(u => toUpperTrim(u)).includes(normalized) ? units : [...units, normalized]
-    );
+    console.warn("addInnerUnit is deprecated - use the Settings UI to manage units");
   };
-  const removePurchaseUnit = (value: string) => setPurchaseUnits((units) =>
-    units.filter((v) => toUpperTrim(v) !== toUpperTrim(value))
-  );
-  const removeInnerUnit = (value: string) => setInnerUnits((units) =>
-    units.filter((v) => toUpperTrim(v) !== toUpperTrim(value))
-  );
+  
+  const removePurchaseUnit = (value: string) => {
+    console.warn("removePurchaseUnit is deprecated - use the Settings UI to manage units");
+  };
+  
+  const removeInnerUnit = (value: string) => {
+    console.warn("removeInnerUnit is deprecated - use the Settings UI to manage units");
+  };
+  
   const updateLaborCostPerMinute = (cost: number) => setLaborCostPerMinute(cost);
 
   return (

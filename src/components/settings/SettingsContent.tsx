@@ -10,7 +10,7 @@ import { FAVVTab } from "@/components/settings/tabs/FAVVTab";
 import { SuppliersTab } from "@/components/settings/tabs/SuppliersTab";
 import { ChefsTab } from "@/components/settings/tabs/ChefsTab";
 import IngredientPriceManager from "../reports/IngredientPriceManager";
-import UnitOptionsSettings from "./UnitOptionsSettings";
+import { UnitOptionsManagement } from "./UnitOptionsManagement";
 
 interface SettingsContentProps {
   currentLocation: "tothai" | "khin";
@@ -101,7 +101,7 @@ export function SettingsContent({
         onEditChef={onEditChef}
       />
       <TabsContent value="unit-options" className="space-y-4">
-        <UnitOptionsSettings />
+        <UnitOptionsManagement />
       </TabsContent>
       <TabsContent value="ingredient-margins" className="space-y-4">
         <IngredientPriceManager />
