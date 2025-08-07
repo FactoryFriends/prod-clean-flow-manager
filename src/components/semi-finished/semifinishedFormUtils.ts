@@ -25,7 +25,7 @@ export type RecipeIngredient = {
   unit: string;
 };
 
-export const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE"];
+export const UNIT_OPTIONS = ["BAG", "KG", "BOX", "LITER", "PIECE", "CONTAINER"];
 
 export function formatNumberComma(n: number | string | undefined | null) {
   if (n === undefined || n === null || n === "") return "";

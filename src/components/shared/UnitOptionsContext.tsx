@@ -12,8 +12,8 @@ export type UnitOptionsContextType = {
   updateLaborCostPerMinute: (cost: number) => void;
 };
 
-const defaultPurchaseUnits = ["CASE", "BOX", "BAG"];
-const defaultInnerUnits = ["BOTTLE", "LITER", "CAN", "PIECE"];
+const defaultPurchaseUnits = ["CASE", "BOX", "BAG", "CONTAINER"];
+const defaultInnerUnits = ["BOTTLE", "LITER", "CAN", "PIECE", "CONTAINER"];
 const defaultLaborCostPerMinute = 0.5; // Euro per minute
 
 const UnitOptionsContext = createContext<UnitOptionsContextType | undefined>(undefined);

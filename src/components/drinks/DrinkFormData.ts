@@ -1,5 +1,5 @@
 
-export const DRINK_UNIT_OPTIONS = ["BOTTLE", "CAN", "LITER", "PIECE"];
+export const DRINK_UNIT_OPTIONS = ["BOTTLE", "CAN", "LITER", "PIECE", "CONTAINER"];
 
 export const DRINK_VAT_OPTIONS = [
   { value: 6, label: "6% (Non-alcoholic drinks)" },
