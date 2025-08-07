@@ -2,10 +2,11 @@
 import { useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { UNIT_OPTIONS } from "./semifinishedFormUtils";
+import { useUnitOptions } from "../shared/UnitOptionsContext";
 
 export function BatchAndUnitFields() {
   const { control } = useFormContext();
+  const { innerUnits } = useUnitOptions();
   
   return (
     <div className="flex gap-2 flex-col md:flex-row">
@@ -44,7 +45,7 @@ export function BatchAndUnitFields() {
                 {...field}
                 className="w-full border rounded-md px-3 py-2 text-sm bg-white"
               >
-                {UNIT_OPTIONS.map((u) => (
+                {innerUnits.map((u) => (
                   <option value={u} key={u}>
                     {u}
                   </option>
