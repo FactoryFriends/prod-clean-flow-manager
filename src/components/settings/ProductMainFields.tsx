@@ -240,27 +240,6 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
         />
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor="supplier_name">Leverancier</Label>
-        <Input
-          id="supplier_name"
-          value={
-            formData.product_type === "zelfgemaakt"
-              ? "TOTHAI PRODUCTION"
-              : formData.supplier_name || ""
-          }
-          disabled={formData.product_type === "zelfgemaakt"}
-          required={formData.product_type === "extern" || formData.product_type === "ingredient"}
-          placeholder={
-            formData.product_type === "extern" || formData.product_type === "ingredient"
-              ? "Naam externe leverancier"
-              : ""
-          }
-          onChange={(e) =>
-            onFieldChange("supplier_name", e.target.value)
-          }
-        />
-      </div>
     </div>
   );
 }
