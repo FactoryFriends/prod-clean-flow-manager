@@ -1,5 +1,6 @@
 
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSuppliers } from "@/hooks/useSuppliers";
 
 interface ProductSupplierSelectProps {
@@ -16,23 +17,31 @@ export function ProductSupplierSelect({ value, onChange, productType, required }
   return (
     <div className="space-y-2">
       <Label htmlFor="supplier_id">Supplier</Label>
-      <select
-        id="supplier_id"
+      <Select
         value={value ?? ""}
-        onChange={e => onChange(e.target.value || null)}
+        onValueChange={(val) => onChange(val || null)}
         disabled={disabled}
-        required={required && !disabled}
-        className="w-full border rounded-md px-3 py-2 text-sm bg-white"
       >
-        <option value="">
-          {productType === "extern" ? "Select supplier…" : "TOTHAI PRODUCTION"}
-        </option>
-        {suppliers.map((sup) => (
-          <option key={sup.id} value={sup.id}>
-            {sup.name}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger className="w-full bg-background">
+          <SelectValue 
+            placeholder={
+              productType === "extern" 
+                ? "Select supplier…" 
+                : "TOTHAI PRODUCTION"
+            } 
+          />
+        </SelectTrigger>
+        <SelectContent className="bg-background border shadow-lg z-50">
+          <SelectItem value="">
+            {productType === "extern" ? "Select supplier…" : "TOTHAI PRODUCTION"}
+          </SelectItem>
+          {suppliers.map((sup) => (
+            <SelectItem key={sup.id} value={sup.id}>
+              {sup.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
