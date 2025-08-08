@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useCreateProduct, useUpdateProduct, Product } from "@/hooks/useProductionData";
+import { useSuppliers } from "@/hooks/useSuppliers";
 import { ProductMainFields } from "./ProductMainFields";
 import { ProductPricingFields } from "./ProductPricingFields";
 
@@ -43,6 +44,7 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
       }));
   }, [editingProduct]);
 
+  const { data: suppliers = [] } = useSuppliers();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
 
@@ -74,10 +76,17 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     let product_type = formData.product_type;
-    let supplier_name =
-      product_type === "zelfgemaakt"
-        ? "TOTHAI PRODUCTION"
-        : formData.supplier_name;
+    
+    // Get supplier name from selected supplier_id or fall back to form data
+    let supplier_name = "TOTHAI PRODUCTION";
+    if (product_type === "extern") {
+      if (formData.supplier_id) {
+        const selectedSupplier = suppliers.find(s => s.id === formData.supplier_id);
+        supplier_name = selectedSupplier?.name || formData.supplier_name || "";
+      } else {
+        supplier_name = formData.supplier_name || "";
+      }
+    }
     // Calculate price_per_unit for reporting, margin calculations
     const pricePerUnit =
       formData.price_per_package && formData.units_per_package > 0
@@ -118,17 +127,17 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
 
     if (
       product_type === "extern" &&
-      (!formData.supplier_name || formData.supplier_name.trim() === "")
+      (!supplier_name || supplier_name.trim() === "")
     ) {
-      alert("Vul de naam van de externe leverancier in.");
+      alert("Please select a supplier for external products.");
       return;
     }
 
     if (
       product_type === "ingredient" &&
-      (!formData.supplier_name || formData.supplier_name.trim() === "")
+      (!supplier_name || supplier_name.trim() === "")
     ) {
-      alert("Vul de naam van de leverancier voor ingrediënt in.");
+      alert("Please select a supplier for ingredients.");
       return;
     }
 
