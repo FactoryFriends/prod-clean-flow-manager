@@ -30,16 +30,29 @@ export function useIngredientFormSubmission({ form }: IngredientFormSubmissionPr
       return;
     }
 
-    let updated: IngredientFormData & { supplier_name: string } = { ...data, supplier_name: "" };
     if (data.product_kind === "extern") {
       const sup = suppliers.find(s => s.id === data.supplier_id);
       if (!sup) {
         toast.error("Please select a valid supplier before saving an externally purchased ingredient.");
         return;
       }
-      updated.supplier_name = sup.name.trim();
-    } else {
-      updated.supplier_name = "TOTHAI PRODUCTION";
+      if (!sup.name || sup.name.trim() === "") {
+        toast.error("Selected supplier has no name. Please update supplier information.");
+        return;
+      }
+    }
+
+    let updated: IngredientFormData & { supplier_name: string } = { 
+      ...data, 
+      supplier_name: data.product_kind === "extern" 
+        ? suppliers.find(s => s.id === data.supplier_id)?.name.trim() || ""
+        : "TOTHAI PRODUCTION"
+    };
+    
+    // Additional safety check for external products
+    if (data.product_kind === "extern" && !updated.supplier_name) {
+      toast.error("Supplier name is required for external products.");
+      return;
     }
 
     createProduct.mutate(
