@@ -32,9 +32,6 @@ export function ProductSupplierSelect({ value, onChange, productType, required }
           />
         </SelectTrigger>
         <SelectContent className="bg-background border shadow-lg z-50">
-          <SelectItem value="">
-            {productType === "extern" ? "Select supplier…" : "TOTHAI PRODUCTION"}
-          </SelectItem>
           {suppliers.map((sup) => (
             <SelectItem key={sup.id} value={sup.id}>
               {sup.name}
