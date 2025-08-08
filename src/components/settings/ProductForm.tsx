@@ -77,15 +77,22 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
     e.preventDefault();
     let product_type = formData.product_type;
     
+    // Debug: log the current state
+    console.log("Form data:", formData);
+    console.log("Suppliers:", suppliers);
+    console.log("Product type:", product_type);
+    
     // Get supplier name from selected supplier_id or fall back to form data
     let supplier_name = "TOTHAI PRODUCTION";
     if (product_type === "extern") {
       if (formData.supplier_id) {
         const selectedSupplier = suppliers.find(s => s.id === formData.supplier_id);
+        console.log("Selected supplier:", selectedSupplier);
         supplier_name = selectedSupplier?.name || formData.supplier_name || "";
       } else {
         supplier_name = formData.supplier_name || "";
       }
+      console.log("Final supplier_name:", supplier_name);
     }
     // Calculate price_per_unit for reporting, margin calculations
     const pricePerUnit =
