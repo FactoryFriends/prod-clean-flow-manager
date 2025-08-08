@@ -3,6 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Replace } from "lucide-react"; // Changed import
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 function ProductList({
   products,
@@ -19,6 +20,17 @@ function ProductList({
   onReplace?: (product: any) => void;
   onPermanentlyDelete?: (product: any) => void;
 }) {
+  const getProductTypeInfo = (item: any) => {
+    if (item.product_type === "dish") {
+      return { label: "Dish", variant: "default" as const };
+    } else if (item.product_type === "drink") {
+      return { label: "Drink", variant: "secondary" as const };
+    } else if (item.product_kind === "zelfgemaakt") {
+      return { label: "Semi-finished", variant: "outline" as const };
+    } else {
+      return { label: "Ingredient", variant: "destructive" as const };
+    }
+  };
   if (!products?.length) {
     return (
       <div className="text-center text-muted-foreground italic my-8">
@@ -33,22 +45,30 @@ function ProductList({
         <thead>
           <tr className="bg-muted/50">
             <th className="p-2 text-left capitalize">{type}</th>
+            <th className="p-2 text-left">Type</th>
             <th className="p-2 text-left">Supplier</th>
             <th className="p-2 text-left">Price</th>
             <th className="p-2 text-left">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {products.map((item) => (
-            <tr key={item.id} className="border-b">
-              <td className="p-2 font-medium">{item.name}</td>
-              <td className="p-2">{item.supplier_name || <span className="italic text-muted-foreground">Not set</span>}</td>
-              <td className="p-2">
-                {typeof item.price_per_unit === "number"
-                  ? `€${Number(item.price_per_unit).toFixed(2)}`
-                  : <span className="italic text-muted-foreground">Not set</span>}
-              </td>
-              <td className="p-2 flex gap-1">
+          {products.map((item) => {
+            const typeInfo = getProductTypeInfo(item);
+            return (
+              <tr key={item.id} className="border-b">
+                <td className="p-2 font-medium">{item.name}</td>
+                <td className="p-2">
+                  <Badge variant={typeInfo.variant} className="text-xs">
+                    {typeInfo.label}
+                  </Badge>
+                </td>
+                <td className="p-2">{item.supplier_name || <span className="italic text-muted-foreground">Not set</span>}</td>
+                <td className="p-2">
+                  {typeof item.price_per_unit === "number"
+                    ? `€${Number(item.price_per_unit).toFixed(2)}`
+                    : <span className="italic text-muted-foreground">Not set</span>}
+                </td>
+                <td className="p-2 flex gap-1">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button variant="ghost" size="icon" onClick={() => onEdit(item)} aria-label="Edit">
@@ -109,7 +129,8 @@ function ProductList({
                 )}
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>
