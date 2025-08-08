@@ -20,6 +20,8 @@ export function ProductList({ onEditProduct }: ProductListProps) {
       return { label: "Drink", variant: "secondary" as const };
     } else if (product.product_kind === "zelfgemaakt") {
       return { label: "Semi-finished", variant: "outline" as const };
+    } else if (product.product_type === "extern" || product.product_kind === "extern") {
+      return { label: "External Product", variant: "destructive" as const };
     } else {
       return { label: "Ingredient", variant: "destructive" as const };
     }
