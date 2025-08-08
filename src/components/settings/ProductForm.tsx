@@ -84,7 +84,7 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
     
     // Get supplier name from selected supplier_id or fall back to form data
     let supplier_name = "TOTHAI PRODUCTION";
-    if (product_type === "extern") {
+    if (product_type === "extern" || product_type === "ingredient") {
       if (formData.supplier_id) {
         const selectedSupplier = suppliers.find(s => s.id === formData.supplier_id);
         console.log("Selected supplier:", selectedSupplier);
