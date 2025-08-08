@@ -13,6 +13,18 @@ export function ProductList({ onEditProduct }: ProductListProps) {
   const { data: products, isLoading } = useAllProducts();
   const deleteProduct = useDeleteProduct();
 
+  const getProductTypeInfo = (product: any) => {
+    if (product.product_type === "dish") {
+      return { label: "Dish", variant: "default" as const };
+    } else if (product.product_type === "drink") {
+      return { label: "Drink", variant: "secondary" as const };
+    } else if (product.product_kind === "zelfgemaakt") {
+      return { label: "Semi-finished", variant: "outline" as const };
+    } else {
+      return { label: "Ingredient", variant: "destructive" as const };
+    }
+  };
+
   function marginPct(product: any) {
     if (!product.sales_price || !product.cost) return null;
     if (Number(product.sales_price) === 0) return null;
@@ -49,12 +61,16 @@ export function ProductList({ onEditProduct }: ProductListProps) {
           margin !== null &&
           product.minimal_margin_threshold_percent !== undefined &&
           margin < product.minimal_margin_threshold_percent;
+        const typeInfo = getProductTypeInfo(product);
         return (
           <div key={product.id} className="bg-card border border-border rounded-lg p-4">
             <div className="flex items-start justify-between">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold text-lg">{product.name}</h3>
+                  <Badge variant={typeInfo.variant} className="text-xs">
+                    {typeInfo.label}
+                  </Badge>
                   <Badge variant={product.active ? "default" : "secondary"}>
                     {product.active ? "Active" : "Inactive"}
                   </Badge>
