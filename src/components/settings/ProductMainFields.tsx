@@ -225,6 +225,12 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
                 <Label htmlFor="package_type">
                   {isZelfgemaakt ? "Package type *" : "Recipe unit type *"}
                 </Label>
+                <div className="text-sm text-green-700 mb-2">
+                  {isZelfgemaakt 
+                    ? "What will you package this product in?" 
+                    : "What unit do you use in recipes?"
+                  }
+                </div>
                 <Select
                   value={formData.unit_type}
                   onValueChange={(value) => onFieldChange("unit_type", value)}
@@ -261,6 +267,12 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
                     : "Standard recipe quantity *"
                   }
                 </Label>
+                <div className="text-sm text-green-700 mb-2">
+                  {isZelfgemaakt 
+                    ? "How much will be in each package?" 
+                    : "How much do you typically use in recipes?"
+                  }
+                </div>
                 <Input
                   id="unit_size"
                   type="number"
@@ -277,12 +289,18 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
                 <Label htmlFor="content_unit_type">
                   {isZelfgemaakt ? "Unit type *" : "Unit type *"}
                 </Label>
+                <div className="text-sm text-green-700 mb-2">
+                  {isZelfgemaakt 
+                    ? "What unit will you measure the content in?" 
+                    : "What unit do you measure this ingredient in?"
+                  }
+                </div>
                 <Select
                   value={formData.inner_unit_type || ""}
                   onValueChange={(value) => onFieldChange("inner_unit_type", value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select unit type..." />
+                    <SelectValue placeholder="e.g. LITER, KG, PIECE..." />
                   </SelectTrigger>
                   <SelectContent className="z-50 bg-background">
                     {innerUnits.map((unit) => (
