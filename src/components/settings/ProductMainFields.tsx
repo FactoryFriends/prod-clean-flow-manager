@@ -332,7 +332,7 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
                       required
                     />
                     <div className="text-xs text-green-600">
-                      This determines how many labels you'll need to print
+                      How many labels will need to be printed
                     </div>
                   </div>
 
