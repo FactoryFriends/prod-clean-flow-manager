@@ -310,12 +310,6 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
                     ))}
                   </SelectContent>
                 </Select>
-                <div className="text-xs text-green-600">
-                  {isZelfgemaakt 
-                    ? `Each ${formData.unit_type || "package"} contains ${formData.unit_size || "X"} ${formData.inner_unit_type || "units"}`
-                    : `Recipe uses ${formData.unit_size || "X"} ${formData.inner_unit_type || "units"}`
-                  }
-                </div>
               </div>
 
               {isZelfgemaakt && (
@@ -334,9 +328,6 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
                       placeholder="How many packages from one batch?"
                       required
                     />
-                    <div className="text-xs text-green-600">
-                      How many labels will need to be printed
-                    </div>
                   </div>
 
                   <div className="space-y-2">
