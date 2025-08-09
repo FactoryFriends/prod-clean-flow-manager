@@ -269,7 +269,7 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
                 </Label>
                 <div className="text-sm text-green-700 mb-2">
                   {isZelfgemaakt 
-                    ? "How much will be in each package?" 
+                    ? "How many units will be in each package?" 
                     : "How much do you typically use in recipes?"
                   }
                 </div>
