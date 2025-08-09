@@ -154,14 +154,30 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
       {showSupplierPackageFields && (
         <>
           <div className="space-y-2">
-            <Label htmlFor="supplier_package_unit">Purchase Unit (e.g. CASE, BOX)</Label>
-            <Input
-              id="supplier_package_unit"
-              type="text"
-              placeholder="e.g. CASE, BOX"
+            <Label htmlFor="supplier_package_unit">Purchase Unit</Label>
+            <Select
               value={formData.supplier_package_unit || ""}
-              onChange={e => onFieldChange("supplier_package_unit", e.target.value)}
-            />
+              onValueChange={(value) => onFieldChange("supplier_package_unit", value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select purchase unit..." />
+              </SelectTrigger>
+              <SelectContent className="z-50 bg-background">
+                <SelectItem value="CASE">CASE</SelectItem>
+                <SelectItem value="BOX">BOX</SelectItem>
+                <SelectItem value="BAG">BAG</SelectItem>
+                <SelectItem value="BOTTLE">BOTTLE</SelectItem>
+                <SelectItem value="CAN">CAN</SelectItem>
+                <SelectItem value="CARTON">CARTON</SelectItem>
+                <SelectItem value="PACK">PACK</SelectItem>
+                <SelectItem value="PALLET">PALLET</SelectItem>
+                <SelectItem value="SACK">SACK</SelectItem>
+                <SelectItem value="TRAY">TRAY</SelectItem>
+                <SelectItem value="UNIT">UNIT</SelectItem>
+                <SelectItem value="KG">KG</SelectItem>
+                <SelectItem value="LITER">LITER</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="units_per_package">
