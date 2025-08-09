@@ -222,9 +222,42 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
+                <Label htmlFor="package_type">
+                  {isZelfgemaakt ? "Package type *" : "Recipe unit type *"}
+                </Label>
+                <Select
+                  value={formData.unit_type}
+                  onValueChange={(value) => onFieldChange("unit_type", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={isZelfgemaakt ? "Select package type..." : "Select unit type..."} />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-background">
+                    {isZelfgemaakt ? (
+                      <>
+                        <SelectItem value="bag">BAG</SelectItem>
+                        <SelectItem value="box">BOX</SelectItem>
+                        <SelectItem value="bottle">BOTTLE</SelectItem>
+                        <SelectItem value="container">CONTAINER</SelectItem>
+                        <SelectItem value="pack">PACK</SelectItem>
+                        <SelectItem value="tray">TRAY</SelectItem>
+                        <SelectItem value="piece">PIECE</SelectItem>
+                      </>
+                    ) : (
+                      innerUnits.map((unit) => (
+                        <SelectItem key={unit} value={unit.toLowerCase()}>
+                          {unit}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="unit_size">
                   {isZelfgemaakt 
-                    ? "Quantity per final package *"
+                    ? "Quantity per package *"
                     : "Standard recipe quantity *"
                   }
                 </Label>
@@ -235,18 +268,18 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
                   min="0"
                   value={formData.unit_size}
                   onChange={(e) => onFieldChange("unit_size", Number(e.target.value))}
-                  placeholder={isZelfgemaakt ? "e.g. 4" : "e.g. 1"}
+                  placeholder="e.g. 3"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="unit_type">
-                  {isZelfgemaakt ? "Unit type *" : "Recipe unit type *"}
+                <Label htmlFor="content_unit_type">
+                  {isZelfgemaakt ? "Unit type *" : "Unit type *"}
                 </Label>
                 <Select
-                  value={formData.unit_type}
-                  onValueChange={(value) => onFieldChange("unit_type", value)}
+                  value={formData.inner_unit_type || ""}
+                  onValueChange={(value) => onFieldChange("inner_unit_type", value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select unit type..." />
@@ -261,8 +294,8 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
                 </Select>
                 <div className="text-xs text-green-600">
                   {isZelfgemaakt 
-                    ? `Each package will contain ${formData.unit_size || "X"} ${formData.unit_type || "units"}`
-                    : `Recipe uses ${formData.unit_size || "X"} ${formData.unit_type || "units"} as standard portion`
+                    ? `Each ${formData.unit_type || "package"} contains ${formData.unit_size || "X"} ${formData.inner_unit_type || "units"}`
+                    : `Recipe uses ${formData.unit_size || "X"} ${formData.inner_unit_type || "units"}`
                   }
                 </div>
               </div>
