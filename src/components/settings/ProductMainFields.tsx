@@ -223,14 +223,14 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="unit_type">
-                  {isZelfgemaakt ? "Final package unit type" : "Recipe unit type"}
+                  {isZelfgemaakt ? "Final package unit type *" : "Recipe unit type *"}
                 </Label>
                 <Select
                   value={formData.unit_type}
                   onValueChange={(value) => onFieldChange("unit_type", value)}
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Select unit type..." />
                   </SelectTrigger>
                   <SelectContent>
                     {innerUnits.map((unit) => (
@@ -244,7 +244,10 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
 
               <div className="space-y-2">
                 <Label htmlFor="unit_size">
-                  {isZelfgemaakt ? "Size per final package" : "Standard recipe unit size"}
+                  {isZelfgemaakt 
+                    ? `Size per final package (${formData.unit_type || 'units'}) *`
+                    : `Standard recipe unit size (${formData.unit_type || 'units'}) *`
+                  }
                 </Label>
                 <Input
                   id="unit_size"
@@ -253,9 +256,18 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
                   min="0"
                   value={formData.unit_size}
                   onChange={(e) => onFieldChange("unit_size", Number(e.target.value))}
-                  placeholder={isZelfgemaakt ? "e.g. 4 (liters per bag)" : "e.g. 1 (piece)"}
+                  placeholder={isZelfgemaakt 
+                    ? `e.g. 4 ${formData.unit_type ? `(${formData.unit_type} per bag)` : "(units per package)"}` 
+                    : `e.g. 1 ${formData.unit_type ? `(${formData.unit_type})` : "(unit)"}`
+                  }
                   required
                 />
+                <div className="text-xs text-green-600">
+                  {isZelfgemaakt 
+                    ? `Each package will contain ${formData.unit_size || "X"} ${formData.unit_type || "units"}`
+                    : `Recipe uses ${formData.unit_size || "X"} ${formData.unit_type || "units"} as standard portion`
+                  }
+                </div>
               </div>
 
               {isZelfgemaakt && (
