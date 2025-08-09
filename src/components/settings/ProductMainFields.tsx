@@ -322,6 +322,9 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="packages_per_batch">Packages per production batch</Label>
+                    <div className="text-sm text-green-700 mb-2">
+                      How many labels will need to be printed
+                    </div>
                     <Input
                       id="packages_per_batch"
                       type="number"
