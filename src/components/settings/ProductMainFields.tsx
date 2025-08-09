@@ -222,31 +222,10 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="unit_type">
-                  {isZelfgemaakt ? "Final package unit type *" : "Recipe unit type *"}
-                </Label>
-                <Select
-                  value={formData.unit_type}
-                  onValueChange={(value) => onFieldChange("unit_type", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select unit type..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {innerUnits.map((unit) => (
-                      <SelectItem key={unit} value={unit.toLowerCase()}>
-                        {unit}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="unit_size">
                   {isZelfgemaakt 
-                    ? `Size per final package (${formData.unit_type || 'units'}) *`
-                    : `Standard recipe unit size (${formData.unit_type || 'units'}) *`
+                    ? "Quantity per final package *"
+                    : "Standard recipe quantity *"
                   }
                 </Label>
                 <Input
@@ -256,12 +235,30 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
                   min="0"
                   value={formData.unit_size}
                   onChange={(e) => onFieldChange("unit_size", Number(e.target.value))}
-                  placeholder={isZelfgemaakt 
-                    ? `e.g. 4 ${formData.unit_type ? `(${formData.unit_type} per bag)` : "(units per package)"}` 
-                    : `e.g. 1 ${formData.unit_type ? `(${formData.unit_type})` : "(unit)"}`
-                  }
+                  placeholder={isZelfgemaakt ? "e.g. 4" : "e.g. 1"}
                   required
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="unit_type">
+                  {isZelfgemaakt ? "Unit type *" : "Recipe unit type *"}
+                </Label>
+                <Select
+                  value={formData.unit_type}
+                  onValueChange={(value) => onFieldChange("unit_type", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select unit type..." />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-background">
+                    {innerUnits.map((unit) => (
+                      <SelectItem key={unit} value={unit.toLowerCase()}>
+                        {unit}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <div className="text-xs text-green-600">
                   {isZelfgemaakt 
                     ? `Each package will contain ${formData.unit_size || "X"} ${formData.unit_type || "units"}`
