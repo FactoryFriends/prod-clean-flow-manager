@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { format, startOfDay, endOfDay } from "date-fns";
 
 export interface InvoiceProposalItem {
@@ -105,6 +106,17 @@ export const useInvoiceProposal = (
           .eq("dispatch_records.dispatch_type", "external");
 
         if (dispatchError) {
+          // Handle authentication errors gracefully
+          if (dispatchError.code === 'PGRST116' || dispatchError.message?.includes('permission')) {
+            toast.error("Please sign in to access invoice data");
+            return {
+              items: [],
+              totalAmount: 0,
+              periodStart: startDate,
+              periodEnd: endDate,
+              packingSlipCount: 0
+            };
+          }
           console.error("Error fetching dispatch items:", dispatchError);
           throw dispatchError;
         }
@@ -195,8 +207,14 @@ export const useInvoiceProposal = (
           .eq("item_type", "external");
 
         if (externalDispatchError) {
-          console.error("Error fetching external dispatch items:", externalDispatchError);
-          throw externalDispatchError;
+          // Handle authentication errors gracefully
+          if (externalDispatchError.code === 'PGRST116' || externalDispatchError.message?.includes('permission')) {
+            console.warn("User does not have permission to view external dispatch items");
+            // Continue without external items instead of failing completely
+          } else {
+            console.error("Error fetching external dispatch items:", externalDispatchError);
+            throw externalDispatchError;
+          }
         }
 
         console.log("Found external dispatch items:", externalDispatchItems?.length || 0);

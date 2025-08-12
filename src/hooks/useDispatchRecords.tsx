@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const useDispatchRecords = (location?: string) => {
   return useQuery({
@@ -19,7 +20,14 @@ export const useDispatchRecords = (location?: string) => {
       }
 
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) {
+        // Handle authentication errors gracefully
+        if (error.code === 'PGRST116' || error.message?.includes('permission')) {
+          toast.error("Please sign in to view dispatch records");
+          return [];
+        }
+        throw error;
+      }
       return data;
     },
   });

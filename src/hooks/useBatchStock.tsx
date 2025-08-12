@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export interface BatchWithStock {
   id: string;
@@ -59,7 +60,19 @@ export const useBatchStock = ({
         .select("item_id, quantity")
         .in("item_id", batchIds)
         .eq("item_type", "batch");
-      if (diErr) throw diErr;
+      if (diErr) {
+        // Handle authentication errors gracefully
+        if (diErr.code === 'PGRST116' || diErr.message?.includes('permission')) {
+          toast.error("Please sign in to view dispatch information");
+          // Continue with empty dispatch items to show available stock
+          return batches.map((batch: any) => ({
+            ...batch,
+            available_quantity: batch.packages_produced,
+            used_quantity: 0
+          }));
+        }
+        throw diErr;
+      }
 
       const usedMap: Record<string, number> = {};
       dispatchItems?.forEach((item: any) => {

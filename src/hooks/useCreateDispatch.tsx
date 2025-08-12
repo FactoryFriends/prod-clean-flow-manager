@@ -66,7 +66,13 @@ export const useCreateDispatch = () => {
         .from("dispatch_items")
         .insert(dispatchItems);
 
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        // Handle authentication errors gracefully
+        if (itemsError.code === 'PGRST116' || itemsError.message?.includes('permission')) {
+          throw new Error("You don't have permission to create dispatch items. Please sign in.");
+        }
+        throw itemsError;
+      }
 
       return dispatchRecord;
     },

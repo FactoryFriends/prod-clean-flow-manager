@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Movement {
   id: string;
@@ -39,7 +40,14 @@ export const useBatchMovements = (batchId: string) => {
         .eq("item_type", "batch")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        // Handle authentication errors gracefully
+        if (error.code === 'PGRST116' || error.message?.includes('permission')) {
+          toast.error("Please sign in to view batch movements");
+          return [];
+        }
+        throw error;
+      }
       if (!data) return [];
       return data.map((item: any) => ({
         id: item.id,
