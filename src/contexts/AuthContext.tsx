@@ -24,16 +24,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fetch user profile when user changes
   const fetchProfile = async (userId: string) => {
     try {
-      // For now, set a mock profile until types are updated
-      setProfile({
-        id: 'mock-id',
-        user_id: userId,
-        role: 'admin', // Default to admin for testing
-        full_name: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        created_by: null
-      } as UserProfile);
+      // For now, create a temporary profile until proper database integration
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setProfile({
+          id: 'temp-profile-id',
+          user_id: userId,
+          role: 'admin', // Temporary - should be fetched from database
+          full_name: user.user_metadata?.full_name || null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          created_by: null
+        } as UserProfile);
+      } else {
+        setProfile(null);
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
       setProfile(null);

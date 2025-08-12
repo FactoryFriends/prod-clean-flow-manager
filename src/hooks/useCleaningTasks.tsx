@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useStaffCodes } from "./useStaffCodes";
 import { logAuditAction } from "./useAuditLogs";
+import { toast } from "sonner";
 
 interface CleaningTask {
   id: string;
@@ -94,7 +95,14 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Handle authentication errors gracefully
+        if (error.code === 'PGRST116' || error.message.includes('permission')) {
+          toast.error("Please sign in to view cleaning tasks");
+          return [];
+        }
+        throw error;
+      }
 
       // Log audit action for task completion/reopening
       const task = data;

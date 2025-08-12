@@ -184,7 +184,7 @@ export function UserManagement() {
                     <TableCell className="font-medium">
                       {userProfile.full_name || 'N/A'}
                     </TableCell>
-                    <TableCell>{userProfile.user.email}</TableCell>
+                    <TableCell>{userProfile.email}</TableCell>
                     <TableCell>
                       <Badge variant={getRoleBadgeVariant(userProfile.role)} className="flex items-center gap-1 w-fit">
                         {getRoleIcon(userProfile.role)}
