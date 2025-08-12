@@ -21,7 +21,14 @@ export const useSuppliers = () => {
         .select("*")
         .eq("active", true)
         .order("name");
-      if (error) throw error;
+      if (error) {
+        // Handle the case where user doesn't have permission
+        if (error.code === 'PGRST116' || error.message.includes('permission')) {
+          toast.error("You don't have permission to view suppliers. Admin access required.");
+          return [];
+        }
+        throw error;
+      }
       return data as Supplier[];
     },
   });
@@ -35,7 +42,14 @@ export const useAllSuppliers = () => {
         .from("suppliers")
         .select("*")
         .order("name");
-      if (error) throw error;
+      if (error) {
+        // Handle the case where user doesn't have permission
+        if (error.code === 'PGRST116' || error.message.includes('permission')) {
+          toast.error("You don't have permission to view suppliers. Admin access required.");
+          return [];
+        }
+        throw error;
+      }
       return data as Supplier[];
     },
   });
