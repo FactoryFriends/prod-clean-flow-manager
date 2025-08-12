@@ -1,6 +1,5 @@
 
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
 import { 
   Package, 
   Coffee, 
@@ -48,8 +47,20 @@ const settingsCategories = [
 ];
 
 export function SettingsTabsList() {
+  // Flatten all tabs for TabsList
+  const allTabs = settingsCategories.flatMap(category => category.tabs);
+
   return (
     <div className="space-y-6">
+      {/* Hidden TabsList to maintain proper context */}
+      <TabsList className="sr-only">
+        {allTabs.map((tab) => (
+          <TabsTrigger key={`hidden-${tab.value}`} value={tab.value} className="sr-only">
+            {tab.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+
       {settingsCategories.map((category) => (
         <div key={category.title} className="space-y-3">
           <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
@@ -60,7 +71,7 @@ export function SettingsTabsList() {
               <TabsTrigger 
                 key={tab.value}
                 value={tab.value} 
-                className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg border border-border hover:bg-accent hover:text-accent-foreground transition-colors"
+                className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg border border-border hover:bg-accent hover:text-accent-foreground transition-colors bg-background"
               >
                 <tab.icon className="w-5 h-5" />
                 <span className="text-xs font-medium">{tab.label}</span>
