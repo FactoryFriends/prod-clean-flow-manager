@@ -21,30 +21,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch user profile when user changes
-  const fetchProfile = async (userId: string) => {
-    try {
-      // For now, create a temporary profile until proper database integration
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setProfile({
-          id: 'temp-profile-id',
-          user_id: userId,
-          role: 'admin', // Temporary - should be fetched from database
-          full_name: user.user_metadata?.full_name || null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          created_by: null
-        } as UserProfile);
-      } else {
-        setProfile(null);
-      }
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      setProfile(null);
-    }
-  };
-
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -52,11 +28,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Fetch profile when user signs in
+        // Create temporary profile for demo purposes
         if (session?.user) {
-          setTimeout(() => {
-            fetchProfile(session.user.id);
-          }, 0);
+          setProfile({
+            id: 'temp-profile-id',
+            user_id: session.user.id,
+            role: 'admin', // Temporary default role
+            full_name: session.user.user_metadata?.full_name || null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            created_by: null
+          } as UserProfile);
         } else {
           setProfile(null);
         }
@@ -71,7 +53,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        fetchProfile(session.user.id);
+        setProfile({
+          id: 'temp-profile-id',
+          user_id: session.user.id,
+          role: 'admin', // Temporary default role
+          full_name: session.user.user_metadata?.full_name || null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          created_by: null
+        } as UserProfile);
       }
       
       setLoading(false);
