@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const useStaffCodes = () => {
   return useQuery({
@@ -12,7 +13,14 @@ export const useStaffCodes = () => {
         .eq("active", true)
         .order("name");
 
-      if (error) throw error;
+      if (error) {
+        // Handle permission denied errors gracefully
+        if (error.code === 'PGRST116' || error.message.includes('permission')) {
+          toast.error("You don't have permission to view staff information. Admin access required.");
+          return [];
+        }
+        throw error;
+      }
       return data;
     },
   });

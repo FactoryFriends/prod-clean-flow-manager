@@ -37,9 +37,12 @@ export const useCreateStaffCode = () => {
       });
     },
     onError: (error: any) => {
+      const errorMessage = error.message?.includes('permission') 
+        ? "You don't have permission to create staff codes. Admin access required."
+        : error.message || "Failed to create staff code";
       toast({
         title: "Error",
-        description: error.message || "Failed to create staff code",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -67,9 +70,12 @@ export const useUpdateStaffCode = () => {
       });
     },
     onError: (error: any) => {
+      const errorMessage = error.message?.includes('permission') 
+        ? "You don't have permission to update staff codes. Admin access required."
+        : error.message || "Failed to update staff code";
       toast({
         title: "Error",
-        description: error.message || "Failed to update staff code",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -97,9 +103,12 @@ export const useDeleteStaffCode = () => {
       });
     },
     onError: (error: any) => {
+      const errorMessage = error.message?.includes('permission') 
+        ? "You don't have permission to delete staff codes. Admin access required."
+        : error.message || "Failed to delete staff code";
       toast({
         title: "Error",
-        description: error.message || "Failed to delete staff code",
+        description: errorMessage,
         variant: "destructive",
       });
     },
