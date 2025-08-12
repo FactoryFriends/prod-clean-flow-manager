@@ -16,70 +16,83 @@ import {
   Cog
 } from "lucide-react";
 
-const settingsCategories = [
-  {
-    title: "Production & Inventory",
-    tabs: [
-      { value: "products", label: "Semi-finished", icon: Package },
-      { value: "drinks", label: "Drinks", icon: Coffee },
-      { value: "suppliers", label: "Suppliers", icon: Truck },
-      { value: "chefs", label: "Chefs", icon: ChefHat },
-    ]
-  },
-  {
-    title: "Operations",
-    tabs: [
-      { value: "staff", label: "Staff", icon: Users },
-      { value: "tasks", label: "Tasks", icon: ClipboardList },
-      { value: "customers", label: "Customers", icon: UserCheck },
-      { value: "favv", label: "FAVV", icon: Building2 },
-    ]
-  },
-  {
-    title: "System & Configuration",
-    tabs: [
-      { value: "users", label: "Users", icon: Shield },
-      { value: "unit-options", label: "Units", icon: Cog },
-      { value: "excel-import", label: "Import", icon: FileSpreadsheet },
-      { value: "ingredient-margins", label: "Margins", icon: TrendingUp },
-    ]
-  }
-];
-
 export function SettingsTabsList() {
-  // Flatten all tabs for TabsList
-  const allTabs = settingsCategories.flatMap(category => category.tabs);
-
   return (
     <div className="space-y-6">
-      {/* Hidden TabsList to maintain proper context */}
-      <TabsList className="sr-only">
-        {allTabs.map((tab) => (
-          <TabsTrigger key={`hidden-${tab.value}`} value={tab.value} className="sr-only">
-            {tab.label}
+      {/* Production & Inventory */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+          Production & Inventory
+        </h3>
+        <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full h-auto p-1 bg-muted/50">
+          <TabsTrigger value="products" className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <Package className="w-5 h-5" />
+            <span className="text-xs font-medium">Semi-finished</span>
           </TabsTrigger>
-        ))}
-      </TabsList>
+          <TabsTrigger value="drinks" className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <Coffee className="w-5 h-5" />
+            <span className="text-xs font-medium">Drinks</span>
+          </TabsTrigger>
+          <TabsTrigger value="suppliers" className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <Truck className="w-5 h-5" />
+            <span className="text-xs font-medium">Suppliers</span>
+          </TabsTrigger>
+          <TabsTrigger value="chefs" className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <ChefHat className="w-5 h-5" />
+            <span className="text-xs font-medium">Chefs</span>
+          </TabsTrigger>
+        </TabsList>
+      </div>
 
-      {settingsCategories.map((category) => (
-        <div key={category.title} className="space-y-3">
-          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-            {category.title}
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {category.tabs.map((tab) => (
-              <TabsTrigger 
-                key={tab.value}
-                value={tab.value} 
-                className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg border border-border hover:bg-accent hover:text-accent-foreground transition-colors bg-background"
-              >
-                <tab.icon className="w-5 h-5" />
-                <span className="text-xs font-medium">{tab.label}</span>
-              </TabsTrigger>
-            ))}
-          </div>
-        </div>
-      ))}
+      {/* Operations */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+          Operations
+        </h3>
+        <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full h-auto p-1 bg-muted/50">
+          <TabsTrigger value="staff" className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <Users className="w-5 h-5" />
+            <span className="text-xs font-medium">Staff</span>
+          </TabsTrigger>
+          <TabsTrigger value="tasks" className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <ClipboardList className="w-5 h-5" />
+            <span className="text-xs font-medium">Tasks</span>
+          </TabsTrigger>
+          <TabsTrigger value="customers" className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <UserCheck className="w-5 h-5" />
+            <span className="text-xs font-medium">Customers</span>
+          </TabsTrigger>
+          <TabsTrigger value="favv" className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <Building2 className="w-5 h-5" />
+            <span className="text-xs font-medium">FAVV</span>
+          </TabsTrigger>
+        </TabsList>
+      </div>
+
+      {/* System & Configuration */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+          System & Configuration
+        </h3>
+        <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full h-auto p-1 bg-muted/50">
+          <TabsTrigger value="users" className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <Shield className="w-5 h-5" />
+            <span className="text-xs font-medium">Users</span>
+          </TabsTrigger>
+          <TabsTrigger value="unit-options" className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <Cog className="w-5 h-5" />
+            <span className="text-xs font-medium">Units</span>
+          </TabsTrigger>
+          <TabsTrigger value="excel-import" className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <FileSpreadsheet className="w-5 h-5" />
+            <span className="text-xs font-medium">Import</span>
+          </TabsTrigger>
+          <TabsTrigger value="ingredient-margins" className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TrendingUp className="w-5 h-5" />
+            <span className="text-xs font-medium">Margins</span>
+          </TabsTrigger>
+        </TabsList>
+      </div>
     </div>
   );
 }
