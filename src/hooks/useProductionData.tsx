@@ -62,7 +62,14 @@ export const useProducts = () => {
         .eq("active", true)
         .order("name");
       
-      if (error) throw error;
+      if (error) {
+        // Handle authentication errors gracefully
+        if (error.code === 'PGRST116' || error.message.includes('permission')) {
+          toast.error("Please sign in to view products");
+          return [];
+        }
+        throw error;
+      }
       return data as Product[];
     },
   });
@@ -77,7 +84,14 @@ export const useAllProducts = () => {
         .select("*")
         .order("name");
       
-      if (error) throw error;
+      if (error) {
+        // Handle authentication errors gracefully
+        if (error.code === 'PGRST116' || error.message.includes('permission')) {
+          toast.error("Please sign in to view products");
+          return [];
+        }
+        throw error;
+      }
       return data as Product[];
     },
   });
@@ -137,7 +151,10 @@ export const useCreateProduct = () => {
       // Rollback
       if (context?.previousData) queryClient.setQueryData(["products"], context.previousData);
       if (context?.previousAll) queryClient.setQueryData(["all-products"], context.previousAll);
-      toast.error("Failed to create product: " + (err.message || "Unknown error"));
+      const errorMessage = err.message?.includes('permission') 
+        ? "You don't have permission to create products. Admin access required."
+        : "Failed to create product: " + (err.message || "Unknown error");
+      toast.error(errorMessage);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
@@ -361,7 +378,14 @@ export const useProductionBatches = (location?: "tothai" | "khin") => {
       const { data, error } = await query
         .order("created_at", { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        // Handle authentication errors gracefully
+        if (error.code === 'PGRST116' || error.message.includes('permission')) {
+          toast.error("Please sign in to view production data");
+          return [];
+        }
+        throw error;
+      }
       return data as ProductionBatch[];
     },
   });
@@ -419,7 +443,10 @@ export const useCreateProductionBatch = () => {
       toast.success("Production batch created successfully");
     },
     onError: (error) => {
-      toast.error("Failed to create production batch: " + error.message);
+      const errorMessage = error.message?.includes('permission') 
+        ? "You don't have permission to create production batches. Please sign in."
+        : "Failed to create production batch: " + error.message;
+      toast.error(errorMessage);
     },
   });
 };
