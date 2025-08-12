@@ -41,7 +41,14 @@ export const useCustomers = (activeOnly: boolean = false) => {
       }
 
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) {
+        // Handle permission denied errors gracefully
+        if (error.code === 'PGRST116' || error.message.includes('permission')) {
+          console.warn("User doesn't have permission to view customers");
+          return [];
+        }
+        throw error;
+      }
       return data as Customer[];
     },
   });
@@ -70,9 +77,12 @@ export const useCreateCustomer = () => {
     },
     onError: (err, variables, ctx: any) => {
       if (ctx?.previous) queryClient.setQueryData(["customers"], ctx.previous);
+      const errorMessage = err.message?.includes('permission') 
+        ? "You don't have permission to create customers. Admin access required."
+        : err.message || "Failed to create customer";
       toast({
         title: "Error",
-        description: err.message || "Failed to create customer",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -111,9 +121,12 @@ export const useUpdateCustomer = () => {
     },
     onError: (err, variables, ctx: any) => {
       if (ctx?.previous) queryClient.setQueryData(["customers"], ctx.previous);
+      const errorMessage = err.message?.includes('permission') 
+        ? "You don't have permission to update customers. Admin access required."
+        : err.message || "Failed to update customer";
       toast({
         title: "Error",
-        description: err.message || "Failed to update customer",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -152,9 +165,12 @@ export const useDeleteCustomer = () => {
     },
     onError: (err, variables, ctx: any) => {
       if (ctx?.previous) queryClient.setQueryData(["customers"], ctx.previous);
+      const errorMessage = err.message?.includes('permission') 
+        ? "You don't have permission to delete customers. Admin access required."
+        : err.message || "Failed to delete customer";
       toast({
         title: "Error",
-        description: err.message || "Failed to delete customer",
+        description: errorMessage,
         variant: "destructive",
       });
     },
