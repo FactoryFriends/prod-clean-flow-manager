@@ -10,7 +10,8 @@ import {
   Truck,
   TrendingUp,
   FileSpreadsheet,
-  ChefHat
+  ChefHat,
+  Shield
 } from "lucide-react";
 
 export function SettingsTabsList() {
@@ -57,6 +58,10 @@ export function SettingsTabsList() {
         <TabsTrigger value="unit-options" className="flex items-center gap-2">
           <SettingsIcon className="w-4 h-4" />
           <span className="hidden sm:inline">Units</span>
+        </TabsTrigger>
+        <TabsTrigger value="users" className="flex items-center gap-2">
+          <Shield className="w-4 h-4" />
+          <span className="hidden sm:inline">Users</span>
         </TabsTrigger>
         <TabsTrigger value="excel-import" className="flex items-center gap-2">
           <FileSpreadsheet className="w-4 h-4" />

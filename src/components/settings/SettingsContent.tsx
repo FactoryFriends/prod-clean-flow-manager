@@ -9,6 +9,7 @@ import { CustomersTab } from "@/components/settings/tabs/CustomersTab";
 import { FAVVTab } from "@/components/settings/tabs/FAVVTab";
 import { SuppliersTab } from "@/components/settings/tabs/SuppliersTab";
 import { ChefsTab } from "@/components/settings/tabs/ChefsTab";
+import { UsersTab } from "@/components/settings/tabs/UsersTab";
 import IngredientPriceManager from "../reports/IngredientPriceManager";
 import { UnitOptionsManagement } from "./UnitOptionsManagement";
 
@@ -103,6 +104,7 @@ export function SettingsContent({
       <TabsContent value="unit-options" className="space-y-4">
         <UnitOptionsManagement />
       </TabsContent>
+      <UsersTab />
       <TabsContent value="ingredient-margins" className="space-y-4">
         <IngredientPriceManager />
       </TabsContent>
