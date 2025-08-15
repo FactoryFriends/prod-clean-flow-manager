@@ -115,8 +115,9 @@ const Index = () => {
     );
   }
 
-  // Don't render anything if not authenticated (will redirect)
+  // Redirect to auth immediately if not authenticated
   if (!user) {
+    navigate('/auth');
     return null;
   }
 
