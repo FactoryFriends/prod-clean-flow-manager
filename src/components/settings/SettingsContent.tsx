@@ -12,6 +12,7 @@ import { ChefsTab } from "@/components/settings/tabs/ChefsTab";
 import { UsersTab } from "@/components/settings/tabs/UsersTab";
 import IngredientPriceManager from "../reports/IngredientPriceManager";
 import { UnitOptionsManagement } from "./UnitOptionsManagement";
+import { ExcelImport } from "./ExcelImport";
 
 interface SettingsContentProps {
   currentLocation: "tothai" | "khin";
@@ -105,6 +106,9 @@ export function SettingsContent({
         <UnitOptionsManagement />
       </TabsContent>
       <UsersTab />
+      <TabsContent value="excel-import" className="space-y-4">
+        <ExcelImport />
+      </TabsContent>
       <TabsContent value="ingredient-margins" className="space-y-4">
         <IngredientPriceManager />
       </TabsContent>
