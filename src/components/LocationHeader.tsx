@@ -23,46 +23,37 @@ export function LocationHeader({ currentLocation, onLocationChange }: LocationHe
 
   return (
     <div className="flex items-center border-b bg-background px-4 py-2">
-      <div className="flex items-center gap-3 ml-auto">
-        <div className={cn(
-          "flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium text-sm",
-          bg,
-          text,
-          "shadow-sm"
-        )}>
-          <MapPin className="w-4 h-4" />
-          <span>{displayName}</span>
-        </div>
-
+      <div className="ml-auto">
         <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-2">
-            {isMobile ? "Switch" : "Switch Location"}
-            <ChevronDown className="w-4 h-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={() => onLocationChange("tothai")}
-            className={cn(
-              "flex items-center gap-2",
-              currentLocation === "tothai" && "bg-tothai-primary/10"
-            )}
-          >
-            <div className="w-3 h-3 rounded-full bg-tothai-primary"></div>
-            ToThai Restaurant
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => onLocationChange("khin")}
-            className={cn(
-              "flex items-center gap-2",
-              currentLocation === "khin" && "bg-khin-primary/10"
-            )}
-          >
-            <div className="w-3 h-3 rounded-full bg-khin-primary"></div>
-            KHIN Restaurant
-          </DropdownMenuItem>
-        </DropdownMenuContent>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-2">
+              <MapPin className="w-4 h-4" />
+              <span>{displayName}</span>
+              <ChevronDown className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => onLocationChange("tothai")}
+              className={cn(
+                "flex items-center gap-2",
+                currentLocation === "tothai" && "bg-tothai-primary/10"
+              )}
+            >
+              <div className="w-3 h-3 rounded-full bg-tothai-primary"></div>
+              ToThai Restaurant
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onLocationChange("khin")}
+              className={cn(
+                "flex items-center gap-2",
+                currentLocation === "khin" && "bg-khin-primary/10"
+              )}
+            >
+              <div className="w-3 h-3 rounded-full bg-khin-primary"></div>
+              KHIN Restaurant
+            </DropdownMenuItem>
+          </DropdownMenuContent>
         </DropdownMenu>
       </div>
     </div>
