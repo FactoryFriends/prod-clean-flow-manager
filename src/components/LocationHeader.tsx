@@ -13,34 +13,21 @@ interface LocationHeaderProps {
 export function LocationHeader({ currentLocation, onLocationChange }: LocationHeaderProps) {
   const isMobile = useIsMobile();
 
-  const getLocationStyles = (location: "tothai" | "khin") => {
-    if (location === "tothai") {
-      return {
-        bg: "bg-tothai-primary",
-        text: "text-tothai-accent",
-        border: "border-tothai-secondary",
-        name: "ToThai Restaurant"
-      };
-    } else {
-      return {
-        bg: "bg-khin-primary", 
-        text: "text-khin-accent",
-        border: "border-khin-secondary",
-        name: "KHIN Restaurant"
-      };
-    }
+  const locationConfig = {
+    tothai: { bg: "bg-tothai-primary", text: "text-tothai-accent", name: "ToThai Restaurant" },
+    khin: { bg: "bg-khin-primary", text: "text-khin-accent", name: "KHIN Restaurant" }
   };
 
-  const currentStyles = getLocationStyles(currentLocation);
-  const displayName = isMobile ? (currentLocation === "tothai" ? "ToThai" : "KHIN") : currentStyles.name;
+  const { bg, text, name } = locationConfig[currentLocation];
+  const displayName = isMobile ? (currentLocation === "tothai" ? "ToThai" : "KHIN") : name;
 
   return (
     <div className="flex items-center border-b bg-background px-4 py-2">
       <div className="flex items-center gap-3 ml-auto">
         <div className={cn(
           "flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium text-sm",
-          currentStyles.bg,
-          currentStyles.text,
+          bg,
+          text,
           "shadow-sm"
         )}>
           <MapPin className="w-4 h-4" />
