@@ -8,13 +8,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Plus, MoreVertical, Shield, User, Trash2 } from "lucide-react";
-import { useUserProfiles, useCreateUser, useUpdateUserRole, useDeleteUser, CreateUserRequest } from "@/hooks/useUserManagement";
+import { Plus, MoreVertical, Shield, User, Trash2, Edit } from "lucide-react";
+import { useUserProfiles, useCreateUser, useUpdateUserRole, useDeleteUser, useUpdateUser, CreateUserRequest, UpdateUserRequest } from "@/hooks/useUserManagement";
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import { toast } from "sonner";
 
 export function UserManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<UpdateUserRequest | null>(null);
   const [newUser, setNewUser] = useState<CreateUserRequest>({
     email: '',
     password: '',
@@ -24,6 +26,7 @@ export function UserManagement() {
 
   const { data: users = [], isLoading } = useUserProfiles();
   const createUser = useCreateUser();
+  const updateUser = useUpdateUser();
   const updateUserRole = useUpdateUserRole();
   const deleteUser = useDeleteUser();
 
@@ -51,6 +54,36 @@ export function UserManagement() {
   const handleDeleteUser = async (userId: string) => {
     if (window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
       await deleteUser.mutateAsync(userId);
+    }
+  };
+
+  const handleEditUser = (userProfile: any) => {
+    setEditingUser({
+      id: userProfile.id,
+      full_name: userProfile.full_name || '',
+      role: userProfile.role
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!editingUser || !editingUser.full_name) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      await updateUser.mutateAsync({
+        profileId: editingUser.id,
+        full_name: editingUser.full_name,
+        role: editingUser.role
+      });
+      setIsEditDialogOpen(false);
+      setEditingUser(null);
+    } catch (error) {
+      // Error is handled by the mutation
     }
   };
 
@@ -202,6 +235,10 @@ export function UserManagement() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditUser(userProfile)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit User
+                          </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleRoleChange(
                               userProfile.id, 
@@ -227,6 +264,57 @@ export function UserManagement() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit User Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <form onSubmit={handleUpdateUser}>
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+              <DialogDescription>
+                Update user information and role permissions.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_full_name">Full Name</Label>
+                <Input
+                  id="edit_full_name"
+                  value={editingUser?.full_name || ''}
+                  onChange={(e) => setEditingUser(prev => prev ? { ...prev, full_name: e.target.value } : null)}
+                  placeholder="Enter full name"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_role">Role</Label>
+                <Select 
+                  value={editingUser?.role || 'production'} 
+                  onValueChange={(value: 'admin' | 'production') => 
+                    setEditingUser(prev => prev ? { ...prev, role: value } : null)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="production">Production User</SelectItem>
+                    <SelectItem value="admin">Administrator</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={updateUser.isPending}>
+                {updateUser.isPending ? 'Updating...' : 'Update User'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </RoleGuard>
   );
 }

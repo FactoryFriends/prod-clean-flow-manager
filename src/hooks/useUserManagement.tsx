@@ -19,6 +19,12 @@ export interface CreateUserRequest {
   role: 'admin' | 'production';
 }
 
+export interface UpdateUserRequest {
+  id: string;
+  full_name: string;
+  role: 'admin' | 'production';
+}
+
 export const useUserProfiles = () => {
   return useQuery({
     queryKey: ["user-profiles"],
@@ -60,7 +66,9 @@ export const useCurrentUserProfile = () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("No user found");
 
-        // Fetch user profile from database
+        console.log('Fetching profile for user:', user.id); // Debug log
+
+        // Fetch user profile from database using the RPC function
         const { data, error } = await supabase
           .rpc('get_current_user_profile' as any, { p_user_id: user.id });
         
@@ -69,7 +77,13 @@ export const useCurrentUserProfile = () => {
           throw error;
         }
 
-        return data && data.length > 0 ? data[0] : null;
+        console.log('Profile data from database:', data); // Debug log
+
+        // The RPC function returns an array, get the first result
+        const profile = data && data.length > 0 ? data[0] : null;
+        console.log('Final profile:', profile); // Debug log
+        
+        return profile;
       } catch (error) {
         console.error('Error fetching current user profile:', error);
         return null;
@@ -128,6 +142,31 @@ export const useUpdateUserRole = () => {
     },
     onError: (error: any) => {
       toast.error(`Failed to update user role: ${error.message}`);
+    },
+  });
+};
+
+export const useUpdateUser = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ profileId, full_name, role }: { profileId: string; full_name: string; role: 'admin' | 'production' }) => {
+      const { data, error } = await supabase
+        .rpc('update_user_role' as any, { 
+          p_profile_id: profileId, 
+          p_role: role 
+        });
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["current-user-profile"] });
+      toast.success("User updated successfully");
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to update user: ${error.message}`);
     },
   });
 };
