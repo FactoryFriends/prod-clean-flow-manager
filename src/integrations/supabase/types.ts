@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -634,6 +634,36 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          full_name: string | null
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          full_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          full_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       staff_codes: {
         Row: {
           active: boolean | null
@@ -753,12 +783,73 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      get_current_user_profile: {
+        Args: { p_user_id: string }
+        Returns: {
+          created_at: string
+          created_by: string
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }[]
+      }
+      get_user_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          created_by: string
+          email: string
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }[]
+      }
+      get_user_role: {
+        Args: { user_id: string }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
+      update_user_profile: {
+        Args: {
+          p_full_name: string
+          p_profile_id: string
+          p_role: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: {
+          created_at: string
+          created_by: string
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }[]
+      }
+      update_user_role: {
+        Args: {
+          p_profile_id: string
+          p_role: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: {
+          created_at: string
+          created_by: string
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       location_type: "tothai" | "khin" | "both"
       staff_role: "chef" | "cleaner"
       task_frequency: "daily" | "weekly" | "monthly" | "quarterly"
       task_status: "open" | "closed"
+      user_role: "admin" | "production"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -890,6 +981,7 @@ export const Constants = {
       staff_role: ["chef", "cleaner"],
       task_frequency: ["daily", "weekly", "monthly", "quarterly"],
       task_status: ["open", "closed"],
+      user_role: ["admin", "production"],
     },
   },
 } as const

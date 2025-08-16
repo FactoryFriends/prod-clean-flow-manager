@@ -152,8 +152,9 @@ export const useUpdateUser = () => {
   return useMutation({
     mutationFn: async ({ profileId, full_name, role }: { profileId: string; full_name: string; role: 'admin' | 'production' }) => {
       const { data, error } = await supabase
-        .rpc('update_user_role' as any, { 
-          p_profile_id: profileId, 
+        .rpc('update_user_profile' as any, { 
+          p_profile_id: profileId,
+          p_full_name: full_name,
           p_role: role 
         });
       
