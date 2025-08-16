@@ -4,8 +4,6 @@ import { useAllProducts, useDeleteProduct } from "@/hooks/useProductionData";
 import { Button } from "@/components/ui/button";
 import { SemiFinishedForm } from "@/components/semi-finished/SemiFinishedForm";
 import ProductList from "./ProductList";
-import { exportSemiFinishedToExcel } from "@/components/settings/excel/semiFinishedExporter";
-import { Download } from "lucide-react";
 
 function SemiFinishedTab() {
   const { data: allProducts = [] } = useAllProducts();
@@ -36,10 +34,6 @@ function SemiFinishedTab() {
     setEditProduct(null);
   };
 
-  const handleExport = () => {
-    exportSemiFinishedToExcel(semiFinished as any);
-  };
-
   return (
     <div className="space-y-2">
       <h2 className="text-2xl font-bold">Semi-finished</h2>
@@ -54,11 +48,7 @@ function SemiFinishedTab() {
         </div>
       ) : (
         <>
-          <div className="flex justify-between items-center mb-2">
-            <Button variant="outline" onClick={handleExport} className="flex items-center gap-2">
-              <Download className="w-4 h-4" />
-              Export to Excel
-            </Button>
+          <div className="flex justify-end mb-2">
             <Button onClick={handleAddNew}>Add New Semi-finished</Button>
           </div>
           <ProductList

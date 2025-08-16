@@ -1,5 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Sidebar } from "@/components/Sidebar";
 import { Dashboard } from "@/components/Dashboard";
 import { Production } from "@/components/Production";
@@ -11,6 +12,7 @@ import { Reports } from "@/components/Reports";
 import { LocationHeader } from "@/components/LocationHeader";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { RecipeManagement } from "./RecipeManagement";
+import { useAuth } from "@/contexts/AuthContext";
 import { BottomNavigation } from "@/components/navigation/BottomNavigation";
 import { MobileHeader } from "@/components/navigation/MobileHeader";
 import { FloatingActionButton } from "@/components/navigation/FloatingActionButton";
@@ -18,12 +20,21 @@ import { toast } from "sonner";
 
 // For FAVV deep-link: keep track of FAVV subtab
 const Index = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [currentLocation, setCurrentLocation] = useState<"tothai" | "khin">("tothai");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const isMobile = useIsMobile();
   const [favvTabActive, setFavvTabActive] = useState(false);
   const [distributionInitialTab, setDistributionInitialTab] = useState<"external" | "internal">("external");
+
+  // Redirect to auth if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
 
   // Handle quick actions from FAB
   const handleQuickAction = (action: string) => {
@@ -91,6 +102,24 @@ const Index = () => {
         return <Dashboard currentLocation={currentLocation} onSectionChange={handleSectionChange} />;
     }
   };
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to auth immediately if not authenticated
+  if (!user) {
+    navigate('/auth');
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
