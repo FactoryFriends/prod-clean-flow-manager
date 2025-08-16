@@ -24,17 +24,31 @@ export const useUserProfiles = () => {
     queryKey: ["user-profiles"],
     queryFn: async () => {
       try {
-        // Return empty for now - this will be properly implemented when profiles table is available in types
-        console.warn('User profiles not available - authentication may need setup');
-        return [] as (UserProfile & { email: string })[];
-      } catch (error: any) {
-        if (error.code === 'PGRST116' || error.message?.includes('permission')) {
-          console.warn('User does not have permission to view user profiles');
-          return [];
+        // Use the get_user_profiles function that exists in the database
+        const { data, error } = await supabase
+          .rpc('get_user_profiles' as any);
+        
+        if (error) {
+          console.error('Error fetching user profiles:', error);
+          // If the function doesn't exist or there's a permission error, return empty array
+          if (error.code === 'PGRST116' || error.message?.includes('function') || error.message?.includes('permission')) {
+            console.warn('User profiles function not available or no permission');
+            return [];
+          }
+          throw error;
         }
-        throw error;
+        
+        // Ensure we always return an array
+        return Array.isArray(data) ? data : [];
+      } catch (error: any) {
+        console.error('Error in useUserProfiles:', error);
+        // Return empty array on any error to prevent UI crashes
+        return [];
       }
     },
+    // Add some default options to help with loading states
+    staleTime: 30000, // 30 seconds
+    retry: 1, // Only retry once on failure
   });
 };
 
@@ -46,16 +60,16 @@ export const useCurrentUserProfile = () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("No user found");
 
-        // Return mock profile for now - secure profile system needs proper implementation
-        return {
-          id: 'temp-id',
-          user_id: user.id,
-          role: 'admin', // Temporary - should be fetched from database
-          full_name: user.user_metadata?.full_name || null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          created_by: null
-        } as UserProfile;
+        // Fetch user profile from database
+        const { data, error } = await supabase
+          .rpc('get_current_user_profile' as any, { p_user_id: user.id });
+        
+        if (error) {
+          console.error('Error fetching user profile:', error);
+          throw error;
+        }
+
+        return data && data.length > 0 ? data[0] : null;
       } catch (error) {
         console.error('Error fetching current user profile:', error);
         return null;
@@ -98,9 +112,14 @@ export const useUpdateUserRole = () => {
   
   return useMutation({
     mutationFn: async ({ profileId, role }: { profileId: string; role: 'admin' | 'production' }) => {
-      // This would normally update the database - for now return success
-      console.log('Update user role:', profileId, role);
-      return { success: true };
+      const { data, error } = await supabase
+        .rpc('update_user_role' as any, { 
+          p_profile_id: profileId, 
+          p_role: role 
+        });
+      
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-profiles"] });
