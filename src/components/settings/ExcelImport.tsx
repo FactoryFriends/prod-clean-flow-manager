@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Download, Upload, FileSpreadsheet, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { Download, Upload, FileSpreadsheet, CheckCircle, XCircle, AlertTriangle, FileText } from "lucide-react";
 import { downloadExcelTemplate } from "./excel/templateGenerator";
 import { parseExcelFile, validateIngredientData } from "./excel/excelParser";
 import { ImportPreview } from "./excel/ImportPreview";
@@ -14,6 +14,7 @@ import { useBulkCreateIngredients } from "./excel/useBulkCreateIngredients";
 import { useAllSuppliers } from "@/hooks/useSuppliers";
 import { useAllProducts } from "@/hooks/useProductionData";
 import { exportIngredientsToExcel } from "./excel/ingredientExporter";
+import { exportSemiFinishedToCSV, exportSemiFinishedToExcel } from "./excel/semiFinishedExporter";
 
 export function ExcelImport() {
   const [file, setFile] = useState<File | null>(null);
@@ -76,8 +77,17 @@ export function ExcelImport() {
     setImportComplete(false);
   };
 
-  // Count actual ingredients (extern products)
+  // Count actual ingredients (extern products) and semi-finished products
   const ingredientCount = allProducts.filter(p => p.product_type === "extern").length;
+  const semiFinishedCount = allProducts.filter(p => p.product_type === "zelfgemaakt").length;
+
+  const handleSemiFinishedExportCSV = () => {
+    exportSemiFinishedToCSV(allProducts);
+  };
+
+  const handleSemiFinishedExportExcel = () => {
+    exportSemiFinishedToExcel(allProducts);
+  };
 
   return (
     <div className="space-y-6">
@@ -107,6 +117,39 @@ export function ExcelImport() {
               <Download className="w-4 h-4" />
               Export {ingredientCount} Ingredients to Excel
             </Button>
+          </div>
+
+          <Separator />
+
+          {/* Semi-Finished Products Export Section */}
+          <div className="space-y-3">
+            <h3 className="font-semibold flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Export Semi-Finished Products
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Download all your semi-finished products ({semiFinishedCount} total) in CSV or Excel format.
+            </p>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleSemiFinishedExportCSV}
+                variant="outline"
+                className="flex items-center gap-2"
+                disabled={semiFinishedCount === 0}
+              >
+                <Download className="w-4 h-4" />
+                Export to CSV
+              </Button>
+              <Button 
+                onClick={handleSemiFinishedExportExcel}
+                variant="outline"
+                className="flex items-center gap-2"
+                disabled={semiFinishedCount === 0}
+              >
+                <Download className="w-4 h-4" />
+                Export to Excel
+              </Button>
+            </div>
           </div>
 
           <Separator />

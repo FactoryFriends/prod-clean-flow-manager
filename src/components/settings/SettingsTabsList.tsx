@@ -85,7 +85,7 @@ export function SettingsTabsList() {
           </TabsTrigger>
           <TabsTrigger value="excel-import" className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm">
             <FileSpreadsheet className="w-5 h-5" />
-            <span className="text-xs font-medium">Import</span>
+            <span className="text-xs font-medium">Import/Export</span>
           </TabsTrigger>
           <TabsTrigger value="ingredient-margins" className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm">
             <TrendingUp className="w-5 h-5" />
