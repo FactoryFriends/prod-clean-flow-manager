@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Download, Upload, FileSpreadsheet, CheckCircle, XCircle, AlertTriangle, FileText } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Download, Upload, FileSpreadsheet, CheckCircle, XCircle, AlertTriangle, Package } from "lucide-react";
 import { toast } from "sonner";
 import { downloadExcelTemplate } from "./excel/templateGenerator";
 import { parseExcelFile, validateIngredientData } from "./excel/excelParser";
@@ -44,6 +44,11 @@ export function ExcelImport() {
   const { data: suppliers = [] } = useAllSuppliers();
   const { data: allProducts = [] } = useAllProducts();
 
+  // Counts
+  const ingredientCount = allProducts.filter(p => p.product_type === "extern").length;
+  const semiFinishedCount = allProducts.filter(p => p.product_type === "zelfgemaakt").length;
+
+  // Ingredients handlers
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (!selectedFile) return;
@@ -71,7 +76,6 @@ export function ExcelImport() {
 
   const handleImport = async () => {
     if (!validationResults?.valid?.length) return;
-
     setIsProcessing(true);
     try {
       await bulkCreateMutation.mutateAsync(validationResults.valid);
@@ -81,10 +85,6 @@ export function ExcelImport() {
     } finally {
       setIsProcessing(false);
     }
-  };
-
-  const handleExport = () => {
-    exportIngredientsToExcel(allProducts);
   };
 
   const resetImport = () => {
@@ -109,7 +109,6 @@ export function ExcelImport() {
       const validation = validateSemiFinishedData(data);
       setSemiFinishedValidation(validation);
     } catch (error) {
-      console.error("Error parsing semi-finished file:", error);
       setSemiFinishedValidation({
         valid: false,
         errors: ["Failed to parse Excel file"],
@@ -129,16 +128,14 @@ export function ExcelImport() {
       const { results, errors } = await updateSemiFinishedProducts(convertedData);
       
       if (errors.length > 0) {
-        console.error("Import errors:", errors);
-        toast.error(`Import completed with ${errors.length} errors. Check console for details.`);
+        toast.error(`Import completed with ${errors.length} errors`);
       } else {
-        toast.success(`Successfully imported/updated ${results.length} semi-finished products`);
+        toast.success(`Successfully imported/updated ${results.length} products`);
       }
       
       setSemiFinishedImportComplete(true);
     } catch (error) {
-      console.error("Semi-finished import failed:", error);
-      toast.error("Import failed. Please check the file format and try again.");
+      toast.error("Import failed. Please check the file format.");
     } finally {
       setSemiFinishedProcessing(false);
     }
@@ -151,332 +148,238 @@ export function ExcelImport() {
     setSemiFinishedImportComplete(false);
   };
 
-  // Count actual ingredients (extern products) and semi-finished products
-  const ingredientCount = allProducts.filter(p => p.product_type === "extern").length;
-  const semiFinishedCount = allProducts.filter(p => p.product_type === "zelfgemaakt").length;
-
-  const handleSemiFinishedExportCSV = () => {
-    exportSemiFinishedToCSV(allProducts);
-  };
-
-  const handleSemiFinishedExportExcel = () => {
-    exportSemiFinishedToExcel(allProducts);
-  };
-
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileSpreadsheet className="w-5 h-5" />
-            Excel Import/Export - Ingredients
-          </CardTitle>
-          <CardDescription>
-            Import multiple ingredients using Excel templates or export existing ingredients as backup
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Export Section */}
-          <div className="space-y-3">
-            <h3 className="font-semibold">Export Current Ingredients</h3>
-            <p className="text-sm text-muted-foreground">
-              Download all your current ingredients ({ingredientCount} total) as Excel backup file.
-            </p>
-            <Button 
-              onClick={handleExport}
-              variant="outline"
-              className="flex items-center gap-2"
-              disabled={ingredientCount === 0}
-            >
-              <Download className="w-4 h-4" />
-              Export {ingredientCount} Ingredients to Excel
-            </Button>
-          </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <FileSpreadsheet className="w-5 h-5" />
+          Import/Export Manager
+        </CardTitle>
+        <CardDescription>
+          Manage bulk data operations for ingredients and semi-finished products
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="ingredients" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="ingredients" className="flex items-center gap-2">
+              <FileSpreadsheet className="w-4 h-4" />
+              Ingredients ({ingredientCount})
+            </TabsTrigger>
+            <TabsTrigger value="semi-finished" className="flex items-center gap-2">
+              <Package className="w-4 h-4" />
+              Semi-Finished ({semiFinishedCount})
+            </TabsTrigger>
+          </TabsList>
 
-          <Separator />
-
-          {/* Semi-Finished Products Export Section */}
-          <div className="space-y-3">
-            <h3 className="font-semibold flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              Export Semi-Finished Products
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Download all your semi-finished products ({semiFinishedCount} total) in CSV or Excel format.
-            </p>
-            <div className="flex gap-2">
-              <Button 
-                onClick={handleSemiFinishedExportCSV}
-                variant="outline"
-                className="flex items-center gap-2"
-                disabled={semiFinishedCount === 0}
-              >
-                <Download className="w-4 h-4" />
-                Export to CSV
-              </Button>
-              <Button 
-                onClick={handleSemiFinishedExportExcel}
-                variant="outline"
-                className="flex items-center gap-2"
-                disabled={semiFinishedCount === 0}
-              >
-                <Download className="w-4 h-4" />
-                Export to Excel
-              </Button>
-            </div>
-          </div>
-
-          <Separator />
-
-          {!importComplete ? (
-            <>
-              {/* Step 1: Download Template */}
-              <div className="space-y-3">
-                <h3 className="font-semibold">Import New Ingredients</h3>
-                <h4 className="font-medium">Step 1: Download Template</h4>
-                <p className="text-sm text-muted-foreground">
-                  Download the Excel template with validation rules, example data, and detailed instructions.
-                </p>
-                <Button 
-                  onClick={downloadExcelTemplate} 
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  Download Excel Template
-                </Button>
-              </div>
-
-              {/* Step 2: Upload File */}
-              <div className="space-y-3">
-                <h4 className="font-medium">Step 2: Upload Your File</h4>
-                <div className="flex items-center gap-4">
-                  <Input
-                    type="file"
-                    accept=".xlsx,.xls"
-                    onChange={handleFileSelect}
-                    disabled={isProcessing}
-                    className="max-w-md"
-                  />
-                  {file && (
-                    <Badge variant="secondary" className="flex items-center gap-1">
-                      <FileSpreadsheet className="w-3 h-3" />
-                      {file.name}
-                    </Badge>
-                  )}
-                </div>
-                {isProcessing && (
-                  <p className="text-sm text-muted-foreground">Processing file...</p>
-                )}
-              </div>
-
-              {/* Step 3: Preview & Import */}
-              {validationResults && (
-                <div className="space-y-3">
-                  <h4 className="font-medium">Step 3: Review & Import</h4>
-                  
-                  {validationResults.errors?.length > 0 && (
-                    <Alert variant="destructive">
-                      <XCircle className="w-4 h-4" />
-                      <AlertDescription>
-                        Found {validationResults.errors.length} error(s) that need to be fixed before importing.
-                      </AlertDescription>
-                    </Alert>
-                  )}
-
-                  {validationResults.warnings?.length > 0 && (
-                    <Alert>
-                      <AlertTriangle className="w-4 h-4" />
-                      <AlertDescription>
-                        {validationResults.warnings.length} warning(s): suppliers will be created automatically.
-                      </AlertDescription>
-                    </Alert>
-                  )}
-
-                  {validationResults.valid?.length > 0 && (
-                    <Alert>
-                      <CheckCircle className="w-4 h-4" />
-                      <AlertDescription>
-                        {validationResults.valid.length} ingredient(s) ready to import.
-                      </AlertDescription>
-                    </Alert>
-                  )}
-
-                  <ImportPreview validationResults={validationResults} />
-
-                  {validationResults.valid?.length > 0 && (
-                    <div className="flex gap-3">
-                      <Button 
-                        onClick={handleImport}
-                        disabled={isProcessing || bulkCreateMutation.isPending}
-                        className="flex items-center gap-2"
-                      >
-                        <Upload className="w-4 h-4" />
-                        {isProcessing || bulkCreateMutation.isPending ? "Importing..." : `Import ${validationResults.valid.length} Ingredients`}
-                      </Button>
-                      <Button variant="outline" onClick={resetImport}>
-                        Start Over
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
-          ) : (
-            /* Import Complete */
-            <div className="text-center py-8 space-y-4">
-              <CheckCircle className="w-16 h-16 text-green-600 mx-auto" />
-              <h3 className="text-xl font-semibold">Import Complete!</h3>
-              <p className="text-muted-foreground">
-                All ingredients have been successfully imported, and any new suppliers have been created.
-              </p>
-              <Button onClick={resetImport}>Import More Ingredients</Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Semi-Finished Products Import/Export Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            Import/Export - Semi-Finished Products
-          </CardTitle>
-          <CardDescription>
-            Import/export semi-finished products for mass updates and data management
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {!semiFinishedImportComplete ? (
-            <>
-              {/* Semi-Finished Export Section */}
-              <div className="space-y-3">
-                <h3 className="font-semibold">Export for Editing</h3>
-                <p className="text-sm text-muted-foreground">
-                  Download your semi-finished products ({semiFinishedCount} total) to Excel, make changes, and re-import.
-                </p>
+          {/* Ingredients Tab */}
+          <TabsContent value="ingredients" className="space-y-4">
+            {!importComplete ? (
+              <div className="space-y-4">
+                {/* Export */}
                 <div className="flex gap-2">
                   <Button 
-                    onClick={handleSemiFinishedExportExcel}
+                    onClick={() => exportIngredientsToExcel(allProducts)}
                     variant="outline"
-                    className="flex items-center gap-2"
-                    disabled={semiFinishedCount === 0}
+                    size="sm"
+                    disabled={ingredientCount === 0}
                   >
-                    <Download className="w-4 h-4" />
-                    Download for Editing
+                    <Download className="w-4 h-4 mr-2" />
+                    Export ({ingredientCount})
                   </Button>
                   <Button 
-                    onClick={handleSemiFinishedExportCSV}
+                    onClick={downloadExcelTemplate} 
                     variant="outline"
-                    className="flex items-center gap-2"
-                    disabled={semiFinishedCount === 0}
+                    size="sm"
                   >
-                    <Download className="w-4 h-4" />
-                    Export to CSV
+                    <Download className="w-4 h-4 mr-2" />
+                    Get Template
                   </Button>
                 </div>
-              </div>
 
-              <Separator />
+                <Separator />
 
-              {/* Semi-Finished Import Section */}
-              <div className="space-y-3">
-                <h3 className="font-semibold">Import Updated Data</h3>
-                <p className="text-sm text-muted-foreground">
-                  Upload an Excel file with semi-finished products data. Existing products will be updated, new ones will be created.
-                </p>
-                <div className="flex items-center gap-4">
-                  <Input
-                    type="file"
-                    accept=".xlsx,.xls"
-                    onChange={handleSemiFinishedFileSelect}
-                    disabled={semiFinishedProcessing}
-                    className="max-w-md"
-                  />
-                  {semiFinishedFile && (
-                    <Badge variant="secondary" className="flex items-center gap-1">
-                      <FileSpreadsheet className="w-3 h-3" />
-                      {semiFinishedFile.name}
-                    </Badge>
-                  )}
-                </div>
-                {semiFinishedProcessing && (
-                  <p className="text-sm text-muted-foreground">Processing file...</p>
-                )}
-              </div>
-
-              {/* Validation Results */}
-              {semiFinishedValidation && (
+                {/* Import */}
                 <div className="space-y-3">
-                  <h4 className="font-medium">Validation Results</h4>
-                  
-                  {semiFinishedValidation.errors.length > 0 && (
-                    <Alert variant="destructive">
-                      <XCircle className="w-4 h-4" />
-                      <AlertDescription>
-                        Found {semiFinishedValidation.errors.length} error(s):
-                        <ul className="mt-2 list-disc list-inside">
-                          {semiFinishedValidation.errors.slice(0, 5).map((error, index) => (
-                            <li key={index} className="text-sm">{error}</li>
-                          ))}
-                          {semiFinishedValidation.errors.length > 5 && (
-                            <li className="text-sm">... and {semiFinishedValidation.errors.length - 5} more</li>
-                          )}
-                        </ul>
-                      </AlertDescription>
-                    </Alert>
-                  )}
+                  <div className="flex items-center gap-4">
+                    <Input
+                      type="file"
+                      accept=".xlsx,.xls"
+                      onChange={handleFileSelect}
+                      disabled={isProcessing}
+                      className="max-w-sm"
+                    />
+                    {file && (
+                      <Badge variant="secondary">
+                        <FileSpreadsheet className="w-3 h-3 mr-1" />
+                        {file.name}
+                      </Badge>
+                    )}
+                  </div>
 
-                  {semiFinishedValidation.warnings.length > 0 && (
-                    <Alert>
-                      <AlertTriangle className="w-4 h-4" />
-                      <AlertDescription>
-                        {semiFinishedValidation.warnings.length} warning(s) found.
-                      </AlertDescription>
-                    </Alert>
-                  )}
+                  {validationResults && (
+                    <div className="space-y-2">
+                      {validationResults.errors?.length > 0 && (
+                        <Alert variant="destructive">
+                          <XCircle className="w-4 h-4" />
+                          <AlertDescription>
+                            {validationResults.errors.length} errors found
+                          </AlertDescription>
+                        </Alert>
+                      )}
 
-                  {semiFinishedValidation.valid && semiFinishedParsedData.length > 0 && (
-                    <Alert>
-                      <CheckCircle className="w-4 h-4" />
-                      <AlertDescription>
-                        {semiFinishedParsedData.length} semi-finished product(s) ready to import/update.
-                      </AlertDescription>
-                    </Alert>
-                  )}
+                      {validationResults.warnings?.length > 0 && (
+                        <Alert>
+                          <AlertTriangle className="w-4 h-4" />
+                          <AlertDescription>
+                            {validationResults.warnings.length} warnings
+                          </AlertDescription>
+                        </Alert>
+                      )}
 
-                  {semiFinishedValidation.valid && semiFinishedParsedData.length > 0 && (
-                    <div className="flex gap-3">
-                      <Button 
-                        onClick={handleSemiFinishedImport}
-                        disabled={semiFinishedProcessing}
-                        className="flex items-center gap-2"
-                      >
-                        <Upload className="w-4 h-4" />
-                        {semiFinishedProcessing ? "Importing..." : `Import/Update ${semiFinishedParsedData.length} Products`}
-                      </Button>
-                      <Button variant="outline" onClick={resetSemiFinishedImport}>
-                        Start Over
-                      </Button>
+                      {validationResults.valid?.length > 0 && (
+                        <>
+                          <Alert>
+                            <CheckCircle className="w-4 h-4" />
+                            <AlertDescription>
+                              {validationResults.valid.length} items ready to import
+                            </AlertDescription>
+                          </Alert>
+
+                          <ImportPreview validationResults={validationResults} />
+
+                          <div className="flex gap-2">
+                            <Button 
+                              onClick={handleImport}
+                              disabled={isProcessing || bulkCreateMutation.isPending}
+                              size="sm"
+                            >
+                              <Upload className="w-4 h-4 mr-2" />
+                              {isProcessing || bulkCreateMutation.isPending ? "Importing..." : `Import ${validationResults.valid.length}`}
+                            </Button>
+                            <Button variant="outline" onClick={resetImport} size="sm">
+                              Reset
+                            </Button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
-            </>
-          ) : (
-            /* Import Complete */
-            <div className="text-center py-8 space-y-4">
-              <CheckCircle className="w-16 h-16 text-green-600 mx-auto" />
-              <h3 className="text-xl font-semibold">Import Complete!</h3>
-              <p className="text-muted-foreground">
-                Semi-finished products have been successfully imported/updated.
-              </p>
-              <Button onClick={resetSemiFinishedImport}>Import More Products</Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+              </div>
+            ) : (
+              <div className="text-center py-8 space-y-4">
+                <CheckCircle className="w-12 h-12 text-green-600 mx-auto" />
+                <h3 className="font-semibold">Import Complete!</h3>
+                <Button onClick={resetImport} size="sm">Import More</Button>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Semi-Finished Products Tab */}
+          <TabsContent value="semi-finished" className="space-y-4">
+            {!semiFinishedImportComplete ? (
+              <div className="space-y-4">
+                {/* Export */}
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => exportSemiFinishedToExcel(allProducts)}
+                    variant="outline"
+                    size="sm"
+                    disabled={semiFinishedCount === 0}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Excel ({semiFinishedCount})
+                  </Button>
+                  <Button 
+                    onClick={() => exportSemiFinishedToCSV(allProducts)}
+                    variant="outline"
+                    size="sm"
+                    disabled={semiFinishedCount === 0}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export CSV
+                  </Button>
+                </div>
+
+                <Separator />
+
+                {/* Import */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-4">
+                    <Input
+                      type="file"
+                      accept=".xlsx,.xls"
+                      onChange={handleSemiFinishedFileSelect}
+                      disabled={semiFinishedProcessing}
+                      className="max-w-sm"
+                    />
+                    {semiFinishedFile && (
+                      <Badge variant="secondary">
+                        <FileSpreadsheet className="w-3 h-3 mr-1" />
+                        {semiFinishedFile.name}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {semiFinishedValidation && (
+                    <div className="space-y-2">
+                      {semiFinishedValidation.errors.length > 0 && (
+                        <Alert variant="destructive">
+                          <XCircle className="w-4 h-4" />
+                          <AlertDescription>
+                            {semiFinishedValidation.errors.length} errors found
+                          </AlertDescription>
+                        </Alert>
+                      )}
+
+                      {semiFinishedValidation.warnings.length > 0 && (
+                        <Alert>
+                          <AlertTriangle className="w-4 h-4" />
+                          <AlertDescription>
+                            {semiFinishedValidation.warnings.length} warnings
+                          </AlertDescription>
+                        </Alert>
+                      )}
+
+                      {semiFinishedValidation.valid && semiFinishedParsedData.length > 0 && (
+                        <>
+                          <Alert>
+                            <CheckCircle className="w-4 h-4" />
+                            <AlertDescription>
+                              {semiFinishedParsedData.length} items ready to import/update
+                            </AlertDescription>
+                          </Alert>
+
+                          <div className="flex gap-2">
+                            <Button 
+                              onClick={handleSemiFinishedImport}
+                              disabled={semiFinishedProcessing}
+                              size="sm"
+                            >
+                              <Upload className="w-4 h-4 mr-2" />
+                              {semiFinishedProcessing ? "Importing..." : `Import ${semiFinishedParsedData.length}`}
+                            </Button>
+                            <Button variant="outline" onClick={resetSemiFinishedImport} size="sm">
+                              Reset
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8 space-y-4">
+                <CheckCircle className="w-12 h-12 text-green-600 mx-auto" />
+                <h3 className="font-semibold">Import Complete!</h3>
+                <Button onClick={resetSemiFinishedImport} size="sm">Import More</Button>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 }
