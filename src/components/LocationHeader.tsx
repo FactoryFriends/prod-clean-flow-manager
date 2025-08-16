@@ -35,18 +35,19 @@ export function LocationHeader({ currentLocation, onLocationChange }: LocationHe
   const displayName = isMobile ? (currentLocation === "tothai" ? "ToThai" : "KHIN") : currentStyles.name;
 
   return (
-    <div className="flex items-center justify-end border-b bg-background px-4 py-2 gap-3">
-      <div className={cn(
-        "flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium text-sm",
-        currentStyles.bg,
-        currentStyles.text,
-        "shadow-sm"
-      )}>
-        <MapPin className="w-4 h-4" />
-        <span>{displayName}</span>
-      </div>
+    <div className="flex items-center border-b bg-background px-4 py-2">
+      <div className="flex items-center gap-3 ml-auto">
+        <div className={cn(
+          "flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium text-sm",
+          currentStyles.bg,
+          currentStyles.text,
+          "shadow-sm"
+        )}>
+          <MapPin className="w-4 h-4" />
+          <span>{displayName}</span>
+        </div>
 
-      <DropdownMenu>
+        <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="gap-2">
             {isMobile ? "Switch" : "Switch Location"}
@@ -75,7 +76,8 @@ export function LocationHeader({ currentLocation, onLocationChange }: LocationHe
             KHIN Restaurant
           </DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>
+        </DropdownMenu>
+      </div>
     </div>
   );
 }
