@@ -95,9 +95,12 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
             <Package className="w-4 h-4" />
             Produced Batches
           </TabsTrigger>
-          <TabsTrigger value="dispatched" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="dispatched" 
+            className="flex items-center gap-2 data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-50 hover:text-red-600 border-red-200"
+          >
             <FileText className="w-4 h-4" />
-            Packing Lists
+            🚨 Packing Lists (INSPECTION PRIORITY)
           </TabsTrigger>
           <TabsTrigger value="cleaning" className="flex items-center gap-2">
             <Brush className="w-4 h-4" />
