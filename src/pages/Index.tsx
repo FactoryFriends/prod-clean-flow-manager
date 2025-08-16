@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sidebar } from "@/components/Sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 import { Dashboard } from "@/components/Dashboard";
 import { Production } from "@/components/Production";
 import { Distribution } from "@/components/Distribution";
@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { BottomNavigation } from "@/components/navigation/BottomNavigation";
 import { MobileHeader } from "@/components/navigation/MobileHeader";
 import { FloatingActionButton } from "@/components/navigation/FloatingActionButton";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { toast } from "sonner";
 
 // For FAVV deep-link: keep track of FAVV subtab
@@ -24,7 +25,6 @@ const Index = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [currentLocation, setCurrentLocation] = useState<"tothai" | "khin">("tothai");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const isMobile = useIsMobile();
   const [favvTabActive, setFavvTabActive] = useState(false);
   const [distributionInitialTab, setDistributionInitialTab] = useState<"external" | "internal">("external");
@@ -153,27 +153,32 @@ const Index = () => {
           />
         </div>
       ) : (
-        /* Desktop Layout - Keep existing sidebar */
-        <div className="flex w-full">
-          <Sidebar 
-            activeSection={activeTab}
-            onSectionChange={handleSectionChange}
-            isCollapsed={sidebarCollapsed}
-            onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-            currentLocation={currentLocation}
-            onLocationChange={setCurrentLocation}
-          />
-          
-          <div className="flex-1 flex flex-col">
-            <LocationHeader 
+        /* Desktop Layout - New Shadcn Sidebar */
+        <SidebarProvider>
+          <div className="min-h-screen flex w-full">
+            <AppSidebar 
+              activeSection={activeTab}
+              onSectionChange={handleSectionChange}
               currentLocation={currentLocation}
               onLocationChange={setCurrentLocation}
             />
-            <main className="flex-1 p-6 overflow-auto">
-              {renderContent()}
-            </main>
+            
+            <div className="flex-1 flex flex-col">
+              {/* Header with sidebar trigger */}
+              <header className="h-12 flex items-center border-b bg-background px-4">
+                <SidebarTrigger className="mr-4" />
+                <LocationHeader 
+                  currentLocation={currentLocation}
+                  onLocationChange={setCurrentLocation}
+                />
+              </header>
+              
+              <main className="flex-1 p-6 overflow-auto">
+                {renderContent()}
+              </main>
+            </div>
           </div>
-        </div>
+        </SidebarProvider>
       )}
     </div>
   );
