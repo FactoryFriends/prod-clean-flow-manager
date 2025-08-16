@@ -17,6 +17,8 @@ import { BottomNavigation } from "@/components/navigation/BottomNavigation";
 import { MobileHeader } from "@/components/navigation/MobileHeader";
 import { FloatingActionButton } from "@/components/navigation/FloatingActionButton";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { LayoutDashboard } from "lucide-react";
 import { toast } from "sonner";
 
 // For FAVV deep-link: keep track of FAVV subtab
@@ -166,7 +168,18 @@ const Index = () => {
             <div className="flex-1 flex flex-col">
               {/* Header with sidebar trigger */}
               <header className="h-12 flex items-center border-b bg-background px-4">
-                <SidebarTrigger className="mr-4" />
+                <div className="flex items-center gap-2">
+                  <SidebarTrigger />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleSectionChange("dashboard")}
+                    className={`flex items-center gap-2 ${activeTab === "dashboard" ? "bg-accent" : ""}`}
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span className="hidden sm:inline">Dashboard</span>
+                  </Button>
+                </div>
                 <LocationHeader 
                   currentLocation={currentLocation}
                   onLocationChange={setCurrentLocation}
