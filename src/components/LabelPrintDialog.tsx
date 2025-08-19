@@ -259,14 +259,27 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
           {/* Number of Labels Input */}
           <div className="space-y-2">
             <Label htmlFor="numLabels">Number of Labels to Print</Label>
-            <Input
-              id="numLabels"
-              type="number"
-              min="1"
-              value={numLabelsToPrint}
-              onChange={(e) => setNumLabelsToPrint(parseInt(e.target.value) || 0)}
-              className="w-32"
-            />
+            <div className="flex items-center gap-3">
+              <Input
+                id="numLabels"
+                type="number"
+                min="1"
+                value={numLabelsToPrint}
+                onChange={(e) => setNumLabelsToPrint(parseInt(e.target.value) || 0)}
+                className="w-32"
+              />
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handlePrintLabels} 
+                disabled={printingLabels || numLabelsToPrint <= 0}
+                className="flex items-center gap-2"
+              >
+                <Printer className="w-4 h-4" />
+                {printingLabels ? "Preparing..." : `Print ${numLabelsToPrint} Labels`}
+              </Button>
+            </div>
             <p className="text-sm text-muted-foreground">
               Default: {batch.packages_produced} (from batch masterdata)
             </p>
@@ -369,20 +382,6 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
             </p>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={handlePrintLabels} 
-              disabled={printingLabels || numLabelsToPrint <= 0}
-              className="flex items-center gap-2"
-            >
-              <Printer className="w-4 h-4" />
-              {printingLabels ? "Preparing..." : `Print ${numLabelsToPrint} Labels`}
-            </Button>
-          </div>
         </div>
       </DialogContent>
     </Dialog>
