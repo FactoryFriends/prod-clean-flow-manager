@@ -74,8 +74,8 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-start justify-center bg-background p-4 py-8">
-      <Card className="w-full max-w-md mt-8 sm:mt-16">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">
             {showForgotPassword ? 'Reset Password' : 'Welcome'}
