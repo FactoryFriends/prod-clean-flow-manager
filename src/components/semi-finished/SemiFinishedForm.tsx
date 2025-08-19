@@ -96,14 +96,18 @@ export function SemiFinishedForm() {
   }, [batchUnit, unitSize, form]);
 
   const onSubmit = (data: SemiFinishedFormData) => {
+    console.log("Form data being submitted:", data);
+    console.log("Thai name value:", data.name_thai);
+    
     if (recipe.length === 0) {
       toast.error("Please add at least one ingredient to the recipe.");
       return;
     }
+    
     createProduct.mutate(
       {
         name: data.name,
-        name_thai: data.name_thai || null,
+        name_thai: data.name_thai || null, // Ensure it's explicitly included
         unit_size: Number(parseNumberComma(data.unit_size as any)),
         unit_type: data.unit_type,
         packages_per_batch: Number(parseNumberComma(data.packages_per_batch as any)),
@@ -135,6 +139,10 @@ export function SemiFinishedForm() {
           form.reset();
           setRecipe([]);
           toast.success("Semi-finished product created");
+        },
+        onError: (error) => {
+          console.error("Error creating product:", error);
+          toast.error("Failed to create product");
         },
       }
     );
