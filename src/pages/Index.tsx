@@ -156,7 +156,7 @@ const Index = () => {
         </div>
       ) : (
         /* Desktop Layout - New Shadcn Sidebar */
-        <SidebarProvider>
+        <SidebarProvider defaultOpen={false}>
           <div className="min-h-screen flex w-full">
             <AppSidebar 
               activeSection={activeTab}
