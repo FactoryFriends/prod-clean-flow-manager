@@ -246,12 +246,13 @@ export const useDeleteProduct = () => {
       await queryClient.cancelQueries({ queryKey: ["all-products"] });
       const previousData = queryClient.getQueryData(["products"]);
       const previousAll = queryClient.getQueryData(["all-products"]);
-      // Optimistically remove
+      // Optimistically remove from active products list
       queryClient.setQueryData(["products"], (old: any) =>
         old ? old.filter((p: any) => p.id !== id) : []
       );
+      // Optimistically set active: false in all-products list
       queryClient.setQueryData(["all-products"], (old: any) =>
-        old ? old.filter((p: any) => p.id !== id) : []
+        old ? old.map((p: any) => p.id === id ? { ...p, active: false } : p) : []
       );
       return { previousData, previousAll };
     },
