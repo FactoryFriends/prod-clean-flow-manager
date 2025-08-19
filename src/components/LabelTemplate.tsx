@@ -8,6 +8,7 @@ interface LabelTemplateProps {
   expiryDate: string;
   labelNumber?: number;
   totalLabels?: number;
+  productType?: string;
 }
 
 export const LabelTemplate = ({ 
@@ -17,9 +18,12 @@ export const LabelTemplate = ({
   productionDate, 
   expiryDate,
   labelNumber = 1,
-  totalLabels = 1
+  totalLabels = 1,
+  productType
 }: LabelTemplateProps) => {
-  const qrCodeData = `BATCH:${batchNumber}|PROD:${productionDate}|EXP:${expiryDate}`;
+  const qrCodeData = productType === "zelfgemaakt" 
+    ? `BATCH:${batchNumber}|PROD:${productionDate}|EXP:${expiryDate}`
+    : `BATCH:${batchNumber}|PROD:${productionDate}`;
   
   return (
     <div 
@@ -56,9 +60,11 @@ export const LabelTemplate = ({
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
           <span><strong>Prod:</strong> {format(new Date(productionDate), 'dd/MM/yyyy')}</span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-          <span><strong>Exp:</strong> {format(new Date(expiryDate), 'dd/MM/yyyy')}</span>
-        </div>
+        {productType === "zelfgemaakt" && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+            <span><strong>Exp:</strong> {format(new Date(expiryDate), 'dd/MM/yyyy')}</span>
+          </div>
+        )}
       </div>
 
       {/* QR Code placeholder */}

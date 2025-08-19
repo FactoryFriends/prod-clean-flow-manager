@@ -60,6 +60,7 @@ export const useProducts = () => {
         .from("products")
         .select("*")
         .eq("active", true)
+        .eq("product_type", "zelfgemaakt") // Only show self-made products for production batches
         .order("name");
       
       if (error) {

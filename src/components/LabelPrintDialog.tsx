@@ -139,9 +139,11 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
               </div>
             </div>
             
+            ${batch.products.product_type === "zelfgemaakt" ? `
             <div style="font-size: 12px; font-weight: bold; border: 2px solid #000; padding: 4px; text-align: center; margin-top: 4px;">
               EXPIRY: ${format(new Date(batch.expiry_date), 'dd/MM/yyyy')} (${format(new Date(batch.expiry_date), 'EEEE')})
             </div>
+            ` : ''}
           </div>
 
           <div style="text-align: center; font-size: 8px; margin-top: 6px; padding-top: 6px; border-top: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center;">
@@ -365,9 +367,11 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
                   </div>
                 </div>
                 
-                <div style={{ fontSize: '12px', fontWeight: 'bold', border: '2px solid #000', padding: '4px', textAlign: 'center', marginTop: '4px' }}>
-                  EXPIRY: {format(new Date(batch.expiry_date), 'dd/MM/yyyy')} ({format(new Date(batch.expiry_date), 'EEEE')})
-                </div>
+                {batch.products.product_type === "zelfgemaakt" && (
+                  <div style={{ fontSize: '12px', fontWeight: 'bold', border: '2px solid #000', padding: '4px', textAlign: 'center', marginTop: '4px' }}>
+                    EXPIRY: {format(new Date(batch.expiry_date), 'dd/MM/yyyy')} ({format(new Date(batch.expiry_date), 'EEEE')})
+                  </div>
+                )}
               </div>
 
               {/* Footer */}
