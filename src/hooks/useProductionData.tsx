@@ -450,3 +450,41 @@ export const useCreateProductionBatch = () => {
     },
   });
 };
+
+export const useUpdateProductionBatch = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, ...batchData }: {
+      id: string;
+      chef_id?: string;
+      packages_produced?: number;
+      expiry_date?: string;
+      production_notes?: string;
+    }) => {
+      const { data, error } = await supabase
+        .from("production_batches")
+        .update(batchData)
+        .eq("id", id)
+        .select(`
+          *,
+          products(*),
+          chefs(*)
+        `)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["production-batches"] });
+      toast.success("Production batch updated successfully");
+    },
+    onError: (error) => {
+      const errorMessage = error.message?.includes('permission') 
+        ? "You don't have permission to update production batches. Please sign in."
+        : "Failed to update production batch: " + error.message;
+      toast.error(errorMessage);
+    },
+  });
+};

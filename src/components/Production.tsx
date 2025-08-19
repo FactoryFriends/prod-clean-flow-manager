@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { EmbeddedBatchForm } from "./EmbeddedBatchForm";
 import { LabelPrintDialog } from "./LabelPrintDialog";
+import { EditBatchDialog } from "./EditBatchDialog";
 import { useProductionBatches, ProductionBatch } from "@/hooks/useProductionData";
 import { Search, Filter, Printer, Edit, X } from "lucide-react";
 import { Input } from "./ui/input";
@@ -20,6 +21,8 @@ export function Production({ currentLocation }: ProductionProps) {
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedBatch, setSelectedBatch] = useState<ProductionBatch | null>(null);
   const [labelDialogOpen, setLabelDialogOpen] = useState(false);
+  const [editBatch, setEditBatch] = useState<ProductionBatch | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const { data: batches, isLoading, error } = useProductionBatches(currentLocation);
 
@@ -65,8 +68,8 @@ export function Production({ currentLocation }: ProductionProps) {
   };
 
   const handleEditBatch = (batch: ProductionBatch) => {
-    // TODO: Implement edit batch functionality
-    console.log("Edit batch:", batch);
+    setEditBatch(batch);
+    setEditDialogOpen(true);
   };
 
   const getExpiryStatus = (batch: ProductionBatch) => {
@@ -260,6 +263,12 @@ export function Production({ currentLocation }: ProductionProps) {
         open={labelDialogOpen}
         onOpenChange={setLabelDialogOpen}
         batch={selectedBatch}
+      />
+
+      <EditBatchDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        batch={editBatch}
       />
     </div>
   );
