@@ -1,20 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>prod-clean-flow-manager</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <title>OptiThai Manager - Restaurant Productie & Schoonmaak</title>
+    <meta name="description" content="OptiThai Restaurant Management System voor productie planning, schoonmaaktaken en voorraad beheer" />
+    <meta name="author" content="OptiThai" />
+    <meta name="keywords" content="restaurant management, productie planning, schoonmaak, voorraad, OptiThai" />
 
-    <meta property="og:title" content="prod-clean-flow-manager" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- PWA Icons -->
+    <link rel="icon" href="/icon-192x192.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/icon-192x192.png" />
+    <link rel="shortcut icon" href="/icon-192x192.png" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#f5dd0f" />
+    <meta name="background-color" content="#ffffff" />
+    <meta name="display" content="standalone" />
+    <meta name="orientation" content="any" />
+    
+    <!-- iOS PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="OptiThai" />
+    <meta name="apple-touch-fullscreen" content="yes" />
+    
+    <!-- Windows PWA Meta Tags -->
+    <meta name="msapplication-TileColor" content="#f5dd0f" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="OptiThai Manager" />
+    <meta property="og:description" content="Restaurant Management System voor productie planning en schoonmaaktaken" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:image" content="/icon-512x512.png" />
+    <meta property="og:url" content="https://optithai.nl" />
+    <meta property="og:site_name" content="OptiThai" />
 
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta name="twitter:title" content="OptiThai Manager" />
+    <meta name="twitter:description" content="Restaurant Management System voor productie planning en schoonmaaktaken" />
+    <meta name="twitter:image" content="/icon-512x512.png" />
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
   </head>
 
   <body>

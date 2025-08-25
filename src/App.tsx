@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelpProvider } from "@/components/help/HelpProvider";
 import { VirtualKeyboardProvider } from "@/components/keyboard/VirtualKeyboardProvider";
 import { VirtualKeyboard } from "@/components/keyboard/VirtualKeyboard";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -34,6 +35,7 @@ const App = () => (
               </Routes>
             </BrowserRouter>
             <VirtualKeyboard />
+            <PWAInstallPrompt />
             <Toaster />
             <Sonner />
           </VirtualKeyboardProvider>

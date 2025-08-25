@@ -37,20 +37,17 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* PWA Theme Colors - OptiThai Branding */
+    --pwa-theme: 45 94% 51%; /* #f5dd0f - OptiThai Yellow */
+    --pwa-accent: 355 74% 41%; /* #ab2325 - OptiThai Red */
   }
 
   .dark {
@@ -99,5 +96,28 @@
 
   body {
     @apply bg-background text-foreground;
+    /* PWA-specific styles */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+
+  /* PWA safe area support for iOS */
+  @supports (padding-top: env(safe-area-inset-top)) {
+    body {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+  }
+
+  /* PWA fullscreen mode adjustments */
+  @media (display-mode: standalone) {
+    body {
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
   }
 }
