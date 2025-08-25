@@ -46,19 +46,10 @@
     <meta name="twitter:description" content="Restaurant Management System voor productie planning en schoonmaaktaken" />
     <meta name="twitter:image" content="/icon-512x512.png" />
     
-    <!-- PWA Service Worker Registration -->
+    <!-- PWA Service Worker Registration - Temporarily Disabled -->
     <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then((registration) => {
-              console.log('SW registered: ', registration);
-            })
-            .catch((registrationError) => {
-              console.log('SW registration failed: ', registrationError);
-            });
-        });
-      }
+      // Service worker temporarily disabled to fix CF timeout
+      console.log('Service worker registration disabled temporarily');
     </script>
   </head>
 
