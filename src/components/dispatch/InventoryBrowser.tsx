@@ -229,7 +229,10 @@ export function InventoryBrowser({ currentLocation, selectedItems, onQuantityCha
 
   return (
     <>
-      <div className="h-full flex flex-col border border-border rounded-lg bg-card">
+      <div 
+        className="flex flex-col border border-border rounded-lg bg-card"
+        style={{ height: '100%' }}
+      >
         <div className="p-4 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-2 mb-4">
             <Package className="w-5 h-5" />
@@ -286,7 +289,10 @@ export function InventoryBrowser({ currentLocation, selectedItems, onQuantityCha
         </div>
 
         {/* Scrollable Inventory List */}
-        <div className="flex-1 p-4" style={{ height: 'calc(70vh - 140px)', overflow: 'auto' }}>
+        <div 
+          className="flex-1 p-4 overflow-y-auto"
+          style={{ minHeight: 0 }}
+        >
           <div className="space-y-3">
             {itemsToShow.length > 0 ? (
               itemsToShow.map(renderInventoryItem)
