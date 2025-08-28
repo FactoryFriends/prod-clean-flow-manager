@@ -64,13 +64,11 @@ export const useProducts = () => {
         .order("name");
       
       if (error) {
-        // Handle authentication errors gracefully
-        if (error.code === 'PGRST116' || error.message.includes('permission')) {
-          toast.error("Please sign in to view products");
-          return [];
-        }
+        console.error("Error fetching products:", error);
         throw error;
       }
+      
+      console.log("Products loaded:", data);
       return data as Product[];
     },
   });
@@ -86,13 +84,11 @@ export const useAllProducts = () => {
         .order("name");
       
       if (error) {
-        // Handle authentication errors gracefully
-        if (error.code === 'PGRST116' || error.message.includes('permission')) {
-          toast.error("Please sign in to view products");
-          return [];
-        }
+        console.error("Error fetching all products:", error);
         throw error;
       }
+      
+      console.log("All products loaded:", data);
       return data as Product[];
     },
   });
@@ -381,13 +377,11 @@ export const useProductionBatches = (location?: "tothai" | "khin") => {
         .order("created_at", { ascending: false });
       
       if (error) {
-        // Handle authentication errors gracefully
-        if (error.code === 'PGRST116' || error.message.includes('permission')) {
-          toast.error("Please sign in to view production data");
-          return [];
-        }
+        console.error("Error fetching production batches:", error);
         throw error;
       }
+      
+      console.log("Production batches loaded:", data);
       return data as ProductionBatch[];
     },
   });
