@@ -230,15 +230,15 @@ export function InventoryBrowser({ currentLocation, selectedItems, onQuantityCha
   return (
     <>
       <Card className="h-full flex flex-col">
-        <CardHeader className="pb-4">
+        <CardHeader className="pb-4 flex-shrink-0">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Package className="w-5 h-5" />
             Available Inventory
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex-1 flex flex-col space-y-4">
+        <CardContent className="flex-1 flex flex-col space-y-4 min-h-0">
           {/* Search and Filters */}
-          <div className="space-y-3">
+          <div className="space-y-3 flex-shrink-0">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -286,17 +286,19 @@ export function InventoryBrowser({ currentLocation, selectedItems, onQuantityCha
           </div>
 
           {/* Inventory List */}
-          <ScrollArea className="flex-1">
-            <div className="space-y-3 pr-3">
-              {itemsToShow.length > 0 ? (
-                itemsToShow.map(renderInventoryItem)
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  {searchQuery ? 'No items match your search' : 'No items available'}
-                </div>
-              )}
-            </div>
-          </ScrollArea>
+          <div className="flex-1 min-h-0">
+            <ScrollArea className="h-full">
+              <div className="space-y-3 pr-3">
+                {itemsToShow.length > 0 ? (
+                  itemsToShow.map(renderInventoryItem)
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    {searchQuery ? 'No items match your search' : 'No items available'}
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          </div>
         </CardContent>
       </Card>
 
