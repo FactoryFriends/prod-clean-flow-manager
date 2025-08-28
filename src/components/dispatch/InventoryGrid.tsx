@@ -266,7 +266,7 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
             </div>
 
             {/* Inventory List */}
-            <ScrollArea className="max-h-96">
+            <ScrollArea className="h-96 w-full">
               <div className="space-y-4 pr-4">
                 {filter === "self-produced" && batchesToShow.map(renderInventoryItem)}
                 {filter === "external" && availableExternal.map(renderInventoryItem)}
