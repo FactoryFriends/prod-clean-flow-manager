@@ -9,7 +9,7 @@ export function PackingSlipHeader({ packingSlipNumber, currentDate }: PackingSli
     <div className="flex justify-between items-start mb-8">
       <div className="flex flex-col items-start">
         <img 
-          src="/lovable-uploads/049be7aa-e57b-4eb6-bec2-515a4c2b96b3.png" 
+          src="/icon-192x192.png" 
           alt="TOTHAI Logo" 
           className="h-16 w-auto object-contain mb-4"
         />

@@ -51,22 +51,7 @@ export function AppSidebar({ activeSection, onSectionChange, currentLocation, on
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
-        {/* Logo positioned at absolute top left */}
-        <div className="flex items-center gap-3 px-4 py-2">
-          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
-            <img 
-              src="/icon-192x192.png" 
-              alt="OptiThai Logo" 
-              className="w-full h-full object-contain"
-            />
-          </div>
-          {!collapsed && (
-            <div>
-              <h1 className="font-semibold text-sidebar-foreground text-sm">OptiThai</h1>
-              <p className="text-xs text-sidebar-foreground/60">Production Hub</p>
-            </div>
-          )}
-        </div>
+        {/* Logo positioned at absolute top left - NO SIDEBAR CONTENT HERE */}
         
         {/* Location switcher */}
         {!collapsed && (
