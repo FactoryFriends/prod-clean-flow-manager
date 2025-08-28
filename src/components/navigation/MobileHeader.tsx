@@ -44,8 +44,23 @@ export function MobileHeader({ activeSection, onSectionChange, currentLocation, 
   return (
     <header className="sticky top-0 z-40 bg-background border-b border-border md:hidden">
       <div className="flex items-center justify-between h-14 px-4">
-        {/* Left: Location & Title */}
+        {/* Left: Logo, Location & Title */}
         <div className="flex items-center gap-3 min-w-0 flex-1">
+          {/* Logo - clickable to dashboard */}
+          <button 
+            onClick={() => onSectionChange("dashboard")}
+            className="flex-shrink-0 hover:opacity-80 transition-opacity"
+            title="Go to Dashboard"
+          >
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center p-1 shadow-sm border">
+              <img 
+                src="/icon-192x192.png" 
+                alt="OptiThai Logo" 
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </button>
+          
           <LocationSwitcher 
             currentLocation={currentLocation} 
             onLocationChange={onLocationChange}
