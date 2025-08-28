@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus, Minus, Eye, EyeOff, Filter, QrCode } from "lucide-react";
 import { format } from "date-fns";
 import { useProductionBatches } from "@/hooks/useProductionData";
@@ -265,10 +266,12 @@ export function InventoryGrid({ currentLocation, selectedItems, onQuantityChange
             </div>
 
             {/* Inventory List */}
-            <div className="space-y-4">
-              {filter === "self-produced" && batchesToShow.map(renderInventoryItem)}
-              {filter === "external" && availableExternal.map(renderInventoryItem)}
-            </div>
+            <ScrollArea className="max-h-96">
+              <div className="space-y-4 pr-4">
+                {filter === "self-produced" && batchesToShow.map(renderInventoryItem)}
+                {filter === "external" && availableExternal.map(renderInventoryItem)}
+              </div>
+            </ScrollArea>
           </div>
         </CardContent>
       </Card>
