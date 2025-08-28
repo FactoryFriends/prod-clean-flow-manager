@@ -6,7 +6,6 @@ import { SelectedItem } from "@/types/dispatch";
 interface CreateDispatchData {
   dispatchType: "external" | "internal";
   customer?: string;
-  pickerCode: string;
   pickerName: string;
   dispatchNotes: string;
   selectedItems: SelectedItem[];
@@ -21,7 +20,6 @@ export const useCreateDispatch = () => {
       const {
         dispatchType,
         customer,
-        pickerCode,
         pickerName,
         dispatchNotes,
         selectedItems,
@@ -38,7 +36,7 @@ export const useCreateDispatch = () => {
         .insert({
           dispatch_type: dispatchType,
           customer: dispatchType === "external" ? customer : null,
-          picker_code: pickerCode,
+          picker_code: pickerName, // Store picker name in picker_code field for backwards compatibility
           picker_name: pickerName,
           dispatch_notes: dispatchNotes,
           total_items: totalItems,

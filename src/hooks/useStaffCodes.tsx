@@ -14,14 +14,11 @@ export const useStaffCodes = () => {
         .order("name");
 
       if (error) {
-        // Handle permission denied errors gracefully
-        if (error.code === 'PGRST116' || error.message.includes('permission')) {
-          toast.error("You don't have permission to view staff information. Admin access required.");
-          return [];
-        }
-        throw error;
+        console.warn("Staff codes access limited:", error.message);
+        return [];
       }
       return data;
     },
+    retry: false, // Don't retry on permission errors
   });
 };

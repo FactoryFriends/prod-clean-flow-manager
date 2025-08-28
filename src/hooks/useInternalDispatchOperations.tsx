@@ -4,7 +4,6 @@ import { useToast } from "@/hooks/use-toast";
 import { SelectedItem } from "@/types/dispatch";
 
 interface UseInternalDispatchOperationsProps {
-  pickerCode: string;
   pickerName: string;
   dispatchNotes: string;
   selectedItems: SelectedItem[];
@@ -13,7 +12,6 @@ interface UseInternalDispatchOperationsProps {
 }
 
 export function useInternalDispatchOperations({
-  pickerCode,
   pickerName,
   dispatchNotes,
   selectedItems,
@@ -28,7 +26,6 @@ export function useInternalDispatchOperations({
       await createDispatch.mutateAsync({
         dispatchType: "internal",
         customer: undefined,
-        pickerCode,
         pickerName,
         dispatchNotes,
         selectedItems,

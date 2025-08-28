@@ -9,7 +9,6 @@ import { SelectedItem } from "@/types/dispatch";
 
 interface UsePackingSlipOperationsProps {
   customer: string;
-  pickerCode: string;
   pickerName: string;
   dispatchNotes: string;
   selectedItems: SelectedItem[];
@@ -23,7 +22,6 @@ interface UsePackingSlipOperationsProps {
 
 export function usePackingSlipOperations({
   customer,
-  pickerCode,
   pickerName,
   dispatchNotes,
   selectedItems,
@@ -64,7 +62,6 @@ export function usePackingSlipOperations({
       const dispatchRecord = await createDispatch.mutateAsync({
         dispatchType: "external",
         customer,
-        pickerCode,
         pickerName,
         dispatchNotes,
         selectedItems,

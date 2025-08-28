@@ -14,8 +14,6 @@ interface DispatchFormProps {
   dispatchType: DispatchType;
   customer: string;
   setCustomer: (customer: string) => void;
-  pickerCode: string;
-  setPickerCode: (code: string) => void;
   pickerName: string;
   setPickerName: (name: string) => void;
   dispatchNotes: string;
@@ -29,8 +27,6 @@ export function DispatchForm({
   dispatchType,
   customer,
   setCustomer,
-  pickerCode,
-  setPickerCode,
   pickerName,
   setPickerName,
   dispatchNotes,
@@ -70,23 +66,10 @@ export function DispatchForm({
     }
   }, [dispatchType, customers, customer, setCustomer]);
 
-  // Auto-fill name when PIN code is entered
-  useEffect(() => {
-    if (pickerCode && staffCodes.length > 0) {
-      const staff = staffCodes.find(s => s.code === pickerCode);
-      if (staff) {
-        setPickerName(staff.name);
-      } else {
-        setPickerName("");
-      }
-    }
-  }, [pickerCode, staffCodes, setPickerName]);
-
-  const canSubmit = pickerCode && pickerName && selectedItems.length > 0 && 
+  const canSubmit = pickerName && selectedItems.length > 0 && 
     (dispatchType === "internal" || (dispatchType === "external" && customer));
 
   console.log("DispatchForm debug:", {
-    pickerCode,
     pickerName,
     selectedItemsLength: selectedItems.length,
     dispatchType,
@@ -101,30 +84,25 @@ export function DispatchForm({
     <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
       <div className="space-y-6">
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="picker-code">{isMobile ? "PIN" : "PIN Code"}</Label>
-              <Input
-                id="picker-code"
-                placeholder={isMobile ? "PIN" : "Enter 4-digit PIN"}
-                value={pickerCode}
-                onChange={(e) => setPickerCode(e.target.value)}
-                maxLength={4}
-                inputMode="numeric"
-                pattern="[0-9]*"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="picker-name">{isMobile ? "Name" : "Staff Name"}</Label>
-              <Input
-                id="picker-name"
-                placeholder={isMobile ? "Name" : "Auto-filled from PIN"}
-                value={pickerName}
-                onChange={(e) => setPickerName(e.target.value)}
-                disabled={!!pickerCode}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="picker-name">{isMobile ? "Staff" : "Staff Name"}</Label>
+            <Select value={pickerName} onValueChange={setPickerName}>
+              <SelectTrigger>
+                <SelectValue placeholder={isMobile ? "Select staff" : "Select staff member"} />
+              </SelectTrigger>
+              <SelectContent>
+                {staffCodes.map((staff) => (
+                  <SelectItem key={staff.code} value={staff.name}>
+                    <div className="flex items-center gap-2">
+                      <span>{staff.name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        ({staff.role || 'Staff'})
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {dispatchType === "external" && (

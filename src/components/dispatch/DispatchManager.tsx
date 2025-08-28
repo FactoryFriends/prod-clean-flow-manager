@@ -17,7 +17,6 @@ interface DispatchManagerProps {
 
 export function DispatchManager({ currentLocation, dispatchType }: DispatchManagerProps) {
   const [customer, setCustomer] = useState("");
-  const [pickerCode, setPickerCode] = useState("");
   const [pickerName, setPickerName] = useState("");
   const [dispatchNotes, setDispatchNotes] = useState("");
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
@@ -35,7 +34,6 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
   const { handleCreatePackingSlip, handleInternalUse } = useDispatchOperations({
     dispatchType,
     customer,
-    pickerCode,
     pickerName,
     dispatchNotes,
     selectedItems,
@@ -46,7 +44,6 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
     setPackingSlipItems,
     onSuccess: () => {
       setSelectedItems([]);
-      setPickerCode("");
       setPickerName("");
       setDispatchNotes("");
       if (dispatchType === "internal") {
@@ -110,7 +107,6 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
   console.log("DispatchManager render:", {
     selectedItemsCount: selectedItems.length,
     packingSlipItemsCount: packingSlipItems.length,
-    pickerCode,
     pickerName,
     customer,
     dispatchType
@@ -123,8 +119,6 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
           dispatchType={dispatchType}
           customer={customer}
           setCustomer={setCustomer}
-          pickerCode={pickerCode}
-          setPickerCode={setPickerCode}
           pickerName={pickerName}
           setPickerName={setPickerName}
           dispatchNotes={dispatchNotes}

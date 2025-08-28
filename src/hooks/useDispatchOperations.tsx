@@ -6,7 +6,6 @@ import { SelectedItem, DispatchType } from "@/types/dispatch";
 interface UseDispatchOperationsProps {
   dispatchType: DispatchType;
   customer: string;
-  pickerCode: string;
   pickerName: string;
   dispatchNotes: string;
   selectedItems: SelectedItem[];
@@ -21,7 +20,6 @@ interface UseDispatchOperationsProps {
 export function useDispatchOperations({
   dispatchType,
   customer,
-  pickerCode,
   pickerName,
   dispatchNotes,
   selectedItems,
@@ -34,7 +32,6 @@ export function useDispatchOperations({
 }: UseDispatchOperationsProps) {
   const { handleCreatePackingSlip } = usePackingSlipOperations({
     customer,
-    pickerCode,
     pickerName,
     dispatchNotes,
     selectedItems,
@@ -47,7 +44,6 @@ export function useDispatchOperations({
   });
 
   const { handleInternalUse } = useInternalDispatchOperations({
-    pickerCode,
     pickerName,
     dispatchNotes,
     selectedItems,
