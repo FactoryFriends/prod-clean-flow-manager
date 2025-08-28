@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, QrCode, Search, Package, Home, Truck } from "lucide-react";
+import { Eye, EyeOff, QrCode, Search, Package, Home, Store } from "lucide-react";
 import { format } from "date-fns";
 import { useProductionBatches } from "@/hooks/useProductionData";
 import { SelectedItem } from "@/types/dispatch";
@@ -267,7 +267,7 @@ export function InventoryBrowser({ currentLocation, selectedItems, onQuantityCha
                   onClick={() => setFilter("self-produced")}
                   className={`flex items-center gap-2 px-4 py-2 font-medium transition-all ${
                     filter === "self-produced" 
-                      ? "bg-primary text-primary-foreground shadow-sm" 
+                      ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm" 
                       : "text-muted-foreground hover:text-foreground hover:bg-background"
                   }`}
                 >
@@ -280,11 +280,11 @@ export function InventoryBrowser({ currentLocation, selectedItems, onQuantityCha
                   onClick={() => setFilter("external")}
                   className={`flex items-center gap-2 px-4 py-2 font-medium transition-all ${
                     filter === "external" 
-                      ? "bg-primary text-primary-foreground shadow-sm" 
+                      ? "bg-amber-600 hover:bg-amber-700 text-white shadow-sm" 
                       : "text-muted-foreground hover:text-foreground hover:bg-background"
                   }`}
                 >
-                  <Truck className="w-4 h-4" />
+                  <Store className="w-4 h-4" />
                   External
                 </Button>
               </div>
