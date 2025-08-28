@@ -128,9 +128,18 @@ const Index = () => {
           />
         </div>
       ) : (
-        /* Desktop Layout - New Shadcn Sidebar */
+        /* Desktop Layout - New Shadcn Sidebar with logo */
         <SidebarProvider defaultOpen={false}>
           <div className="min-h-screen flex w-full">
+            {/* Logo positioned at absolute top left */}
+            <div className="fixed top-4 left-4 z-50 w-10 h-10 bg-white rounded-lg flex items-center justify-center p-1 shadow-md border">
+              <img 
+                src="/icon-192x192.png" 
+                alt="OptiThai Logo" 
+                className="w-full h-full object-contain"
+              />
+            </div>
+            
             <AppSidebar 
               activeSection={activeTab}
               onSectionChange={handleSectionChange}
@@ -139,17 +148,9 @@ const Index = () => {
             />
             
             <div className="flex-1 flex flex-col">
-              {/* Header with logo and sidebar trigger */}
+              {/* Header with sidebar trigger */}
               <header className="h-12 flex items-center justify-between border-b bg-background px-4">
-                <div className="flex items-center gap-2">
-                  {/* Logo positioned at absolute top left */}
-                  <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center p-1 mr-2">
-                    <img 
-                      src="/icon-192x192.png" 
-                      alt="OptiThai Logo" 
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
+                <div className="flex items-center gap-2 ml-16">
                   <SidebarTrigger />
                   <Button
                     variant="ghost"
