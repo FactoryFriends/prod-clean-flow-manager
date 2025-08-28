@@ -11,14 +11,16 @@ export const useStaffCodes = () => {
         .from("staff_codes")
         .select("*")
         .eq("active", true)
-        .order("name");
+        .order("name", { ascending: true });
 
       if (error) {
-        console.warn("Staff codes access limited:", error.message);
-        return [];
+        console.error("Error fetching staff codes:", error);
+        toast.error("Failed to load staff codes");
+        throw error;
       }
-      return data;
+      
+      console.log("Staff codes loaded:", data);
+      return data || [];
     },
-    retry: false, // Don't retry on permission errors
   });
 };

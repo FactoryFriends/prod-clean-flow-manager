@@ -40,6 +40,12 @@ export function DispatchForm({
   const isMobile = useIsMobile();
 
   // Debug logging
+  console.log("DispatchForm staff codes debug:", {
+    staffCodes,
+    staffCodesLength: staffCodes.length
+  });
+
+  // Debug logging
   console.log("DispatchForm customers debug:", {
     customers,
     customersLoading,

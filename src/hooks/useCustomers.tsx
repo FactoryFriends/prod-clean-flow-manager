@@ -42,6 +42,7 @@ export const useCustomers = (activeOnly: boolean = false) => {
 
       const { data, error } = await query;
       if (error) {
+        console.error("Error fetching customers:", error);
         // Handle permission denied errors gracefully
         if (error.code === 'PGRST116' || error.message.includes('permission')) {
           console.warn("User doesn't have permission to view customers");
@@ -49,6 +50,8 @@ export const useCustomers = (activeOnly: boolean = false) => {
         }
         throw error;
       }
+      
+      console.log("Customers loaded:", data);
       return data as Customer[];
     },
   });
