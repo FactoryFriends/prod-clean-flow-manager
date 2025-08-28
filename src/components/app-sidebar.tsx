@@ -51,27 +51,14 @@ export function AppSidebar({ activeSection, onSectionChange, currentLocation, on
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
-        {/* Logo at top of sidebar - UX best practice */}
-        <div className="flex items-center gap-3 px-4 py-3">
-          <button 
-            onClick={() => onSectionChange("dashboard")}
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-            title="Go to Dashboard"
-          >
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1 shadow-sm border">
-              <img 
-                src="/icon-192x192.png" 
-                alt="OptiThai Logo" 
-                className="w-full h-full object-contain"
-              />
+        {/* Clean header with just company name */}
+        <div className="flex items-center gap-3 px-4 py-4">
+          {!collapsed && (
+            <div>
+              <h1 className="font-semibold text-sidebar-foreground">OptiThai</h1>
+              <p className="text-sm text-sidebar-foreground/60">Production Hub</p>
             </div>
-            {!collapsed && (
-              <div>
-                <h1 className="font-semibold text-sidebar-foreground text-sm">OptiThai</h1>
-                <p className="text-xs text-sidebar-foreground/60">Production Hub</p>
-              </div>
-            )}
-          </button>
+          )}
         </div>
         
         {/* Location switcher */}

@@ -139,9 +139,17 @@ const Index = () => {
             />
             
             <div className="flex-1 flex flex-col">
-              {/* Header with sidebar trigger - clean UX */}
+              {/* Header with integrated logo and clean layout */}
               <header className="h-12 flex items-center justify-between border-b bg-background px-4">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
+                  {/* Logo integrated with header elements */}
+                  <div className="w-6 h-6 bg-white rounded flex items-center justify-center p-0.5 border">
+                    <img 
+                      src="/icon-192x192.png" 
+                      alt="OptiThai" 
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                   <SidebarTrigger />
                   <Button
                     variant="ghost"
