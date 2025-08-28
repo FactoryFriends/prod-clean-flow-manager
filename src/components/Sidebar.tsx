@@ -1,11 +1,9 @@
-import { Building, Package, Truck, Brush, BarChart3, Settings, Receipt, Menu, X, FileText, LogOut } from "lucide-react";
+import { Building, Package, Truck, Brush, BarChart3, Settings, Receipt, Menu, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
-import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
 
 interface SidebarProps {
   activeSection: string;
@@ -31,16 +29,6 @@ const menuItems = [
 export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleCollapse, currentLocation, onLocationChange }: SidebarProps) {
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { signOut, user } = useAuth();
-
-  const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (error) {
-      toast.error('Error signing out');
-    } else {
-      toast.success('Signed out successfully');
-    }
-  };
 
   // Filter menu items based on current location
   const availableMenuItems = menuItems.filter(item => 
@@ -48,8 +36,7 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
   );
 
   // Get current user profile for role-based access
-  const { profile } = useAuth();
-
+  
   const handleSectionChange = (section: string) => {
     onSectionChange(section);
     if (isMobile) {
@@ -137,27 +124,6 @@ export function Sidebar({ activeSection, onSectionChange, isCollapsed, onToggleC
           })}
         </nav>
       </div>
-
-      {/* User section */}
-      {(!isCollapsed || isMobile) && (
-        <div className="p-4 border-t border-sidebar-border space-y-2">
-        <div className="px-3 py-2 text-xs text-sidebar-foreground/60">
-          Signed in as: {user?.email}
-          {profile && (
-            <span className="block text-xs font-medium capitalize">
-              {profile.role} user
-            </span>
-          )}
-        </div>
-          <button
-            onClick={handleSignOut}
-            className="w-full flex items-center gap-3 p-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors touch-manipulation min-h-[44px]"
-          >
-            <LogOut className="w-4 h-4 flex-shrink-0" />
-            <span className="text-sm font-medium">Sign Out</span>
-          </button>
-        </div>
-      )}
     </>
   );
 

@@ -1,4 +1,4 @@
-import { Settings, Receipt, Building, Menu, LogOut, MapPin } from "lucide-react";
+import { Settings, Receipt, Building, Menu, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu, 
@@ -8,8 +8,6 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { LocationSwitcher } from "@/components/LocationSwitcher";
-import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
 interface MobileHeaderProps {
@@ -34,16 +32,6 @@ const getSectionTitle = (section: string) => {
 };
 
 export function MobileHeader({ activeSection, onSectionChange, currentLocation, onLocationChange }: MobileHeaderProps) {
-  const { signOut, user, profile } = useAuth();
-
-  const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (error) {
-      toast.error('Error signing out');
-    } else {
-      toast.success('Signed out successfully');
-    }
-  };
 
   const secondaryMenuItems = [
     ...(currentLocation === "tothai" ? [
@@ -82,14 +70,6 @@ export function MobileHeader({ activeSection, onSectionChange, currentLocation, 
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <div className="px-2 py-1.5 text-sm font-medium">
-              {profile?.full_name || user?.email || 'User'}
-            </div>
-            <div className="px-2 py-1 text-xs text-muted-foreground">
-              {profile?.role === 'admin' ? 'Administrator' : 'Production User'}
-            </div>
-            <DropdownMenuSeparator />
-            
             {secondaryMenuItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -103,12 +83,6 @@ export function MobileHeader({ activeSection, onSectionChange, currentLocation, 
                 </DropdownMenuItem>
               );
             })}
-            
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

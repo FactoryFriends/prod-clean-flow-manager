@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { Building, Package, Truck, Brush, BarChart3, Settings, Receipt, FileText, LogOut, Menu } from "lucide-react";
+import { Building, Package, Truck, Brush, BarChart3, Settings, Receipt, FileText, Menu } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
 
 import {
   Sidebar,
@@ -41,16 +39,6 @@ const menuItems = [
 export function AppSidebar({ activeSection, onSectionChange, currentLocation, onLocationChange }: AppSidebarProps) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const { signOut, user, profile } = useAuth();
-
-  const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (error) {
-      toast.error('Error signing out');
-    } else {
-      toast.success('Signed out successfully');
-    }
-  };
 
   // Filter menu items based on current location
   const availableMenuItems = menuItems.filter(item => 
@@ -148,32 +136,11 @@ export function AppSidebar({ activeSection, onSectionChange, currentLocation, on
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
-        {!collapsed && (
-          <div className="px-4 py-2">
-            <div className="text-xs text-sidebar-foreground/60">
-              Signed in as: {user?.email}
-              {profile && (
-                <span className="block text-xs font-medium capitalize">
-                  {profile.role} user
-                </span>
-              )}
-            </div>
+        <div className="px-4 py-2">
+          <div className="text-xs text-sidebar-foreground/60">
+            OptiThai Manager
           </div>
-        )}
-        
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <button
-                onClick={handleSignOut}
-                className="flex items-center gap-3 w-full text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              >
-                <LogOut className="w-4 h-4 flex-shrink-0" />
-                {!collapsed && <span className="text-sm font-medium">Sign Out</span>}
-              </button>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );
