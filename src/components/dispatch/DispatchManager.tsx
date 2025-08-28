@@ -129,7 +129,7 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
       />
 
       {/* Side-by-Side Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" style={{ height: '70vh' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6" style={{ height: '70vh' }}>
         {/* Left Panel - Inventory Browser */}
         <InventoryBrowser
           currentLocation={currentLocation}
