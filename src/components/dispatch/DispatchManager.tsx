@@ -3,9 +3,9 @@ import { useState, useEffect } from "react";
 import { useProductionBatches } from "@/hooks/useProductionData";
 import { useCustomers } from "@/hooks/useCustomers";
 import { PackingSlipDialog } from "../PackingSlipDialog";
-import { DispatchForm } from "./DispatchForm";
-import { SelectedItemsSummary } from "./SelectedItemsSummary";
-import { InventoryGrid } from "./InventoryGrid";
+import { DispatchFormHeader } from "./DispatchFormHeader";
+import { LivePackingList } from "./LivePackingList";
+import { InventoryBrowser } from "./InventoryBrowser";
 import { SelectedItem, DispatchType } from "@/types/dispatch";
 import { externalProducts } from "@/data/dispatchData";
 import { useDispatchOperations } from "@/hooks/useDispatchOperations";
@@ -114,31 +114,35 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DispatchForm
-          dispatchType={dispatchType}
-          customer={customer}
-          setCustomer={setCustomer}
-          pickerName={pickerName}
-          setPickerName={setPickerName}
-          dispatchNotes={dispatchNotes}
-          setDispatchNotes={setDispatchNotes}
+      {/* Compact Form Header */}
+      <DispatchFormHeader
+        dispatchType={dispatchType}
+        customer={customer}
+        setCustomer={setCustomer}
+        pickerName={pickerName}
+        setPickerName={setPickerName}
+        dispatchNotes={dispatchNotes}
+        setDispatchNotes={setDispatchNotes}
+        selectedItems={selectedItems}
+        onCreatePackingSlip={handleCreatePackingSlip}
+        onInternalUse={handleInternalUse}
+      />
+
+      {/* Side-by-Side Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[600px]">
+        {/* Left Panel - Inventory Browser */}
+        <InventoryBrowser
+          currentLocation={currentLocation}
           selectedItems={selectedItems}
-          onCreatePackingSlip={handleCreatePackingSlip}
-          onInternalUse={handleInternalUse}
+          onQuantityChange={handleQuantityChange}
         />
 
-        <SelectedItemsSummary
+        {/* Right Panel - Live Packing List */}
+        <LivePackingList
           selectedItems={selectedItems}
           onQuantityChange={handleQuantityChange}
         />
       </div>
-
-      <InventoryGrid
-        currentLocation={currentLocation}
-        selectedItems={selectedItems}
-        onQuantityChange={handleQuantityChange}
-      />
 
       {dispatchType === "external" && (
         <PackingSlipDialog
