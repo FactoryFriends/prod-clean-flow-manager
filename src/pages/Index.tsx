@@ -128,8 +128,8 @@ const Index = () => {
           />
         </div>
       ) : (
-        /* Desktop Layout - New Shadcn Sidebar with proper logo placement */
-        <SidebarProvider defaultOpen={false}>
+        /* Desktop Layout - Shadcn Sidebar */
+        <SidebarProvider defaultOpen={true}>
           <div className="min-h-screen flex w-full">
             <AppSidebar 
               activeSection={activeTab}
