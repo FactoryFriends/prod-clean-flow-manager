@@ -229,16 +229,15 @@ export function InventoryBrowser({ currentLocation, selectedItems, onQuantityCha
 
   return (
     <>
-      <Card className="h-full flex flex-col">
-        <CardHeader className="pb-4 flex-shrink-0">
-          <CardTitle className="flex items-center gap-2 text-lg">
+      <div className="h-full flex flex-col border border-border rounded-lg bg-card">
+        <div className="p-4 border-b border-border flex-shrink-0">
+          <div className="flex items-center gap-2 mb-4">
             <Package className="w-5 h-5" />
-            Available Inventory
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex-1 flex flex-col space-y-4 min-h-0">
+            <h2 className="text-lg font-semibold">Available Inventory</h2>
+          </div>
+          
           {/* Search and Filters */}
-          <div className="space-y-3 flex-shrink-0">
+          <div className="space-y-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -284,23 +283,21 @@ export function InventoryBrowser({ currentLocation, selectedItems, onQuantityCha
               )}
             </div>
           </div>
+        </div>
 
-          {/* Inventory List */}
-          <div className="flex-1 min-h-0 overflow-hidden">
-            <ScrollArea className="h-full">
-              <div className="space-y-3 pr-3 pb-4">
-                {itemsToShow.length > 0 ? (
-                  itemsToShow.map(renderInventoryItem)
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    {searchQuery ? 'No items match your search' : 'No items available'}
-                  </div>
-                )}
+        {/* Scrollable Inventory List */}
+        <div className="flex-1 p-4 overflow-hidden">
+          <div className="h-full overflow-y-auto space-y-3">
+            {itemsToShow.length > 0 ? (
+              itemsToShow.map(renderInventoryItem)
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                {searchQuery ? 'No items match your search' : 'No items available'}
               </div>
-            </ScrollArea>
+            )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <BatchDetailsDialog
         open={detailsOpen}
