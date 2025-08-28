@@ -52,11 +52,11 @@ export function AppSidebar({ activeSection, onSectionChange, currentLocation, on
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-3 px-4 py-4">
-          <div className="w-8 h-8 bg-sidebar-primary rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
             <img 
-              src="/lovable-uploads/0de3c103-6c05-4b46-bf8c-8237a9815b6d.png" 
+              src="/icon-192x192.png" 
               alt="OptiThai Logo" 
-              className="w-6 h-6 object-contain"
+              className="w-full h-full object-contain"
             />
           </div>
           {!collapsed && (
