@@ -286,8 +286,8 @@ export function InventoryBrowser({ currentLocation, selectedItems, onQuantityCha
         </div>
 
         {/* Scrollable Inventory List */}
-        <div className="flex-1 p-4 overflow-hidden">
-          <div className="h-full overflow-y-auto space-y-3">
+        <div className="flex-1 p-4" style={{ height: 'calc(70vh - 140px)', overflow: 'auto' }}>
+          <div className="space-y-3">
             {itemsToShow.length > 0 ? (
               itemsToShow.map(renderInventoryItem)
             ) : (
