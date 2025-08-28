@@ -29,6 +29,14 @@ export function InventoryBrowser({ currentLocation, selectedItems, onQuantityCha
   const [qrScannerOpen, setQrScannerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Debug logging
+  console.log("InventoryBrowser - Debug Info:", {
+    containerHeight: "Should be checking actual heights",
+    itemCount: batches?.length || 0,
+    filter,
+    searchQuery
+  });
+
   const getSelectedQuantity = (itemId: string) => {
     return selectedItems.find(si => si.id === itemId)?.selectedQuantity || 0;
   };
@@ -230,10 +238,18 @@ export function InventoryBrowser({ currentLocation, selectedItems, onQuantityCha
   return (
     <>
       <div 
-        className="flex flex-col border border-border rounded-lg bg-card"
-        style={{ height: '100%' }}
+        className="border border-border rounded-lg bg-card"
+        style={{ 
+          height: '70vh',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+        onLoad={() => console.log("Container loaded")}
       >
-        <div className="p-4 border-b border-border flex-shrink-0">
+        <div 
+          className="p-4 border-b border-border"
+          style={{ flexShrink: 0 }}
+        >
           <div className="flex items-center gap-2 mb-4">
             <Package className="w-5 h-5" />
             <h2 className="text-lg font-semibold">Available Inventory</h2>
@@ -288,19 +304,32 @@ export function InventoryBrowser({ currentLocation, selectedItems, onQuantityCha
           </div>
         </div>
 
-        {/* Scrollable Inventory List */}
+        {/* Scrollable Inventory List - COMPLETELY SIMPLIFIED */}
         <div 
-          className="flex-1 p-4 overflow-y-auto"
-          style={{ minHeight: 0 }}
+          style={{ 
+            flex: 1,
+            overflow: 'auto',
+            padding: '16px',
+            backgroundColor: '#f9f9f9'
+          }}
+          onScroll={() => console.log("SCROLLING DETECTED!")}
         >
-          <div className="space-y-3">
-            {itemsToShow.length > 0 ? (
-              itemsToShow.map(renderInventoryItem)
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                {searchQuery ? 'No items match your search' : 'No items available'}
-              </div>
-            )}
+          <div style={{ minHeight: '2000px' }}>
+            <div style={{ color: 'red', fontWeight: 'bold', marginBottom: '20px' }}>
+              SCROLL TEST - This should be scrollable! Items: {itemsToShow.length}
+            </div>
+            <div className="space-y-3">
+              {itemsToShow.length > 0 ? (
+                itemsToShow.map(renderInventoryItem)
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  {searchQuery ? 'No items match your search' : 'No items available'}
+                </div>
+              )}
+            </div>
+            <div style={{ color: 'blue', fontWeight: 'bold', marginTop: '50px' }}>
+              END OF LIST - If you can see this by scrolling, it works!
+            </div>
           </div>
         </div>
       </div>
