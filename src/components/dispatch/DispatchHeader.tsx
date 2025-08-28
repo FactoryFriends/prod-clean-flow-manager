@@ -28,7 +28,11 @@ export function DispatchHeader({ dispatchType, onDispatchTypeChange }: DispatchH
             <Button
               variant={dispatchType === "external" ? "default" : "outline"}
               onClick={() => onDispatchTypeChange("external")}
-              className="flex items-center gap-2"
+              className={`flex items-center gap-2 min-w-[180px] ${
+                dispatchType === "external" 
+                  ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg" 
+                  : "border-2 border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300"
+              }`}
             >
               <ArrowRight className="w-4 h-4" />
               External Dispatch
@@ -36,7 +40,11 @@ export function DispatchHeader({ dispatchType, onDispatchTypeChange }: DispatchH
             <Button
               variant={dispatchType === "internal" ? "default" : "outline"}
               onClick={() => onDispatchTypeChange("internal")}
-              className="flex items-center gap-2"
+              className={`flex items-center gap-2 min-w-[180px] ${
+                dispatchType === "internal" 
+                  ? "bg-green-600 hover:bg-green-700 text-white shadow-lg" 
+                  : "border-2 border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-300"
+              }`}
             >
               <Home className="w-4 h-4" />
               Internal Use
