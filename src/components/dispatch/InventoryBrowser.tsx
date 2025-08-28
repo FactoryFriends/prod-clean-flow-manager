@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, QrCode, Search, Package } from "lucide-react";
+import { Eye, EyeOff, QrCode, Search, Package, Home, Truck } from "lucide-react";
 import { format } from "date-fns";
 import { useProductionBatches } from "@/hooks/useProductionData";
 import { SelectedItem } from "@/types/dispatch";
@@ -259,15 +259,35 @@ export function InventoryBrowser({ currentLocation, selectedItems, onQuantityCha
               />
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
-              <ToggleGroup type="single" value={filter} onValueChange={(value) => value && setFilter(value as "self-produced" | "external")}>
-                <ToggleGroupItem value="self-produced" className="text-xs">
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex rounded-lg border border-border bg-muted p-1">
+                <Button
+                  variant={filter === "self-produced" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setFilter("self-produced")}
+                  className={`flex items-center gap-2 px-4 py-2 font-medium transition-all ${
+                    filter === "self-produced" 
+                      ? "bg-primary text-primary-foreground shadow-sm" 
+                      : "text-muted-foreground hover:text-foreground hover:bg-background"
+                  }`}
+                >
+                  <Home className="w-4 h-4" />
                   In-House
-                </ToggleGroupItem>
-                <ToggleGroupItem value="external" className="text-xs">
+                </Button>
+                <Button
+                  variant={filter === "external" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setFilter("external")}
+                  className={`flex items-center gap-2 px-4 py-2 font-medium transition-all ${
+                    filter === "external" 
+                      ? "bg-primary text-primary-foreground shadow-sm" 
+                      : "text-muted-foreground hover:text-foreground hover:bg-background"
+                  }`}
+                >
+                  <Truck className="w-4 h-4" />
                   External
-                </ToggleGroupItem>
-              </ToggleGroup>
+                </Button>
+              </div>
 
               {filter === "self-produced" && (
                 <Button
