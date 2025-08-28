@@ -286,9 +286,9 @@ export function InventoryBrowser({ currentLocation, selectedItems, onQuantityCha
           </div>
 
           {/* Inventory List */}
-          <div className="flex-1 min-h-0">
+          <div className="flex-1 min-h-0 overflow-hidden">
             <ScrollArea className="h-full">
-              <div className="space-y-3 pr-3">
+              <div className="space-y-3 pr-3 pb-4">
                 {itemsToShow.length > 0 ? (
                   itemsToShow.map(renderInventoryItem)
                 ) : (
