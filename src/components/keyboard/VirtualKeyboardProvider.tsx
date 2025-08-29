@@ -45,9 +45,11 @@ export function VirtualKeyboardProvider({ children }: VirtualKeyboardProviderPro
     setInputValue(newValue);
     if (activeInputRef.current) {
       activeInputRef.current.value = newValue;
-      // Trigger change event
-      const event = new Event('input', { bubbles: true });
-      activeInputRef.current.dispatchEvent(event);
+      // Trigger both input and change events for React controlled components
+      const inputEvent = new Event('input', { bubbles: true });
+      const changeEvent = new Event('change', { bubbles: true });
+      activeInputRef.current.dispatchEvent(inputEvent);
+      activeInputRef.current.dispatchEvent(changeEvent);
     }
   };
 
