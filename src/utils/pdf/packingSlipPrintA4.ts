@@ -227,14 +227,14 @@ export const printPackingSlipA4 = (data: PDFData) => {
         <div class="signature-box">
           <h4>Prepared by:</h4>
           <p><strong>${data.preparedBy || 'Not specified'}</strong></p>
-          <p>Electronisch ondertekend door ${data.preparedBy || 'Not specified'}</p>
+          <p>Electronically signed by ${data.preparedBy || 'Not specified'}</p>
           <p>Date: ${data.currentDate}</p>
           <p>Time: ${new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</p>
         </div>
         <div class="signature-box">
           <h4>Picked up by:</h4>
           <p><strong>${data.pickedUpBy || 'Not specified'}</strong></p>
-          <p>Electronisch ondertekend door ${data.pickedUpBy || 'Not specified'}</p>
+          <p>Electronically signed by ${data.pickedUpBy || 'Not specified'}</p>
           <p>Date: ${data.currentDate}</p>
           <p>Time: ${new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</p>
         </div>

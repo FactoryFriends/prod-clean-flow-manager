@@ -181,14 +181,14 @@ export function PackingSlipDetailsModal({ packingSlip, isOpen, onClose }: Packin
             <div className="border border-gray-300 p-3 bg-gray-50">
               <h4 className="text-sm font-bold mb-2">Prepared by:</h4>
               <p><strong>{packingSlip.prepared_by || 'Not specified'}</strong></p>
-              <p>Electronisch ondertekend door {packingSlip.prepared_by || 'Not specified'}</p>
+              <p>Electronically signed by {packingSlip.prepared_by || 'Not specified'}</p>
               <p>Date: {packingSlip.pickup_date || packingSlip.created_at.split('T')[0]}</p>
               <p>Time: {new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</p>
             </div>
             <div className="border border-gray-300 p-3 bg-gray-50">
               <h4 className="text-sm font-bold mb-2">Picked up by:</h4>
               <p><strong>{packingSlip.picked_up_by || 'Not specified'}</strong></p>
-              <p>Electronisch ondertekend door {packingSlip.picked_up_by || 'Not specified'}</p>
+              <p>Electronically signed by {packingSlip.picked_up_by || 'Not specified'}</p>
               <p>Date: {packingSlip.pickup_date || packingSlip.created_at.split('T')[0]}</p>
               <p>Time: {new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</p>
             </div>
