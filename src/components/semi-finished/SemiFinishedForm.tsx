@@ -31,6 +31,11 @@ export function SemiFinishedForm() {
       shelf_life_days: null,
       labour_time_minutes: null,
       active: true,
+      variable_packaging: false,
+      cost: 0,
+      markup_percent: 0,
+      sales_price: 0,
+      minimal_margin_threshold_percent: 25,
     },
   });
 

@@ -9,6 +9,7 @@ interface LabelTemplateProps {
   labelNumber?: number;
   totalLabels?: number;
   productType?: string;
+  itemsPerPackage?: number;
 }
 
 export const LabelTemplate = ({ 
@@ -19,7 +20,8 @@ export const LabelTemplate = ({
   expiryDate,
   labelNumber = 1,
   totalLabels = 1,
-  productType
+  productType,
+  itemsPerPackage
 }: LabelTemplateProps) => {
   const qrCodeData = productType === "zelfgemaakt" 
     ? `BATCH:${batchNumber}|PROD:${productionDate}|EXP:${expiryDate}`
@@ -63,6 +65,11 @@ export const LabelTemplate = ({
         {productType === "zelfgemaakt" && (
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
             <span><strong>Exp:</strong> {format(new Date(expiryDate), 'dd/MM/yyyy')}</span>
+          </div>
+        )}
+        {itemsPerPackage && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+            <span><strong>Qty:</strong> {itemsPerPackage} items/package</span>
           </div>
         )}
       </div>

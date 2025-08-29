@@ -213,7 +213,14 @@ export function Production({ currentLocation }: ProductionProps) {
                         {batch.batch_number}
                       </TableCell>
                       <TableCell>{batch.chefs.name}</TableCell>
-                      <TableCell>{batch.packages_produced}</TableCell>
+                      <TableCell>
+                        {batch.packages_produced}
+                        {batch.items_per_package && (
+                          <div className="text-xs text-muted-foreground">
+                            {batch.items_per_package} items/pkg
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell>{format(new Date(batch.production_date), "MMM dd, yyyy")}</TableCell>
                       <TableCell className={`${
                         isExpired ? 'text-red-600 font-bold' : 

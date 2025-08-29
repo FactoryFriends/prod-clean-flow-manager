@@ -47,6 +47,7 @@ export interface ProductionBatch {
   expiry_date: string;
   production_notes?: string;
   location: "tothai" | "khin";
+  items_per_package?: number;
   created_at: string;
   products: Product;
   chefs: Chef;

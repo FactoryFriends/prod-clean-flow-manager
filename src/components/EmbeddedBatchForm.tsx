@@ -17,6 +17,7 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
   const [selectedProductId, setSelectedProductId] = useState("");
   const [selectedChefId, setSelectedChefId] = useState("");
   const [packagesProduced, setPackagesProduced] = useState("");
+  const [itemsPerPackage, setItemsPerPackage] = useState("");
   const [calculatedExpiryDate, setCalculatedExpiryDate] = useState("");
   const [notes, setNotes] = useState("");
 
@@ -49,18 +50,26 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
       return;
     }
 
-    createBatch.mutate({
+    const batchData: any = {
       product_id: selectedProductId,
       chef_id: selectedChefId,
       packages_produced: parseInt(packagesProduced),
       expiry_date: calculatedExpiryDate,
       production_notes: notes || undefined,
       location: currentLocation,
-    }, {
+    };
+
+    // Add items_per_package if variable packaging is enabled and value is provided
+    if (selectedProduct?.variable_packaging && itemsPerPackage) {
+      batchData.items_per_package = parseInt(itemsPerPackage);
+    }
+
+    createBatch.mutate(batchData, {
       onSuccess: (newBatch) => {
         setSelectedProductId("");
         setSelectedChefId("");
         setPackagesProduced("");
+        setItemsPerPackage("");
         setNotes("");
         
         // Call the callback to open label printing
@@ -71,7 +80,8 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
     });
   };
 
-  const canSubmit = selectedProductId && selectedChefId && packagesProduced && !createBatch.isPending;
+  const canSubmit = selectedProductId && selectedChefId && packagesProduced && 
+    (!selectedProduct?.variable_packaging || itemsPerPackage) && !createBatch.isPending;
 
   return (
     <Card className="bg-blue-50 border-2 border-blue-200 shadow-md">
@@ -147,6 +157,24 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
               </>
             )}
           </div>
+
+          {/* Variable packaging input - only show if variable_packaging is enabled */}
+          {selectedProduct?.variable_packaging && (
+            <div className="space-y-2">
+              <Label htmlFor="itemsPerPackage">Items per Package</Label>
+              <Input
+                id="itemsPerPackage"
+                type="number"
+                value={itemsPerPackage}
+                onChange={(e) => setItemsPerPackage(e.target.value)}
+                placeholder="e.g. 30"
+                className="bg-white"
+              />
+              <p className="text-xs text-blue-600">
+                Specify the exact number of items in each package for this batch
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="expiry">Expiry Date (Auto-calculated)</Label>

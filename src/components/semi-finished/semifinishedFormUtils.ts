@@ -11,6 +11,7 @@ export type SemiFinishedFormData = {
   shelf_life_days: number | null;
   labour_time_minutes: number | null;
   active: boolean;
+  variable_packaging: boolean;
   // ADD THE NEW FIELDS BELOW
   cost: number;
   markup_percent: number;

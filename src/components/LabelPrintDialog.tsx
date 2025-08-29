@@ -144,6 +144,12 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
               EXPIRY: ${format(new Date(batch.expiry_date), 'dd/MM/yyyy')} (${format(new Date(batch.expiry_date), 'EEEE')})
             </div>
             ` : ''}
+            
+            ${batch.items_per_package ? `
+            <div style="font-size: 10px; font-weight: bold; text-align: center; margin-top: 2px; background-color: #f0f0f0; padding: 2px;">
+              QTY: ${batch.items_per_package} items per package
+            </div>
+            ` : ''}
           </div>
 
           <div style="text-align: center; font-size: 8px; margin-top: 6px; padding-top: 6px; border-top: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center;">
@@ -370,6 +376,12 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
                 {batch.products.product_type === "zelfgemaakt" && (
                   <div style={{ fontSize: '12px', fontWeight: 'bold', border: '2px solid #000', padding: '4px', textAlign: 'center', marginTop: '4px' }}>
                     EXPIRY: {format(new Date(batch.expiry_date), 'dd/MM/yyyy')} ({format(new Date(batch.expiry_date), 'EEEE')})
+                  </div>
+                )}
+                
+                {batch.items_per_package && (
+                  <div style={{ fontSize: '10px', fontWeight: 'bold', textAlign: 'center', marginTop: '2px', backgroundColor: '#f0f0f0', padding: '2px' }}>
+                    QTY: {batch.items_per_package} items per package
                   </div>
                 )}
               </div>

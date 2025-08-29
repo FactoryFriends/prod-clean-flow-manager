@@ -492,6 +492,7 @@ export type Database = {
           created_at: string
           expiry_date: string
           id: string
+          items_per_package: number | null
           location: Database["public"]["Enums"]["location_type"]
           packages_produced: number
           product_id: string
@@ -505,6 +506,7 @@ export type Database = {
           created_at?: string
           expiry_date: string
           id?: string
+          items_per_package?: number | null
           location: Database["public"]["Enums"]["location_type"]
           packages_produced: number
           product_id: string
@@ -518,6 +520,7 @@ export type Database = {
           created_at?: string
           expiry_date?: string
           id?: string
+          items_per_package?: number | null
           location?: Database["public"]["Enums"]["location_type"]
           packages_produced?: number
           product_id?: string
@@ -570,6 +573,7 @@ export type Database = {
           unit_type: string
           units_per_package: number | null
           updated_at: string
+          variable_packaging: boolean
         }
         Insert: {
           active?: boolean
@@ -598,6 +602,7 @@ export type Database = {
           unit_type: string
           units_per_package?: number | null
           updated_at?: string
+          variable_packaging?: boolean
         }
         Update: {
           active?: boolean
@@ -626,6 +631,7 @@ export type Database = {
           unit_type?: string
           units_per_package?: number | null
           updated_at?: string
+          variable_packaging?: boolean
         }
         Relationships: [
           {
