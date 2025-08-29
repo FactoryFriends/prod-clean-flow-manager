@@ -34,6 +34,7 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
     units_per_package: editingProduct?.units_per_package ?? null,
     inner_unit_type: editingProduct?.inner_unit_type || "",
     price_per_package: editingProduct?.price_per_package ?? null,
+    variable_packaging: editingProduct?.variable_packaging ?? false,
   });
 
   useEffect(() => {
@@ -123,6 +124,7 @@ export function ProductForm({ editingProduct, onSuccess, onCancel }: ProductForm
       units_per_package: formData.units_per_package,
       inner_unit_type: formData.inner_unit_type,
       price_per_package: formData.price_per_package,
+      variable_packaging: formData.variable_packaging,
     };
 
     if (
