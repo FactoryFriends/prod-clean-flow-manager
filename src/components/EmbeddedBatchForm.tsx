@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Input } from "./ui/input";
+import { InputWithKeyboard } from "./ui/input-with-keyboard";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
@@ -169,7 +170,7 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
                 <Label htmlFor="itemsPerPackage" className="text-sm font-medium">
                   Items/{getPackagingType(selectedProduct)?.slice(0, -1) || 'Package'}
                 </Label>
-                <Input
+                <InputWithKeyboard
                   id="itemsPerPackage"
                   type="number"
                   value={itemsPerPackage}
