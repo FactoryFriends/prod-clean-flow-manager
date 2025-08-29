@@ -44,7 +44,7 @@ export function InventoryItemCard({
 
   const handleAdd = () => {
     onAddToPackingList(item.id, pendingQuantity);
-    setPendingQuantity(1); // Reset to 1 after adding
+    setPendingQuantity(1);
   };
 
   const maxAvailable = (item.availableQuantity || 999) - alreadySelectedQuantity;
@@ -52,88 +52,82 @@ export function InventoryItemCard({
 
   return (
     <div 
-      className={`border border-border rounded-lg p-4 transition-all hover:shadow-sm ${
+      className={`flex items-center gap-3 px-3 py-2 border-b border-border/50 transition-all hover:bg-accent/5 ${
         expired ? 'opacity-60' : ''
-      } ${alreadySelectedQuantity > 0 ? 'bg-accent/10 border-accent' : 'bg-card'}`}
+      } ${alreadySelectedQuantity > 0 ? 'bg-accent/10 border-l-2 border-l-accent' : ''}`}
     >
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex-1">
-          <div 
-            className={item.type === 'batch' && onBatchClick ? "cursor-pointer" : ""}
-            onClick={item.type === 'batch' && onBatchClick ? () => onBatchClick(item) : undefined}
-          >
-            <h3 className="font-medium text-card-foreground mb-1">{item.name}</h3>
-            {item.type === 'batch' ? (
-              <div className="text-sm text-muted-foreground space-y-1">
-                <p>Batch: {item.batchNumber} • Available: {item.availableQuantity}</p>
-                <p>Source: {item.chef?.name} • {item.productionDate ? format(new Date(item.productionDate), "yyyy-MM-dd") : 'N/A'}</p>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">External supplier</p>
-            )}
-          </div>
-          
-          <div className="flex gap-2 mt-2">
-            {item.type === 'batch' ? (
-              <Badge variant="secondary" className="text-xs">
-                In-House
-              </Badge>
-            ) : (
-              <Badge variant="outline" className="text-xs">
-                External
-              </Badge>
-            )}
-            {alreadySelectedQuantity > 0 && (
-              <Badge variant="default" className="text-xs">
-                In List: {alreadySelectedQuantity}
-              </Badge>
-            )}
-          </div>
-        </div>
-
-        <div className="text-right">
-          <div className="text-lg font-semibold text-primary">
-            {item.availableQuantity || 0}
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {item.type === 'batch' ? (item.unitType === 'bags' ? 'bags' : 'containers') : 'units'} available
-          </div>
+      {/* Badge and Batch Info */}
+      <div className="flex items-center gap-2 min-w-0 flex-1">
+        {item.type === 'batch' ? (
+          <Badge variant="secondary" className="text-xs shrink-0 bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
+            In-House
+          </Badge>
+        ) : (
+          <Badge variant="outline" className="text-xs shrink-0 bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400">
+            External
+          </Badge>
+        )}
+        
+        <div 
+          className={`flex items-center gap-2 min-w-0 flex-1 ${
+            item.type === 'batch' && onBatchClick ? "cursor-pointer hover:text-primary" : ""
+          }`}
+          onClick={item.type === 'batch' && onBatchClick ? () => onBatchClick(item) : undefined}
+        >
+          {item.type === 'batch' && item.batchNumber && (
+            <span className="font-semibold text-sm text-foreground shrink-0">
+              #{item.batchNumber}
+            </span>
+          )}
+          <span className="text-sm text-foreground truncate" title={item.name}>
+            {item.name}
+          </span>
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-8 h-8 p-0"
-            onClick={() => handleQuantityChange(-1)}
-            disabled={pendingQuantity <= 1 || expired}
-          >
-            -
-          </Button>
-          
-          <span className="w-8 text-center font-medium">{pendingQuantity}</span>
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-8 h-8 p-0"
-            onClick={() => handleQuantityChange(1)}
-            disabled={!canAdd || pendingQuantity >= maxAvailable}
-          >
-            +
-          </Button>
+      {/* Availability */}
+      <div className="text-right shrink-0">
+        <div className="text-sm font-medium text-foreground">
+          {item.availableQuantity || 0} available
         </div>
+        {alreadySelectedQuantity > 0 && (
+          <div className="text-xs text-accent">
+            {alreadySelectedQuantity} in list
+          </div>
+        )}
+      </div>
+
+      {/* Quantity Controls */}
+      <div className="flex items-center gap-1 shrink-0">
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-7 h-7 p-0 text-xs"
+          onClick={() => handleQuantityChange(-1)}
+          disabled={pendingQuantity <= 1 || expired}
+        >
+          -
+        </Button>
+        
+        <span className="w-6 text-center text-xs font-medium">{pendingQuantity}</span>
+
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-7 h-7 p-0 text-xs"
+          onClick={() => handleQuantityChange(1)}
+          disabled={!canAdd || pendingQuantity >= maxAvailable}
+        >
+          +
+        </Button>
 
         <Button 
           size="sm"
           onClick={handleAdd}
           disabled={!canAdd}
-          className="bg-primary hover:bg-primary/90"
+          className="ml-2 h-7 px-3 text-xs"
         >
-          <Package className="w-4 h-4 mr-1" />
-          Add ({pendingQuantity})
+          Add
         </Button>
       </div>
     </div>
