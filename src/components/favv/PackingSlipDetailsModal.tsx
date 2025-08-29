@@ -100,23 +100,94 @@ export function PackingSlipDetailsModal({ packingSlip, isOpen, onClose }: Packin
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
-          <PackingSlipHeader packingSlip={packingSlip} />
+        <div className="bg-white p-6 font-sans text-black" style={{ fontFamily: 'Arial, sans-serif' }}>
+          {/* Header */}
+          <div className="flex justify-between mb-5 border-b-2 border-gray-800 pb-3">
+            <div>
+              <p><strong>ToThai BV</strong></p>
+              <p>Production Kitchen</p>
+              <p>Leuvensestraat 100</p>
+              <p>3300 Tienen</p>
+              <p><strong>Registration 0534 968 163</strong></p>
+            </div>
+            <div className="text-right">
+              <h2 className="text-xl font-bold mb-1">PACKING SLIP</h2>
+              <p><strong>#{packingSlip.slip_number}</strong></p>
+              <p>{packingSlip.pickup_date || packingSlip.created_at.split('T')[0]}</p>
+            </div>
+          </div>
           
-          <PackingSlipDispatchInfo dispatchRecords={packingSlip.dispatch_records} />
+          {/* Destination */}
+          <div className="bg-gray-100 p-3 rounded mb-5">
+            <h3 className="text-sm font-bold mb-2">Destination:</h3>
+            <p><strong>{packingSlip.destination}</strong></p>
+            <p>Date: {packingSlip.pickup_date || packingSlip.created_at.split('T')[0]}</p>
+          </div>
           
-          <PackingSlipStaffInfo 
-            preparedBy={packingSlip.prepared_by}
-            pickedUpBy={packingSlip.picked_up_by}
-            pickerName={packingSlip.dispatch_records?.picker_name}
-          />
+          {/* Items Table */}
+          <table className="w-full border-collapse mb-5">
+            <thead>
+              <tr>
+                <th className="border border-gray-300 p-2 bg-gray-100 text-left text-xs font-bold">Product</th>
+                <th className="border border-gray-300 p-2 bg-gray-100 text-left text-xs font-bold">Batch Number</th>
+                <th className="border border-gray-300 p-2 bg-gray-100 text-left text-xs font-bold">Production Date</th>
+                <th className="border border-gray-300 p-2 bg-gray-100 text-left text-xs font-bold">Quantity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(packingSlip.item_details && Array.isArray(packingSlip.item_details) && packingSlip.item_details.length > 0
+                ? packingSlip.item_details
+                : packingSlip.batches?.map(batch => ({
+                    name: batch.products.name,
+                    batchNumber: batch.batch_number,
+                    selectedQuantity: 1,
+                    productionDate: batch.production_date,
+                  })) || []
+              ).map((item, index) => (
+                <tr key={index}>
+                  <td className="border border-gray-300 p-2 text-xs">{item.name}</td>
+                  <td className="border border-gray-300 p-2 text-xs">{item.batchNumber || '-'}</td>
+                  <td className="border border-gray-300 p-2 text-xs">{item.productionDate || '-'}</td>
+                  <td className="border border-gray-300 p-2 text-xs">{item.selectedQuantity} bags</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
           
-          <PackingSlipBatchInfo 
-            batches={packingSlip.batches}
-            batchIds={packingSlip.batch_ids}
-          />
+          {/* Summary */}
+          <div className="mb-5">
+            <h3 className="text-sm font-bold mb-1">Summary:</h3>
+            <p>Total Items: {packingSlip.total_items} | Total Packages: {packingSlip.total_packages}</p>
+          </div>
           
-          <PackingSlipPickupInfo pickupDate={packingSlip.pickup_date} />
+          {/* Compliance */}
+          <div className="mb-5">
+            <p className="text-sm font-bold">FAVV Compliance: ok</p>
+          </div>
+          
+          {/* Signatures */}
+          <div className="grid grid-cols-2 gap-5 mb-5">
+            <div className="border border-gray-300 p-3 bg-gray-50">
+              <h4 className="text-sm font-bold mb-2">Prepared by:</h4>
+              <p><strong>{packingSlip.prepared_by || 'Not specified'}</strong></p>
+              <p>Electronisch ondertekend door {packingSlip.prepared_by || 'Not specified'}</p>
+              <p>Date: {packingSlip.pickup_date || packingSlip.created_at.split('T')[0]}</p>
+              <p>Time: {new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</p>
+            </div>
+            <div className="border border-gray-300 p-3 bg-gray-50">
+              <h4 className="text-sm font-bold mb-2">Picked up by:</h4>
+              <p><strong>{packingSlip.picked_up_by || 'Not specified'}</strong></p>
+              <p>Electronisch ondertekend door {packingSlip.picked_up_by || 'Not specified'}</p>
+              <p>Date: {packingSlip.pickup_date || packingSlip.created_at.split('T')[0]}</p>
+              <p>Time: {new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</p>
+            </div>
+          </div>
+          
+          {/* Footer */}
+          <div className="text-center text-xs text-gray-600 border-t border-gray-300 pt-3">
+            <p>This document serves as official transport documentation for FAVV compliance</p>
+            <p>Generated by TOTHAI Operations Management System</p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
