@@ -150,16 +150,19 @@ const Index = () => {
                       className="w-full h-full object-contain"
                     />
                   </div>
-                  <SidebarTrigger />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleSectionChange("dashboard")}
-                    className={`flex items-center gap-2 ${activeTab === "dashboard" ? "bg-accent" : ""}`}
-                  >
-                    <LayoutDashboard className="w-4 h-4" />
-                    <span className="hidden sm:inline">Dashboard</span>
-                  </Button>
+                  {/* Sidebar trigger and Dashboard button stacked vertically */}
+                  <div className="flex flex-col items-center gap-0.5">
+                    <SidebarTrigger className="h-5 w-5" />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleSectionChange("dashboard")}
+                      className={`flex items-center gap-2 h-6 px-2 ${activeTab === "dashboard" ? "bg-accent" : ""}`}
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      <span className="hidden sm:inline text-xs">Dashboard</span>
+                    </Button>
+                  </div>
                 </div>
                 <LocationHeader 
                   currentLocation={currentLocation}
