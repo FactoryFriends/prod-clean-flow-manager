@@ -2,6 +2,7 @@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { generatePackingSlipPDF } from "@/utils/pdf/packingSlipPdfGenerator";
+import { printPackingSlipA4 } from "@/utils/pdf/packingSlipPrintA4";
 import { format } from "date-fns";
 import { SelectedItem } from "@/types/dispatch";
 
@@ -85,9 +86,25 @@ Prepared by: ${preparedBy}
 
       if (createError) throw createError;
 
+      // Ask user if they want to print the packing slip
+      const shouldPrint = window.confirm("Packing slip confirmed successfully! Would you like to print it now?");
+      
+      if (shouldPrint) {
+        printPackingSlipA4({
+          packingSlipNumber,
+          currentDate,
+          destinationCustomer,
+          selectedItems,
+          totalItems,
+          totalPackages,
+          preparedBy,
+          pickedUpBy,
+        });
+      }
+
       toast({
         title: "Packing Slip Confirmed",
-        description: "Packing slip has been created and marked as shipped. It will appear in FAVV reports.",
+        description: `Packing slip has been created and marked as shipped.${shouldPrint ? ' Print dialog opened.' : ''} It will appear in FAVV reports.`,
       });
 
       return true;
