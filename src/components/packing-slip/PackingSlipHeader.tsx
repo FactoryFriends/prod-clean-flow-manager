@@ -14,10 +14,11 @@ export function PackingSlipHeader({ packingSlipNumber, currentDate }: PackingSli
           className="h-16 w-auto object-contain mb-4"
         />
         <div>
-          <p className="text-gray-600">Production Kitchen</p>
-          <p className="text-gray-600">Leuvensestraat 100</p>
-          <p className="text-gray-600">3300 Tienen</p>
-          <p className="text-gray-600 font-semibold">BE0534 968 163</p>
+          <p className="text-gray-800 font-semibold">ToThai BV</p>
+          <p className="text-gray-600 text-sm">Production Kitchen</p>
+          <p className="text-gray-600 text-sm">Leuvensestraat 100</p>
+          <p className="text-gray-600 text-sm">3300 Tienen</p>
+          <p className="text-gray-600 text-sm font-medium">Registration 0534 968 163</p>
         </div>
       </div>
       <div className="text-right">
