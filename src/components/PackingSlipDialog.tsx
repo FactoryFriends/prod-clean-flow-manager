@@ -15,7 +15,9 @@ interface PackingSlipDialogProps {
   pickedUpBy: string;
   dispatchNotes: string;
   currentLocation: "tothai" | "khin";
-  dispatchId?: string; // Add dispatch ID
+  dispatchId?: string;
+  packingSlipId?: string;
+  packingSlipNumber?: string;
 }
 
 export function PackingSlipDialog({
@@ -28,6 +30,8 @@ export function PackingSlipDialog({
   dispatchNotes,
   currentLocation,
   dispatchId,
+  packingSlipId,
+  packingSlipNumber: providedPackingSlipNumber,
 }: PackingSlipDialogProps) {
   const { data: customers = [] } = useCustomers(true);
 
@@ -45,7 +49,7 @@ export function PackingSlipDialog({
   const totalItems = selectedItems.length;
   const totalPackages = selectedItems.reduce((sum, item) => sum + item.selectedQuantity, 0);
 
-  const packingSlipNumber = generatePackingSlipNumber();
+  const packingSlipNumber = providedPackingSlipNumber || generatePackingSlipNumber();
   const currentDate = format(new Date(), "yyyy-MM-dd");
   const destinationCustomer = getDestination();
 
@@ -77,6 +81,7 @@ export function PackingSlipDialog({
           preparedBy={preparedBy}
           pickedUpBy={pickedUpBy}
           dispatchId={dispatchId}
+          packingSlipId={packingSlipId}
           onClose={() => onOpenChange(false)}
         />
       </DialogContent>

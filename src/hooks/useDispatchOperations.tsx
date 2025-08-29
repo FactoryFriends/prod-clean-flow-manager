@@ -14,6 +14,8 @@ interface UseDispatchOperationsProps {
   setPackingSlipOpen: (open: boolean) => void;
   setPackingSlipStaffNames: (names: { preparedBy: string; pickedUpBy: string }) => void;
   setPackingSlipItems: (items: SelectedItem[]) => void;
+  setPackingSlipId: (id: string | null) => void;
+  setPackingSlipNumber: (number: string) => void;
   onSuccess: () => void;
 }
 
@@ -28,6 +30,8 @@ export function useDispatchOperations({
   setPackingSlipOpen,
   setPackingSlipStaffNames,
   setPackingSlipItems,
+  setPackingSlipId,
+  setPackingSlipNumber,
   onSuccess
 }: UseDispatchOperationsProps) {
   const { handleCreatePackingSlip } = usePackingSlipOperations({
@@ -40,6 +44,8 @@ export function useDispatchOperations({
     setPackingSlipOpen,
     setPackingSlipStaffNames,
     setPackingSlipItems,
+    setPackingSlipId,
+    setPackingSlipNumber,
     onSuccess
   });
 

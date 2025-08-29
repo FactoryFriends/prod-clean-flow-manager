@@ -20,7 +20,8 @@ interface PackingSlipActionsProps {
   totalPackages: number;
   preparedBy: string;
   pickedUpBy: string;
-  dispatchId?: string; // Add dispatch ID
+  dispatchId?: string;
+  packingSlipId?: string;
   onClose: () => void;
 }
 
@@ -34,6 +35,7 @@ export function PackingSlipActions({
   preparedBy,
   pickedUpBy,
   dispatchId,
+  packingSlipId,
   onClose,
 }: PackingSlipActionsProps) {
   const [isConfirming, setIsConfirming] = useState(false);
@@ -48,6 +50,7 @@ export function PackingSlipActions({
     preparedBy,
     pickedUpBy,
     dispatchId,
+    packingSlipId,
   });
 
   const handleConfirm = async () => {

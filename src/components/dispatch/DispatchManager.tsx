@@ -27,6 +27,8 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
     pickedUpBy: string;
   }>({ preparedBy: "", pickedUpBy: "" });
   const [packingSlipItems, setPackingSlipItems] = useState<SelectedItem[]>([]);
+  const [packingSlipId, setPackingSlipId] = useState<string | null>(null);
+  const [packingSlipNumber, setPackingSlipNumber] = useState<string | null>(null);
 
   const { data: batches } = useProductionBatches(currentLocation);
   const { data: customers = [] } = useCustomers(true);
@@ -42,6 +44,8 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
     setPackingSlipOpen,
     setPackingSlipStaffNames,
     setPackingSlipItems,
+    setPackingSlipId,
+    setPackingSlipNumber,
     onSuccess: () => {
       setSelectedItems([]);
       setPickerName("");
@@ -155,6 +159,8 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
           dispatchNotes={dispatchNotes}
           currentLocation={currentLocation}
           dispatchId={currentDispatchId}
+          packingSlipId={packingSlipId}
+          packingSlipNumber={packingSlipNumber}
         />
       )}
     </div>

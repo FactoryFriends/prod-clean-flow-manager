@@ -23,7 +23,8 @@ interface UsePackingSlipActionsProps {
   totalPackages: number;
   preparedBy: string;
   pickedUpBy: string;
-  dispatchId?: string; // Add dispatch ID for confirmation
+  dispatchId?: string;
+  packingSlipId?: string;
 }
 
 export function usePackingSlipActions({
@@ -36,6 +37,7 @@ export function usePackingSlipActions({
   preparedBy,
   pickedUpBy,
   dispatchId,
+  packingSlipId,
 }: UsePackingSlipActionsProps) {
   const { toast } = useToast();
   const confirmDispatch = useConfirmDispatch();
@@ -73,29 +75,19 @@ Prepared by: ${preparedBy}
         await confirmDispatch.mutateAsync(dispatchId);
       }
 
-      const batchIds = selectedItems
-        .filter(item => item.type === 'batch')
-        .map(item => item.id);
+      // Update the existing packing slip status to 'shipped'
+      if (packingSlipId) {
+        const { error: updateError } = await supabase
+          .from("packing_slips")
+          .update({
+            status: "shipped" as const,
+            pickup_date: currentDate,
+            item_details: JSON.parse(JSON.stringify(selectedItems))
+          })
+          .eq("id", packingSlipId);
 
-      const { data: packingSlip, error: createError } = await supabase
-        .from("packing_slips")
-        .insert({
-          dispatch_id: dispatchId,
-          slip_number: packingSlipNumber,
-          destination: destinationCustomer ? destinationCustomer.name : "External Customer",
-          prepared_by: preparedBy,
-          picked_up_by: pickedUpBy,
-          batch_ids: batchIds,
-          total_items: totalItems,
-          total_packages: totalPackages,
-          pickup_date: currentDate,
-          status: "shipped" as const,
-          item_details: JSON.parse(JSON.stringify(selectedItems))
-        })
-        .select()
-        .single();
-
-      if (createError) throw createError;
+        if (updateError) throw updateError;
+      }
 
       // Ask user if they want to print the packing slip
       const shouldPrint = window.confirm("Packing slip confirmed successfully! Would you like to print it now?");

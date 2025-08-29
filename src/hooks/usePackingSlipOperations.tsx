@@ -17,6 +17,8 @@ interface UsePackingSlipOperationsProps {
   setPackingSlipOpen: (open: boolean) => void;
   setPackingSlipStaffNames: (names: { preparedBy: string; pickedUpBy: string }) => void;
   setPackingSlipItems: (items: SelectedItem[]) => void;
+  setPackingSlipId: (id: string | null) => void;
+  setPackingSlipNumber: (number: string) => void;
   onSuccess: () => void;
 }
 
@@ -30,6 +32,8 @@ export function usePackingSlipOperations({
   setPackingSlipOpen,
   setPackingSlipStaffNames,
   setPackingSlipItems,
+  setPackingSlipId,
+  setPackingSlipNumber,
   onSuccess
 }: UsePackingSlipOperationsProps) {
   const { data: customers = [] } = useCustomers(true);
@@ -74,7 +78,7 @@ export function usePackingSlipOperations({
 
       const slipNumber = generatePackingSlipNumber();
       
-      await createPackingSlip.mutateAsync({
+      const packingSlip = await createPackingSlip.mutateAsync({
         dispatchId: dispatchRecord.id,
         slipNumber,
         destination: getDestination(),
@@ -86,6 +90,8 @@ export function usePackingSlipOperations({
       });
 
       setCurrentDispatchId(dispatchRecord.id);
+      setPackingSlipId(packingSlip.id);
+      setPackingSlipNumber(slipNumber);
       setPackingSlipStaffNames(staffNames);
       setPackingSlipOpen(true);
 
