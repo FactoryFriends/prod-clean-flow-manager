@@ -263,15 +263,30 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="unit_size">
-                  {isZelfgemaakt 
-                    ? "Quantity per package *"
-                    : "Standard recipe quantity *"
-                  }
+                <Label htmlFor="unit_size" className="flex items-center justify-between">
+                  <span>
+                    {isZelfgemaakt 
+                      ? "Quantity per package *"
+                      : "Standard recipe quantity *"
+                    }
+                  </span>
+                  {isZelfgemaakt && (
+                    <div className="flex items-center gap-2">
+                      <Package className="w-4 h-4" />
+                      <Switch
+                        checked={!!formData.variable_packaging}
+                        onCheckedChange={(checked) => onFieldChange("variable_packaging", checked)}
+                      />
+                      <span className="text-xs text-muted-foreground">Variable</span>
+                    </div>
+                  )}
                 </Label>
                 <div className="text-sm text-green-700 mb-2">
                   {isZelfgemaakt 
-                    ? "How many units will be in each package?" 
+                    ? (formData.variable_packaging 
+                        ? "When variable packaging is enabled, users specify quantity per package when creating batches"
+                        : "How many units will be in each package?"
+                      )
                     : "How much do you typically use in recipes?"
                   }
                 </div>
@@ -280,10 +295,16 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
                   type="number"
                   step="0.1"
                   min="0"
-                  value={formData.unit_size}
-                  onChange={(e) => onFieldChange("unit_size", Number(e.target.value))}
-                  placeholder="e.g. 3"
-                  required
+                  value={formData.variable_packaging ? "" : formData.unit_size}
+                  onChange={(e) => {
+                    if (!formData.variable_packaging) {
+                      onFieldChange("unit_size", Number(e.target.value));
+                    }
+                  }}
+                  placeholder={formData.variable_packaging ? "Variable quantity per package" : "e.g. 3"}
+                  disabled={formData.variable_packaging}
+                  className={formData.variable_packaging ? "bg-muted cursor-not-allowed" : ""}
+                  required={!formData.variable_packaging}
                 />
               </div>
 
@@ -317,37 +338,18 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
               {isZelfgemaakt && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="packages_per_batch" className="flex items-center justify-between">
-                      <span>Packages per production batch</span>
-                      <div className="flex items-center gap-2">
-                        <Package className="w-4 h-4" />
-                        <Switch
-                          checked={!!formData.variable_packaging}
-                          onCheckedChange={(checked) => onFieldChange("variable_packaging", checked)}
-                        />
-                        <span className="text-xs text-muted-foreground">Variable</span>
-                      </div>
-                    </Label>
+                    <Label htmlFor="packages_per_batch">Packages per production batch</Label>
                     <div className="text-sm text-green-700 mb-2">
-                      {formData.variable_packaging 
-                        ? "When variable packaging is enabled, users specify quantity per package when creating batches"
-                        : "How many labels will need to be printed"
-                      }
+                      How many labels will need to be printed
                     </div>
                     <Input
                       id="packages_per_batch"
                       type="number"
                       min="1"
-                      value={formData.variable_packaging ? "" : formData.packages_per_batch}
-                      onChange={(e) => {
-                        if (!formData.variable_packaging) {
-                          onFieldChange("packages_per_batch", Number(e.target.value));
-                        }
-                      }}
-                      placeholder={formData.variable_packaging ? "Variable quantity per batch" : "How many packages from one batch?"}
-                      disabled={formData.variable_packaging}
-                      className={formData.variable_packaging ? "bg-muted cursor-not-allowed" : ""}
-                      required={!formData.variable_packaging}
+                      value={formData.packages_per_batch}
+                      onChange={(e) => onFieldChange("packages_per_batch", Number(e.target.value))}
+                      placeholder="How many packages from one batch?"
+                      required
                     />
                   </div>
 
