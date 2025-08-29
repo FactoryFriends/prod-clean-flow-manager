@@ -650,6 +650,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          extended_session: boolean
           full_name: string | null
           id: string
           role: Database["public"]["Enums"]["user_role"]
@@ -659,6 +660,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          extended_session?: boolean
           full_name?: string | null
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
@@ -668,6 +670,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          extended_session?: boolean
           full_name?: string | null
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
@@ -800,6 +803,7 @@ export type Database = {
         Returns: {
           created_at: string
           created_by: string
+          extended_session: boolean
           full_name: string
           id: string
           role: Database["public"]["Enums"]["user_role"]
@@ -813,6 +817,7 @@ export type Database = {
           created_at: string
           created_by: string
           email: string
+          extended_session: boolean
           full_name: string
           id: string
           role: Database["public"]["Enums"]["user_role"]
@@ -824,8 +829,22 @@ export type Database = {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      update_user_extended_session: {
+        Args: { p_extended_session: boolean; p_profile_id: string }
+        Returns: {
+          created_at: string
+          created_by: string
+          extended_session: boolean
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }[]
+      }
       update_user_profile: {
         Args: {
+          p_extended_session?: boolean
           p_full_name: string
           p_profile_id: string
           p_role: Database["public"]["Enums"]["user_role"]
@@ -833,6 +852,7 @@ export type Database = {
         Returns: {
           created_at: string
           created_by: string
+          extended_session: boolean
           full_name: string
           id: string
           role: Database["public"]["Enums"]["user_role"]

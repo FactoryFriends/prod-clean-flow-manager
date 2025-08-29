@@ -8,8 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Plus, MoreVertical, Shield, User, Trash2, Edit } from "lucide-react";
+import { Plus, MoreVertical, Shield, User, Trash2, Edit, Clock } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useUserProfiles, useCreateUser, useUpdateUserRole, useDeleteUser, useUpdateUser, CreateUserRequest, UpdateUserRequest } from "@/hooks/useUserManagement";
+import { useUpdateExtendedSession } from "@/hooks/useExtendedSessionMutation";
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import { toast } from "sonner";
 
@@ -21,7 +23,8 @@ export function UserManagement() {
     email: '',
     password: '',
     full_name: '',
-    role: 'production'
+    role: 'production',
+    extended_session: false
   });
 
   const { data: users = [], isLoading } = useUserProfiles();
@@ -29,6 +32,7 @@ export function UserManagement() {
   const updateUser = useUpdateUser();
   const updateUserRole = useUpdateUserRole();
   const deleteUser = useDeleteUser();
+  const updateExtendedSession = useUpdateExtendedSession();
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +45,7 @@ export function UserManagement() {
     try {
       await createUser.mutateAsync(newUser);
       setIsCreateDialogOpen(false);
-      setNewUser({ email: '', password: '', full_name: '', role: 'production' });
+      setNewUser({ email: '', password: '', full_name: '', role: 'production', extended_session: false });
     } catch (error) {
       // Error is handled by the mutation
     }
@@ -61,7 +65,8 @@ export function UserManagement() {
     setEditingUser({
       id: userProfile.id,
       full_name: userProfile.full_name || '',
-      role: userProfile.role
+      role: userProfile.role,
+      extended_session: userProfile.extended_session || false
     });
     setIsEditDialogOpen(true);
   };
@@ -78,13 +83,18 @@ export function UserManagement() {
       await updateUser.mutateAsync({
         profileId: editingUser.id,
         full_name: editingUser.full_name,
-        role: editingUser.role
+        role: editingUser.role,
+        extended_session: editingUser.extended_session
       });
       setIsEditDialogOpen(false);
       setEditingUser(null);
     } catch (error) {
       // Error is handled by the mutation
     }
+  };
+
+  const handleExtendedSessionToggle = async (profileId: string, extended_session: boolean) => {
+    await updateExtendedSession.mutateAsync({ profileId, extended_session });
   };
 
   const getRoleIcon = (role: string) => {
@@ -175,6 +185,16 @@ export function UserManagement() {
                         </SelectContent>
                       </Select>
                     </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="extended_session"
+                        checked={newUser.extended_session}
+                        onCheckedChange={(checked) => setNewUser({ ...newUser, extended_session: !!checked })}
+                      />
+                      <Label htmlFor="extended_session" className="text-sm font-normal">
+                        Enable 1-year sessions (recommended for production users on dedicated devices)
+                      </Label>
+                    </div>
                   </div>
                   <DialogFooter>
                     <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
@@ -207,6 +227,7 @@ export function UserManagement() {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead>Session Duration</TableHead>
                   <TableHead>Created</TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
@@ -222,6 +243,12 @@ export function UserManagement() {
                       <Badge variant={getRoleBadgeVariant(userProfile.role)} className="flex items-center gap-1 w-fit">
                         {getRoleIcon(userProfile.role)}
                         {userProfile.role === 'admin' ? 'Administrator' : 'Production User'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={userProfile.extended_session ? 'default' : 'secondary'} className="flex items-center gap-1 w-fit">
+                        <Clock className="h-3 w-3" />
+                        {userProfile.extended_session ? '1 Year' : '24 Hours'}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -246,6 +273,15 @@ export function UserManagement() {
                             )}
                           >
                             {userProfile.role === 'admin' ? 'Make Production User' : 'Make Administrator'}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleExtendedSessionToggle(
+                              userProfile.id, 
+                              !userProfile.extended_session
+                            )}
+                          >
+                            <Clock className="mr-2 h-4 w-4" />
+                            {userProfile.extended_session ? 'Disable 1-Year Sessions' : 'Enable 1-Year Sessions'}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleDeleteUser(userProfile.user_id)}
@@ -302,6 +338,18 @@ export function UserManagement() {
                     <SelectItem value="admin">Administrator</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="edit_extended_session"
+                  checked={editingUser?.extended_session || false}
+                  onCheckedChange={(checked) => 
+                    setEditingUser(prev => prev ? { ...prev, extended_session: !!checked } : null)
+                  }
+                />
+                <Label htmlFor="edit_extended_session" className="text-sm font-normal">
+                  Enable 1-year sessions (recommended for production users on dedicated devices)
+                </Label>
               </div>
             </div>
             <DialogFooter>

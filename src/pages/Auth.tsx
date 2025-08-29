@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { InputWithKeyboard } from "@/components/ui/input-with-keyboard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, LogIn, UserPlus, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,10 +15,9 @@ export default function Auth() {
   const { signIn, signUp, loading } = useAuth();
   const [activeTab, setActiveTab] = useState("login");
   
-  // Login form state
+  // Remove unused state that's no longer needed since we removed the manual checkbox
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [rememberDevice, setRememberDevice] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState("");
   
@@ -39,7 +37,7 @@ export default function Auth() {
     setLoginError("");
 
     try {
-      const { error } = await signIn(loginEmail, loginPassword, rememberDevice);
+      const { error } = await signIn(loginEmail, loginPassword);
       
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
@@ -104,11 +102,14 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Shield className="h-12 w-12 text-primary mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-foreground">Production Manager</h1>
-          <p className="text-muted-foreground">Sign in to access your dashboard</p>
-        </div>
+          <div className="text-center mb-8">
+            <Shield className="h-12 w-12 text-primary mx-auto mb-4" />
+            <h1 className="text-3xl font-bold text-foreground">Production Manager</h1>
+            <p className="text-muted-foreground">Sign in to access your dashboard</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Session duration is automatically configured based on your user settings
+            </p>
+          </div>
 
         <Card>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -164,17 +165,6 @@ export default function Auth() {
                       onChange={(e) => setLoginPassword(e.target.value)}
                       required
                     />
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="remember"
-                      checked={rememberDevice}
-                      onCheckedChange={(checked) => setRememberDevice(!!checked)}
-                    />
-                    <label htmlFor="remember" className="text-sm text-muted-foreground">
-                      Remember this device for 1 year
-                    </label>
                   </div>
                   
                   <Button type="submit" className="w-full" disabled={loginLoading}>

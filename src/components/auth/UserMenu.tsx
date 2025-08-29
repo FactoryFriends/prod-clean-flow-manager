@@ -10,10 +10,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCurrentUserProfile } from '@/hooks/useUserManagement';
+import { SessionInfoDisplay } from '@/components/settings/SessionInfoDisplay';
 import { toast } from "sonner";
 
 export function UserMenu() {
   const { user, profile, signOut } = useAuth();
+  const { data: userProfile } = useCurrentUserProfile();
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -54,6 +57,9 @@ export function UserMenu() {
             <p className="text-xs leading-none text-muted-foreground capitalize">
               {profile?.role || 'production'} user
             </p>
+            <div className="pt-2">
+              <SessionInfoDisplay />
+            </div>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

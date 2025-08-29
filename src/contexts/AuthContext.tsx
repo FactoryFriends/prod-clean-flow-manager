@@ -10,7 +10,7 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   signUp: (email: string, password: string, fullName?: string, role?: 'admin' | 'production') => Promise<{ error: any }>;
-  signIn: (email: string, password: string, rememberDevice?: boolean) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
 }
 
@@ -100,25 +100,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
-  const signIn = async (email: string, password: string, rememberDevice = false) => {
-    // Store device preference before signing in
-    sessionManager.setDevicePreference(rememberDevice);
-    
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    if (!error && rememberDevice) {
-      // Store session metadata for long-term sessions
-      sessionManager.setSessionMetadata({
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        loginTime: new Date().toISOString(),
-        longTerm: true
+        password,
       });
+
+      if (error) throw error;
+
+      // Get user profile to check extended_session setting
+      if (data.user) {
+        const { data: profileData } = await supabase
+          .rpc('get_current_user_profile' as any, { p_user_id: data.user.id });
+        
+        const profile = profileData && profileData.length > 0 ? profileData[0] : null;
+        
+        // Configure session duration based on user's extended_session setting
+        if (profile?.extended_session) {
+          sessionManager.setDevicePreference(true);
+          sessionManager.setSessionMetadata({
+            extended_session: true,
+            user_id: data.user.id,
+            expires_at: Date.now() + (365 * 24 * 60 * 60 * 1000) // 1 year
+          });
+        } else {
+          sessionManager.setDevicePreference(false);
+          sessionManager.setSessionMetadata({
+            extended_session: false,
+            user_id: data.user.id,
+            expires_at: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+          });
+        }
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      console.error('Sign in error:', error);
+      return { error };
     }
-    
-    return { error };
   };
 
   const signOut = async () => {

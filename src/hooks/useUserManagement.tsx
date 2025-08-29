@@ -10,6 +10,7 @@ export interface UserProfile {
   created_at: string;
   updated_at: string;
   created_by: string | null;
+  extended_session: boolean;
 }
 
 export interface CreateUserRequest {
@@ -17,12 +18,14 @@ export interface CreateUserRequest {
   password: string;
   full_name: string;
   role: 'admin' | 'production';
+  extended_session: boolean;
 }
 
 export interface UpdateUserRequest {
   id: string;
   full_name: string;
   role: 'admin' | 'production';
+  extended_session: boolean;
 }
 
 export const useUserProfiles = () => {
@@ -104,7 +107,8 @@ export const useCreateUser = () => {
         password: userData.password,
         user_metadata: {
           full_name: userData.full_name,
-          role: userData.role
+          role: userData.role,
+          extended_session: userData.extended_session
         }
       });
       
@@ -150,12 +154,13 @@ export const useUpdateUser = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ profileId, full_name, role }: { profileId: string; full_name: string; role: 'admin' | 'production' }) => {
+    mutationFn: async ({ profileId, full_name, role, extended_session }: { profileId: string; full_name: string; role: 'admin' | 'production'; extended_session: boolean }) => {
       const { data, error } = await supabase
         .rpc('update_user_profile' as any, { 
           p_profile_id: profileId,
           p_full_name: full_name,
-          p_role: role 
+          p_role: role,
+          p_extended_session: extended_session
         });
       
       if (error) throw error;
