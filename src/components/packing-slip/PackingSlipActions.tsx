@@ -57,7 +57,10 @@ export function PackingSlipActions({
   };
 
   return (
-    <div className="flex justify-between items-center mt-6">
+    <div className="flex justify-end items-center mt-6 gap-2">
+      <Button variant="outline" onClick={onClose}>
+        Close
+      </Button>
       <Button 
         onClick={handleConfirm}
         disabled={isConfirming}
@@ -66,12 +69,6 @@ export function PackingSlipActions({
       >
         {isConfirming ? "Confirming..." : "CONFIRM & SHIP"}
       </Button>
-      
-      <div className="flex gap-2">
-        <Button variant="outline" onClick={onClose}>
-          Close
-        </Button>
-      </div>
     </div>
   );
 }
