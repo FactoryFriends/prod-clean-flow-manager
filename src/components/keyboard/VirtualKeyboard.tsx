@@ -123,6 +123,15 @@ export function VirtualKeyboard() {
           >
             Clear
           </Button>
+          
+          <Button
+            variant="default"
+            size="sm"
+            onClick={hide}
+            className="min-w-[80px] bg-primary"
+          >
+            Done
+          </Button>
         </div>
       </Card>
     </div>
