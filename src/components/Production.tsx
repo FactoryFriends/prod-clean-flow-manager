@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EmbeddedBatchForm } from "./EmbeddedBatchForm";
 import { LabelPrintDialog } from "./LabelPrintDialog";
 import { EditBatchDialog } from "./EditBatchDialog";
 import { useProductionBatches, ProductionBatch } from "@/hooks/useProductionData";
+import { useIsAdmin } from "./auth/RoleGuard";
+import { supabase } from "@/integrations/supabase/client";
 import { Search, Filter, Printer, Edit, X } from "lucide-react";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
@@ -23,8 +25,34 @@ export function Production({ currentLocation }: ProductionProps) {
   const [labelDialogOpen, setLabelDialogOpen] = useState(false);
   const [editBatch, setEditBatch] = useState<ProductionBatch | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [batchStocks, setBatchStocks] = useState<Record<string, number>>({});
 
   const { data: batches, isLoading, error } = useProductionBatches(currentLocation);
+  const isAdmin = useIsAdmin();
+
+  // Fetch remaining stock for all batches if admin
+  useEffect(() => {
+    if (isAdmin && batches?.length) {
+      const fetchBatchStocks = async () => {
+        const stockPromises = batches.map(async (batch) => {
+          const { data } = await supabase.rpc('get_batch_remaining_stock', { 
+            batch_id_param: batch.id 
+          });
+          return { batchId: batch.id, stock: data || 0 };
+        });
+        
+        const results = await Promise.all(stockPromises);
+        const stockMap = results.reduce((acc, { batchId, stock }) => {
+          acc[batchId] = stock;
+          return acc;
+        }, {} as Record<string, number>);
+        
+        setBatchStocks(stockMap);
+      };
+      
+      fetchBatchStocks();
+    }
+  }, [isAdmin, batches]);
 
   const getLocationName = (location: string) => {
     return location === "tothai" ? "To Thai Restaurant" : "Khin Takeaway";
@@ -176,6 +204,7 @@ export function Production({ currentLocation }: ProductionProps) {
                   <TableHead>Batch Number</TableHead>
                   <TableHead>Chef</TableHead>
                   <TableHead>Packages</TableHead>
+                  {isAdmin && <TableHead>Remaining</TableHead>}
                   <TableHead>Production Date</TableHead>
                   <TableHead>Expiry Date</TableHead>
                   <TableHead>Status</TableHead>
@@ -221,6 +250,17 @@ export function Production({ currentLocation }: ProductionProps) {
                           </div>
                         )}
                       </TableCell>
+                      {isAdmin && (
+                        <TableCell className="font-medium">
+                          <div className={`${
+                            batchStocks[batch.id] > 0 
+                              ? 'text-green-700' 
+                              : 'text-red-600'
+                          }`}>
+                            {batchStocks[batch.id] !== undefined ? batchStocks[batch.id] : '...'}
+                          </div>
+                        </TableCell>
+                      )}
                       <TableCell>{format(new Date(batch.production_date), "MMM dd, yyyy")}</TableCell>
                       <TableCell className={`${
                         isExpired ? 'text-red-600 font-bold' : 
@@ -245,16 +285,29 @@ export function Production({ currentLocation }: ProductionProps) {
                             <Printer className="w-3 h-3" />
                             Print Labels
                           </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => handleEditBatch(batch)}
-                            className="flex items-center gap-1"
-                            disabled={isExpired}
-                          >
-                            <Edit className="w-3 h-3" />
-                            Edit Batch
-                          </Button>
+                          {isAdmin ? (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleEditBatch(batch)}
+                              className="flex items-center gap-1"
+                              disabled={isExpired}
+                            >
+                              <Edit className="w-3 h-3" />
+                              Edit Stock
+                            </Button>
+                          ) : (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleEditBatch(batch)}
+                              className="flex items-center gap-1"
+                              disabled={isExpired}
+                            >
+                              <Edit className="w-3 h-3" />
+                              Edit Batch
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

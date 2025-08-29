@@ -6,6 +6,9 @@ import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Button } from "./ui/button";
 import { useChefs, useUpdateProductionBatch, ProductionBatch } from "@/hooks/useProductionData";
+import { useStockAdjustment } from "@/hooks/useStockAdjustment";
+import { useIsAdmin } from "./auth/RoleGuard";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EditBatchDialogProps {
   open: boolean;
@@ -16,11 +19,16 @@ interface EditBatchDialogProps {
 export function EditBatchDialog({ open, onOpenChange, batch }: EditBatchDialogProps) {
   const [selectedChefId, setSelectedChefId] = useState("");
   const [packagesProduced, setPackagesProduced] = useState("");
+  const [remainingStock, setRemainingStock] = useState("");
+  const [adjustmentReason, setAdjustmentReason] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
   const [notes, setNotes] = useState("");
+  const [currentRemainingStock, setCurrentRemainingStock] = useState(0);
 
   const { data: chefs } = useChefs(batch?.location);
   const updateBatch = useUpdateProductionBatch();
+  const stockAdjustment = useStockAdjustment();
+  const isAdmin = useIsAdmin();
 
   // Initialize form when batch changes
   useEffect(() => {
@@ -29,30 +37,87 @@ export function EditBatchDialog({ open, onOpenChange, batch }: EditBatchDialogPr
       setPackagesProduced(batch.packages_produced.toString());
       setExpiryDate(batch.expiry_date);
       setNotes(batch.production_notes || "");
+      
+      // Calculate current remaining stock for admins
+      if (isAdmin) {
+        fetchCurrentRemainingStock();
+      }
     }
-  }, [batch]);
+  }, [batch, isAdmin]);
+
+  const fetchCurrentRemainingStock = async () => {
+    if (!batch) return;
+    
+    const { data, error } = await supabase.rpc('get_batch_remaining_stock', { 
+      batch_id_param: batch.id 
+    });
+    
+    if (!error && data !== null) {
+      setCurrentRemainingStock(data);
+      setRemainingStock(data.toString());
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!batch || !selectedChefId || !packagesProduced) {
+    if (!batch || !selectedChefId) {
       return;
     }
 
-    updateBatch.mutate({
-      id: batch.id,
-      chef_id: selectedChefId,
-      packages_produced: parseInt(packagesProduced),
-      expiry_date: expiryDate,
-      production_notes: notes || undefined,
-    }, {
-      onSuccess: () => {
-        onOpenChange(false);
+    // Handle admin stock adjustment
+    if (isAdmin && remainingStock && parseInt(remainingStock) !== currentRemainingStock) {
+      if (!adjustmentReason.trim()) {
+        return; // Reason is required for stock adjustments
       }
-    });
+      
+      stockAdjustment.mutate({
+        batchId: batch.id,
+        newRemainingStock: parseInt(remainingStock),
+        reason: adjustmentReason,
+        adjustedBy: "Current User", // This should be replaced with actual user name
+      }, {
+        onSuccess: () => {
+          // Also update other batch details if changed
+          if (expiryDate !== batch.expiry_date || notes !== (batch.production_notes || "")) {
+            updateBatch.mutate({
+              id: batch.id,
+              chef_id: selectedChefId,
+              packages_produced: batch.packages_produced, // Keep original
+              expiry_date: expiryDate,
+              production_notes: notes || undefined,
+            }, {
+              onSuccess: () => onOpenChange(false),
+            });
+          } else {
+            onOpenChange(false);
+          }
+        },
+      });
+    } else {
+      // Regular batch update for non-admins or no stock change
+      const packagesToUpdate = isAdmin ? batch.packages_produced : parseInt(packagesProduced);
+      if (!isAdmin && !packagesProduced) return;
+      
+      updateBatch.mutate({
+        id: batch.id,
+        chef_id: selectedChefId,
+        packages_produced: packagesToUpdate,
+        expiry_date: expiryDate,
+        production_notes: notes || undefined,
+      }, {
+        onSuccess: () => {
+          onOpenChange(false);
+        }
+      });
+    }
   };
 
-  const canSubmit = selectedChefId && packagesProduced && !updateBatch.isPending;
+  const canSubmit = selectedChefId && 
+    (isAdmin ? true : packagesProduced) && 
+    !updateBatch.isPending && 
+    !stockAdjustment.isPending &&
+    (isAdmin && remainingStock && parseInt(remainingStock) !== currentRemainingStock ? adjustmentReason.trim() : true);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -95,23 +160,54 @@ export function EditBatchDialog({ open, onOpenChange, batch }: EditBatchDialogPr
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="packages">
-                Number of Packages{batch.products.unit_type === "PIECE" ? "/Bags" : ""} Produced
-              </Label>
-              <Select value={packagesProduced} onValueChange={setPackagesProduced}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select number of packages" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 50 }, (_, i) => i + 1).map((num) => (
-                    <SelectItem key={num} value={num.toString()}>
-                      {num} {batch.products.unit_type === "PIECE" ? `bag${num > 1 ? 's' : ''}` : `package${num > 1 ? 's' : ''}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {isAdmin ? (
+              <div className="space-y-2">
+                <Label htmlFor="remainingStock">
+                  Remaining Stock Quantity
+                </Label>
+                <div className="space-y-2">
+                  <div className="text-sm text-muted-foreground">
+                    Original Production: {batch.packages_produced} packages
+                  </div>
+                  <Input
+                    id="remainingStock"
+                    type="number"
+                    min="0"
+                    value={remainingStock}
+                    onChange={(e) => setRemainingStock(e.target.value)}
+                    placeholder="Enter current stock quantity"
+                  />
+                  {remainingStock && parseInt(remainingStock) !== currentRemainingStock && (
+                    <div className="space-y-2">
+                      <Label htmlFor="adjustmentReason">
+                        Reason for Stock Adjustment (Required)
+                      </Label>
+                      <Input
+                        id="adjustmentReason"
+                        value={adjustmentReason}
+                        onChange={(e) => setAdjustmentReason(e.target.value)}
+                        placeholder="Enter reason for adjustment..."
+                        required
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="packages">
+                  Number of Packages{batch.products.unit_type === "PIECE" ? "/Bags" : ""} Produced
+                </Label>
+                <Input
+                  id="packages"
+                  type="number"
+                  min="1"
+                  value={packagesProduced}
+                  onChange={(e) => setPackagesProduced(e.target.value)}
+                  placeholder="Enter number of packages"
+                />
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="expiry">Expiry Date</Label>
@@ -146,7 +242,7 @@ export function EditBatchDialog({ open, onOpenChange, batch }: EditBatchDialogPr
                 type="submit" 
                 disabled={!canSubmit}
               >
-                {updateBatch.isPending ? "Updating..." : "Update Batch"}
+                {(updateBatch.isPending || stockAdjustment.isPending) ? "Updating..." : "Update Batch"}
               </Button>
             </div>
           </form>
