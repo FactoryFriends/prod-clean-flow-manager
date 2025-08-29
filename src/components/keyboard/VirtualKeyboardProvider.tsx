@@ -44,12 +44,24 @@ export function VirtualKeyboardProvider({ children }: VirtualKeyboardProviderPro
   const updateInput = (newValue: string) => {
     setInputValue(newValue);
     if (activeInputRef.current) {
-      activeInputRef.current.value = newValue;
-      // Trigger both input and change events for React controlled components
+      const element = activeInputRef.current;
+      
+      // Set the value
+      element.value = newValue;
+      
+      // Create a proper React synthetic event
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype,
+        'value'
+      )?.set;
+      
+      if (nativeInputValueSetter) {
+        nativeInputValueSetter.call(element, newValue);
+      }
+      
+      // Dispatch input event that React can process
       const inputEvent = new Event('input', { bubbles: true });
-      const changeEvent = new Event('change', { bubbles: true });
-      activeInputRef.current.dispatchEvent(inputEvent);
-      activeInputRef.current.dispatchEvent(changeEvent);
+      element.dispatchEvent(inputEvent);
     }
   };
 
