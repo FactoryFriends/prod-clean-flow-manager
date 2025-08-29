@@ -94,7 +94,7 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
       <CardContent className="p-4">
         <form onSubmit={handleSubmit} className="space-y-3">
           {/* Optimized layout - All main fields in one compact row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="product" className="text-sm font-medium">Product</Label>
               <Select value={selectedProductId} onValueChange={setSelectedProductId}>
@@ -109,6 +109,12 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
                   ))}
                 </SelectContent>
               </Select>
+              {calculatedExpiryDate && (
+                <p className="text-xs text-blue-600">
+                  Expires: {new Date(calculatedExpiryDate).toLocaleDateString()}
+                  {selectedProduct?.shelf_life_days && ` (${selectedProduct.shelf_life_days}d shelf life)`}
+                </p>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -166,21 +172,6 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
               </div>
             )}
 
-            <div className="space-y-1.5">
-              <Label htmlFor="expiry" className="text-sm font-medium">Expiry Date</Label>
-              <Input
-                id="expiry"
-                type="date"
-                value={calculatedExpiryDate}
-                onChange={(e) => setCalculatedExpiryDate(e.target.value)}
-                className="bg-white h-9"
-              />
-              {selectedProduct?.shelf_life_days && (
-                <p className="text-xs text-blue-600">
-                  {selectedProduct.shelf_life_days}d shelf life
-                </p>
-              )}
-            </div>
           </div>
 
           {/* Compact info section */}
