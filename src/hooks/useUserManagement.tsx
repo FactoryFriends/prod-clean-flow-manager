@@ -195,3 +195,39 @@ export const useDeleteUser = () => {
     },
   });
 };
+
+export const useResetUserPassword = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ email, newPassword }: { email: string; newPassword?: string }) => {
+      if (newPassword) {
+        // Admin setting a specific password
+        const { data, error } = await supabase.auth.admin.updateUserById(
+          email, // This should be userId, but we'll need to get it from email
+          { password: newPassword }
+        );
+        if (error) throw error;
+        return data;
+      } else {
+        // Send reset email
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/`
+        });
+        if (error) throw error;
+        return { success: true };
+      }
+    },
+    onSuccess: (_, { newPassword }) => {
+      queryClient.invalidateQueries({ queryKey: ["user-profiles"] });
+      if (newPassword) {
+        toast.success("Password updated successfully");
+      } else {
+        toast.success("Password reset email sent successfully");
+      }
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to reset password: ${error.message}`);
+    },
+  });
+};

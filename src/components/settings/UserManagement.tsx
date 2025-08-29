@@ -8,9 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Plus, MoreVertical, Shield, User, Trash2, Edit, Clock } from "lucide-react";
+import { Plus, MoreVertical, Shield, User, Trash2, Edit, Clock, KeyRound } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useUserProfiles, useCreateUser, useUpdateUserRole, useDeleteUser, useUpdateUser, CreateUserRequest, UpdateUserRequest } from "@/hooks/useUserManagement";
+import { useUserProfiles, useCreateUser, useUpdateUserRole, useDeleteUser, useUpdateUser, useResetUserPassword, CreateUserRequest, UpdateUserRequest } from "@/hooks/useUserManagement";
 import { useUpdateExtendedSession } from "@/hooks/useExtendedSessionMutation";
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import { toast } from "sonner";
@@ -18,7 +18,9 @@ import { toast } from "sonner";
 export function UserManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UpdateUserRequest | null>(null);
+  const [resetPasswordUser, setResetPasswordUser] = useState<{ email: string; user_id: string } | null>(null);
   const [newUser, setNewUser] = useState<CreateUserRequest>({
     email: '',
     password: '',
@@ -33,6 +35,7 @@ export function UserManagement() {
   const updateUserRole = useUpdateUserRole();
   const deleteUser = useDeleteUser();
   const updateExtendedSession = useUpdateExtendedSession();
+  const resetUserPassword = useResetUserPassword();
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,6 +98,23 @@ export function UserManagement() {
 
   const handleExtendedSessionToggle = async (profileId: string, extended_session: boolean) => {
     await updateExtendedSession.mutateAsync({ profileId, extended_session });
+  };
+
+  const handleResetPassword = (userProfile: any) => {
+    setResetPasswordUser({ email: userProfile.email, user_id: userProfile.user_id });
+    setIsResetPasswordDialogOpen(true);
+  };
+
+  const handleConfirmPasswordReset = async () => {
+    if (!resetPasswordUser) return;
+    
+    try {
+      await resetUserPassword.mutateAsync({ email: resetPasswordUser.email });
+      setIsResetPasswordDialogOpen(false);
+      setResetPasswordUser(null);
+    } catch (error) {
+      // Error is handled by the mutation
+    }
   };
 
   const getRoleIcon = (role: string) => {
@@ -266,6 +286,10 @@ export function UserManagement() {
                             <Edit className="mr-2 h-4 w-4" />
                             Edit User
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleResetPassword(userProfile)}>
+                            <KeyRound className="mr-2 h-4 w-4" />
+                            Reset Password
+                          </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleRoleChange(
                               userProfile.id, 
@@ -361,6 +385,26 @@ export function UserManagement() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Password Dialog */}
+      <Dialog open={isResetPasswordDialogOpen} onOpenChange={setIsResetPasswordDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription>
+              Send a password reset email to {resetPasswordUser?.email}. The user will receive an email with instructions to set a new password.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsResetPasswordDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmPasswordReset} disabled={resetUserPassword.isPending}>
+              {resetUserPassword.isPending ? 'Sending...' : 'Send Reset Email'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </RoleGuard>
