@@ -28,6 +28,13 @@ export function DashboardQuickActions({ onSectionChange, currentLocation }: Dash
       label: "Pick Goods"
     },
     {
+      id: 'internal',
+      onClick: () => onSectionChange('distribution:internal'),
+      className: "p-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors",
+      icon: ChefHat,
+      label: "Internal Kitchen"
+    },
+    {
       id: 'cleaning',
       onClick: () => onSectionChange('cleaning'),
       className: "p-4 bg-accent text-accent-foreground rounded-lg hover:bg-accent/80 transition-colors",
@@ -40,13 +47,6 @@ export function DashboardQuickActions({ onSectionChange, currentLocation }: Dash
       className: "p-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors",
       icon: ShieldCheck,
       label: "FAVV Compliance"
-    },
-    {
-      id: 'internal',
-      onClick: () => onSectionChange('distribution:internal'),
-      className: "p-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors",
-      icon: ChefHat,
-      label: "Internal Kitchen"
     }
   ];
 
