@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, QrCode, Search, Package, Home, Store } from "lucide-react";
-import { useProductionBatches } from "@/hooks/useProductionData";
+import { useBatchStock } from "@/hooks/useBatchStock";
 import { SelectedItem } from "@/types/dispatch";
 import { externalProducts } from "@/data/dispatchData";
 import { BatchDetailsDialog } from "../BatchDetailsDialog";
@@ -17,7 +17,7 @@ interface InventoryBrowserProps {
 }
 
 export function InventoryBrowser({ currentLocation, selectedItems, onAddToPackingList }: InventoryBrowserProps) {
-  const { data: batches } = useProductionBatches(currentLocation);
+  const { data: batches } = useBatchStock({ location: currentLocation, inStockOnly: true });
   const [selectedBatch, setSelectedBatch] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [showExpired, setShowExpired] = useState(false);
@@ -76,18 +76,19 @@ export function InventoryBrowser({ currentLocation, selectedItems, onAddToPackin
 
   // Convert batches to available inventory and sort alphabetically
   const availableBatches = (batches || [])
+    .filter(batch => batch.packages_in_stock > 0) // Only show items with stock
     .map(batch => ({
       id: batch.id,
       type: 'batch' as const,
-      name: batch.products.name,
+      name: batch.products?.name || 'Unknown Product',
       batchNumber: batch.batch_number,
-      availableQuantity: batch.packages_produced,
+      availableQuantity: batch.packages_in_stock,
       selectedQuantity: 0,
       expiryDate: batch.expiry_date,
       productionDate: batch.production_date,
       chef: batch.chefs,
-      unitSize: batch.products.unit_size,
-      unitType: batch.products.unit_type,
+      unitSize: batch.products?.unit_size,
+      unitType: batch.products?.unit_type,
       productionNotes: batch.production_notes,
     }))
     .sort((a, b) => a.name.localeCompare(b.name));

@@ -93,7 +93,7 @@ export function InventoryItemCard({
 
         <div className="text-right">
           <div className="text-lg font-semibold text-primary">
-            {item.availableQuantity || '∞'}
+            {item.availableQuantity || 0}
           </div>
           <div className="text-xs text-muted-foreground">
             {item.type === 'batch' ? (item.unitType === 'bags' ? 'bags' : 'containers') : 'units'} available
