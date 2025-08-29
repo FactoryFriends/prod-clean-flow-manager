@@ -134,7 +134,7 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
         <InventoryBrowser
           currentLocation={currentLocation}
           selectedItems={selectedItems}
-          onQuantityChange={handleQuantityChange}
+          onAddToPackingList={handleQuantityChange}
         />
 
         {/* Right Panel - Live Packing List */}
