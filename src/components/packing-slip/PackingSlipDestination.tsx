@@ -13,20 +13,20 @@ interface PackingSlipDestinationProps {
 
 export function PackingSlipDestination({ destinationCustomer, currentDate }: PackingSlipDestinationProps) {
   return (
-    <div className="mb-8">
-      <h3 className="text-lg font-semibold mb-2">Destination:</h3>
-      <div className="bg-gray-50 p-4 rounded">
+    <div className="mb-4">
+      <h3 className="text-sm font-semibold mb-1">Destination:</h3>
+      <div className="bg-gray-50 p-2 rounded text-xs">
         <p className="font-semibold">{destinationCustomer ? destinationCustomer.name : "External Customer"}</p>
         {destinationCustomer && destinationCustomer.address && (
-          <p className="text-sm text-gray-600 mt-1">{destinationCustomer.address}</p>
+          <p className="text-gray-600 mt-0.5">{destinationCustomer.address}</p>
         )}
         {destinationCustomer && destinationCustomer.contact_person && (
-          <p className="text-sm text-gray-600">Contact: {destinationCustomer.contact_person}</p>
+          <p className="text-gray-600">Contact: {destinationCustomer.contact_person}</p>
         )}
         {destinationCustomer && destinationCustomer.phone && (
-          <p className="text-sm text-gray-600">Phone: {destinationCustomer.phone}</p>
+          <p className="text-gray-600">Phone: {destinationCustomer.phone}</p>
         )}
-        <p className="text-sm text-gray-600 mt-2">Date: {currentDate}</p>
+        <p className="text-gray-600 mt-1">Date: {currentDate}</p>
       </div>
     </div>
   );
