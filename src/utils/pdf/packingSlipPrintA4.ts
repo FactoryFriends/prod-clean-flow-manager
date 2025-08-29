@@ -1,14 +1,9 @@
 import { PDFData } from './types';
 
 export const printPackingSlipA4 = (data: PDFData) => {
-  console.log('printPackingSlipA4 called with data:', data);
-  
   // Create a new window for printing
   const printWindow = window.open('', '_blank');
-  console.log('Print window created:', printWindow);
-  
   if (!printWindow) {
-    console.error('Failed to open print window - popup blocked');
     alert('Please allow popups to print the packing slip');
     return;
   }
