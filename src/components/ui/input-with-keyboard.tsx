@@ -6,10 +6,11 @@ import { useVirtualKeyboard } from '@/components/keyboard/useVirtualKeyboard';
 
 interface InputWithKeyboardProps extends React.ComponentProps<typeof Input> {
   enableKeyboard?: boolean;
+  showKeyboardButton?: boolean;
 }
 
 export const InputWithKeyboard = React.forwardRef<HTMLInputElement, InputWithKeyboardProps>(
-  ({ enableKeyboard = true, type = 'text', onChange, ...props }, ref) => {
+  ({ enableKeyboard = true, showKeyboardButton = true, type = 'text', onChange, ...props }, ref) => {
     const { show } = useVirtualKeyboard();
     const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -35,7 +36,7 @@ export const InputWithKeyboard = React.forwardRef<HTMLInputElement, InputWithKey
           type={type}
           {...props}
         />
-        {enableKeyboard && (
+        {enableKeyboard && showKeyboardButton && (
           <Button
             type="button"
             variant="ghost"

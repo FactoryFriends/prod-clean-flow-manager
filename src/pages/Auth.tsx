@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { InputWithKeyboard } from "@/components/ui/input-with-keyboard";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -118,7 +117,7 @@ export default function Auth() {
                 <label htmlFor="email" className="text-sm font-medium">
                   Email
                 </label>
-                <InputWithKeyboard
+                <Input
                   id="email"
                   type="email"
                   placeholder="Enter your email"
@@ -132,7 +131,7 @@ export default function Auth() {
                 <label htmlFor="password" className="text-sm font-medium">
                   Password
                 </label>
-                <InputWithKeyboard
+                <Input
                   id="password"
                   type="password"
                   placeholder="Enter your password"
