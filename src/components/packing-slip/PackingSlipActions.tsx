@@ -68,18 +68,6 @@ export function PackingSlipActions({
       </Button>
       
       <div className="flex gap-2">
-        <Button 
-          onClick={handleDownloadPDF}
-          className="bg-yellow-600 hover:bg-yellow-700 text-white"
-        >
-          Download PDF
-        </Button>
-        <Button 
-          variant="outline"
-          onClick={handleCopyDetails}
-        >
-          Copy Details
-        </Button>
         <Button variant="outline" onClick={onClose}>
           Close
         </Button>
