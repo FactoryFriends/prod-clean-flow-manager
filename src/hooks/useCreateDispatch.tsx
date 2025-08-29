@@ -10,6 +10,7 @@ interface CreateDispatchData {
   dispatchNotes: string;
   selectedItems: SelectedItem[];
   currentLocation: "tothai" | "khin";
+  status?: "draft" | "confirmed";
 }
 
 export const useCreateDispatch = () => {
@@ -24,6 +25,7 @@ export const useCreateDispatch = () => {
         dispatchNotes,
         selectedItems,
         currentLocation,
+        status = "draft", // Default to draft status
       } = dispatchData;
 
       // Calculate totals
@@ -42,6 +44,7 @@ export const useCreateDispatch = () => {
           total_items: totalItems,
           total_packages: totalPackages,
           location: currentLocation,
+          status: status,
         })
         .select()
         .single();

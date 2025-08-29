@@ -362,6 +362,7 @@ export type Database = {
           location: string
           picker_code: string
           picker_name: string
+          status: string
           total_items: number
           total_packages: number
           updated_at: string
@@ -375,6 +376,7 @@ export type Database = {
           location: string
           picker_code: string
           picker_name: string
+          status?: string
           total_items?: number
           total_packages?: number
           updated_at?: string
@@ -388,6 +390,7 @@ export type Database = {
           location?: string
           picker_code?: string
           picker_name?: string
+          status?: string
           total_items?: number
           total_packages?: number
           updated_at?: string

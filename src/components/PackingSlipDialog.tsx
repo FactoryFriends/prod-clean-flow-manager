@@ -15,6 +15,7 @@ interface PackingSlipDialogProps {
   pickedUpBy: string;
   dispatchNotes: string;
   currentLocation: "tothai" | "khin";
+  dispatchId?: string; // Add dispatch ID
 }
 
 export function PackingSlipDialog({
@@ -26,6 +27,7 @@ export function PackingSlipDialog({
   pickedUpBy,
   dispatchNotes,
   currentLocation,
+  dispatchId,
 }: PackingSlipDialogProps) {
   const { data: customers = [] } = useCustomers(true);
 
@@ -74,6 +76,7 @@ export function PackingSlipDialog({
           totalPackages={totalPackages}
           preparedBy={preparedBy}
           pickedUpBy={pickedUpBy}
+          dispatchId={dispatchId}
           onClose={() => onOpenChange(false)}
         />
       </DialogContent>

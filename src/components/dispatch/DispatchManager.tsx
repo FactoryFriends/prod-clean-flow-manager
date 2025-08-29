@@ -154,6 +154,7 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
           pickedUpBy={packingSlipStaffNames.pickedUpBy}
           dispatchNotes={dispatchNotes}
           currentLocation={currentLocation}
+          dispatchId={currentDispatchId}
         />
       )}
     </div>

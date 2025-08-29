@@ -30,6 +30,7 @@ export function useInternalDispatchOperations({
         dispatchNotes,
         selectedItems,
         currentLocation,
+        status: "confirmed", // Internal dispatches are confirmed immediately
       });
 
       toast({

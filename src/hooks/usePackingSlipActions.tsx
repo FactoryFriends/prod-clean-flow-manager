@@ -1,6 +1,7 @@
 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useConfirmDispatch } from "@/hooks/useConfirmDispatch";
 import { generatePackingSlipPDF } from "@/utils/pdf/packingSlipPdfGenerator";
 import { printPackingSlipA4 } from "@/utils/pdf/packingSlipPrintA4";
 import { format } from "date-fns";
@@ -22,6 +23,7 @@ interface UsePackingSlipActionsProps {
   totalPackages: number;
   preparedBy: string;
   pickedUpBy: string;
+  dispatchId?: string; // Add dispatch ID for confirmation
 }
 
 export function usePackingSlipActions({
@@ -33,8 +35,10 @@ export function usePackingSlipActions({
   totalPackages,
   preparedBy,
   pickedUpBy,
+  dispatchId,
 }: UsePackingSlipActionsProps) {
   const { toast } = useToast();
+  const confirmDispatch = useConfirmDispatch();
 
   const handleDownloadPDF = () => {
     generatePackingSlipPDF({
@@ -64,6 +68,11 @@ Prepared by: ${preparedBy}
 
   const handleConfirmAndShip = async () => {
     try {
+      // First confirm the dispatch to update inventory
+      if (dispatchId) {
+        await confirmDispatch.mutateAsync(dispatchId);
+      }
+
       const batchIds = selectedItems
         .filter(item => item.type === 'batch')
         .map(item => item.id);
@@ -71,6 +80,7 @@ Prepared by: ${preparedBy}
       const { data: packingSlip, error: createError } = await supabase
         .from("packing_slips")
         .insert({
+          dispatch_id: dispatchId,
           slip_number: packingSlipNumber,
           destination: destinationCustomer ? destinationCustomer.name : "External Customer",
           prepared_by: preparedBy,
