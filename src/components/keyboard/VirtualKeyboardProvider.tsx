@@ -5,7 +5,7 @@ interface VirtualKeyboardContextType {
   inputType: 'text' | 'number';
   inputValue: string;
   isShiftActive: boolean;
-  show: (inputRef: HTMLInputElement | HTMLTextAreaElement, type?: 'text' | 'number') => void;
+  show: (inputRef: HTMLInputElement | HTMLTextAreaElement, type?: 'text' | 'number', onChange?: (e: any) => void) => void;
   hide: () => void;
   type: (char: string) => void;
   backspace: () => void;
@@ -26,18 +26,23 @@ export function VirtualKeyboardProvider({ children }: VirtualKeyboardProviderPro
   const [inputValue, setInputValue] = useState('');
   const [isShiftActive, setIsShiftActive] = useState(false);
   const activeInputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
+  const onChangeHandlerRef = useRef<((e: any) => void) | null>(null);
 
-  const show = (inputRef: HTMLInputElement | HTMLTextAreaElement, type: 'text' | 'number' = 'text') => {
+  const show = (inputRef: HTMLInputElement | HTMLTextAreaElement, type: 'text' | 'number' = 'text', onChange?: (e: any) => void) => {
     activeInputRef.current = inputRef;
     setInputType(type);
     setInputValue(inputRef.value);
     setIsVisible(true);
     setIsShiftActive(false);
+    
+    // Store the React onChange handler
+    onChangeHandlerRef.current = onChange || null;
   };
 
   const hide = () => {
     setIsVisible(false);
     activeInputRef.current = null;
+    onChangeHandlerRef.current = null;
     setIsShiftActive(false);
   };
 
@@ -46,22 +51,27 @@ export function VirtualKeyboardProvider({ children }: VirtualKeyboardProviderPro
     if (activeInputRef.current) {
       const element = activeInputRef.current;
       
-      // Set the value
+      // Set the value directly
       element.value = newValue;
       
-      // Create a proper React synthetic event
-      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-        window.HTMLInputElement.prototype,
-        'value'
-      )?.set;
+      // Create a synthetic event that mimics React's onChange event
+      const mockEvent = {
+        target: { value: newValue },
+        currentTarget: { value: newValue },
+        preventDefault: () => {},
+        stopPropagation: () => {}
+      };
       
-      if (nativeInputValueSetter) {
-        nativeInputValueSetter.call(element, newValue);
+      // Try to call React's onChange handler directly if available
+      if (onChangeHandlerRef.current) {
+        onChangeHandlerRef.current(mockEvent);
+      } else {
+        // Fallback: dispatch native events
+        const inputEvent = new Event('input', { bubbles: true });
+        const changeEvent = new Event('change', { bubbles: true });
+        element.dispatchEvent(inputEvent);
+        element.dispatchEvent(changeEvent);
       }
-      
-      // Dispatch input event that React can process
-      const inputEvent = new Event('input', { bubbles: true });
-      element.dispatchEvent(inputEvent);
     }
   };
 

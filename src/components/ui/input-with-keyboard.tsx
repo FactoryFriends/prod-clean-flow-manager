@@ -9,7 +9,7 @@ interface InputWithKeyboardProps extends React.ComponentProps<typeof Input> {
 }
 
 export const InputWithKeyboard = React.forwardRef<HTMLInputElement, InputWithKeyboardProps>(
-  ({ enableKeyboard = true, type = 'text', ...props }, ref) => {
+  ({ enableKeyboard = true, type = 'text', onChange, ...props }, ref) => {
     const { show } = useVirtualKeyboard();
     const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -17,7 +17,7 @@ export const InputWithKeyboard = React.forwardRef<HTMLInputElement, InputWithKey
       const element = inputRef.current;
       if (element) {
         const keyboardType = type === 'number' ? 'number' : 'text';
-        show(element, keyboardType);
+        show(element, keyboardType, onChange);
       }
     };
 
