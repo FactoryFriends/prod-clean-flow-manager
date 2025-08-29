@@ -127,24 +127,28 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
 
           <div className="space-y-2">
             <Label htmlFor="packages">
-              Number of Packages{selectedProduct?.unit_type === "PIECE" ? "/Bags" : ""} Produced
+              Number of {selectedProduct?.supplier_package_unit || 'Packages'} Produced
             </Label>
             <Select value={packagesProduced} onValueChange={setPackagesProduced}>
               <SelectTrigger className="bg-white">
-                <SelectValue placeholder="Select number of packages" />
+                <SelectValue placeholder={`Select number of ${selectedProduct?.supplier_package_unit?.toLowerCase() || 'packages'}`} />
               </SelectTrigger>
               <SelectContent className="bg-white border border-gray-200 shadow-lg z-50">
-                {Array.from({ length: 50 }, (_, i) => i + 1).map((num) => (
-                  <SelectItem key={num} value={num.toString()}>
-                    {num} {selectedProduct?.unit_type === "PIECE" ? `bag${num > 1 ? 's' : ''}` : `package${num > 1 ? 's' : ''}`}
-                  </SelectItem>
-                ))}
+                {Array.from({ length: 50 }, (_, i) => i + 1).map((num) => {
+                  const unitName = selectedProduct?.supplier_package_unit?.toLowerCase() || 'package';
+                  const pluralUnit = num > 1 ? `${unitName}s` : unitName;
+                  return (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num} {pluralUnit}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
             {selectedProduct && (
               <>
                 <p className="text-xs text-blue-600">
-                  Standard: {selectedProduct.packages_per_batch} packages
+                  Standard: {selectedProduct.packages_per_batch} {selectedProduct.supplier_package_unit?.toLowerCase() || 'packages'}
                 </p>
                 <p className="text-xs italic text-blue-800">
                   You can change this if you produced more or less than the usual batch.
@@ -161,17 +165,19 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
           {/* Variable packaging input - only show if variable_packaging is enabled */}
           {selectedProduct?.variable_packaging && (
             <div className="space-y-2">
-              <Label htmlFor="itemsPerPackage">Items per Package</Label>
+              <Label htmlFor="itemsPerPackage">
+                Items per {selectedProduct?.supplier_package_unit || 'Package'}
+              </Label>
               <Input
                 id="itemsPerPackage"
                 type="number"
                 value={itemsPerPackage}
                 onChange={(e) => setItemsPerPackage(e.target.value)}
-                placeholder="e.g. 30"
+                placeholder={`e.g. 40 items per ${selectedProduct?.supplier_package_unit?.toLowerCase() || 'package'}`}
                 className="bg-white"
               />
               <p className="text-xs text-blue-600">
-                Specify the exact number of items in each package for this batch
+                Specify how many items go in each {selectedProduct?.supplier_package_unit?.toLowerCase() || 'package'} for this batch
               </p>
             </div>
           )}
