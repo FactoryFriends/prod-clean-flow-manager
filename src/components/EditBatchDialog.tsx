@@ -104,7 +104,7 @@ export function EditBatchDialog({ open, onOpenChange, batch }: EditBatchDialogPr
                   <SelectValue placeholder="Select number of packages" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.from({ length: 15 }, (_, i) => i + 1).map((num) => (
+                  {Array.from({ length: 50 }, (_, i) => i + 1).map((num) => (
                     <SelectItem key={num} value={num.toString()}>
                       {num} {batch.products.unit_type === "PIECE" ? `bag${num > 1 ? 's' : ''}` : `package${num > 1 ? 's' : ''}`}
                     </SelectItem>

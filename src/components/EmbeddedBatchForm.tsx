@@ -124,7 +124,7 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
                 <SelectValue placeholder="Select number of packages" />
               </SelectTrigger>
               <SelectContent className="bg-white border border-gray-200 shadow-lg z-50">
-                {Array.from({ length: 15 }, (_, i) => i + 1).map((num) => (
+                {Array.from({ length: 50 }, (_, i) => i + 1).map((num) => (
                   <SelectItem key={num} value={num.toString()}>
                     {num} {selectedProduct?.unit_type === "PIECE" ? `bag${num > 1 ? 's' : ''}` : `package${num > 1 ? 's' : ''}`}
                   </SelectItem>
