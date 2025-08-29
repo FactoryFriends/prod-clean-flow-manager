@@ -53,6 +53,8 @@ export function PackingSlipDetailsModal({ packingSlip, isOpen, onClose }: Packin
   if (!packingSlip) return null;
 
   const handlePrint = () => {
+    console.log('Print button clicked for packing slip:', packingSlip.slip_number);
+    
     // Use stored item_details if available, otherwise fallback to batch data
     const selectedItems = packingSlip.item_details && Array.isArray(packingSlip.item_details) && packingSlip.item_details.length > 0
       ? packingSlip.item_details
@@ -65,7 +67,9 @@ export function PackingSlipDetailsModal({ packingSlip, isOpen, onClose }: Packin
           type: 'batch' as const
         })) || [];
 
-    printPackingSlipA4({
+    console.log('Selected items for printing:', selectedItems);
+
+    const printData = {
       packingSlipNumber: packingSlip.slip_number,
       currentDate: packingSlip.pickup_date || packingSlip.created_at.split('T')[0],
       destinationCustomer: {
@@ -76,7 +80,16 @@ export function PackingSlipDetailsModal({ packingSlip, isOpen, onClose }: Packin
       totalPackages: packingSlip.total_packages,
       preparedBy: packingSlip.prepared_by || 'Not specified',
       pickedUpBy: packingSlip.picked_up_by || 'Not specified',
-    });
+    };
+    
+    console.log('Print data:', printData);
+    
+    try {
+      printPackingSlipA4(printData);
+      console.log('Print function called successfully');
+    } catch (error) {
+      console.error('Error calling print function:', error);
+    }
   };
 
   return (
