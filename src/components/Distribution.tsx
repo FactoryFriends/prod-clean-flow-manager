@@ -45,7 +45,7 @@ export function Distribution({ currentLocation, initialTab = "external" }: Distr
                 }`} />
               </div>
               <div className="text-left">
-                <h3 className="text-xl font-bold mb-1">Ship to Customers</h3>
+                <h3 className="text-xl font-bold mb-1">Ship to External Kitchen</h3>
                 <p className={`text-sm ${
                   activeTab === "external" ? "text-blue-100" : "text-blue-600"
                 }`}>
