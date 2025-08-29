@@ -25,7 +25,7 @@ export function DashboardQuickActions({ onSectionChange, currentLocation }: Dash
       onClick: () => onSectionChange('distribution'),
       className: "p-4 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors",
       icon: Truck,
-      label: "Pick Goods"
+      label: "External Kitchen"
     },
     {
       id: 'internal',
