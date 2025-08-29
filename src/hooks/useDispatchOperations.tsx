@@ -15,7 +15,7 @@ interface UseDispatchOperationsProps {
   setPackingSlipStaffNames: (names: { preparedBy: string; pickedUpBy: string }) => void;
   setPackingSlipItems: (items: SelectedItem[]) => void;
   setPackingSlipId: (id: string | null) => void;
-  setPackingSlipNumber: (number: string) => void;
+  setPackingSlipNumber: (number: string | null) => void;
   onSuccess: () => void;
 }
 

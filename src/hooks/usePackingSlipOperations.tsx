@@ -18,7 +18,7 @@ interface UsePackingSlipOperationsProps {
   setPackingSlipStaffNames: (names: { preparedBy: string; pickedUpBy: string }) => void;
   setPackingSlipItems: (items: SelectedItem[]) => void;
   setPackingSlipId: (id: string | null) => void;
-  setPackingSlipNumber: (number: string) => void;
+  setPackingSlipNumber: (number: string | null) => void;
   onSuccess: () => void;
 }
 
@@ -89,7 +89,7 @@ export function usePackingSlipOperations({
 
       setCurrentDispatchId(dispatchRecord.id);
       setPackingSlipId(packingSlip.id);
-      setPackingSlipNumber(""); // No number until confirmed
+      setPackingSlipNumber(null); // No number until confirmed
       setPackingSlipStaffNames(staffNames);
       setPackingSlipOpen(true);
 

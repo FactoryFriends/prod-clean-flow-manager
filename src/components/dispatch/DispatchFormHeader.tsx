@@ -129,7 +129,7 @@ export function DispatchFormHeader({
                 disabled={!canSubmit}
                 className="w-full h-9 bg-primary hover:bg-primary/90"
               >
-                Create Slip ({totalItems})
+                FINISH LIST ({totalItems})
               </Button>
             ) : (
               <Button 

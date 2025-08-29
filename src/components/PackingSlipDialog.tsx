@@ -17,7 +17,7 @@ interface PackingSlipDialogProps {
   currentLocation: "tothai" | "khin";
   dispatchId?: string;
   packingSlipId?: string;
-  packingSlipNumber?: string;
+  packingSlipNumber?: string | null;
 }
 
 export function PackingSlipDialog({
