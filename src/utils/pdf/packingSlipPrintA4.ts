@@ -196,14 +196,21 @@ export const printPackingSlipA4 = (data: PDFData) => {
           </tr>
         </thead>
         <tbody>
-          ${data.selectedItems.map(item => `
+          ${data.selectedItems.map(item => {
+            // Check if this is an external product
+            const isExternalProduct = item.type !== 'batch' || 
+              (item.product_type && item.product_type !== 'zelfgemaakt') ||
+              (item.product_kind && item.product_kind !== 'zelfgemaakt');
+            
+            return `
             <tr>
               <td>${item.name}</td>
-              <td>${item.batchNumber || '-'}</td>
-              <td>${item.productionDate || '-'}</td>
+              <td>${isExternalProduct ? 'EXTERNAL PRODUCT' : (item.batchNumber || '-')}</td>
+              <td>${isExternalProduct ? 'SEE PACKAGING' : (item.productionDate || '-')}</td>
               <td>${item.selectedQuantity} bags</td>
             </tr>
-          `).join('')}
+            `;
+          }).join('')}
         </tbody>
       </table>
       

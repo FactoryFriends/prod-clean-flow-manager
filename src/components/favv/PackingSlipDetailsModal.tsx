@@ -143,14 +143,25 @@ export function PackingSlipDetailsModal({ packingSlip, isOpen, onClose }: Packin
                     selectedQuantity: 1,
                     productionDate: batch.production_date,
                   })) || []
-              ).map((item, index) => (
-                <tr key={index}>
-                  <td className="border border-gray-300 p-2 text-xs">{item.name}</td>
-                  <td className="border border-gray-300 p-2 text-xs">{item.batchNumber || '-'}</td>
-                  <td className="border border-gray-300 p-2 text-xs">{item.productionDate || '-'}</td>
-                  <td className="border border-gray-300 p-2 text-xs">{item.selectedQuantity} bags</td>
-                </tr>
-              ))}
+              ).map((item, index) => {
+                // Check if this is an external product
+                const isExternalProduct = item.type !== 'batch' || 
+                  (item.product_type && item.product_type !== 'zelfgemaakt') ||
+                  (item.product_kind && item.product_kind !== 'zelfgemaakt');
+                
+                return (
+                  <tr key={index}>
+                    <td className="border border-gray-300 p-2 text-xs">{item.name}</td>
+                    <td className="border border-gray-300 p-2 text-xs">
+                      {isExternalProduct ? "EXTERNAL PRODUCT" : (item.batchNumber || '-')}
+                    </td>
+                    <td className="border border-gray-300 p-2 text-xs">
+                      {isExternalProduct ? "SEE PACKAGING" : (item.productionDate || '-')}
+                    </td>
+                    <td className="border border-gray-300 p-2 text-xs">{item.selectedQuantity} bags</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
           

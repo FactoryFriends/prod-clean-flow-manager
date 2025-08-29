@@ -5,6 +5,9 @@ export interface PDFItem {
   batchNumber?: string;
   selectedQuantity: number;
   productionDate?: string;
+  type?: string;
+  product_type?: string;
+  product_kind?: string;
 }
 
 export interface PDFData {
