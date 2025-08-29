@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { AppSidebar } from "@/components/app-sidebar";
 import { Dashboard } from "@/components/Dashboard";
 import { Production } from "@/components/Production";
 import { Distribution } from "@/components/Distribution";
@@ -15,9 +14,7 @@ import { RecipeManagement } from "./RecipeManagement";
 import { BottomNavigation } from "@/components/navigation/BottomNavigation";
 import { MobileHeader } from "@/components/navigation/MobileHeader";
 import { FloatingActionButton } from "@/components/navigation/FloatingActionButton";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { LayoutDashboard } from "lucide-react";
+import { TopNavigation } from "@/components/navigation/TopNavigation";
 import { toast } from "sonner";
 
 // For FAVV deep-link: keep track of FAVV subtab
@@ -128,55 +125,47 @@ const Index = () => {
           />
         </div>
       ) : (
-        /* Desktop Layout - Shadcn Sidebar */
-        <SidebarProvider defaultOpen={false}>
-          <div className="min-h-screen flex w-full">
-            <AppSidebar 
-              activeSection={activeTab}
-              onSectionChange={handleSectionChange}
+        /* Desktop Layout - Top Navigation */
+        <div className="min-h-screen flex flex-col w-full">
+          {/* Header with horizontal navigation */}
+          <header className="h-14 flex items-center justify-between border-b bg-background px-6">
+            <div className="flex items-center gap-4">
+              {/* Logo */}
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-white rounded flex items-center justify-center p-1 border">
+                  <img 
+                    src="/icon-192x192.png" 
+                    alt="OptiThai" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div>
+                  <h1 className="font-semibold text-foreground">OptiThai</h1>
+                  <p className="text-xs text-muted-foreground">Production Hub</p>
+                </div>
+              </div>
+              
+              {/* Horizontal Navigation */}
+              <div className="ml-8">
+                <TopNavigation 
+                  activeSection={activeTab}
+                  onSectionChange={handleSectionChange}
+                  currentLocation={currentLocation}
+                />
+              </div>
+            </div>
+            
+            {/* Location switcher */}
+            <LocationHeader 
               currentLocation={currentLocation}
               onLocationChange={setCurrentLocation}
             />
-            
-            <div className="flex-1 flex flex-col">
-              {/* Header with sidebar trigger positioned at absolute left */}
-              <header className="h-12 flex items-center justify-between border-b bg-background relative">
-                {/* Sidebar trigger at absolute leftmost position */}
-                <SidebarTrigger className="absolute left-0 top-0 bottom-0 w-12 h-full flex items-center justify-center hover:bg-accent z-10" />
-                
-                <div className="flex items-center gap-3 ml-12">
-                  {/* Logo integrated with header elements */}
-                  <div className="w-6 h-6 bg-white rounded flex items-center justify-center p-0.5 border">
-                    <img 
-                      src="/icon-192x192.png" 
-                      alt="OptiThai" 
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleSectionChange("dashboard")}
-                    className={`flex items-center gap-2 ${activeTab === "dashboard" ? "bg-accent" : ""}`}
-                  >
-                    <LayoutDashboard className="w-4 h-4" />
-                    <span className="hidden sm:inline">Dashboard</span>
-                  </Button>
-                </div>
-                <div className="pr-4">
-                  <LocationHeader 
-                    currentLocation={currentLocation}
-                    onLocationChange={setCurrentLocation}
-                  />
-                </div>
-              </header>
-              
-              <main className="flex-1 p-6 overflow-auto">
-                {renderContent()}
-              </main>
-            </div>
-          </div>
-        </SidebarProvider>
+          </header>
+          
+          <main className="flex-1 p-6 overflow-auto">
+            {renderContent()}
+          </main>
+        </div>
       )}
     </div>
   );
