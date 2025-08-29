@@ -1,12 +1,16 @@
 
 import { useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { useUnitOptions } from "../shared/UnitOptionsContext";
+import { Package } from "lucide-react";
 
 export function BatchAndUnitFields() {
-  const { control } = useFormContext();
+  const { control, watch } = useFormContext();
   const { innerUnits } = useUnitOptions();
+  
+  const variablePackaging = watch("variable_packaging");
   
   console.log("BatchAndUnitFields - innerUnits:", innerUnits);
   
@@ -62,26 +66,53 @@ export function BatchAndUnitFields() {
         control={control}
         name="packages_per_batch"
         rules={{
-          required: "Packages per batch is required",
-          min: { value: 1, message: "Must be at least 1" },
+          required: !variablePackaging ? "Packages per batch is required" : false,
+          min: !variablePackaging ? { value: 1, message: "Must be at least 1" } : undefined,
         }}
         render={({ field }) => (
           <FormItem className="flex-1">
-            <FormLabel>Packages per Batch</FormLabel>
+            <FormLabel className="flex items-center gap-2">
+              Packages per Batch
+              <div className="flex items-center gap-2 ml-auto">
+                <Package className="w-4 h-4" />
+                <FormField
+                  control={control}
+                  name="variable_packaging"
+                  render={({ field: variableField }) => (
+                    <div className="flex items-center gap-1">
+                      <Switch
+                        checked={!!variableField.value}
+                        onCheckedChange={variableField.onChange}
+                      />
+                      <span className="text-xs text-muted-foreground">Variable</span>
+                    </div>
+                  )}
+                />
+              </div>
+            </FormLabel>
             <FormControl>
               <Input
                 type="number"
                 min="1"
                 step="1"
-                placeholder="e.g. 5"
+                placeholder={variablePackaging ? "Variable quantity per batch" : "e.g. 5"}
+                disabled={variablePackaging}
                 {...field}
-                value={field.value || ""}
+                value={variablePackaging ? "" : (field.value || "")}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  field.onChange(value === "" ? "" : Number(value));
+                  if (!variablePackaging) {
+                    const value = e.target.value;
+                    field.onChange(value === "" ? "" : Number(value));
+                  }
                 }}
+                className={variablePackaging ? "bg-muted cursor-not-allowed" : ""}
               />
             </FormControl>
+            {variablePackaging && (
+              <p className="text-xs text-muted-foreground italic">
+                When variable packaging is enabled, users specify quantity per package when creating batches
+              </p>
+            )}
             <FormMessage />
           </FormItem>
         )}

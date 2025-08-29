@@ -157,26 +157,6 @@ export function SemiFinishedFormFields({
         )}
       />
 
-      {/* Variable Packaging Toggle */}
-      <FormField
-        control={control}
-        name="variable_packaging"
-        render={({ field }) => (
-          <FormItem>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={!!field.value}
-                onCheckedChange={field.onChange}
-              />
-              <FormLabel>Variable Packaging</FormLabel>
-            </div>
-            <div className="text-xs text-muted-foreground italic mt-1">
-              When enabled, users can specify different quantities per package when creating batches
-            </div>
-          </FormItem>
-        )}
-      />
-
       {/* Active / Inactive Toggle */}
       <FormField
         control={control}
