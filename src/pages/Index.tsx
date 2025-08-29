@@ -140,34 +140,36 @@ const Index = () => {
             
             <div className="flex-1 flex flex-col">
               {/* Header with sidebar trigger positioned at absolute left */}
-              <div className="relative">
-                <SidebarTrigger className="absolute left-2 top-3 z-10" />
-                <header className="h-12 flex items-center justify-between border-b bg-background pl-12 pr-4">
-                  <div className="flex items-center gap-3">
-                    {/* Logo integrated with header elements */}
-                    <div className="w-6 h-6 bg-white rounded flex items-center justify-center p-0.5 border">
-                      <img 
-                        src="/icon-192x192.png" 
-                        alt="OptiThai" 
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleSectionChange("dashboard")}
-                      className={`flex items-center gap-2 ${activeTab === "dashboard" ? "bg-accent" : ""}`}
-                    >
-                      <LayoutDashboard className="w-4 h-4" />
-                      <span className="hidden sm:inline">Dashboard</span>
-                    </Button>
+              <header className="h-12 flex items-center justify-between border-b bg-background relative">
+                {/* Sidebar trigger at absolute leftmost position */}
+                <SidebarTrigger className="absolute left-0 top-0 bottom-0 w-12 h-full flex items-center justify-center hover:bg-accent z-10" />
+                
+                <div className="flex items-center gap-3 ml-12">
+                  {/* Logo integrated with header elements */}
+                  <div className="w-6 h-6 bg-white rounded flex items-center justify-center p-0.5 border">
+                    <img 
+                      src="/icon-192x192.png" 
+                      alt="OptiThai" 
+                      className="w-full h-full object-contain"
+                    />
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleSectionChange("dashboard")}
+                    className={`flex items-center gap-2 ${activeTab === "dashboard" ? "bg-accent" : ""}`}
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span className="hidden sm:inline">Dashboard</span>
+                  </Button>
+                </div>
+                <div className="pr-4">
                   <LocationHeader 
                     currentLocation={currentLocation}
                     onLocationChange={setCurrentLocation}
                   />
-                </header>
-              </div>
+                </div>
+              </header>
               
               <main className="flex-1 p-6 overflow-auto">
                 {renderContent()}

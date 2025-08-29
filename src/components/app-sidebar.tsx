@@ -130,9 +130,15 @@ export function AppSidebar({ activeSection, onSectionChange, currentLocation, on
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
-        <div className="px-4 py-2">
+        <div className="px-4 py-2 space-y-1">
           <div className="text-xs text-sidebar-foreground/60">
             OptiThai Manager
+          </div>
+          <div className="text-xs text-sidebar-foreground/40">
+            © Factory & Friends BV
+          </div>
+          <div className="text-xs text-sidebar-foreground/40">
+            Version 1.0.0
           </div>
         </div>
       </SidebarFooter>
