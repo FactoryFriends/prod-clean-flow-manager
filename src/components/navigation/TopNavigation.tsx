@@ -1,4 +1,4 @@
-import { Building, Package, Truck, Brush, Home, Settings, Receipt, FileText } from "lucide-react";
+import { Building, ChefHat, Truck, Brush, Home, Settings, Receipt, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -11,7 +11,7 @@ interface TopNavigationProps {
 
 const menuItems = [
   { id: "dashboard", label: "Dashboard", icon: Home, availableFor: ["tothai", "khin"] },
-  { id: "production", label: "Production", icon: Package, availableFor: ["tothai"] },
+  { id: "production", label: "Production", icon: ChefHat, availableFor: ["tothai"] },
   { id: "distribution", label: "Distribution", icon: Truck, availableFor: ["tothai"] },
   { id: "cleaning", label: "Cleaning Tasks", icon: Brush, availableFor: ["tothai", "khin"] },
   { id: "invoicing", label: "Invoicing", icon: Receipt, availableFor: ["tothai"] },

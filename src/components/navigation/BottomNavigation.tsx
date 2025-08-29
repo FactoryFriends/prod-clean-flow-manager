@@ -1,4 +1,4 @@
-import { Building, Package, Truck, Brush, Home, FileText } from "lucide-react";
+import { Building, ChefHat, Truck, Brush, Home, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BottomNavigationProps {
@@ -9,7 +9,7 @@ interface BottomNavigationProps {
 
 const primaryNavItems = [
   { id: "dashboard", label: "Home", icon: Home, availableFor: ["tothai", "khin"] },
-  { id: "production", label: "Production", icon: Package, availableFor: ["tothai"] },
+  { id: "production", label: "Production", icon: ChefHat, availableFor: ["tothai"] },
   { id: "cleaning", label: "Cleaning", icon: Brush, availableFor: ["tothai", "khin"] },
   { id: "distribution", label: "Distribution", icon: Truck, availableFor: ["tothai"] },
   { id: "reports", label: "Reports", icon: FileText, availableFor: ["tothai", "khin"] },
