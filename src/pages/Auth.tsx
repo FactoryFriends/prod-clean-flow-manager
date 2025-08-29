@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { InputWithKeyboard } from "@/components/ui/input-with-keyboard";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -172,7 +173,7 @@ export default function Auth() {
                           <label htmlFor="forgot-email" className="text-sm font-medium">
                             Email
                           </label>
-                          <InputWithKeyboard
+                          <Input
                             id="forgot-email"
                             type="email"
                             placeholder="Enter your email address"
