@@ -22,6 +22,7 @@ interface PackingSlip {
   pickup_date?: string;
   batch_ids?: string[];
   status?: string;
+  item_details?: any[];
   dispatch_records?: {
     location?: string;
     dispatch_type?: string;
@@ -52,15 +53,17 @@ export function PackingSlipDetailsModal({ packingSlip, isOpen, onClose }: Packin
   if (!packingSlip) return null;
 
   const handlePrint = () => {
-    // Convert the packing slip data to the format expected by printPackingSlipA4
-    const selectedItems = packingSlip.batches?.map(batch => ({
-      id: batch.id,
-      name: batch.products.name,
-      batchNumber: batch.batch_number,
-      selectedQuantity: 1, // We don't have the exact quantity from this data structure
-      productionDate: batch.production_date,
-      type: 'batch' as const
-    })) || [];
+    // Use stored item_details if available, otherwise fallback to batch data
+    const selectedItems = packingSlip.item_details && Array.isArray(packingSlip.item_details) && packingSlip.item_details.length > 0
+      ? packingSlip.item_details
+      : packingSlip.batches?.map(batch => ({
+          id: batch.id,
+          name: batch.products.name,
+          batchNumber: batch.batch_number,
+          selectedQuantity: 1, // Fallback for old records
+          productionDate: batch.production_date,
+          type: 'batch' as const
+        })) || [];
 
     printPackingSlipA4({
       packingSlipNumber: packingSlip.slip_number,

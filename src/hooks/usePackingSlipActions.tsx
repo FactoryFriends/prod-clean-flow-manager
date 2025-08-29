@@ -79,7 +79,8 @@ Prepared by: ${preparedBy}
           total_items: totalItems,
           total_packages: totalPackages,
           pickup_date: currentDate,
-          status: "shipped" as const
+          status: "shipped" as const,
+          item_details: JSON.parse(JSON.stringify(selectedItems))
         })
         .select()
         .single();

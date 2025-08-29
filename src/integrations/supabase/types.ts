@@ -401,6 +401,7 @@ export type Database = {
           destination: string
           dispatch_id: string | null
           id: string
+          item_details: Json | null
           picked_up_by: string | null
           pickup_date: string | null
           prepared_by: string | null
@@ -415,6 +416,7 @@ export type Database = {
           destination: string
           dispatch_id?: string | null
           id?: string
+          item_details?: Json | null
           picked_up_by?: string | null
           pickup_date?: string | null
           prepared_by?: string | null
@@ -429,6 +431,7 @@ export type Database = {
           destination?: string
           dispatch_id?: string | null
           id?: string
+          item_details?: Json | null
           picked_up_by?: string | null
           pickup_date?: string | null
           prepared_by?: string | null
