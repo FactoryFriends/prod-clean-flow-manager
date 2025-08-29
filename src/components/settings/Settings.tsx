@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { SettingsAuth } from "@/components/settings/SettingsAuth";
+import { RoleGuard } from "@/components/auth/RoleGuard";
 import { SettingsHeader } from "@/components/settings/SettingsHeader";
 import { SettingsTabsList } from "@/components/settings/SettingsTabsList";
 import { ProductsTab } from "@/components/settings/tabs/ProductsTab";
@@ -21,7 +21,6 @@ interface SettingsProps {
 }
 
 export function Settings({ currentLocation }: SettingsProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [editingStaffCode, setEditingStaffCode] = useState<any>(null);
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
@@ -35,10 +34,6 @@ export function Settings({ currentLocation }: SettingsProps) {
   const [staffCodeFilter, setStaffCodeFilter] = useState("");
   const [templateFilter, setTemplateFilter] = useState("");
   const [customerFilter, setCustomerFilter] = useState("");
-
-  if (!isAuthenticated) {
-    return <SettingsAuth onAuthenticated={() => setIsAuthenticated(true)} />;
-  }
 
   const handleEditProduct = (product: any) => {
     setEditingProduct(product);
@@ -91,67 +86,81 @@ export function Settings({ currentLocation }: SettingsProps) {
   };
 
   return (
-    <UnitOptionsProvider>
-      <div className="space-y-6">
-        <SettingsHeader 
-          title="Settings" 
-          description="Manage system configuration and data" 
-        />
-        <Tabs defaultValue="products" className="space-y-4">
-          <SettingsTabsList />
-          <ProductsTab
-            productFilter={productFilter}
-            setProductFilter={setProductFilter}
-            onAddNewProduct={handleAddNewProduct}
-            onEditProduct={handleEditProduct}
+    <RoleGuard 
+      allowedRoles={['admin']} 
+      fallback={
+        <div className="space-y-6">
+          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+          <div className="bg-card border border-border rounded-lg p-6 max-w-md">
+            <p className="text-muted-foreground">
+              Administrator access required to view settings.
+            </p>
+          </div>
+        </div>
+      }
+    >
+      <UnitOptionsProvider>
+        <div className="space-y-6">
+          <SettingsHeader 
+            title="Settings" 
+            description="Manage system configuration and data" 
           />
-          <DrinksTab
-            drinkFilter={drinkFilter}
-            setDrinkFilter={setDrinkFilter}
-            onAddNewDrink={handleAddNewDrink}
-            onEditProduct={handleEditProduct}
+          <Tabs defaultValue="products" className="space-y-4">
+            <SettingsTabsList />
+            <ProductsTab
+              productFilter={productFilter}
+              setProductFilter={setProductFilter}
+              onAddNewProduct={handleAddNewProduct}
+              onEditProduct={handleEditProduct}
+            />
+            <DrinksTab
+              drinkFilter={drinkFilter}
+              setDrinkFilter={setDrinkFilter}
+              onAddNewDrink={handleAddNewDrink}
+              onEditProduct={handleEditProduct}
+            />
+            <StaffTab
+              staffCodeFilter={staffCodeFilter}
+              setStaffCodeFilter={setStaffCodeFilter}
+              onAddNewStaffCode={handleAddNewStaffCode}
+              onEditStaffCode={handleEditStaffCode}
+            />
+            <TasksTab
+              templateFilter={templateFilter}
+              setTemplateFilter={setTemplateFilter}
+              onAddNewTemplate={handleAddNewTemplate}
+              onEditTemplate={handleEditTemplate}
+            />
+            <CustomersTab
+              customerFilter={customerFilter}
+              setCustomerFilter={setCustomerFilter}
+            />
+            <FAVVTab currentLocation={currentLocation} />
+            <SuppliersTab />
+            <TabsContent value="unit-options" className="space-y-4">
+              <UnitOptionsSettings />
+            </TabsContent>
+            <TabsContent value="ingredient-margins" className="space-y-4">
+              <IngredientPriceManager />
+            </TabsContent>
+          </Tabs>
+          <SystemInfo currentLocation={currentLocation} />
+          <SettingsDialogs
+            productDialogOpen={productDialogOpen}
+            setProductDialogOpen={setProductDialogOpen}
+            editingProduct={editingProduct}
+            handleProductSuccess={handleProductSuccess}
+            staffCodeDialogOpen={staffCodeDialogOpen}
+            setStaffCodeDialogOpen={setStaffCodeDialogOpen}
+            editingStaffCode={editingStaffCode}
+            handleStaffCodeSuccess={handleStaffCodeSuccess}
+            templateDialogOpen={templateDialogOpen}
+            setTemplateDialogOpen={setTemplateDialogOpen}
+            editingTemplate={editingTemplate}
+            handleTemplateSuccess={handleTemplateSuccess}
           />
-          <StaffTab
-            staffCodeFilter={staffCodeFilter}
-            setStaffCodeFilter={setStaffCodeFilter}
-            onAddNewStaffCode={handleAddNewStaffCode}
-            onEditStaffCode={handleEditStaffCode}
-          />
-          <TasksTab
-            templateFilter={templateFilter}
-            setTemplateFilter={setTemplateFilter}
-            onAddNewTemplate={handleAddNewTemplate}
-            onEditTemplate={handleEditTemplate}
-          />
-          <CustomersTab
-            customerFilter={customerFilter}
-            setCustomerFilter={setCustomerFilter}
-          />
-          <FAVVTab currentLocation={currentLocation} />
-          <SuppliersTab />
-          <TabsContent value="unit-options" className="space-y-4">
-            <UnitOptionsSettings />
-          </TabsContent>
-          <TabsContent value="ingredient-margins" className="space-y-4">
-            <IngredientPriceManager />
-          </TabsContent>
-        </Tabs>
-        <SystemInfo currentLocation={currentLocation} />
-        <SettingsDialogs
-          productDialogOpen={productDialogOpen}
-          setProductDialogOpen={setProductDialogOpen}
-          editingProduct={editingProduct}
-          handleProductSuccess={handleProductSuccess}
-          staffCodeDialogOpen={staffCodeDialogOpen}
-          setStaffCodeDialogOpen={setStaffCodeDialogOpen}
-          editingStaffCode={editingStaffCode}
-          handleStaffCodeSuccess={handleStaffCodeSuccess}
-          templateDialogOpen={templateDialogOpen}
-          setTemplateDialogOpen={setTemplateDialogOpen}
-          editingTemplate={editingTemplate}
-          handleTemplateSuccess={handleTemplateSuccess}
-        />
-      </div>
-    </UnitOptionsProvider>
+        </div>
+      </UnitOptionsProvider>
+    </RoleGuard>
   );
 }

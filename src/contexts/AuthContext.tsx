@@ -29,17 +29,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Create temporary profile for demo purposes
+        // Load real profile from database
         if (session?.user) {
-          setProfile({
-            id: 'temp-profile-id',
-            user_id: session.user.id,
-            role: 'admin', // Temporary default role
-            full_name: session.user.user_metadata?.full_name || null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            created_by: null
-          } as UserProfile);
+          setTimeout(async () => {
+            try {
+              const { data, error } = await supabase.rpc('get_current_user_profile', {
+                p_user_id: session.user.id
+              });
+              
+              if (data && data.length > 0) {
+                setProfile(data[0]);
+              } else {
+                setProfile(null);
+              }
+            } catch (error) {
+              console.error('Error loading user profile:', error);
+              setProfile(null);
+            }
+          }, 0);
         } else {
           setProfile(null);
         }
@@ -49,20 +56,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        setProfile({
-          id: 'temp-profile-id',
-          user_id: session.user.id,
-          role: 'admin', // Temporary default role
-          full_name: session.user.user_metadata?.full_name || null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          created_by: null
-        } as UserProfile);
+        try {
+          const { data, error } = await supabase.rpc('get_current_user_profile', {
+            p_user_id: session.user.id
+          });
+          
+          if (data && data.length > 0) {
+            setProfile(data[0]);
+          } else {
+            setProfile(null);
+          }
+        } catch (error) {
+          console.error('Error loading user profile:', error);
+          setProfile(null);
+        }
       }
       
       setLoading(false);
