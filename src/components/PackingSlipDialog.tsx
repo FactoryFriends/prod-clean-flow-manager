@@ -49,7 +49,7 @@ export function PackingSlipDialog({
   const totalItems = selectedItems.length;
   const totalPackages = selectedItems.reduce((sum, item) => sum + item.selectedQuantity, 0);
 
-  const packingSlipNumber = providedPackingSlipNumber || generatePackingSlipNumber();
+  const packingSlipNumber = providedPackingSlipNumber || "DRAFT";
   const currentDate = format(new Date(), "yyyy-MM-dd");
   const destinationCustomer = getDestination();
 
@@ -57,7 +57,9 @@ export function PackingSlipDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Packing Slip Preview</DialogTitle>
+          <DialogTitle>
+            {packingSlipNumber === "DRAFT" ? "Draft Packing Slip" : `Packing Slip ${packingSlipNumber}`}
+          </DialogTitle>
         </DialogHeader>
         
         <PackingSlipPreview

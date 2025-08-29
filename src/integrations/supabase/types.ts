@@ -408,7 +408,7 @@ export type Database = {
           picked_up_by: string | null
           pickup_date: string | null
           prepared_by: string | null
-          slip_number: string
+          slip_number: string | null
           status: string | null
           total_items: number
           total_packages: number
@@ -423,7 +423,7 @@ export type Database = {
           picked_up_by?: string | null
           pickup_date?: string | null
           prepared_by?: string | null
-          slip_number: string
+          slip_number?: string | null
           status?: string | null
           total_items?: number
           total_packages?: number
@@ -438,7 +438,7 @@ export type Database = {
           picked_up_by?: string | null
           pickup_date?: string | null
           prepared_by?: string | null
-          slip_number?: string
+          slip_number?: string | null
           status?: string | null
           total_items?: number
           total_packages?: number

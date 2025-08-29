@@ -17,7 +17,7 @@ export const useCreatePackingSlip = () => {
       totalPackages,
     }: {
       dispatchId: string;
-      slipNumber: string;
+      slipNumber: string | null;
       destination: string;
       preparedBy: string;
       pickedUpBy: string;

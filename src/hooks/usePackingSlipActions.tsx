@@ -75,11 +75,14 @@ Prepared by: ${preparedBy}
         await confirmDispatch.mutateAsync(dispatchId);
       }
 
-      // Update the existing packing slip status to 'shipped'
+      // Generate packing slip number and update status to 'shipped'
       if (packingSlipId) {
+        const generatedSlipNumber = `PS-${format(new Date(), "yyyyMMdd")}-${Math.floor(Math.random() * 1000).toString().padStart(3, "0")}`;
+        
         const { error: updateError } = await supabase
           .from("packing_slips")
           .update({
+            slip_number: generatedSlipNumber,
             status: "shipped" as const,
             pickup_date: currentDate,
             item_details: JSON.parse(JSON.stringify(selectedItems))

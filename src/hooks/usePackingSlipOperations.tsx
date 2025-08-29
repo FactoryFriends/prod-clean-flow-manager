@@ -76,11 +76,9 @@ export function usePackingSlipOperations({
         .filter(item => item.type === 'batch')
         .map(item => item.id);
 
-      const slipNumber = generatePackingSlipNumber();
-      
       const packingSlip = await createPackingSlip.mutateAsync({
         dispatchId: dispatchRecord.id,
-        slipNumber,
+        slipNumber: null, // Will be generated on confirmation
         destination: getDestination(),
         preparedBy: pickerName,
         pickedUpBy: pickerName,
@@ -91,13 +89,13 @@ export function usePackingSlipOperations({
 
       setCurrentDispatchId(dispatchRecord.id);
       setPackingSlipId(packingSlip.id);
-      setPackingSlipNumber(slipNumber);
+      setPackingSlipNumber(""); // No number until confirmed
       setPackingSlipStaffNames(staffNames);
       setPackingSlipOpen(true);
 
       toast({
-        title: "Dispatch Created",
-        description: `External dispatch ${slipNumber} created successfully`,
+        title: "Draft Packing Slip Created",
+        description: "Draft packing slip created successfully. Confirm to generate slip number.",
       });
 
       setTimeout(() => {
