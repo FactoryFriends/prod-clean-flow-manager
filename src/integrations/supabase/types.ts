@@ -490,6 +490,9 @@ export type Database = {
       }
       production_batches: {
         Row: {
+          adjusted_by: string | null
+          adjustment_reason: string | null
+          adjustment_timestamp: string | null
           batch_number: string
           chef_id: string
           created_at: string
@@ -497,6 +500,7 @@ export type Database = {
           id: string
           items_per_package: number | null
           location: Database["public"]["Enums"]["location_type"]
+          manual_stock_adjustment: number | null
           packages_produced: number
           product_id: string
           production_date: string
@@ -504,6 +508,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          adjusted_by?: string | null
+          adjustment_reason?: string | null
+          adjustment_timestamp?: string | null
           batch_number: string
           chef_id: string
           created_at?: string
@@ -511,6 +518,7 @@ export type Database = {
           id?: string
           items_per_package?: number | null
           location: Database["public"]["Enums"]["location_type"]
+          manual_stock_adjustment?: number | null
           packages_produced: number
           product_id: string
           production_date?: string
@@ -518,6 +526,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          adjusted_by?: string | null
+          adjustment_reason?: string | null
+          adjustment_timestamp?: string | null
           batch_number?: string
           chef_id?: string
           created_at?: string
@@ -525,6 +536,7 @@ export type Database = {
           id?: string
           items_per_package?: number | null
           location?: Database["public"]["Enums"]["location_type"]
+          manual_stock_adjustment?: number | null
           packages_produced?: number
           product_id?: string
           production_date?: string
@@ -797,6 +809,10 @@ export type Database = {
       generate_scheduled_cleaning_tasks: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      get_batch_remaining_stock: {
+        Args: { batch_id_param: string }
+        Returns: number
       }
       get_current_user_profile: {
         Args: { p_user_id: string }
