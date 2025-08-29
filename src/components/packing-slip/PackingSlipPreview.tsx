@@ -52,10 +52,7 @@ export function PackingSlipPreview({
       {/* Summary */}
       <div className="mb-4">
         <h3 className="text-sm font-semibold mb-1">Summary:</h3>
-        <div className="text-xs">
-          <p>Total Items: {totalItems}</p>
-          <p>Total Packages: {totalPackages}</p>
-        </div>
+        <p className="text-xs">Total Items: {totalItems} | Total Packages: {totalPackages}</p>
       </div>
       
       <PackingSlipCompliance />
