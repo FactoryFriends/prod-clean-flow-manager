@@ -8,7 +8,6 @@ export function PackingSlipHeader({ packingSlipNumber, currentDate }: PackingSli
   return (
     <div className="flex justify-between items-start mb-4">
       <div className="flex flex-col items-start">
-        <h1 className="text-lg font-bold text-gray-800 mb-1">TOTHAI</h1>
         <div className="text-xs leading-tight">
           <p className="text-gray-800 font-semibold">ToThai BV</p>
           <p className="text-gray-600">Production Kitchen</p>
