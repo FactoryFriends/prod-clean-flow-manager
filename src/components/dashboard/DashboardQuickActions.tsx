@@ -1,5 +1,5 @@
 
-import { ChefHat, Truck, ClipboardList, ShieldCheck, Utensils } from "lucide-react";
+import { ChefHat, Truck, ClipboardList, ShieldCheck, Store } from "lucide-react";
 
 interface DashboardQuickActionsProps {
   // onSectionChange now allows `'reports:favv'` and `'distribution:internal'` as well!
@@ -31,7 +31,7 @@ export function DashboardQuickActions({ onSectionChange, currentLocation }: Dash
       id: 'internal',
       onClick: () => onSectionChange('distribution:internal'),
       className: "p-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors",
-      icon: Utensils,
+      icon: Store,
       label: "Internal Kitchen"
     },
     {
