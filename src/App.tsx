@@ -8,7 +8,10 @@ import { HelpProvider } from "@/components/help/HelpProvider";
 import { VirtualKeyboardProvider } from "@/components/keyboard/VirtualKeyboardProvider";
 import { VirtualKeyboard } from "@/components/keyboard/VirtualKeyboard";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 import Index from "./pages/Index";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -18,17 +21,24 @@ const App = () => (
     <TooltipProvider>
       <HelpProvider>
         <VirtualKeyboardProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-          <VirtualKeyboard />
-          <PWAInstallPrompt />
-          <Toaster />
-          <Sonner />
+          <AuthProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/" element={
+                  <AuthGuard>
+                    <Index />
+                  </AuthGuard>
+                } />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+            <VirtualKeyboard />
+            <PWAInstallPrompt />
+            <Toaster />
+            <Sonner />
+          </AuthProvider>
         </VirtualKeyboardProvider>
       </HelpProvider>
     </TooltipProvider>

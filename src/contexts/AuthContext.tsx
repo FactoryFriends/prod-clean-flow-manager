@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/hooks/useUserManagement';
+import { sessionManager } from '@/utils/sessionManager';
 
 interface AuthContextType {
   user: User | null;
@@ -9,7 +10,7 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   signUp: (email: string, password: string, fullName?: string, role?: 'admin' | 'production') => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string, rememberDevice?: boolean) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
 }
 
@@ -87,15 +88,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, rememberDevice = false) => {
+    // Store device preference before signing in
+    sessionManager.setDevicePreference(rememberDevice);
+    
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+    
+    if (!error && rememberDevice) {
+      // Store session metadata for long-term sessions
+      sessionManager.setSessionMetadata({
+        email,
+        loginTime: new Date().toISOString(),
+        longTerm: true
+      });
+    }
+    
     return { error };
   };
 
   const signOut = async () => {
+    // Clear all session data on signout
+    sessionManager.clearAll();
     const { error } = await supabase.auth.signOut();
     return { error };
   };
