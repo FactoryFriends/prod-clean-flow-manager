@@ -27,6 +27,24 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
 
   const selectedProduct = products?.find(p => p.id === selectedProductId);
 
+  // Helper function to extract packaging type from product name or use supplier_package_unit
+  const getPackagingType = (product: any) => {
+    if (product?.supplier_package_unit) {
+      return product.supplier_package_unit.toUpperCase();
+    }
+    
+    // Extract packaging type from product name if available
+    const name = product?.name?.toLowerCase() || "";
+    if (name.includes("box")) return "BOX";
+    if (name.includes("bag")) return "BAG";
+    if (name.includes("container")) return "CONTAINER";
+    if (name.includes("pack")) return "PACK";
+    if (name.includes("bottle")) return "BOTTLE";
+    if (name.includes("jar")) return "JAR";
+    
+    return "PACKAGES"; // fallback
+  };
+
   // Auto-calculate expiry date when product changes
   useEffect(() => {
     if (selectedProduct && selectedProduct.shelf_life_days) {
@@ -135,7 +153,7 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
 
             <div className="space-y-1.5">
               <Label htmlFor="packages" className="text-sm font-medium">
-                # {selectedProduct?.supplier_package_unit || 'Packages'}
+                # {getPackagingType(selectedProduct)}
               </Label>
               <Select value={packagesProduced} onValueChange={setPackagesProduced}>
                 <SelectTrigger className="bg-white h-9">
@@ -159,7 +177,7 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
             {selectedProduct?.variable_packaging && (
               <div className="space-y-1.5">
                 <Label htmlFor="itemsPerPackage" className="text-sm font-medium">
-                  Items/{selectedProduct?.supplier_package_unit || 'Package'}
+                  Items/{getPackagingType(selectedProduct)?.slice(0, -1) || 'Package'}
                 </Label>
                 <Input
                   id="itemsPerPackage"
