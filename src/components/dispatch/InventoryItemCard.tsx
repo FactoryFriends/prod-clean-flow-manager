@@ -52,83 +52,87 @@ export function InventoryItemCard({
 
   return (
     <div 
-      className={`flex items-center gap-3 px-3 py-2 border-b border-border/50 transition-all hover:bg-accent/5 ${
+      className={`px-3 py-2 border-b border-border/50 transition-all hover:bg-accent/5 ${
         expired ? 'opacity-60' : ''
       } ${alreadySelectedQuantity > 0 ? 'bg-accent/10 border-l-2 border-l-accent' : ''}`}
     >
-      {/* Badge and Batch Info */}
-      <div className="flex items-center gap-2 min-w-0 flex-1">
-        {item.type === 'batch' ? (
-          <Badge variant="secondary" className="text-xs shrink-0 bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
-            In-House
-          </Badge>
-        ) : (
-          <Badge variant="outline" className="text-xs shrink-0 bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400">
-            External
-          </Badge>
-        )}
-        
-        <div 
-          className={`flex items-center gap-2 min-w-0 flex-1 ${
-            item.type === 'batch' && onBatchClick ? "cursor-pointer hover:text-primary" : ""
-          }`}
-          onClick={item.type === 'batch' && onBatchClick ? () => onBatchClick(item) : undefined}
-        >
+      {/* Product Name - First Line */}
+      <div 
+        className={`font-semibold text-sm text-foreground mb-1 ${
+          item.type === 'batch' && onBatchClick ? "cursor-pointer hover:text-primary" : ""
+        }`}
+        onClick={item.type === 'batch' && onBatchClick ? () => onBatchClick(item) : undefined}
+      >
+        {item.name}
+      </div>
+
+      {/* Details and Controls - Second Line */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          {/* Badge */}
+          {item.type === 'batch' ? (
+            <Badge variant="secondary" className="text-xs shrink-0 bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
+              In-House
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-xs shrink-0 bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400">
+              External
+            </Badge>
+          )}
+          
+          {/* Batch Number */}
           {item.type === 'batch' && item.batchNumber && (
-            <span className="font-semibold text-sm text-foreground shrink-0">
+            <span className="text-xs text-muted-foreground shrink-0">
               #{item.batchNumber}
             </span>
           )}
-          <span className="text-sm text-foreground truncate" title={item.name}>
-            {item.name}
+
+          {/* Availability */}
+          <span className="text-xs text-muted-foreground">
+            {item.availableQuantity || 0} available
           </span>
+
+          {/* In List indicator */}
+          {alreadySelectedQuantity > 0 && (
+            <span className="text-xs text-accent font-medium">
+              • {alreadySelectedQuantity} in list
+            </span>
+          )}
         </div>
-      </div>
 
-      {/* Availability */}
-      <div className="text-right shrink-0">
-        <div className="text-sm font-medium text-foreground">
-          {item.availableQuantity || 0} available
+        {/* Quantity Controls */}
+        <div className="flex items-center gap-1 shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-7 h-7 p-0 text-xs"
+            onClick={() => handleQuantityChange(-1)}
+            disabled={pendingQuantity <= 1 || expired}
+          >
+            -
+          </Button>
+          
+          <span className="w-6 text-center text-xs font-medium">{pendingQuantity}</span>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-7 h-7 p-0 text-xs"
+            onClick={() => handleQuantityChange(1)}
+            disabled={!canAdd || pendingQuantity >= maxAvailable}
+          >
+            +
+          </Button>
+
+          <Button 
+            size="sm"
+            onClick={handleAdd}
+            disabled={!canAdd}
+            className="ml-2 h-7 px-3 text-xs"
+          >
+            Add
+          </Button>
         </div>
-        {alreadySelectedQuantity > 0 && (
-          <div className="text-xs text-accent">
-            {alreadySelectedQuantity} in list
-          </div>
-        )}
-      </div>
-
-      {/* Quantity Controls */}
-      <div className="flex items-center gap-1 shrink-0">
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-7 h-7 p-0 text-xs"
-          onClick={() => handleQuantityChange(-1)}
-          disabled={pendingQuantity <= 1 || expired}
-        >
-          -
-        </Button>
-        
-        <span className="w-6 text-center text-xs font-medium">{pendingQuantity}</span>
-
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-7 h-7 p-0 text-xs"
-          onClick={() => handleQuantityChange(1)}
-          disabled={!canAdd || pendingQuantity >= maxAvailable}
-        >
-          +
-        </Button>
-
-        <Button 
-          size="sm"
-          onClick={handleAdd}
-          disabled={!canAdd}
-          className="ml-2 h-7 px-3 text-xs"
-        >
-          Add
-        </Button>
       </div>
     </div>
   );
