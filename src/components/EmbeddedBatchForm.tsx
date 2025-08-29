@@ -93,8 +93,8 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
       </CardHeader>
       <CardContent className="p-4">
         <form onSubmit={handleSubmit} className="space-y-3">
-          {/* Optimized layout - All main fields in one compact row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          {/* Optimized layout - 4 columns */}
+          <div className="grid grid-cols-4 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="product" className="text-sm font-medium">Product</Label>
               <Select value={selectedProductId} onValueChange={setSelectedProductId}>
