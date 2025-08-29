@@ -91,15 +91,15 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
           Create New Production Batch
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Top row - Main fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="product">Product</Label>
+      <CardContent className="p-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
+          {/* Optimized layout - All main fields in one compact row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="product" className="text-sm font-medium">Product</Label>
               <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                <SelectTrigger className="bg-white">
-                  <SelectValue placeholder="Select a product" />
+                <SelectTrigger className="bg-white h-9">
+                  <SelectValue placeholder="Select product" />
                 </SelectTrigger>
                 <SelectContent>
                   {products?.map((product) => (
@@ -111,11 +111,11 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="chef">Chef</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="chef" className="text-sm font-medium">Chef</Label>
               <Select value={selectedChefId} onValueChange={setSelectedChefId}>
-                <SelectTrigger className="bg-white">
-                  <SelectValue placeholder="Select a chef" />
+                <SelectTrigger className="bg-white h-9">
+                  <SelectValue placeholder="Select chef" />
                 </SelectTrigger>
                 <SelectContent>
                   {chefs?.map((chef) => (
@@ -127,110 +127,97 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="packages">
-                Number of {selectedProduct?.supplier_package_unit || 'Packages'} Produced
+            <div className="space-y-1.5">
+              <Label htmlFor="packages" className="text-sm font-medium">
+                # {selectedProduct?.supplier_package_unit || 'Packages'}
               </Label>
               <Select value={packagesProduced} onValueChange={setPackagesProduced}>
-                <SelectTrigger className="bg-white">
-                  <SelectValue placeholder={`Select number of ${selectedProduct?.supplier_package_unit?.toLowerCase() || 'packages'}`} />
+                <SelectTrigger className="bg-white h-9">
+                  <SelectValue placeholder="Count" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border border-gray-200 shadow-lg z-50">
-                  {Array.from({ length: 50 }, (_, i) => i + 1).map((num) => {
-                    const unitName = selectedProduct?.supplier_package_unit?.toLowerCase() || 'package';
-                    const pluralUnit = num > 1 ? `${unitName}s` : unitName;
-                    return (
-                      <SelectItem key={num} value={num.toString()}>
-                        {num} {pluralUnit}
-                      </SelectItem>
-                    );
-                  })}
+                  {Array.from({ length: 50 }, (_, i) => i + 1).map((num) => (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               {selectedProduct && (
                 <p className="text-xs text-blue-600">
-                  Standard: {selectedProduct.packages_per_batch} {selectedProduct.supplier_package_unit?.toLowerCase() || 'packages'}
+                  Std: {selectedProduct.packages_per_batch}
                 </p>
               )}
             </div>
-          </div>
 
-          {/* Second row - Variable packaging and Expiry date */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {selectedProduct?.variable_packaging && (
-              <div className="space-y-2">
-                <Label htmlFor="itemsPerPackage">
-                  Items per {selectedProduct?.supplier_package_unit || 'Package'}
+              <div className="space-y-1.5">
+                <Label htmlFor="itemsPerPackage" className="text-sm font-medium">
+                  Items/{selectedProduct?.supplier_package_unit || 'Package'}
                 </Label>
                 <Input
                   id="itemsPerPackage"
                   type="number"
                   value={itemsPerPackage}
                   onChange={(e) => setItemsPerPackage(e.target.value)}
-                  placeholder={`e.g. 40 items per ${selectedProduct?.supplier_package_unit?.toLowerCase() || 'package'}`}
-                  className="bg-white"
+                  placeholder="40"
+                  className="bg-white h-9"
                 />
-                <p className="text-xs text-blue-600">
-                  Specify how many items go in each {selectedProduct?.supplier_package_unit?.toLowerCase() || 'package'} for this batch
-                </p>
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="expiry">Expiry Date (Auto-calculated)</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="expiry" className="text-sm font-medium">Expiry Date</Label>
               <Input
                 id="expiry"
                 type="date"
                 value={calculatedExpiryDate}
                 onChange={(e) => setCalculatedExpiryDate(e.target.value)}
-                className="bg-white"
+                className="bg-white h-9"
               />
-              {selectedProduct && selectedProduct.shelf_life_days && (
+              {selectedProduct?.shelf_life_days && (
                 <p className="text-xs text-blue-600">
-                  Based on {selectedProduct.shelf_life_days} days shelf life
+                  {selectedProduct.shelf_life_days}d shelf life
                 </p>
               )}
             </div>
           </div>
 
-          {/* Additional notes and tips */}
+          {/* Compact info section */}
           {selectedProduct && (
-            <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-              <div className="text-xs space-y-1">
-                <p className="italic text-blue-800">
-                  You can change the package count if you produced more or less than the usual batch.
-                </p>
-                {selectedProduct.unit_type === "PIECE" && (
-                  <p className="text-blue-700">
-                    Example: If you made 600 spring rolls and pack 30 per bag, enter 20 for "Number of Packages/Bags".
-                  </p>
-                )}
+            <div className="bg-blue-50 p-2 rounded border border-blue-200">
+              <div className="text-xs text-blue-700">
+                💡 You can adjust package count from standard batch size.
+                {selectedProduct.unit_type === "PIECE" && 
+                  " Example: 600 spring rolls ÷ 30 per bag = 20 bags"
+                }
               </div>
             </div>
           )}
 
-          {/* Third row - Production notes */}
-          <div className="space-y-2">
-            <Label htmlFor="notes">Production Notes (optional)</Label>
-            <Textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Any special notes..."
-              rows={2}
-              className="bg-white"
-            />
-          </div>
+          {/* Bottom row - Notes and submit */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 items-end">
+            <div className="lg:col-span-2 space-y-1.5">
+              <Label htmlFor="notes" className="text-sm font-medium">Production Notes (optional)</Label>
+              <Textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Any special notes..."
+                rows={2}
+                className="bg-white"
+              />
+            </div>
 
-          {/* Submit button */}
-          <div className="flex justify-end pt-2">
-            <Button 
-              type="submit" 
-              disabled={!canSubmit}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              {createBatch.isPending ? "Creating..." : "CREATE BATCH AND PRINT LABELS"}
-            </Button>
+            <div className="flex justify-end">
+              <Button 
+                type="submit" 
+                disabled={!canSubmit}
+                className="bg-blue-600 hover:bg-blue-700 w-full lg:w-auto"
+              >
+                {createBatch.isPending ? "Creating..." : "CREATE & PRINT"}
+              </Button>
+            </div>
           </div>
         </form>
       </CardContent>
