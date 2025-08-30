@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { useUnitOptions } from "./UnitOptionsContext";
+import { useUnitOptionsQuery } from "@/hooks/useUnitOptions";
 import { Button } from "@/components/ui/button";
 
 export interface SupplierPackagingFieldsProps {
@@ -18,7 +19,9 @@ export function SupplierPackagingFields({
   show, 
   supplierName = "your supplier" 
 }: SupplierPackagingFieldsProps) {
-  const { purchaseUnits, innerUnits } = useUnitOptions();
+  const { innerUnits } = useUnitOptions();
+  const { data: unitOptions = [] } = useUnitOptionsQuery(); 
+  const supplierPackageUnits = unitOptions.filter(unit => unit.unit_type === 'supplier_package').map(unit => unit.name);
 
   if (!show) return null;
   
@@ -48,7 +51,7 @@ export function SupplierPackagingFields({
                       onChange={(e) => field.onChange(e.target.value)}
                     >
                       <option value="">___</option>
-                      {purchaseUnits.map((unit) => (
+                      {supplierPackageUnits.map((unit) => (
                         <option key={unit} value={unit}>{unit}</option>
                       ))}
                     </select>

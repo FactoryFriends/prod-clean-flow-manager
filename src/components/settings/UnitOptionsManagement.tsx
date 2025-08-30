@@ -106,20 +106,20 @@ export function UnitOptionsManagement() {
             </div>
           </div>
 
-          {/* Purchase Units */}
+          {/* Measurement Units */}
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
             <div className="flex items-center gap-2 mb-3">
               <Box className="h-5 w-5 text-blue-600" />
-              <Label className="text-lg font-semibold text-blue-900">Purchase Units</Label>
+              <Label className="text-lg font-semibold text-blue-900">Measurement Units</Label>
             </div>
             <p className="text-sm text-blue-700 mb-4">
-              Units used for purchasing and procurement activities. Examples: KG, LITER, METER
+              Standard measurement units for quantities and weights. Examples: KG, LITER, METER, GRAM
             </p>
             <div className="flex gap-2 mb-3">
               <Input
                 value={newPurchaseUnit}
                 onChange={(e) => setNewPurchaseUnit(e.target.value)}
-                placeholder="New purchase unit..."
+                placeholder="New measurement unit..."
                 onKeyPress={(e) => e.key === 'Enter' && handleAddPurchaseUnit()}
               />
               <Button 
@@ -183,6 +183,49 @@ export function UnitOptionsManagement() {
                   </button>
                 </Badge>
               ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Live Preview Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Live Preview</CardTitle>
+          <CardDescription>
+            Test your unit combinations to see how they work together in the product creation flow.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-gray-50 p-6 rounded-lg border">
+            <h4 className="font-semibold text-gray-900 mb-4">Example Product Scenario:</h4>
+            <div className="space-y-4">
+              <p className="text-base text-gray-800 leading-relaxed">
+                This product comes in{" "}
+                <select className="inline border-b-2 border-blue-300 bg-transparent px-2 py-1 text-blue-600 font-semibold focus:border-blue-500 focus:outline-none">
+                  <option value="">Choose...</option>
+                  {supplierPackageUnits.map((unit) => (
+                    <option key={unit.id} value={unit.name}>{unit.name}</option>
+                  ))}
+                </select>
+                {" "}that contain{" "}
+                <input 
+                  type="number" 
+                  placeholder="24" 
+                  className="inline w-16 border-b-2 border-blue-300 bg-transparent px-1 py-0 text-blue-600 font-semibold focus:border-blue-500 border-t-0 border-l-0 border-r-0 rounded-none"
+                />
+                {" "}individual{" "}
+                <select className="inline border-b-2 border-blue-300 bg-transparent px-2 py-1 text-blue-600 font-semibold focus:border-blue-500 focus:outline-none">
+                  <option value="">Choose...</option>
+                  {innerUnits.map((unit) => (
+                    <option key={unit.id} value={unit.name}>{unit.name}</option>
+                  ))}
+                </select>
+                .
+              </p>
+              <p className="text-sm text-gray-600 italic">
+                Example: "This product comes in <strong>CASES</strong> that contain <strong>24</strong> individual <strong>BOTTLES</strong>."
+              </p>
             </div>
           </div>
         </CardContent>

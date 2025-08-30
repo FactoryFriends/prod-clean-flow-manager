@@ -106,11 +106,11 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
                 📦 Supplier & Purchase Information
               </h3>
               <div className="text-sm text-orange-700 mb-4">
-                Information about how you purchase this product from your supplier.
+                Tell us about your supplier's packaging to calculate the exact cost per unit.
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
+              <div className="space-y-4">
+                <div>
                   <ProductSupplierSelect
                     value={formData.supplier_id}
                     onChange={val => onFieldChange("supplier_id", val)}
@@ -119,94 +119,92 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
                   />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="supplier_package_unit">What does supplier sell? *</Label>
-                  <Select
-                    value={formData.supplier_package_unit || ""}
-                    onValueChange={(value) => onFieldChange("supplier_package_unit", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="e.g. TRAY, CASE, BOX..." />
-                    </SelectTrigger>
-                    <SelectContent className="z-50 bg-background">
-                      {supplierPackageUnits.map((unit) => (
-                        <SelectItem key={unit} value={unit}>
-                          {unit}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <div className="bg-white p-4 rounded-lg border">
+                  <p className="text-base text-gray-800 mb-4 leading-relaxed">
+                    This product comes in{" "}
+                    <span className="inline-block min-w-[120px] text-orange-600 font-semibold">
+                      <Select
+                        value={formData.supplier_package_unit || ""}
+                        onValueChange={(value) => onFieldChange("supplier_package_unit", value)}
+                      >
+                        <SelectTrigger className="inline w-auto border-b-2 border-orange-300 bg-transparent px-2 py-1 text-orange-600 font-semibold focus:border-orange-500 border-t-0 border-l-0 border-r-0 rounded-none text-base">
+                          <SelectValue placeholder="___" />
+                        </SelectTrigger>
+                        <SelectContent className="z-50 bg-background">
+                          {supplierPackageUnits.map((unit) => (
+                            <SelectItem key={unit} value={unit}>
+                              {unit}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </span>
+                    {" "}and it costs me{" "}
+                    <span className="inline-block min-w-[80px] text-orange-600 font-semibold">
+                      €<Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={formData.price_per_package ?? ""}
+                        onChange={e => onFieldChange("price_per_package", e.target.value ? Number(e.target.value) : null)}
+                        placeholder="0.00"
+                        className="inline w-20 border-b-2 border-orange-300 bg-transparent px-1 py-0 text-orange-600 font-semibold focus:border-orange-500 border-t-0 border-l-0 border-r-0 rounded-none text-base"
+                      />
+                    </span>
+                    .
+                  </p>
+                  
+                  <p className="text-base text-gray-800 mb-4 leading-relaxed">
+                    Each package contains{" "}
+                    <span className="inline-block min-w-[60px] text-orange-600 font-semibold">
+                      <Input
+                        type="number"
+                        min="1"
+                        value={formData.units_per_package ?? ""}
+                        onChange={e => onFieldChange("units_per_package", e.target.value ? Number(e.target.value) : null)}
+                        placeholder="1"
+                        className="inline w-16 border-b-2 border-orange-300 bg-transparent px-1 py-0 text-orange-600 font-semibold focus:border-orange-500 border-t-0 border-l-0 border-r-0 rounded-none text-base"
+                      />
+                    </span>
+                    {" "}units, and each unit is measured as{" "}
+                    <span className="inline-block min-w-[100px] text-orange-600 font-semibold">
+                      <Select
+                        value={formData.inner_unit_type || ""}
+                        onValueChange={(value) => onFieldChange("inner_unit_type", value)}
+                      >
+                        <SelectTrigger className="inline w-auto border-b-2 border-orange-300 bg-transparent px-2 py-1 text-orange-600 font-semibold focus:border-orange-500 border-t-0 border-l-0 border-r-0 rounded-none text-base">
+                          <SelectValue placeholder="___" />
+                        </SelectTrigger>
+                        <SelectContent className="z-50 bg-background">
+                          {innerUnits.map((unit) => (
+                            <SelectItem key={unit} value={unit.toLowerCase()}>
+                              {unit}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </span>
+                    .
+                  </p>
 
-                <div className="space-y-2">
-                  <Label htmlFor="price_per_package">Price per {formData.supplier_package_unit || 'Package'} (€) *</Label>
-                  <Input
-                    id="price_per_package"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.price_per_package ?? ""}
-                    onChange={e => onFieldChange("price_per_package", e.target.value ? Number(e.target.value) : null)}
-                    placeholder="Invoice price"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="units_per_package">
-                    How many units per {formData.supplier_package_unit || 'package'}?
-                  </Label>
-                  <Input
-                    id="units_per_package"
-                    type="number"
-                    min="1"
-                    value={formData.units_per_package ?? ""}
-                    placeholder="e.g. 30 eggs per tray"
-                    onChange={e => onFieldChange("units_per_package", e.target.value ? Number(e.target.value) : null)}
-                  />
-                  <div className="text-xs text-orange-600">
-                    Leave blank if sold as single units (no subdivision)
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="inner_unit_type">What type of units inside?</Label>
-                  <Select
-                    value={formData.inner_unit_type || ""}
-                    onValueChange={(value) => onFieldChange("inner_unit_type", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="e.g. PIECE, BOTTLE, etc." />
-                    </SelectTrigger>
-                    <SelectContent className="z-50 bg-background">
-                      {innerUnits.map((unit) => (
-                        <SelectItem key={unit} value={unit.toLowerCase()}>
-                          {unit}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Calculated cost per unit */}
-                <div className="col-span-2">
-                  <Label>Cost per unit (€)</Label>
-                  <Input
-                    value={
-                      formData.price_per_package && formData.units_per_package > 0
-                        ? (formData.price_per_package / formData.units_per_package).toFixed(4)
-                        : (formData.price_per_package
-                          ? Number(formData.price_per_package).toFixed(4)
-                          : "")
-                    }
-                    readOnly
-                    disabled
-                    className="bg-gray-100 cursor-not-allowed"
-                  />
-                  <div className="text-xs text-orange-600 italic mt-1">
-                    {formData.price_per_package && formData.units_per_package > 0
-                      ? `Calculated: €${formData.price_per_package} ÷ ${formData.units_per_package} units`
-                      : `Equal to package price if not subdivided`}
-                  </div>
+                  {/* Calculated cost per unit */}
+                  {formData.price_per_package && (
+                    <div className="mt-4 p-3 bg-orange-100 rounded-lg">
+                      <p className="text-sm font-semibold text-orange-900">
+                        ✓ Cost per unit: €
+                        {formData.units_per_package > 0
+                          ? (formData.price_per_package / formData.units_per_package).toFixed(4)
+                          : Number(formData.price_per_package).toFixed(4)
+                        }
+                      </p>
+                      <p className="text-xs text-orange-700 mt-1">
+                        {formData.units_per_package > 0
+                          ? `€${formData.price_per_package} ÷ ${formData.units_per_package} units`
+                          : `Equal to package price (not subdivided)`
+                        }
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
