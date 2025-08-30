@@ -1,7 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { logAuditAction } from '@/hooks/useAuditLogs';
+import { Logger } from '@/utils/logger';
 import { useStaffCodes } from "./useStaffCodes";
-import { logAuditAction } from "./useAuditLogs";
 import { toast } from "sonner";
 
 interface CleaningTask {
@@ -34,7 +37,7 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
   const { data: cleaningTasks = [], isLoading, error } = useQuery({
     queryKey: ['cleaning-tasks', dbLocation],
     queryFn: async () => {
-      console.log('Fetching cleaning tasks for location:', dbLocation);
+      Logger.info('Fetching cleaning tasks', { component: 'useCleaningTasks', data: { dbLocation } });
       const { data, error } = await supabase
         .from('cleaning_tasks')
         .select(`
@@ -46,11 +49,11 @@ export function useCleaningTasks(dbLocation: "tothai" | "khin") {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching cleaning tasks:', error);
+        Logger.error('Error fetching cleaning tasks', { error, component: 'useCleaningTasks' });
         throw error;
       }
 
-      console.log('Fetched cleaning tasks:', data);
+      Logger.debug('Fetched cleaning tasks', { component: 'useCleaningTasks', data });
       
       // Transform the data to flatten the requires_photo field
       const transformedData = data.map(task => ({

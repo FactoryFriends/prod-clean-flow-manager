@@ -8,6 +8,9 @@ import { DispatchType, SelectedItem } from "@/types/dispatch";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useStaffCodes } from "@/hooks/useStaffCodes";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useCreateDispatch } from "@/hooks/useCreateDispatch";
+import { LivePackingList } from "./LivePackingList";
+import { Logger } from "@/utils/logger";
 import { useEffect } from "react";
 
 interface DispatchFormProps {
@@ -40,34 +43,32 @@ export function DispatchForm({
   const isMobile = useIsMobile();
 
   // Debug logging
-  console.log("DispatchForm staff codes debug:", {
-    staffCodes,
-    staffCodesLength: staffCodes.length
+  Logger.debug("DispatchForm staff codes debug", {
+    component: "DispatchForm",
+    data: { staffCodes, staffCodesLength: staffCodes.length }
   });
 
   // Debug logging
-  console.log("DispatchForm customers debug:", {
-    customers,
-    customersLoading,
-    customersError,
-    customersLength: customers.length
+  Logger.debug("DispatchForm customers debug", {
+    component: "DispatchForm", 
+    data: { customers, customersLoading, customersError, customersLength: customers.length }
   });
 
   // Set KHIN as default customer for external dispatch
   useEffect(() => {
     if (dispatchType === "external" && !customer && customers.length > 0) {
-      console.log("Looking for KHIN customer in:", customers);
+      Logger.debug("Looking for KHIN customer", { component: "DispatchForm", data: { customers } });
       const khinCustomer = customers.find(c => 
         c.name.toLowerCase().includes('khin') || c.name.toLowerCase().includes('restaurant')
       );
-      console.log("Found KHIN customer:", khinCustomer);
+      Logger.debug("Found KHIN customer", { component: "DispatchForm", data: { khinCustomer } });
       if (khinCustomer) {
         setCustomer(khinCustomer.id);
-        console.log("Set customer to:", khinCustomer.id);
+        Logger.debug("Set customer to KHIN", { component: "DispatchForm", data: { customerId: khinCustomer.id } });
       } else {
         // If no KHIN found, set the first customer as default
         setCustomer(customers[0].id);
-        console.log("Set first customer as default:", customers[0].id);
+        Logger.debug("Set first customer as default", { component: "DispatchForm", data: { customerId: customers[0].id } });
       }
     }
   }, [dispatchType, customers, customer, setCustomer]);
@@ -75,15 +76,18 @@ export function DispatchForm({
   const canSubmit = pickerName && selectedItems.length > 0 && 
     (dispatchType === "internal" || (dispatchType === "external" && customer));
 
-  console.log("DispatchForm debug:", {
-    pickerName,
-    selectedItemsLength: selectedItems.length,
-    dispatchType,
-    customer,
-    canSubmit,
-    customersCount: customers.length,
-    customersLoading,
-    customersError
+  Logger.debug("DispatchForm debug data", {
+    component: "DispatchForm",
+    data: {
+      pickerName,
+      selectedItemsLength: selectedItems.length,
+      dispatchType,
+      customer,
+      canSubmit,
+      customersCount: customers.length,
+      customersLoading,
+      customersError
+    }
   });
 
   return (

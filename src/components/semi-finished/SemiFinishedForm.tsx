@@ -3,8 +3,9 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form, FormLabel } from "@/components/ui/form";
-import { useCreateProduct, useAllProducts } from "@/hooks/useProductionData";
+import { useAllProducts, useCreateProduct } from "@/hooks/useProductionData";
 import { useSuppliers } from "@/hooks/useSuppliers";
+import { Logger } from "@/utils/logger";
 import { toast } from "sonner";
 
 import {
@@ -46,13 +47,15 @@ export function SemiFinishedForm() {
   const { data: allProducts, isLoading: productsLoading } = useAllProducts();
   const { data: suppliers = [] } = useSuppliers();
 
-  console.log("All products data:", allProducts);
-  console.log("Products loading:", productsLoading);
+  Logger.debug("All products data loaded", { 
+    component: "SemiFinishedForm", 
+    data: { allProducts, productsLoading } 
+  });
 
   // Pick ONLY extern products (ingredients) for recipe
   const ingredientOptions = React.useMemo(() => {
     if (!allProducts) {
-      console.log("No allProducts data available");
+      Logger.debug("No allProducts data available", { component: "SemiFinishedForm" });
       return [];
     }
     
@@ -64,8 +67,13 @@ export function SemiFinishedForm() {
       }
     );
     
-    console.log("Filtered ingredient options:", filtered);
-    console.log("Filter criteria - extern products:", allProducts.filter(p => p.product_type === "extern"));
+    Logger.debug("Filtered ingredient options", { 
+      component: "SemiFinishedForm", 
+      data: { 
+        filtered, 
+        externProducts: allProducts.filter(p => p.product_type === "extern") 
+      } 
+    });
     return filtered;
   }, [allProducts]);
 
@@ -101,8 +109,10 @@ export function SemiFinishedForm() {
   }, [batchUnit, unitSize, form]);
 
   const onSubmit = (data: SemiFinishedFormData) => {
-    console.log("Form data being submitted:", data);
-    console.log("Thai name value:", data.name_thai);
+    Logger.info("Semi-finished form submission", { 
+      component: "SemiFinishedForm", 
+      data: { formData: data, nameThaiValue: data.name_thai } 
+    });
     
     if (recipe.length === 0) {
       toast.error("Please add at least one ingredient to the recipe.");
@@ -146,7 +156,7 @@ export function SemiFinishedForm() {
           toast.success("Semi-finished product created");
         },
         onError: (error) => {
-          console.error("Error creating product:", error);
+          Logger.error("Error creating product", { error, component: "SemiFinishedForm" });
           toast.error("Failed to create product");
         },
       }

@@ -3,6 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/hooks/useUserManagement';
 import { sessionManager } from '@/utils/sessionManager';
+import { Logger } from '@/utils/logger';
 
 interface AuthContextType {
   user: User | null;
@@ -43,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setProfile(null);
               }
             } catch (error) {
-              console.error('Error loading user profile:', error);
+              Logger.error('Error loading user profile', { error, component: 'AuthContext' });
               setProfile(null);
             }
           }, 0);
@@ -72,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setProfile(null);
           }
         } catch (error) {
-          console.error('Error loading user profile:', error);
+          Logger.error('Error loading user profile', { error, component: 'AuthContext' });
           setProfile(null);
         }
       }
@@ -128,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return { error: null };
     } catch (error: any) {
-      console.error('Sign in error:', error);
+      Logger.error('Sign in error', { error, component: 'AuthContext' });
       return { error };
     }
   };

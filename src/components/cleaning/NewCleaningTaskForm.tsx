@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { NewCleaningTaskFormFields } from "./NewCleaningTaskFormFields";
+import { Logger } from "@/utils/logger";
 
 interface NewTaskFormData {
   title: string;
