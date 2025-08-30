@@ -7,10 +7,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 
 interface ProductListProps {
   onEditProduct: (product: Product) => void;
+  typeFilter?: string;
+  searchFilter?: string;
 }
 
-export function ProductList({ onEditProduct }: ProductListProps) {
-  const { data: products, isLoading } = useAllProducts();
+export function ProductList({ onEditProduct, typeFilter = "all", searchFilter = "" }: ProductListProps) {
+  const { data: allProducts, isLoading } = useAllProducts();
   const deleteProduct = useDeleteProduct();
 
   const getProductTypeInfo = (product: any) => {
@@ -42,11 +44,43 @@ export function ProductList({ onEditProduct }: ProductListProps) {
     }
   };
 
+  // Filter products based on type and search
+  const filteredProducts = allProducts?.filter((product) => {
+    // Type filter
+    let matchesType = true;
+    if (typeFilter !== "all") {
+      switch (typeFilter) {
+        case "semi-finished":
+          matchesType = product.product_kind === "zelfgemaakt" && product.product_type !== "dish" && product.product_type !== "drink";
+          break;
+        case "external":
+          matchesType = product.product_type === "extern" || product.product_kind === "extern";
+          break;
+        case "ingredient":
+          matchesType = product.product_type === "ingredient";
+          break;
+        case "dish":
+          matchesType = product.product_type === "dish";
+          break;
+        case "drink":
+          matchesType = product.product_type === "drink";
+          break;
+      }
+    }
+
+    // Search filter
+    const matchesSearch = searchFilter === "" || 
+      product.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+      (product.supplier_name && product.supplier_name.toLowerCase().includes(searchFilter.toLowerCase()));
+
+    return matchesType && matchesSearch;
+  }) || [];
+
   if (isLoading) {
     return <div className="text-center py-4">Loading products...</div>;
   }
 
-  if (!products || products.length === 0) {
+  if (!allProducts || allProducts.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         <Plus className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -55,9 +89,21 @@ export function ProductList({ onEditProduct }: ProductListProps) {
     );
   }
 
+  if (filteredProducts.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <Plus className="w-12 h-12 mx-auto mb-4 opacity-50" />
+        <p>No products match the current filters.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {products.map((product) => {
+      <div className="text-sm text-muted-foreground">
+        Showing {filteredProducts.length} of {allProducts.length} products
+      </div>
+      {filteredProducts.map((product) => {
         const margin = marginPct(product);
         const showMarginAlarm =
           margin !== null &&

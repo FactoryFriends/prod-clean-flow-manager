@@ -27,7 +27,7 @@ export function SettingsTabsList() {
         <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full h-auto p-1 bg-muted/50">
           <TabsTrigger value="products" className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm">
             <Package className="w-5 h-5" />
-            <span className="text-xs font-medium">Semi-finished</span>
+            <span className="text-xs font-medium">Products</span>
           </TabsTrigger>
           <TabsTrigger value="drinks" className="flex flex-col items-center gap-2 h-auto py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm">
             <Coffee className="w-5 h-5" />

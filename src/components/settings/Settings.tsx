@@ -31,6 +31,7 @@ export function Settings({ currentLocation }: SettingsProps) {
   
   // Filter states
   const [productFilter, setProductFilter] = useState("");
+  const [productTypeFilter, setProductTypeFilter] = useState("all");
   const [drinkFilter, setDrinkFilter] = useState("");
   const [staffCodeFilter, setStaffCodeFilter] = useState("");
   const [templateFilter, setTemplateFilter] = useState("");
@@ -111,6 +112,8 @@ export function Settings({ currentLocation }: SettingsProps) {
             <ProductsTab
               productFilter={productFilter}
               setProductFilter={setProductFilter}
+              productTypeFilter={productTypeFilter}
+              setProductTypeFilter={setProductTypeFilter}
               onAddNewProduct={handleAddNewProduct}
               onEditProduct={handleEditProduct}
             />

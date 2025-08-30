@@ -14,6 +14,7 @@ export function useSettingsState() {
   
   // Filter states
   const [productFilter, setProductFilter] = useState("");
+  const [productTypeFilter, setProductTypeFilter] = useState("all");
   const [drinkFilter, setDrinkFilter] = useState("");
   const [staffCodeFilter, setStaffCodeFilter] = useState("");
   const [templateFilter, setTemplateFilter] = useState("");
@@ -46,6 +47,8 @@ export function useSettingsState() {
     // Filter states
     productFilter,
     setProductFilter,
+    productTypeFilter,
+    setProductTypeFilter,
     drinkFilter,
     setDrinkFilter,
     staffCodeFilter,

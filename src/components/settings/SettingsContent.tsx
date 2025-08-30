@@ -18,6 +18,8 @@ interface SettingsContentProps {
   currentLocation: "tothai" | "khin";
   productFilter: string;
   setProductFilter: (filter: string) => void;
+  productTypeFilter: string;
+  setProductTypeFilter: (filter: string) => void;
   drinkFilter: string;
   setDrinkFilter: (filter: string) => void;
   staffCodeFilter: string;
@@ -43,6 +45,8 @@ export function SettingsContent({
   currentLocation,
   productFilter,
   setProductFilter,
+  productTypeFilter,
+  setProductTypeFilter,
   drinkFilter,
   setDrinkFilter,
   staffCodeFilter,
@@ -69,6 +73,8 @@ export function SettingsContent({
       <ProductsTab
         productFilter={productFilter}
         setProductFilter={setProductFilter}
+        productTypeFilter={productTypeFilter}
+        setProductTypeFilter={setProductTypeFilter}
         onAddNewProduct={onAddNewProduct}
         onEditProduct={onEditProduct}
       />
