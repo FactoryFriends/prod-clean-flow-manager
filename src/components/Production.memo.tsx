@@ -112,7 +112,7 @@ export const Production = React.memo(function Production({ currentLocation }: Pr
 
       return matchesSearch && matchesFilter;
     });
-  }, [batches, searchTerm, filterStatus]);
+  }, [batches, searchTerm, filterStatus, batchStocks]);
 
   if (error) {
     return (
