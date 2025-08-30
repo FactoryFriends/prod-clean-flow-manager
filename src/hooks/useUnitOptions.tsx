@@ -5,7 +5,7 @@ import { toast } from "sonner";
 export type UnitOption = {
   id: string;
   name: string;
-  unit_type: 'purchase' | 'inner';
+  unit_type: 'purchase' | 'inner' | 'supplier_package';
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -40,12 +40,18 @@ export function useInnerUnits() {
   return unitOptions.filter(unit => unit.unit_type === 'inner').map(unit => unit.name);
 }
 
+// Get supplier package units only
+export function useSupplierPackageUnits() {
+  const { data: unitOptions = [] } = useUnitOptionsQuery();
+  return unitOptions.filter(unit => unit.unit_type === 'supplier_package').map(unit => unit.name);
+}
+
 // Create new unit option
 export function useCreateUnitOption() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ name, unit_type }: { name: string; unit_type: 'purchase' | 'inner' }) => {
+    mutationFn: async ({ name, unit_type }: { name: string; unit_type: 'purchase' | 'inner' | 'supplier_package' }) => {
       const { data, error } = await supabase
         .from("unit_options")
         .insert({ name: name.trim().toUpperCase(), unit_type })

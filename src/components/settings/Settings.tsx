@@ -14,7 +14,7 @@ import { SystemInfo } from "@/components/settings/SystemInfo";
 import { SuppliersTab } from "@/components/settings/tabs/SuppliersTab";
 import { UsersTab } from "@/components/settings/tabs/UsersTab";
 import IngredientPriceManager from "../reports/IngredientPriceManager";
-import UnitOptionsSettings from "./UnitOptionsSettings";
+import { UnitOptionsManagement } from "./UnitOptionsManagement";
 import { UnitOptionsProvider } from "../shared/UnitOptionsContext";
 
 interface SettingsProps {
@@ -143,7 +143,7 @@ export function Settings({ currentLocation }: SettingsProps) {
             <SuppliersTab />
             <UsersTab />
             <TabsContent value="unit-options" className="space-y-4">
-              <UnitOptionsSettings />
+              <UnitOptionsManagement />
             </TabsContent>
             <TabsContent value="ingredient-margins" className="space-y-4">
               <IngredientPriceManager />

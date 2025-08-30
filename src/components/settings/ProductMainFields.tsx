@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ProductFicheUpload } from "./ProductFicheUpload";
 import { ProductSupplierSelect } from "./ProductSupplierSelect";
 import { useUnitOptions } from "../shared/UnitOptionsContext";
+import { useSupplierPackageUnits } from "@/hooks/useUnitOptions";
 import { Package } from "lucide-react";
 import React from "react";
 
@@ -15,6 +16,7 @@ interface ProductMainFieldsProps {
 
 export function ProductMainFields({ formData, onFieldChange }: ProductMainFieldsProps) {
   const { innerUnits } = useUnitOptions();
+  const supplierPackageUnits = useSupplierPackageUnits();
   const showSupplierPackageFields =
     formData.product_type === "extern" ||
     formData.product_type === "ingredient" ||
@@ -127,19 +129,11 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
                       <SelectValue placeholder="e.g. TRAY, CASE, BOX..." />
                     </SelectTrigger>
                     <SelectContent className="z-50 bg-background">
-                      <SelectItem value="CASE">CASE</SelectItem>
-                      <SelectItem value="BOX">BOX</SelectItem>
-                      <SelectItem value="BAG">BAG</SelectItem>
-                      <SelectItem value="BOTTLE">BOTTLE</SelectItem>
-                      <SelectItem value="CAN">CAN</SelectItem>
-                      <SelectItem value="CARTON">CARTON</SelectItem>
-                      <SelectItem value="PACK">PACK</SelectItem>
-                      <SelectItem value="PALLET">PALLET</SelectItem>
-                      <SelectItem value="SACK">SACK</SelectItem>
-                      <SelectItem value="TRAY">TRAY</SelectItem>
-                      <SelectItem value="UNIT">UNIT</SelectItem>
-                      <SelectItem value="KG">KG</SelectItem>
-                      <SelectItem value="LITER">LITER</SelectItem>
+                      {supplierPackageUnits.map((unit) => (
+                        <SelectItem key={unit} value={unit}>
+                          {unit}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -176,13 +170,21 @@ export function ProductMainFields({ formData, onFieldChange }: ProductMainFields
 
                 <div className="space-y-2">
                   <Label htmlFor="inner_unit_type">What type of units inside?</Label>
-                  <Input
-                    id="inner_unit_type"
-                    type="text"
-                    placeholder="e.g. PIECE, BOTTLE, etc."
+                  <Select
                     value={formData.inner_unit_type || ""}
-                    onChange={e => onFieldChange("inner_unit_type", e.target.value)}
-                  />
+                    onValueChange={(value) => onFieldChange("inner_unit_type", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="e.g. PIECE, BOTTLE, etc." />
+                    </SelectTrigger>
+                    <SelectContent className="z-50 bg-background">
+                      {innerUnits.map((unit) => (
+                        <SelectItem key={unit} value={unit.toLowerCase()}>
+                          {unit}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Calculated cost per unit */}
