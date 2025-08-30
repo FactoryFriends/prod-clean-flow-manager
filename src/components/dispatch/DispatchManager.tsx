@@ -1,13 +1,12 @@
 
 import { useState, useEffect } from "react";
-import { useProductionBatches } from "@/hooks/useProductionData";
+import { useProductionBatches, useExternalProducts, useIngredientProducts } from "@/hooks/useProductionData";
 import { useCustomers } from "@/hooks/useCustomers";
 import { PackingSlipDialog } from "../PackingSlipDialog";
 import { DispatchFormHeader } from "./DispatchFormHeader";
 import { LivePackingList } from "./LivePackingList";
 import { InventoryBrowser } from "./InventoryBrowser";
 import { SelectedItem, DispatchType } from "@/types/dispatch";
-import { externalProducts } from "@/data/dispatchData";
 import { useDispatchOperations } from "@/hooks/useDispatchOperations";
 
 interface DispatchManagerProps {
@@ -32,6 +31,8 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
 
   const { data: batches } = useProductionBatches(currentLocation);
   const { data: customers = [] } = useCustomers(true);
+  const { data: externalProducts } = useExternalProducts();
+  const { data: ingredientProducts } = useIngredientProducts();
   
   const { handleCreatePackingSlip, handleInternalUse } = useDispatchOperations({
     dispatchType,
@@ -75,14 +76,28 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
     productionDate: batch.production_date,
   }));
 
-  const availableExternal = externalProducts.map(product => ({
+  // Match InventoryBrowser data structure exactly
+  const availableExternalProducts = (externalProducts || []).map(product => ({
     id: product.id,
     type: 'external' as const,
     name: product.name,
     selectedQuantity: 0,
+    supplier: product.supplier_name,
+    productType: 'External Product' as const,
+    innerUnitType: product.inner_unit_type,
   }));
 
-  const allAvailableItems = [...availableBatches, ...availableExternal];
+  const availableIngredientProducts = (ingredientProducts || []).map(product => ({
+    id: product.id,
+    type: 'ingredient' as const,
+    name: product.name,
+    selectedQuantity: 0,
+    supplier: product.supplier_name,
+    productType: 'Ingredient' as const,
+    innerUnitType: product.inner_unit_type,
+  }));
+
+  const allAvailableItems = [...availableBatches, ...availableExternalProducts, ...availableIngredientProducts];
 
   const handleQuantityChange = (itemId: string, change: number) => {
     const item = allAvailableItems.find(i => i.id === itemId);

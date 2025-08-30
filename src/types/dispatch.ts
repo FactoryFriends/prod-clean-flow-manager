@@ -1,13 +1,16 @@
 
 export interface SelectedItem {
   id: string;
-  type: 'batch' | 'external';
+  type: 'batch' | 'external' | 'ingredient';
   name: string;
   batchNumber?: string;
   availableQuantity?: number;
   selectedQuantity: number;
   expiryDate?: string;
   productionDate?: string;
+  supplier?: string;
+  productType?: string;
+  innerUnitType?: string;
 }
 
 export interface ExternalProduct {
