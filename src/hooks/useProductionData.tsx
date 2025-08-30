@@ -117,6 +117,29 @@ export const useExternalProducts = () => {
   });
 };
 
+export const useIngredientProducts = () => {
+  return useQuery({
+    queryKey: ["ingredient-products"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("active", true)
+        .eq("product_type", "ingredient")
+        .eq("pickable", true)
+        .order("name");
+      
+      if (error) {
+        console.error("Error fetching ingredient products:", error);
+        throw error;
+      }
+      
+      console.log("Ingredient products loaded:", data);
+      return data as Product[];
+    },
+  });
+};
+
 export const useCreateProduct = () => {
   const queryClient = useQueryClient();
   return useMutation({

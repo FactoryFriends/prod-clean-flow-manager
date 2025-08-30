@@ -6,7 +6,7 @@ import { format } from "date-fns";
 
 interface InventoryItem {
   id: string;
-  type: 'batch' | 'external';
+  type: 'batch' | 'external' | 'ingredient';
   name: string;
   batchNumber?: string;
   availableQuantity?: number;
@@ -16,6 +16,7 @@ interface InventoryItem {
   unitSize?: number;
   unitType?: string;
   productionNotes?: string;
+  productType?: 'External Product' | 'Ingredient';
 }
 
 interface InventoryItemCardProps {
@@ -74,9 +75,13 @@ export function InventoryItemCard({
             <Badge variant="secondary" className="text-xs shrink-0 bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
               In-House
             </Badge>
-          ) : (
+          ) : item.type === 'external' ? (
             <Badge variant="outline" className="text-xs shrink-0 bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400">
               External
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-xs shrink-0 bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
+              Ingredient
             </Badge>
           )}
           

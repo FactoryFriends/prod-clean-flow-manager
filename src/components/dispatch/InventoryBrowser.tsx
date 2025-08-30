@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, QrCode, Search, Package, Home, Store } from "lucide-react";
 import { useBatchStock } from "@/hooks/useBatchStock";
-import { useExternalProducts } from "@/hooks/useProductionData";
+import { useExternalProducts, useIngredientProducts } from "@/hooks/useProductionData";
 import { SelectedItem } from "@/types/dispatch";
 import { BatchDetailsDialog } from "../BatchDetailsDialog";
 import { QRScanner } from "../QRScanner";
@@ -19,10 +19,11 @@ interface InventoryBrowserProps {
 export function InventoryBrowser({ currentLocation, selectedItems, onAddToPackingList }: InventoryBrowserProps) {
   const { data: batches } = useBatchStock({ location: currentLocation, inStockOnly: true });
   const { data: externalProducts } = useExternalProducts();
+  const { data: ingredientProducts } = useIngredientProducts();
   const [selectedBatch, setSelectedBatch] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [showExpired, setShowExpired] = useState(false);
-  const [filter, setFilter] = useState<"self-produced" | "external">("self-produced");
+  const [filter, setFilter] = useState<"self-produced" | "restaurant-supplies">("self-produced");
   const [qrScannerOpen, setQrScannerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -105,7 +106,7 @@ export function InventoryBrowser({ currentLocation, selectedItems, onAddToPackin
 
   const batchesToShow = showExpired ? availableBatches : activeBatches;
 
-  // Sort external products alphabetically
+  // Combine external products and ingredients for restaurant supplies
   const availableExternal = (externalProducts || [])
     .map(product => ({
       id: product.id,
@@ -113,7 +114,20 @@ export function InventoryBrowser({ currentLocation, selectedItems, onAddToPackin
       name: product.name,
       selectedQuantity: 0,
       supplier: product.supplier_name,
-    }))
+      productType: 'External Product' as const,
+    }));
+
+  const availableIngredients = (ingredientProducts || [])
+    .map(product => ({
+      id: product.id,
+      type: 'ingredient' as const,
+      name: product.name,
+      selectedQuantity: 0,
+      supplier: product.supplier_name,
+      productType: 'Ingredient' as const,
+    }));
+
+  const restaurantSupplies = [...availableExternal, ...availableIngredients]
     .sort((a, b) => a.name.localeCompare(b.name));
 
   // Filter items based on search query
@@ -127,7 +141,7 @@ export function InventoryBrowser({ currentLocation, selectedItems, onAddToPackin
 
   const itemsToShow = filter === "self-produced" 
     ? filterBySearch(batchesToShow) 
-    : filterBySearch(availableExternal);
+    : filterBySearch(restaurantSupplies);
 
   return (
     <>
@@ -176,17 +190,17 @@ export function InventoryBrowser({ currentLocation, selectedItems, onAddToPackin
                   In-House
                 </Button>
                 <Button
-                  variant={filter === "external" ? "default" : "ghost"}
+                  variant={filter === "restaurant-supplies" ? "default" : "ghost"}
                   size="sm"
-                  onClick={() => setFilter("external")}
+                  onClick={() => setFilter("restaurant-supplies")}
                   className={`flex items-center gap-2 px-4 py-2 font-medium transition-all ${
-                    filter === "external" 
+                    filter === "restaurant-supplies" 
                       ? "bg-amber-600 hover:bg-amber-700 text-white shadow-sm" 
                       : "text-muted-foreground hover:text-foreground hover:bg-background"
                   }`}
                 >
                   <Store className="w-4 h-4" />
-                  External
+                  Restaurant Supplies
                 </Button>
               </div>
 
