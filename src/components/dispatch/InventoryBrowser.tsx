@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, QrCode, Search, Package, Home, Store } from "lucide-react";
 import { useBatchStock } from "@/hooks/useBatchStock";
+import { useExternalProducts } from "@/hooks/useProductionData";
 import { SelectedItem } from "@/types/dispatch";
-import { externalProducts } from "@/data/dispatchData";
 import { BatchDetailsDialog } from "../BatchDetailsDialog";
 import { QRScanner } from "../QRScanner";
 import { InventoryItemCard } from "./InventoryItemCard";
@@ -18,6 +18,7 @@ interface InventoryBrowserProps {
 
 export function InventoryBrowser({ currentLocation, selectedItems, onAddToPackingList }: InventoryBrowserProps) {
   const { data: batches } = useBatchStock({ location: currentLocation, inStockOnly: true });
+  const { data: externalProducts } = useExternalProducts();
   const [selectedBatch, setSelectedBatch] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [showExpired, setShowExpired] = useState(false);
@@ -105,12 +106,13 @@ export function InventoryBrowser({ currentLocation, selectedItems, onAddToPackin
   const batchesToShow = showExpired ? availableBatches : activeBatches;
 
   // Sort external products alphabetically
-  const availableExternal = externalProducts
+  const availableExternal = (externalProducts || [])
     .map(product => ({
       id: product.id,
       type: 'external' as const,
       name: product.name,
       selectedQuantity: 0,
+      supplier: product.supplier_name,
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 

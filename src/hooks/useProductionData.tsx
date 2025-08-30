@@ -95,6 +95,28 @@ export const useAllProducts = () => {
   });
 };
 
+export const useExternalProducts = () => {
+  return useQuery({
+    queryKey: ["external-products"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("active", true)
+        .in("product_type", ["extern"])
+        .order("name");
+      
+      if (error) {
+        console.error("Error fetching external products:", error);
+        throw error;
+      }
+      
+      console.log("External products loaded:", data);
+      return data as Product[];
+    },
+  });
+};
+
 export const useCreateProduct = () => {
   const queryClient = useQueryClient();
   return useMutation({
