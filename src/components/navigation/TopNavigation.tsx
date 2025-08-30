@@ -60,7 +60,9 @@ export function TopNavigation({ activeSection, onSectionChange, currentLocation 
       </div>
       
       {/* User Menu */}
-      <UserMenu />
+      <div className="ml-4">
+        <UserMenu />
+      </div>
     </div>
   );
 }
