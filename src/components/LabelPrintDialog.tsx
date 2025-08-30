@@ -9,6 +9,7 @@ import { Printer } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import QRCode from "qrcode";
+import { sanitizeText, setSafeTextContent } from "@/utils/htmlSanitizer";
 
 interface LabelPrintDialogProps {
   open: boolean;
@@ -26,17 +27,22 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
     if (batch) {
       setNumLabelsToPrint(batch.packages_produced);
       
-      // Generate QR code for preview
+      // Generate QR code for preview with sanitized data
+      const validateField = (value: any, maxLength: number = 100): string => {
+        const sanitized = sanitizeText(String(value || ""));
+        return sanitized.length > maxLength ? sanitized.substring(0, maxLength) + "..." : sanitized;
+      };
+
       const qrData = JSON.stringify({
         batch_id: batch.id,
-        batch_number: batch.batch_number,
-        product: batch.products.name,
+        batch_number: validateField(batch.batch_number, 30),
+        product: validateField(batch.products.name, 50),
         production_date: format(new Date(batch.production_date), "dd/MM/yyyy"),
         expiry_date: format(new Date(batch.expiry_date), "dd/MM/yyyy"),
         package_number: 1,
-        chef: batch.chefs.name,
-        location: batch.location,
-        package_size: `${batch.products.unit_size} ${batch.products.unit_type}`,
+        chef: validateField(batch.chefs.name, 30),
+        location: validateField(batch.location, 30),
+        package_size: `${validateField(String(batch.products.unit_size), 10)} ${validateField(batch.products.unit_type, 10)}`,
         product_id: batch.product_id
       });
 
@@ -59,6 +65,23 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
       return;
     }
 
+    // Security validation: Limit maximum labels to prevent memory issues
+    if (numLabelsToPrint > 1000) {
+      toast.error("Cannot print more than 1000 labels at once for security reasons");
+      return;
+    }
+
+    // Validate and sanitize batch data for QR code generation
+    const validateField = (value: any, maxLength: number = 100): string => {
+      const sanitized = sanitizeText(String(value || ""));
+      return sanitized.length > maxLength ? sanitized.substring(0, maxLength) + "..." : sanitized;
+    };
+
+    const safeProductName = validateField(batch.products.name, 50);
+    const safeBatchNumber = validateField(batch.batch_number, 30);
+    const safeChefName = validateField(batch.chefs.name, 30);
+    const safeLocation = validateField(batch.location, 30);
+
     setPrintingLabels(true);
     
     try {
@@ -69,17 +92,17 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
       
       // Generate HTML for each label
       for (let i = 1; i <= numLabelsToPrint; i++) {
-        // Create QR code data
+        // Create QR code data with sanitized values
         const qrData = JSON.stringify({
           batch_id: batch.id,
-          batch_number: batch.batch_number,
-          product: batch.products.name,
+          batch_number: safeBatchNumber,
+          product: safeProductName,
           production_date: format(new Date(batch.production_date), "dd/MM/yyyy"),
           expiry_date: format(new Date(batch.expiry_date), "dd/MM/yyyy"),
           package_number: i,
-          chef: batch.chefs.name,
-          location: batch.location,
-          package_size: `${batch.products.unit_size} ${batch.products.unit_type}`,
+          chef: safeChefName,
+          location: safeLocation,
+          package_size: `${validateField(String(batch.products.unit_size), 10)} ${validateField(batch.products.unit_type, 10)}`,
           product_id: batch.product_id
         });
 
@@ -110,53 +133,167 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
         labelDiv.style.alignItems = 'stretch';
         labelDiv.style.boxSizing = 'border-box';
 
-        labelDiv.innerHTML = `
-          <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 6px;">
-            <div style="font-size: 15px; font-weight: bold;">${batch.products.name}</div>
-            ${batch.products.name_thai ? `<div style="font-size: 12px; margin-top: 2px;">${batch.products.name_thai}</div>` : ''}
-          </div>
+        // Create label content using safe DOM manipulation
+        const createLabelContent = () => {
+          // Header section
+          const headerDiv = document.createElement('div');
+          headerDiv.style.textAlign = 'center';
+          headerDiv.style.borderBottom = '2px solid #000';
+          headerDiv.style.paddingBottom = '6px';
+          headerDiv.style.marginBottom = '6px';
 
-          <div style="flex: 1; display: flex; flex-direction: column;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
-              <div style="flex: 2; padding-right: 10px;">
-                <div style="font-size: 11px; margin-bottom: 2px; font-weight: bold;">
-                  <strong>Batch:</strong> ${batch.batch_number}
-                </div>
-                <div style="font-size: 9px; margin-bottom: 2px;">
-                  <strong>Chef:</strong> ${batch.chefs.name}
-                </div>
-                <div style="font-size: 9px; margin-bottom: 2px;">
-                  <strong>Production:</strong> ${format(new Date(batch.production_date), 'dd/MM/yyyy')}
-                </div>
-                <div style="font-size: 9px;">
-                  <strong>Size:</strong> ${batch.products.unit_size} ${batch.products.unit_type}
-                </div>
-              </div>
+          const productNameDiv = document.createElement('div');
+          productNameDiv.style.fontSize = '15px';
+          productNameDiv.style.fontWeight = 'bold';
+          setSafeTextContent(productNameDiv, batch.products.name);
+          headerDiv.appendChild(productNameDiv);
 
-              <div style="flex: 1; text-align: center; border-left: 2px solid #ccc; padding-left: 10px;">
-                <div style="font-size: 8px; margin-bottom: 6px; font-weight: bold;">QR CODE</div>
-                <img src="${qrCodeDataURL}" style="width: 42px; height: 42px; margin: 0 auto; display: block;" alt="QR Code ${i}" />
-              </div>
-            </div>
-            
-            ${batch.products.product_type === "zelfgemaakt" ? `
-            <div style="font-size: 12px; font-weight: bold; border: 2px solid #000; padding: 4px; text-align: center; margin-top: 4px;">
-              EXPIRY: ${format(new Date(batch.expiry_date), 'dd/MM/yyyy')} (${format(new Date(batch.expiry_date), 'EEEE')})
-            </div>
-            ` : ''}
-            
-            ${batch.items_per_package ? `
-            <div style="font-size: 10px; font-weight: bold; text-align: center; margin-top: 2px; background-color: #f0f0f0; padding: 2px;">
-              QTY: ${batch.items_per_package} items per package
-            </div>
-            ` : ''}
-          </div>
+          if (batch.products.name_thai) {
+            const thaiNameDiv = document.createElement('div');
+            thaiNameDiv.style.fontSize = '12px';
+            thaiNameDiv.style.marginTop = '2px';
+            setSafeTextContent(thaiNameDiv, batch.products.name_thai);
+            headerDiv.appendChild(thaiNameDiv);
+          }
 
-          <div style="text-align: center; font-size: 8px; margin-top: 6px; padding-top: 6px; border-top: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 7px;">TOTHAI Production Kitchen</span>
-            <span>Label ${i} of ${numLabelsToPrint}</span>
-          </div>
-        `;
+          // Main content section
+          const mainContentDiv = document.createElement('div');
+          mainContentDiv.style.flex = '1';
+          mainContentDiv.style.display = 'flex';
+          mainContentDiv.style.flexDirection = 'column';
+
+          // Product info and QR code container
+          const infoQrContainer = document.createElement('div');
+          infoQrContainer.style.display = 'flex';
+          infoQrContainer.style.justifyContent = 'space-between';
+          infoQrContainer.style.alignItems = 'flex-start';
+          infoQrContainer.style.marginBottom = '6px';
+
+          // Product info section
+          const productInfoDiv = document.createElement('div');
+          productInfoDiv.style.flex = '2';
+          productInfoDiv.style.paddingRight = '10px';
+
+          // Batch info
+          const batchInfoDiv = document.createElement('div');
+          batchInfoDiv.style.fontSize = '11px';
+          batchInfoDiv.style.marginBottom = '2px';
+          batchInfoDiv.style.fontWeight = 'bold';
+          const batchLabel = document.createElement('strong');
+          batchLabel.textContent = 'Batch: ';
+          batchInfoDiv.appendChild(batchLabel);
+          batchInfoDiv.appendChild(document.createTextNode(sanitizeText(batch.batch_number)));
+          productInfoDiv.appendChild(batchInfoDiv);
+
+          // Chef info
+          const chefInfoDiv = document.createElement('div');
+          chefInfoDiv.style.fontSize = '9px';
+          chefInfoDiv.style.marginBottom = '2px';
+          const chefLabel = document.createElement('strong');
+          chefLabel.textContent = 'Chef: ';
+          chefInfoDiv.appendChild(chefLabel);
+          chefInfoDiv.appendChild(document.createTextNode(sanitizeText(batch.chefs.name)));
+          productInfoDiv.appendChild(chefInfoDiv);
+
+          // Production date info
+          const productionInfoDiv = document.createElement('div');
+          productionInfoDiv.style.fontSize = '9px';
+          productionInfoDiv.style.marginBottom = '2px';
+          const productionLabel = document.createElement('strong');
+          productionLabel.textContent = 'Production: ';
+          productionInfoDiv.appendChild(productionLabel);
+          productionInfoDiv.appendChild(document.createTextNode(format(new Date(batch.production_date), 'dd/MM/yyyy')));
+          productInfoDiv.appendChild(productionInfoDiv);
+
+          // Size info
+          const sizeInfoDiv = document.createElement('div');
+          sizeInfoDiv.style.fontSize = '9px';
+          const sizeLabel = document.createElement('strong');
+          sizeLabel.textContent = 'Size: ';
+          sizeInfoDiv.appendChild(sizeLabel);
+          sizeInfoDiv.appendChild(document.createTextNode(`${sanitizeText(String(batch.products.unit_size))} ${sanitizeText(batch.products.unit_type)}`));
+          productInfoDiv.appendChild(sizeInfoDiv);
+
+          // QR Code section
+          const qrCodeDiv = document.createElement('div');
+          qrCodeDiv.style.flex = '1';
+          qrCodeDiv.style.textAlign = 'center';
+          qrCodeDiv.style.borderLeft = '2px solid #ccc';
+          qrCodeDiv.style.paddingLeft = '10px';
+
+          const qrLabel = document.createElement('div');
+          qrLabel.style.fontSize = '8px';
+          qrLabel.style.marginBottom = '6px';
+          qrLabel.style.fontWeight = 'bold';
+          qrLabel.textContent = 'QR CODE';
+          qrCodeDiv.appendChild(qrLabel);
+
+          const qrImg = document.createElement('img');
+          qrImg.src = qrCodeDataURL;
+          qrImg.style.width = '42px';
+          qrImg.style.height = '42px';
+          qrImg.style.margin = '0 auto';
+          qrImg.style.display = 'block';
+          qrImg.alt = `QR Code ${i}`;
+          qrCodeDiv.appendChild(qrImg);
+
+          infoQrContainer.appendChild(productInfoDiv);
+          infoQrContainer.appendChild(qrCodeDiv);
+          mainContentDiv.appendChild(infoQrContainer);
+
+          // Expiry info (if applicable)
+          if (batch.products.product_type === "zelfgemaakt") {
+            const expiryDiv = document.createElement('div');
+            expiryDiv.style.fontSize = '12px';
+            expiryDiv.style.fontWeight = 'bold';
+            expiryDiv.style.border = '2px solid #000';
+            expiryDiv.style.padding = '4px';
+            expiryDiv.style.textAlign = 'center';
+            expiryDiv.style.marginTop = '4px';
+            expiryDiv.textContent = `EXPIRY: ${format(new Date(batch.expiry_date), 'dd/MM/yyyy')} (${format(new Date(batch.expiry_date), 'EEEE')})`;
+            mainContentDiv.appendChild(expiryDiv);
+          }
+
+          // Quantity info (if applicable)
+          if (batch.items_per_package) {
+            const qtyDiv = document.createElement('div');
+            qtyDiv.style.fontSize = '10px';
+            qtyDiv.style.fontWeight = 'bold';
+            qtyDiv.style.textAlign = 'center';
+            qtyDiv.style.marginTop = '2px';
+            qtyDiv.style.backgroundColor = '#f0f0f0';
+            qtyDiv.style.padding = '2px';
+            qtyDiv.textContent = `QTY: ${batch.items_per_package} items per package`;
+            mainContentDiv.appendChild(qtyDiv);
+          }
+
+          // Footer section
+          const footerDiv = document.createElement('div');
+          footerDiv.style.textAlign = 'center';
+          footerDiv.style.fontSize = '8px';
+          footerDiv.style.marginTop = '6px';
+          footerDiv.style.paddingTop = '6px';
+          footerDiv.style.borderTop = '1px solid #ccc';
+          footerDiv.style.display = 'flex';
+          footerDiv.style.justifyContent = 'space-between';
+          footerDiv.style.alignItems = 'center';
+
+          const companySpan = document.createElement('span');
+          companySpan.style.fontSize = '7px';
+          companySpan.textContent = 'TOTHAI Production Kitchen';
+          footerDiv.appendChild(companySpan);
+
+          const labelCountSpan = document.createElement('span');
+          labelCountSpan.textContent = `Label ${i} of ${numLabelsToPrint}`;
+          footerDiv.appendChild(labelCountSpan);
+
+          return { headerDiv, mainContentDiv, footerDiv };
+        };
+
+        const { headerDiv, mainContentDiv, footerDiv } = createLabelContent();
+        labelDiv.appendChild(headerDiv);
+        labelDiv.appendChild(mainContentDiv);
+        labelDiv.appendChild(footerDiv);
 
         labelsContainer.appendChild(labelDiv);
       }
@@ -164,9 +301,9 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
       // Add to document
       document.body.appendChild(labelsContainer);
 
-      // Add print styles
+      // Add print styles (using textContent for security)
       const printStyle = document.createElement('style');
-      printStyle.innerHTML = `
+      printStyle.textContent = `
         @media print {
            @page {
              size: 102mm 59mm;
@@ -203,19 +340,19 @@ export function LabelPrintDialog({ open, onOpenChange, batch }: LabelPrintDialog
         labelsContainer.style.display = 'none';
       }, 100);
 
-      // Save label records to database
+      // Save label records to database with sanitized data
       const labelData = Array.from({ length: numLabelsToPrint }, (_, index) => ({
         batch_id: batch.id,
         label_number: index + 1,
         qr_code_data: {
-          batch_number: batch.batch_number,
-          product: batch.products.name,
+          batch_number: safeBatchNumber,
+          product: safeProductName,
           production_date: format(new Date(batch.production_date), "dd/MM/yyyy"),
           expiry_date: format(new Date(batch.expiry_date), "dd/MM/yyyy"),
           package_number: index + 1,
-          chef: batch.chefs.name,
-          location: batch.location,
-          package_size: `${batch.products.unit_size} ${batch.products.unit_type}`
+          chef: safeChefName,
+          location: safeLocation,
+          package_size: `${validateField(String(batch.products.unit_size), 10)} ${validateField(batch.products.unit_type, 10)}`
         }
       }));
 
