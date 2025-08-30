@@ -126,7 +126,6 @@ export const useIngredientProducts = () => {
         .select("*")
         .eq("active", true)
         .eq("product_type", "ingredient")
-        .eq("pickable", true)
         .order("name");
       
       if (error) {

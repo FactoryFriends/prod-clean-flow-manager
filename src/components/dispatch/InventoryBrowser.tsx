@@ -187,7 +187,7 @@ export function InventoryBrowser({ currentLocation, selectedItems, onAddToPackin
                   }`}
                 >
                   <Home className="w-4 h-4" />
-                  In-House
+                  House-Made
                 </Button>
                 <Button
                   variant={filter === "restaurant-supplies" ? "default" : "ghost"}
