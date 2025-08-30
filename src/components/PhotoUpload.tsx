@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Camera, Upload, X, AlertCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { Logger } from '@/utils/logger';
 
 interface PhotoUploadProps {
   onPhotosUploaded: (photoUrls: string[]) => void;
@@ -45,14 +46,14 @@ export function PhotoUpload({ onPhotosUploaded, maxPhotos = 5, required = false 
     setUploadError(null);
 
     try {
-      console.log('Starting photo upload process...');
+      Logger.info('Starting photo upload process', { component: 'PhotoUpload', data: { fileCount: selectedFiles.length } });
       
       const uploadPromises = selectedFiles.map(async (file) => {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         const filePath = `cleaning-tasks/${fileName}`;
 
-        console.log('Uploading file:', fileName);
+        Logger.debug('Uploading file', { component: 'PhotoUpload', data: { fileName } });
 
         const { data, error } = await supabase.storage
           .from('cleaning-photos')
@@ -62,27 +63,27 @@ export function PhotoUpload({ onPhotosUploaded, maxPhotos = 5, required = false 
           });
 
         if (error) {
-          console.error('Upload error:', error);
+          Logger.error('Upload error', { error, component: 'PhotoUpload', data: { fileName } });
           throw error;
         }
 
-        console.log('Upload successful:', data);
+        Logger.info('Upload successful', { component: 'PhotoUpload', data: { path: data?.path } });
 
         // Get public URL
         const { data: { publicUrl } } = supabase.storage
           .from('cleaning-photos')
           .getPublicUrl(filePath);
 
-        console.log('Public URL:', publicUrl);
+        Logger.debug('Public URL generated', { component: 'PhotoUpload', data: { publicUrl } });
         return publicUrl;
       });
 
       const photoUrls = await Promise.all(uploadPromises);
-      console.log('All photos uploaded successfully:', photoUrls);
+      Logger.info('All photos uploaded successfully', { component: 'PhotoUpload', data: { count: photoUrls.length } });
       onPhotosUploaded(photoUrls);
       setSelectedFiles([]);
     } catch (error) {
-      console.error('Error uploading photos:', error);
+      Logger.error('Error uploading photos', { error, component: 'PhotoUpload' });
       setUploadError('Failed to upload photos. Please try again.');
     } finally {
       setUploading(false);

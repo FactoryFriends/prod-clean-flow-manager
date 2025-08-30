@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { queryKeys } from "./queryKeys";
 
 export type UnitOption = {
   id: string;
@@ -14,7 +15,7 @@ export type UnitOption = {
 // Fetch all unit options
 export function useUnitOptionsQuery() {
   return useQuery({
-    queryKey: ["unit-options"],
+    queryKey: queryKeys.unitOptions.all,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("unit_options")
@@ -62,7 +63,7 @@ export function useCreateUnitOption() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["unit-options"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.unitOptions.all });
       toast.success("Unit option added successfully");
     },
     onError: (error: any) => {
@@ -89,7 +90,7 @@ export function useDeleteUnitOption() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["unit-options"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.unitOptions.all });
       toast.success("Unit option removed successfully");
     },
     onError: () => {
@@ -115,7 +116,7 @@ export function useUpdateUnitOption() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["unit-options"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.unitOptions.all });
       toast.success("Unit option updated successfully");
     },
     onError: () => {

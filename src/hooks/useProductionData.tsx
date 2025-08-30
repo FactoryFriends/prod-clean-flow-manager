@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Logger } from "@/utils/logger";
+import { queryKeys } from "./queryKeys";
 
 export interface Product {
   id: string;
@@ -55,7 +57,7 @@ export interface ProductionBatch {
 
 export const useProducts = () => {
   return useQuery({
-    queryKey: ["products"],
+    queryKey: queryKeys.products.production,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
@@ -65,11 +67,11 @@ export const useProducts = () => {
         .order("name");
       
       if (error) {
-        console.error("Error fetching products:", error);
+        Logger.error("Error fetching products", { error, component: "useProducts" });
         throw error;
       }
       
-      console.log("Products loaded:", data);
+      Logger.info("Products loaded", { data: { count: data?.length }, component: "useProducts" });
       return data as Product[];
     },
   });
@@ -77,7 +79,7 @@ export const useProducts = () => {
 
 export const useAllProducts = () => {
   return useQuery({
-    queryKey: ["all-products"],
+    queryKey: queryKeys.products.all,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
@@ -85,11 +87,11 @@ export const useAllProducts = () => {
         .order("name");
       
       if (error) {
-        console.error("Error fetching all products:", error);
+        Logger.error("Error fetching all products", { error, component: "useAllProducts" });
         throw error;
       }
       
-      console.log("All products loaded:", data);
+      Logger.info("All products loaded", { data: { count: data?.length }, component: "useAllProducts" });
       return data as Product[];
     },
   });
@@ -383,7 +385,7 @@ export const useReplaceIngredient = () => {
 
 export const useChefs = (location?: "tothai" | "khin") => {
   return useQuery({
-    queryKey: ["chefs", location],
+    queryKey: queryKeys.chefs.byLocation(location),
     queryFn: async () => {
       let query = supabase
         .from("chefs")
@@ -396,7 +398,10 @@ export const useChefs = (location?: "tothai" | "khin") => {
       
       const { data, error } = await query.order("name");
       
-      if (error) throw error;
+      if (error) {
+        Logger.error("Error fetching chefs", { error, data: { location }, component: "useChefs" });
+        throw error;
+      }
       return data as Chef[];
     },
   });
@@ -404,7 +409,7 @@ export const useChefs = (location?: "tothai" | "khin") => {
 
 export const useProductionBatches = (location?: "tothai" | "khin") => {
   return useQuery({
-    queryKey: ["production-batches", location],
+    queryKey: queryKeys.production.batches(location),
     queryFn: async () => {
       let query = supabase
         .from("production_batches")
@@ -422,11 +427,11 @@ export const useProductionBatches = (location?: "tothai" | "khin") => {
         .order("created_at", { ascending: false });
       
       if (error) {
-        console.error("Error fetching production batches:", error);
+        Logger.error("Error fetching production batches", { error, data: { location }, component: "useProductionBatches" });
         throw error;
       }
       
-      console.log("Production batches loaded:", data);
+      Logger.info("Production batches loaded", { data: { count: data?.length, location }, component: "useProductionBatches" });
       return data as ProductionBatch[];
     },
   });

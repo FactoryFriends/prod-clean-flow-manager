@@ -39,7 +39,7 @@ export function NewCleaningTaskForm({ currentLocation, onSuccess, onCancel }: Ne
 
   const createTaskMutation = useMutation({
     mutationFn: async (data: NewTaskFormData) => {
-      console.log('Creating new task:', data);
+      Logger.info('Creating new task', { component: 'NewCleaningTaskForm', data });
       const { data: result, error } = await supabase
         .from('cleaning_tasks')
         .insert({
@@ -56,11 +56,11 @@ export function NewCleaningTaskForm({ currentLocation, onSuccess, onCancel }: Ne
         .single();
 
       if (error) {
-        console.error('Error creating task:', error);
+        Logger.error('Error creating task', { error, component: 'NewCleaningTaskForm' });
         throw error;
       }
 
-      console.log('Task created successfully:', result);
+      Logger.info('Task created successfully', { component: 'NewCleaningTaskForm', data: { taskId: result?.id } });
       return result;
     },
     onSuccess: () => {
@@ -73,7 +73,7 @@ export function NewCleaningTaskForm({ currentLocation, onSuccess, onCancel }: Ne
       onSuccess();
     },
     onError: (error) => {
-      console.error('Failed to create task:', error);
+      Logger.error('Failed to create task', { error, component: 'NewCleaningTaskForm' });
       toast({
         title: "Error",
         description: "Failed to create cleaning task. Please try again.",
