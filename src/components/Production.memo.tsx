@@ -34,9 +34,9 @@ export const Production = React.memo(function Production({ currentLocation }: Pr
     currentLocation === "tothai" ? "To Thai Restaurant" : "Khin Takeaway"
   , [currentLocation]);
 
-  // Fetch remaining stock for all batches if admin
+  // Fetch remaining stock for all batches (for filtering)
   useEffect(() => {
-    if (isAdmin && batches?.length) {
+    if (batches?.length) {
       const fetchBatchStocks = async () => {
         const stockPromises = batches.map(async (batch) => {
           const { data } = await supabase.rpc('get_batch_remaining_stock', { 
@@ -56,7 +56,7 @@ export const Production = React.memo(function Production({ currentLocation }: Pr
       
       fetchBatchStocks();
     }
-  }, [isAdmin, batches]);
+  }, [batches]);
 
   const handleBatchCreated = useCallback((newBatch: ProductionBatch) => {
     setSelectedBatch(newBatch);
@@ -105,6 +105,9 @@ export const Production = React.memo(function Production({ currentLocation }: Pr
         matchesFilter = isExpiringSoon && !isExpired;
       } else if (filterStatus === "expired") {
         matchesFilter = isExpired;
+      } else if (filterStatus === "in-stock") {
+        const stock = batchStocks[batch.id];
+        matchesFilter = stock !== undefined && stock > 0;
       }
 
       return matchesSearch && matchesFilter;
@@ -166,6 +169,7 @@ export const Production = React.memo(function Production({ currentLocation }: Pr
               <SelectItem value="fresh">Fresh</SelectItem>
               <SelectItem value="expiring">Expiring Soon</SelectItem>
               <SelectItem value="expired">Expired</SelectItem>
+              <SelectItem value="in-stock">In Stock Only</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -202,7 +206,7 @@ export const Production = React.memo(function Production({ currentLocation }: Pr
                   <TableHead>Batch Number</TableHead>
                   <TableHead>Chef</TableHead>
                   <TableHead>Packages</TableHead>
-                  {isAdmin && <TableHead>Remaining</TableHead>}
+                  {(isAdmin || filterStatus === "in-stock") && <TableHead>Remaining</TableHead>}
                   <TableHead>Production Date</TableHead>
                   <TableHead>Expiry Date</TableHead>
                   <TableHead>Status</TableHead>
@@ -248,7 +252,7 @@ export const Production = React.memo(function Production({ currentLocation }: Pr
                           </div>
                         )}
                       </TableCell>
-                      {isAdmin && (
+                      {(isAdmin || filterStatus === "in-stock") && (
                         <TableCell className="font-medium">
                           <div className={`${
                             batchStocks[batch.id] > 0 

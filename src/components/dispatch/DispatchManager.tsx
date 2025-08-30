@@ -100,8 +100,19 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
   const allAvailableItems = [...availableBatches, ...availableExternalProducts, ...availableIngredientProducts];
 
   const handleQuantityChange = (itemId: string, change: number) => {
+    console.log('🔍 handleQuantityChange called:', { itemId, change });
+    console.log('📦 allAvailableItems count:', allAvailableItems.length);
+    console.log('🏪 External products:', availableExternalProducts.length);
+    console.log('🥘 Ingredient products:', availableIngredientProducts.length);
+    console.log('🔧 Looking for item:', itemId);
+    
     const item = allAvailableItems.find(i => i.id === itemId);
-    if (!item) return;
+    if (!item) {
+      console.error('❌ Item not found:', itemId);
+      console.error('Available item IDs:', allAvailableItems.map(i => ({ id: i.id, name: i.name, type: i.type })));
+      return;
+    }
+    console.log('✅ Found item:', item);
 
     const existingIndex = selectedItems.findIndex(si => si.id === itemId);
     
@@ -123,12 +134,15 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
     console.log("Selected items updated:", selectedItems.length + (change > 0 && existingIndex < 0 ? 1 : 0));
   };
 
-  console.log("DispatchManager render:", {
+  console.log("🚀 DispatchManager render:", {
     selectedItemsCount: selectedItems.length,
     packingSlipItemsCount: packingSlipItems.length,
     pickerName,
     customer,
-    dispatchType
+    dispatchType,
+    externalProductsCount: (externalProducts || []).length,
+    ingredientProductsCount: (ingredientProducts || []).length,
+    allAvailableItemsCount: allAvailableItems.length
   });
 
   return (
