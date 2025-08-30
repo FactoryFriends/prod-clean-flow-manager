@@ -115,6 +115,7 @@ export function InventoryBrowser({ currentLocation, selectedItems, onAddToPackin
       selectedQuantity: 0,
       supplier: product.supplier_name,
       productType: 'External Product' as const,
+      innerUnitType: product.inner_unit_type,
     }));
 
   const availableIngredients = (ingredientProducts || [])
@@ -125,6 +126,7 @@ export function InventoryBrowser({ currentLocation, selectedItems, onAddToPackin
       selectedQuantity: 0,
       supplier: product.supplier_name,
       productType: 'Ingredient' as const,
+      innerUnitType: product.inner_unit_type,
     }));
 
   const restaurantSupplies = [...availableExternal, ...availableIngredients]

@@ -17,6 +17,7 @@ interface InventoryItem {
   unitType?: string;
   productionNotes?: string;
   productType?: 'External Product' | 'Ingredient';
+  innerUnitType?: string;
 }
 
 interface InventoryItemCardProps {
@@ -51,6 +52,11 @@ export function InventoryItemCard({
   const maxAvailable = (item.availableQuantity || 999) - alreadySelectedQuantity;
   const canAdd = !expired && maxAvailable > 0 && pendingQuantity <= maxAvailable;
 
+  // Display name with inner unit type for external products and ingredients
+  const displayName = (item.type === 'external' || item.type === 'ingredient') && item.innerUnitType
+    ? `${item.name} - number of ${item.innerUnitType.toUpperCase()}`
+    : item.name;
+
   return (
     <div 
       className={`px-3 py-2 border-b border-border/50 transition-all hover:bg-accent/5 ${
@@ -64,7 +70,7 @@ export function InventoryItemCard({
         }`}
         onClick={item.type === 'batch' && onBatchClick ? () => onBatchClick(item) : undefined}
       >
-        {item.name}
+        {displayName}
       </div>
 
       {/* Details and Controls - Second Line */}
@@ -73,7 +79,7 @@ export function InventoryItemCard({
           {/* Badge */}
           {item.type === 'batch' ? (
             <Badge variant="secondary" className="text-xs shrink-0 bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
-              In-House
+              House-Made
             </Badge>
           ) : item.type === 'external' ? (
             <Badge variant="outline" className="text-xs shrink-0 bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400">
