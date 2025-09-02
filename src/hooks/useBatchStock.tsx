@@ -55,11 +55,17 @@ export const useBatchStock = ({
       const batchIds = batches.map((b: any) => b.id);
       if (batchIds.length === 0) return [];
 
+      // Only count dispatch items from confirmed dispatches
       const { data: dispatchItems, error: diErr } = await supabase
         .from("dispatch_items")
-        .select("item_id, quantity")
+        .select(`
+          item_id, 
+          quantity,
+          dispatch_records!inner(status)
+        `)
         .in("item_id", batchIds)
-        .eq("item_type", "batch");
+        .eq("item_type", "batch")
+        .eq("dispatch_records.status", "confirmed");
       if (diErr) {
         // Handle authentication errors gracefully
         if (diErr.code === 'PGRST116' || diErr.message?.includes('permission')) {

@@ -110,13 +110,13 @@ export function DispatchFormHeader({
     setIsAwaitingConfirmation(false);
   };
 
-  // Reset state when dispatch type or selected items change
+  // Reset state when dispatch type changes or items are cleared (but not when awaiting confirmation)
   useEffect(() => {
-    if (dispatchType !== "internal" || selectedItems.length === 0) {
+    if (dispatchType !== "internal" || (selectedItems.length === 0 && !isAwaitingConfirmation)) {
       setJustCreatedDispatchId(null);
       setIsAwaitingConfirmation(false);
     }
-  }, [dispatchType, selectedItems.length]);
+  }, [dispatchType, selectedItems.length, isAwaitingConfirmation]);
 
   // Determine button appearance and state
   const getButtonConfig = () => {
