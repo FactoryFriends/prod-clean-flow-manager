@@ -26,7 +26,7 @@ interface FAVVReportsProps {
 
 export function FAVVReports({ currentLocation }: FAVVReportsProps) {
   const [locationFilter, setLocationFilter] = useState<"all" | "tothai" | "khin">(currentLocation);
-  const [startDate, setStartDate] = useState<Date | undefined>(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+  const [startDate, setStartDate] = useState<Date | undefined>(new Date(new Date().getFullYear(), new Date().getMonth() - 2, 1));
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [taskNameFilter, setTaskNameFilter] = useState<string>("");
   const [selectedTask, setSelectedTask] = useState<any>(null);
