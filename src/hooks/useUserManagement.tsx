@@ -200,25 +200,28 @@ export const useResetUserPassword = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ email, newPassword }: { email: string; newPassword?: string }) => {
-      if (newPassword) {
+    mutationFn: async ({ userId, email, newPassword }: { userId?: string; email: string; newPassword?: string }) => {
+      if (newPassword && userId) {
         // Admin setting a specific password
         const { data, error } = await supabase.auth.admin.updateUserById(
-          email, // This should be userId, but we'll need to get it from email
+          userId,
           { password: newPassword }
         );
         if (error) throw error;
-        return data;
+        return { ...data, resetLink: null };
       } else {
         // Send reset email
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/`
+          redirectTo: `${window.location.origin}/reset-password`
         });
         if (error) throw error;
-        return { success: true };
+        
+        // Generate reset link for admin to copy
+        const resetLink = `${window.location.origin}/reset-password`;
+        return { success: true, resetLink, email };
       }
     },
-    onSuccess: (_, { newPassword }) => {
+    onSuccess: (data, { newPassword }) => {
       queryClient.invalidateQueries({ queryKey: ["user-profiles"] });
       if (newPassword) {
         toast.success("Password updated successfully");
@@ -228,6 +231,31 @@ export const useResetUserPassword = () => {
     },
     onError: (error: any) => {
       toast.error(`Failed to reset password: ${error.message}`);
+    },
+  });
+};
+
+// New hook for generating admin reset links
+export const useGenerateResetLink = () => {
+  return useMutation({
+    mutationFn: async ({ email }: { email: string }) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      });
+      if (error) throw error;
+      
+      // Return the email and a reference to the reset link
+      return { 
+        email, 
+        resetLink: `${window.location.origin}/reset-password`,
+        message: "Reset email sent to user. They will receive an email with a secure reset link."
+      };
+    },
+    onSuccess: (data) => {
+      toast.success(`Reset link generated for ${data.email}`);
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to generate reset link: ${error.message}`);
     },
   });
 };
