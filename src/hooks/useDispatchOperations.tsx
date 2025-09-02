@@ -16,7 +16,7 @@ interface UseDispatchOperationsProps {
   setPackingSlipItems: (items: SelectedItem[]) => void;
   setPackingSlipId: (id: string | null) => void;
   setPackingSlipNumber: (number: string | null) => void;
-  onSuccess: () => void;
+  onSuccess: (dispatchId?: string) => void;
 }
 
 export function useDispatchOperations({
@@ -53,7 +53,7 @@ export function useDispatchOperations({
     pickerName,
     selectedItems,
     currentLocation,
-    onSuccess
+    onSuccess: (dispatchId: string) => onSuccess(dispatchId)
   });
 
   return {

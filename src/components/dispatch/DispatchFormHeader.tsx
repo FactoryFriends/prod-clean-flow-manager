@@ -5,12 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DispatchType, SelectedItem } from "@/types/dispatch";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useStaffCodes } from "@/hooks/useStaffCodes";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useEffect, useState } from "react";
-import { useInternalDispatchRecords } from "@/hooks/useInternalDispatchRecords";
-import { useConfirmInternalDispatch } from "@/hooks/useConfirmInternalDispatch";
-import { InternalDispatchConfirmationDialog } from "./InternalDispatchConfirmationDialog";
-import { CheckCircle } from "lucide-react";
+import { useEffect } from "react";
 
 interface DispatchFormHeaderProps {
   dispatchType: DispatchType;
@@ -21,7 +16,7 @@ interface DispatchFormHeaderProps {
   selectedItems: SelectedItem[];
   currentLocation: "tothai" | "khin";
   onCreatePackingSlip: () => void;
-  onInternalUse: () => Promise<string | void>;
+  onInternalUse: () => void;
 }
 
 export function DispatchFormHeader({
@@ -35,14 +30,8 @@ export function DispatchFormHeader({
   onCreatePackingSlip,
   onInternalUse,
 }: DispatchFormHeaderProps) {
-  const [showInternalConfirmation, setShowInternalConfirmation] = useState(false);
-  const [justCreatedDispatchId, setJustCreatedDispatchId] = useState<string | null>(null);
-  const [isAwaitingConfirmation, setIsAwaitingConfirmation] = useState(false);
-  const { data: customers = [], isLoading: customersLoading, error: customersError } = useCustomers(true);
+  const { data: customers = [] } = useCustomers(true);
   const { data: staffCodes = [] } = useStaffCodes();
-  const { data: pendingInternalDispatches = [] } = useInternalDispatchRecords(currentLocation);
-  const confirmDispatch = useConfirmInternalDispatch();
-  const isMobile = useIsMobile();
 
   // Set KHIN as default customer for external dispatch
   useEffect(() => {
@@ -60,84 +49,7 @@ export function DispatchFormHeader({
 
   const canSubmit = pickerName && selectedItems.length > 0 && 
     (dispatchType === "internal" || (dispatchType === "external" && customer));
-
   const totalItems = selectedItems.reduce((sum, item) => sum + item.selectedQuantity, 0);
-
-  // Handle progressive internal dispatch workflow
-  const handleInternalAction = async () => {
-    console.log("🎯 handleInternalAction called:", { isAwaitingConfirmation, justCreatedDispatchId });
-    
-    if (!isAwaitingConfirmation) {
-      // First click: Create dispatch
-      console.log("📝 Creating internal dispatch...");
-      try {
-        const dispatchId = await onInternalUse();
-        console.log("✅ Received dispatch ID:", dispatchId, "Type:", typeof dispatchId);
-        
-        if (dispatchId && typeof dispatchId === 'string') {
-          console.log("🔄 Setting state: justCreatedDispatchId =", dispatchId, "isAwaitingConfirmation = true");
-          setJustCreatedDispatchId(dispatchId);
-          setIsAwaitingConfirmation(true);
-        } else {
-          console.warn("⚠️ Invalid dispatch ID returned:", dispatchId);
-        }
-      } catch (error) {
-        console.error("❌ Error creating internal pick:", error);
-      }
-    } else {
-      // Second click: Confirm dispatch
-      console.log("✅ Confirming dispatch with ID:", justCreatedDispatchId);
-      if (justCreatedDispatchId) {
-        try {
-          await confirmDispatch.mutateAsync({
-            dispatchId: justCreatedDispatchId,
-            confirmedBy: pickerName,
-          });
-          console.log("🎉 Dispatch confirmed, resetting state");
-          // Reset state after successful confirmation
-          setJustCreatedDispatchId(null);
-          setIsAwaitingConfirmation(false);
-        } catch (error) {
-          console.error("❌ Error confirming dispatch:", error);
-        }
-      }
-    }
-  };
-
-  // Handle cancel pickup - resets to initial state
-  const handleCancelPickup = () => {
-    setJustCreatedDispatchId(null);
-    setIsAwaitingConfirmation(false);
-  };
-
-  // Reset state when dispatch type changes or items are cleared (but not when awaiting confirmation)
-  useEffect(() => {
-    if (dispatchType !== "internal" || (selectedItems.length === 0 && !isAwaitingConfirmation)) {
-      setJustCreatedDispatchId(null);
-      setIsAwaitingConfirmation(false);
-    }
-  }, [dispatchType, selectedItems.length, isAwaitingConfirmation]);
-
-  // Determine button appearance and state
-  const getButtonConfig = () => {
-    if (!isAwaitingConfirmation) {
-      return {
-        text: `CREATE PICK (${totalItems})`,
-        className: "flex-1 h-9 bg-orange-500 hover:bg-orange-600 text-white",
-        disabled: !canSubmit,
-        icon: null
-      };
-    } else {
-      return {
-        text: `CONFIRM PICKUP (${totalItems})`,
-        className: "flex-1 h-9 bg-green-600 hover:bg-green-700 text-white",
-        disabled: confirmDispatch.isPending,
-        icon: <CheckCircle className="w-4 h-4" />
-      };
-    }
-  };
-
-  const buttonConfig = getButtonConfig();
 
   return (
     <Card className="mb-6">
@@ -204,48 +116,17 @@ export function DispatchFormHeader({
                 REVIEW & SHIP ({totalItems})
               </Button>
             ) : (
-              <div className="flex gap-2 justify-end">
-                {isAwaitingConfirmation ? (
-                  <>
-                    <Button 
-                      onClick={handleInternalAction}
-                      disabled={buttonConfig.disabled}
-                      className={buttonConfig.className.replace('flex-1', '')}
-                    >
-                      {buttonConfig.icon}
-                      {buttonConfig.text}
-                    </Button>
-                    <Button 
-                      onClick={handleCancelPickup}
-                      variant="outline"
-                      className="h-9 px-4 border-red-300 text-red-600 hover:bg-red-50"
-                    >
-                      CANCEL PICKUP
-                    </Button>
-                  </>
-                ) : (
-                  <Button 
-                    onClick={handleInternalAction}
-                    disabled={buttonConfig.disabled}
-                    className={buttonConfig.className.replace('flex-1', '')}
-                  >
-                    {buttonConfig.icon}
-                    {buttonConfig.text}
-                  </Button>
-                )}
-              </div>
+              <Button 
+                onClick={onInternalUse}
+                disabled={!canSubmit}
+                className="w-full h-9 bg-orange-500 hover:bg-orange-600 text-white"
+              >
+                CREATE PICK ({totalItems})
+              </Button>
             )}
           </div>
         </div>
       </CardContent>
-      
-      {dispatchType === "internal" && (
-        <InternalDispatchConfirmationDialog
-          open={showInternalConfirmation}
-          onOpenChange={setShowInternalConfirmation}
-          currentLocation={currentLocation}
-        />
-      )}
     </Card>
   );
 }

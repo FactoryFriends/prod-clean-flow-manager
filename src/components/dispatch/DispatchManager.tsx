@@ -6,6 +6,7 @@ import { PackingSlipDialog } from "../PackingSlipDialog";
 import { DispatchFormHeader } from "./DispatchFormHeader";
 import { LivePackingList } from "./LivePackingList";
 import { InventoryBrowser } from "./InventoryBrowser";
+import { InternalDispatchSummary } from "./InternalDispatchSummary";
 import { SelectedItem, DispatchType } from "@/types/dispatch";
 import { useDispatchOperations } from "@/hooks/useDispatchOperations";
 
@@ -27,6 +28,10 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
   const [packingSlipItems, setPackingSlipItems] = useState<SelectedItem[]>([]);
   const [packingSlipId, setPackingSlipId] = useState<string | null>(null);
   const [packingSlipNumber, setPackingSlipNumber] = useState<string | null>(null);
+  const [showSummaryScreen, setShowSummaryScreen] = useState(false);
+  const [summaryDispatchId, setSummaryDispatchId] = useState<string | null>(null);
+  const [summaryItems, setSummaryItems] = useState<SelectedItem[]>([]);
+  const [summaryPickerName, setSummaryPickerName] = useState("");
 
   const { data: batches } = useProductionBatches(currentLocation);
   const { data: customers = [] } = useCustomers(true);
@@ -46,10 +51,17 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
     setPackingSlipItems,
     setPackingSlipId,
     setPackingSlipNumber,
-    onSuccess: () => {
-      setSelectedItems([]);
-      setPickerName("");
-      if (dispatchType === "internal") {
+    onSuccess: (dispatchId?: string) => {
+      if (dispatchType === "internal" && dispatchId) {
+        // For internal dispatches, show summary screen instead of clearing immediately
+        setSummaryDispatchId(dispatchId);
+        setSummaryItems([...selectedItems]);
+        setSummaryPickerName(pickerName);
+        setShowSummaryScreen(true);
+      } else {
+        // For external dispatches, clear as before
+        setSelectedItems([]);
+        setPickerName("");
         setCustomer("");
       }
     }
@@ -132,16 +144,49 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
     console.log("Selected items updated:", selectedItems.length + (change > 0 && existingIndex < 0 ? 1 : 0));
   };
 
+  const handleSummaryConfirm = () => {
+    setShowSummaryScreen(false);
+    setSummaryDispatchId(null);
+    setSummaryItems([]);
+    setSummaryPickerName("");
+    setSelectedItems([]);
+    setPickerName("");
+    setCustomer("");
+  };
+
+  const handleSummaryCancel = () => {
+    setShowSummaryScreen(false);
+    setSummaryDispatchId(null);
+    setSummaryItems([]);
+    setSummaryPickerName("");
+    // Keep selectedItems and pickerName so user can continue where they left off
+  };
+
   console.log("🚀 DispatchManager render:", {
     selectedItemsCount: selectedItems.length,
     packingSlipItemsCount: packingSlipItems.length,
     pickerName,
     customer,
     dispatchType,
+    showSummaryScreen,
     externalProductsCount: (externalProducts || []).length,
     ingredientProductsCount: (ingredientProducts || []).length,
     allAvailableItemsCount: allAvailableItems.length
   });
+
+  // Show summary screen for internal dispatches after CREATE PICK
+  if (dispatchType === "internal" && showSummaryScreen && summaryDispatchId) {
+    return (
+      <InternalDispatchSummary
+        selectedItems={summaryItems}
+        pickerName={summaryPickerName}
+        currentLocation={currentLocation}
+        dispatchId={summaryDispatchId}
+        onConfirm={handleSummaryConfirm}
+        onCancel={handleSummaryCancel}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -8,7 +8,7 @@ interface UseInternalDispatchOperationsProps {
   pickerName: string;
   selectedItems: SelectedItem[];
   currentLocation: "tothai" | "khin";
-  onSuccess: () => void;
+  onSuccess: (dispatchId: string) => void;
 }
 
 export function useInternalDispatchOperations({
@@ -56,7 +56,7 @@ export function useInternalDispatchOperations({
         description: `Internal pick created with ${selectedItems.length} items. Click CONFIRM PICKUP to update inventory.`,
       });
 
-      onSuccess();
+      onSuccess(result.id);
       
       // Return the dispatch ID for progressive workflow
       return result.id;

@@ -19,7 +19,7 @@ interface UsePackingSlipOperationsProps {
   setPackingSlipItems: (items: SelectedItem[]) => void;
   setPackingSlipId: (id: string | null) => void;
   setPackingSlipNumber: (number: string | null) => void;
-  onSuccess: () => void;
+  onSuccess: (dispatchId?: string) => void;
 }
 
 export function usePackingSlipOperations({
