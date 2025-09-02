@@ -116,7 +116,7 @@ export function InternalDispatchConfirmationDialog({
 
                   <Separator className="my-4" />
 
-                  <div className="flex justify-between">
+                  <div className="flex justify-start gap-2">
                     <Button
                       onClick={() => handleConfirmPickup(dispatch.id, dispatch.picker_name)}
                       disabled={confirmDispatch.isPending}

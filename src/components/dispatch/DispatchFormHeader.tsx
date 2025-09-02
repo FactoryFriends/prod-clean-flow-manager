@@ -132,9 +132,9 @@ export function DispatchFormHeader({
   return (
     <Card className="mb-6">
       <CardContent className="p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-          {/* Staff Selection */}
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+          {/* Staff Selection - Wider field */}
+          <div className="space-y-2 md:col-span-2">
             <Label htmlFor="picker-name" className="text-sm">Staff</Label>
             <Select value={pickerName} onValueChange={setPickerName}>
               <SelectTrigger className="h-9">
@@ -191,13 +191,13 @@ export function DispatchFormHeader({
                 REVIEW & SHIP ({totalItems})
               </Button>
             ) : (
-              <div className="flex gap-2">
+              <div className="flex gap-2 justify-end">
                 {isAwaitingConfirmation ? (
                   <>
                     <Button 
                       onClick={handleInternalAction}
                       disabled={buttonConfig.disabled}
-                      className={buttonConfig.className}
+                      className={buttonConfig.className.replace('flex-1', '')}
                     >
                       {buttonConfig.icon}
                       {buttonConfig.text}
@@ -214,21 +214,10 @@ export function DispatchFormHeader({
                   <Button 
                     onClick={handleInternalAction}
                     disabled={buttonConfig.disabled}
-                    className={buttonConfig.className}
+                    className={buttonConfig.className.replace('flex-1', '')}
                   >
                     {buttonConfig.icon}
                     {buttonConfig.text}
-                  </Button>
-                )}
-                {/* Show numbered badge only for other pending dispatches (not the one just created) */}
-                {pendingInternalDispatches.filter(d => d.id !== justCreatedDispatchId).length > 0 && (
-                  <Button 
-                    onClick={() => setShowInternalConfirmation(true)}
-                    variant="outline"
-                    className="h-9 px-3 border-warning text-warning hover:bg-warning/10"
-                    title={`${pendingInternalDispatches.filter(d => d.id !== justCreatedDispatchId).length} other pending pickup${pendingInternalDispatches.filter(d => d.id !== justCreatedDispatchId).length > 1 ? 's' : ''}`}
-                  >
-                    {pendingInternalDispatches.filter(d => d.id !== justCreatedDispatchId).length}
                   </Button>
                 )}
               </div>

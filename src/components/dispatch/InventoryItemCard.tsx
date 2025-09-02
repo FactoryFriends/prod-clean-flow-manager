@@ -93,7 +93,7 @@ export function InventoryItemCard({
           
           {/* Batch Number */}
           {item.type === 'batch' && item.batchNumber && (
-            <span className="text-xs text-muted-foreground shrink-0">
+            <span className="text-xs font-bold text-foreground shrink-0">
               #{item.batchNumber}
             </span>
           )}
