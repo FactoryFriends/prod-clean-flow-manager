@@ -30,12 +30,12 @@ export function useInternalDispatchOperations({
         dispatchNotes,
         selectedItems,
         currentLocation,
-        status: "confirmed", // Internal dispatches are confirmed immediately
+        status: "draft", // Internal dispatches start as drafts, need confirmation
       });
 
       toast({
-        title: "Internal Use Logged",
-        description: `${selectedItems.length} items logged for internal kitchen use`,
+        title: "Internal Pick Created",
+        description: `Internal pick created with ${selectedItems.length} items. Confirm pickup to update inventory.`,
       });
 
       onSuccess();

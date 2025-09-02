@@ -8,7 +8,9 @@ import { DispatchType, SelectedItem } from "@/types/dispatch";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useStaffCodes } from "@/hooks/useStaffCodes";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useInternalDispatchRecords } from "@/hooks/useInternalDispatchRecords";
+import { InternalDispatchConfirmationDialog } from "./InternalDispatchConfirmationDialog";
 
 interface DispatchFormHeaderProps {
   dispatchType: DispatchType;
@@ -19,6 +21,7 @@ interface DispatchFormHeaderProps {
   dispatchNotes: string;
   setDispatchNotes: (notes: string) => void;
   selectedItems: SelectedItem[];
+  currentLocation: "tothai" | "khin";
   onCreatePackingSlip: () => void;
   onInternalUse: () => void;
 }
@@ -32,11 +35,14 @@ export function DispatchFormHeader({
   dispatchNotes,
   setDispatchNotes,
   selectedItems,
+  currentLocation,
   onCreatePackingSlip,
   onInternalUse,
 }: DispatchFormHeaderProps) {
+  const [showInternalConfirmation, setShowInternalConfirmation] = useState(false);
   const { data: customers = [], isLoading: customersLoading, error: customersError } = useCustomers(true);
   const { data: staffCodes = [] } = useStaffCodes();
+  const { data: pendingInternalDispatches = [] } = useInternalDispatchRecords(currentLocation);
   const isMobile = useIsMobile();
 
   // Set KHIN as default customer for external dispatch
@@ -120,9 +126,9 @@ export function DispatchFormHeader({
             />
           </div>
 
-          {/* Action Button */}
+          {/* Action Buttons */}
           <div className="space-y-2">
-            <Label className="text-sm opacity-0">Action</Label>
+            <Label className="text-sm opacity-0">Actions</Label>
             {dispatchType === "external" ? (
               <Button 
                 onClick={onCreatePackingSlip}
@@ -132,17 +138,37 @@ export function DispatchFormHeader({
                 REVIEW & SHIP ({totalItems})
               </Button>
             ) : (
-              <Button 
-                onClick={onInternalUse}
-                disabled={!canSubmit}
-                className="w-full h-9 bg-secondary hover:bg-secondary/90"
-              >
-                Log Use ({totalItems})
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={onInternalUse}
+                  disabled={!canSubmit}
+                  className="flex-1 h-9 bg-secondary hover:bg-secondary/90"
+                >
+                  CREATE PICK ({totalItems})
+                </Button>
+                {pendingInternalDispatches.length > 0 && (
+                  <Button 
+                    onClick={() => setShowInternalConfirmation(true)}
+                    variant="outline"
+                    className="h-9 px-3 border-warning text-warning hover:bg-warning/10"
+                    title={`${pendingInternalDispatches.length} pending pickup${pendingInternalDispatches.length > 1 ? 's' : ''}`}
+                  >
+                    {pendingInternalDispatches.length}
+                  </Button>
+                )}
+              </div>
             )}
           </div>
         </div>
       </CardContent>
+      
+      {dispatchType === "internal" && (
+        <InternalDispatchConfirmationDialog
+          open={showInternalConfirmation}
+          onOpenChange={setShowInternalConfirmation}
+          currentLocation={currentLocation}
+        />
+      )}
     </Card>
   );
 }

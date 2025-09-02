@@ -157,6 +157,7 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
         dispatchNotes={dispatchNotes}
         setDispatchNotes={setDispatchNotes}
         selectedItems={selectedItems}
+        currentLocation={currentLocation}
         onCreatePackingSlip={handleCreatePackingSlip}
         onInternalUse={handleInternalUse}
       />

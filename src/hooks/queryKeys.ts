@@ -34,6 +34,7 @@ export const queryKeys = {
   dispatch: {
     all: ['dispatch'] as const,
     records: (location?: string) => ['dispatch', 'records', location] as const,
+    internal: (location?: string) => ['internal-dispatch-records', location] as const,
   },
   
   // Packing Slips
