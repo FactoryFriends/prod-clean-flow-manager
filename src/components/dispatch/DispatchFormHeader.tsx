@@ -153,6 +153,9 @@ export function DispatchFormHeader({
                 ))}
               </SelectContent>
             </Select>
+            {!pickerName && selectedItems.length === 0 && (
+              <p className="text-xs text-muted-foreground">⚠️ Select staff member to begin picking</p>
+            )}
           </div>
 
           {/* Customer Selection (only for external) */}

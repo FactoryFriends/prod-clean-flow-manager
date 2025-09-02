@@ -14,9 +14,10 @@ interface InventoryBrowserProps {
   currentLocation: "tothai" | "khin";
   selectedItems: SelectedItem[];
   onAddToPackingList: (itemId: string, change: number) => void;
+  pickerName: string;
 }
 
-export function InventoryBrowser({ currentLocation, selectedItems, onAddToPackingList }: InventoryBrowserProps) {
+export function InventoryBrowser({ currentLocation, selectedItems, onAddToPackingList, pickerName }: InventoryBrowserProps) {
   const { data: batches } = useBatchStock({ location: currentLocation, inStockOnly: true });
   const { data: externalProducts } = useExternalProducts();
   const { data: ingredientProducts } = useIngredientProducts();
@@ -212,6 +213,8 @@ export function InventoryBrowser({ currentLocation, selectedItems, onAddToPackin
                   size="sm"
                   onClick={() => setQrScannerOpen(true)}
                   className="flex items-center gap-1 text-xs"
+                  disabled={!pickerName}
+                  title={!pickerName ? "Select staff first" : undefined}
                 >
                   <QrCode className="w-3 h-3" />
                   Scan QR
@@ -238,23 +241,32 @@ export function InventoryBrowser({ currentLocation, selectedItems, onAddToPackin
           className="flex-1 p-4 overflow-y-auto"
           style={{ minHeight: 0 }}
         >
-          <div className="space-y-3">
-            {itemsToShow.length > 0 ? (
-              itemsToShow.map((item: any) => (
-                <InventoryItemCard
-                  key={item.id}
-                  item={item}
-                  alreadySelectedQuantity={getSelectedQuantity(item.id)}
-                  onBatchClick={item.type === 'batch' ? handleBatchClick : undefined}
-                  onAddToPackingList={onAddToPackingList}
-                />
-              ))
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                {searchQuery ? 'No items match your search' : 'No items available'}
-              </div>
-            )}
-          </div>
+          {!pickerName ? (
+            <div className="text-center py-12">
+              <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <p className="text-muted-foreground text-sm mb-2">Select a staff member above to start picking items</p>
+              <p className="text-muted-foreground text-xs">You need to choose who is picking the items before you can select inventory</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {itemsToShow.length > 0 ? (
+                itemsToShow.map((item: any) => (
+                  <InventoryItemCard
+                    key={item.id}
+                    item={item}
+                    alreadySelectedQuantity={getSelectedQuantity(item.id)}
+                    onBatchClick={item.type === 'batch' ? handleBatchClick : undefined}
+                    onAddToPackingList={onAddToPackingList}
+                    pickerName={pickerName}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  {searchQuery ? 'No items match your search' : 'No items available'}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

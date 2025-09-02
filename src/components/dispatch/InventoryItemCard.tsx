@@ -25,13 +25,15 @@ interface InventoryItemCardProps {
   alreadySelectedQuantity: number;
   onBatchClick?: (item: InventoryItem) => void;
   onAddToPackingList: (itemId: string, quantity: number) => void;
+  pickerName: string;
 }
 
 export function InventoryItemCard({ 
   item, 
   alreadySelectedQuantity, 
   onBatchClick, 
-  onAddToPackingList 
+  onAddToPackingList,
+  pickerName
 }: InventoryItemCardProps) {
   const [pendingQuantity, setPendingQuantity] = useState(1);
 
@@ -50,7 +52,7 @@ export function InventoryItemCard({
   };
 
   const maxAvailable = (item.availableQuantity || 999) - alreadySelectedQuantity;
-  const canAdd = !expired && maxAvailable > 0 && pendingQuantity <= maxAvailable;
+  const canAdd = !expired && maxAvailable > 0 && pendingQuantity <= maxAvailable && !!pickerName;
 
   // Display name with inner unit type for external products and ingredients
   const displayName = (item.type === 'external' || item.type === 'ingredient') && item.innerUnitType
@@ -61,7 +63,7 @@ export function InventoryItemCard({
     <div 
       className={`px-3 py-2 border-b border-border/50 transition-all hover:bg-accent/5 ${
         expired ? 'opacity-60' : ''
-      } ${alreadySelectedQuantity > 0 ? 'bg-accent/10 border-l-2 border-l-accent' : ''}`}
+      } ${!pickerName ? 'opacity-50 cursor-not-allowed' : ''} ${alreadySelectedQuantity > 0 ? 'bg-accent/10 border-l-2 border-l-accent' : ''}`}
     >
       {/* Product Name - First Line */}
       <div 
@@ -118,7 +120,8 @@ export function InventoryItemCard({
             size="sm"
             className="w-7 h-7 p-0 text-xs"
             onClick={() => handleQuantityChange(-1)}
-            disabled={pendingQuantity <= 1 || expired}
+            disabled={pendingQuantity <= 1 || expired || !pickerName}
+            title={!pickerName ? "Select staff first" : undefined}
           >
             -
           </Button>
@@ -131,6 +134,7 @@ export function InventoryItemCard({
             className="w-7 h-7 p-0 text-xs"
             onClick={() => handleQuantityChange(1)}
             disabled={!canAdd || pendingQuantity >= maxAvailable}
+            title={!pickerName ? "Select staff first" : undefined}
           >
             +
           </Button>
@@ -140,6 +144,7 @@ export function InventoryItemCard({
             onClick={handleAdd}
             disabled={!canAdd}
             className="ml-2 h-7 px-3 text-xs"
+            title={!pickerName ? "Select staff first" : undefined}
           >
             Add
           </Button>

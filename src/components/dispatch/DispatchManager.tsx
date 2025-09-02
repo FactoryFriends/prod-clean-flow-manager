@@ -165,6 +165,7 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
           currentLocation={currentLocation}
           selectedItems={selectedItems}
           onAddToPackingList={handleQuantityChange}
+          pickerName={pickerName}
         />
 
         {/* Right Panel - Live Packing List */}
