@@ -13,8 +13,10 @@ import { useFAVVPackingSlips } from "../hooks/useFAVVPackingSlips";
 import { useFAVVStockTakes } from "../hooks/useFAVVStockTakes";
 import { useFAVVCompletedTasks } from "../hooks/useFAVVCompletedTasks";
 import { useUnifiedOperationsData } from "../hooks/useUnifiedOperationsData";
-import { Package, FileText, Brush } from "lucide-react";
+import { Package, FileText, Brush, History } from "lucide-react";
 import { BatchesInStockTable } from "./favv/BatchesInStockTable";
+import { AuditTrailModal } from "./favv/AuditTrailModal";
+import { Button } from "./ui/button";
 import { ExpandableBatchMovementsList } from "./favv/ExpandableBatchMovementsList";
 import { useBatchStock } from "@/hooks/useBatchStock";
 
@@ -30,6 +32,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [operationType, setOperationType] = useState<"all" | "external" | "internal">("all");
+  const [auditTrailOpen, setAuditTrailOpen] = useState(false);
 
   // Updated tabs: "in-stock", "movements", "partially-used", "fully-used"
   const [batchTab, setBatchTab] = useState<"in-stock" | "movements" | "partially-used" | "fully-used">("in-stock");
@@ -93,10 +96,23 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">FAVV Compliance Reports</CardTitle>
-          <CardDescription>
-            Complete overview of production, distribution, and cleaning compliance for FAVV inspections
-          </CardDescription>
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="text-2xl">FAVV Compliance Reports</CardTitle>
+              <CardDescription>
+                Complete overview of production, distribution, and cleaning compliance for FAVV inspections
+              </CardDescription>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setAuditTrailOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <History className="w-4 h-4" />
+              Audit Trail
+            </Button>
+          </div>
         </CardHeader>
       </Card>
 
@@ -234,6 +250,11 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
         task={selectedTask}
         isOpen={isTaskModalOpen}
         onClose={() => setIsTaskModalOpen(false)}
+      />
+
+      <AuditTrailModal
+        isOpen={auditTrailOpen}
+        onClose={() => setAuditTrailOpen(false)}
       />
     </div>
   );
