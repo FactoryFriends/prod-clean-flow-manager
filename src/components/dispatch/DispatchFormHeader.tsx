@@ -10,7 +10,9 @@ import { useStaffCodes } from "@/hooks/useStaffCodes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useEffect, useState } from "react";
 import { useInternalDispatchRecords } from "@/hooks/useInternalDispatchRecords";
+import { useConfirmInternalDispatch } from "@/hooks/useConfirmInternalDispatch";
 import { InternalDispatchConfirmationDialog } from "./InternalDispatchConfirmationDialog";
+import { CheckCircle } from "lucide-react";
 
 interface DispatchFormHeaderProps {
   dispatchType: DispatchType;
@@ -23,7 +25,7 @@ interface DispatchFormHeaderProps {
   selectedItems: SelectedItem[];
   currentLocation: "tothai" | "khin";
   onCreatePackingSlip: () => void;
-  onInternalUse: () => void;
+  onInternalUse: () => Promise<string | void>;
 }
 
 export function DispatchFormHeader({
@@ -40,9 +42,12 @@ export function DispatchFormHeader({
   onInternalUse,
 }: DispatchFormHeaderProps) {
   const [showInternalConfirmation, setShowInternalConfirmation] = useState(false);
+  const [justCreatedDispatchId, setJustCreatedDispatchId] = useState<string | null>(null);
+  const [isAwaitingConfirmation, setIsAwaitingConfirmation] = useState(false);
   const { data: customers = [], isLoading: customersLoading, error: customersError } = useCustomers(true);
   const { data: staffCodes = [] } = useStaffCodes();
   const { data: pendingInternalDispatches = [] } = useInternalDispatchRecords(currentLocation);
+  const confirmDispatch = useConfirmInternalDispatch();
   const isMobile = useIsMobile();
 
   // Set KHIN as default customer for external dispatch
@@ -63,6 +68,66 @@ export function DispatchFormHeader({
     (dispatchType === "internal" || (dispatchType === "external" && customer));
 
   const totalItems = selectedItems.reduce((sum, item) => sum + item.selectedQuantity, 0);
+
+  // Handle progressive internal dispatch workflow
+  const handleInternalAction = async () => {
+    if (!isAwaitingConfirmation) {
+      // First click: Create dispatch
+      try {
+        const dispatchId = await onInternalUse();
+        if (dispatchId && typeof dispatchId === 'string') {
+          setJustCreatedDispatchId(dispatchId);
+          setIsAwaitingConfirmation(true);
+        }
+      } catch (error) {
+        console.error("Error creating internal pick:", error);
+      }
+    } else {
+      // Second click: Confirm dispatch
+      if (justCreatedDispatchId) {
+        try {
+          await confirmDispatch.mutateAsync({
+            dispatchId: justCreatedDispatchId,
+            confirmedBy: pickerName,
+          });
+          // Reset state after successful confirmation
+          setJustCreatedDispatchId(null);
+          setIsAwaitingConfirmation(false);
+        } catch (error) {
+          console.error("Error confirming dispatch:", error);
+        }
+      }
+    }
+  };
+
+  // Reset state when dispatch type or selected items change
+  useEffect(() => {
+    if (dispatchType !== "internal" || selectedItems.length === 0) {
+      setJustCreatedDispatchId(null);
+      setIsAwaitingConfirmation(false);
+    }
+  }, [dispatchType, selectedItems.length]);
+
+  // Determine button appearance and state
+  const getButtonConfig = () => {
+    if (!isAwaitingConfirmation) {
+      return {
+        text: `CREATE PICK (${totalItems})`,
+        className: "flex-1 h-9 bg-orange-500 hover:bg-orange-600 text-white",
+        disabled: !canSubmit,
+        icon: null
+      };
+    } else {
+      return {
+        text: `CONFIRM PICKUP (${totalItems})`,
+        className: "flex-1 h-9 bg-green-600 hover:bg-green-700 text-white",
+        disabled: confirmDispatch.isPending,
+        icon: <CheckCircle className="w-4 h-4" />
+      };
+    }
+  };
+
+  const buttonConfig = getButtonConfig();
 
   return (
     <Card className="mb-6">
@@ -140,20 +205,22 @@ export function DispatchFormHeader({
             ) : (
               <div className="flex gap-2">
                 <Button 
-                  onClick={onInternalUse}
-                  disabled={!canSubmit}
-                  className="flex-1 h-9 bg-orange-500 hover:bg-orange-600 text-white"
+                  onClick={handleInternalAction}
+                  disabled={buttonConfig.disabled}
+                  className={buttonConfig.className}
                 >
-                  CREATE PICK ({totalItems})
+                  {buttonConfig.icon}
+                  {buttonConfig.text}
                 </Button>
-                {pendingInternalDispatches.length > 0 && (
+                {/* Show numbered badge only for other pending dispatches (not the one just created) */}
+                {pendingInternalDispatches.filter(d => d.id !== justCreatedDispatchId).length > 0 && (
                   <Button 
                     onClick={() => setShowInternalConfirmation(true)}
                     variant="outline"
                     className="h-9 px-3 border-warning text-warning hover:bg-warning/10"
-                    title={`${pendingInternalDispatches.length} pending pickup${pendingInternalDispatches.length > 1 ? 's' : ''}`}
+                    title={`${pendingInternalDispatches.filter(d => d.id !== justCreatedDispatchId).length} other pending pickup${pendingInternalDispatches.filter(d => d.id !== justCreatedDispatchId).length > 1 ? 's' : ''}`}
                   >
-                    {pendingInternalDispatches.length}
+                    {pendingInternalDispatches.filter(d => d.id !== justCreatedDispatchId).length}
                   </Button>
                 )}
               </div>

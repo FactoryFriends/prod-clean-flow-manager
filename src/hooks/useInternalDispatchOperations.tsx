@@ -17,13 +17,13 @@ export function useInternalDispatchOperations({
   selectedItems,
   currentLocation,
   onSuccess
-}: UseInternalDispatchOperationsProps) {
+}: UseInternalDispatchOperationsProps): { handleInternalUse: () => Promise<string> } {
   const createDispatch = useCreateDispatch();
   const { toast } = useToast();
 
-  const handleInternalUse = async () => {
+  const handleInternalUse = async (): Promise<string> => {
     try {
-      await createDispatch.mutateAsync({
+      const result = await createDispatch.mutateAsync({
         dispatchType: "internal",
         customer: undefined,
         pickerName,
@@ -35,10 +35,13 @@ export function useInternalDispatchOperations({
 
       toast({
         title: "Internal Pick Created",
-        description: `Internal pick created with ${selectedItems.length} items. Confirm pickup to update inventory.`,
+        description: `Internal pick created with ${selectedItems.length} items. Click CONFIRM PICKUP to update inventory.`,
       });
 
       onSuccess();
+      
+      // Return the dispatch ID for progressive workflow
+      return result.id;
 
     } catch (error) {
       console.error("Error logging internal use:", error);
@@ -47,6 +50,7 @@ export function useInternalDispatchOperations({
         description: "Failed to log internal use. Please try again.",
         variant: "destructive",
       });
+      throw error;
     }
   };
 
