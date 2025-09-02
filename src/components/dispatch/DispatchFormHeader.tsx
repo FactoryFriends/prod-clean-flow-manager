@@ -1,7 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DispatchType, SelectedItem } from "@/types/dispatch";
@@ -20,8 +18,6 @@ interface DispatchFormHeaderProps {
   setCustomer: (customer: string) => void;
   pickerName: string;
   setPickerName: (name: string) => void;
-  dispatchNotes: string;
-  setDispatchNotes: (notes: string) => void;
   selectedItems: SelectedItem[];
   currentLocation: "tothai" | "khin";
   onCreatePackingSlip: () => void;
@@ -34,8 +30,6 @@ export function DispatchFormHeader({
   setCustomer,
   pickerName,
   setPickerName,
-  dispatchNotes,
-  setDispatchNotes,
   selectedItems,
   currentLocation,
   onCreatePackingSlip,
@@ -100,6 +94,12 @@ export function DispatchFormHeader({
     }
   };
 
+  // Handle cancel pickup - resets to initial state
+  const handleCancelPickup = () => {
+    setJustCreatedDispatchId(null);
+    setIsAwaitingConfirmation(false);
+  };
+
   // Reset state when dispatch type or selected items change
   useEffect(() => {
     if (dispatchType !== "internal" || selectedItems.length === 0) {
@@ -132,7 +132,7 @@ export function DispatchFormHeader({
   return (
     <Card className="mb-6">
       <CardContent className="p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
           {/* Staff Selection */}
           <div className="space-y-2">
             <Label htmlFor="picker-name" className="text-sm">Staff</Label>
@@ -179,18 +179,6 @@ export function DispatchFormHeader({
             </div>
           )}
 
-          {/* Notes */}
-          <div className="space-y-2">
-            <Label htmlFor="dispatch-notes" className="text-sm">Notes</Label>
-            <Input
-              id="dispatch-notes"
-              placeholder="Add notes..."
-              value={dispatchNotes}
-              onChange={(e) => setDispatchNotes(e.target.value)}
-              className="h-9"
-            />
-          </div>
-
           {/* Action Buttons */}
           <div className="space-y-2">
             <Label className="text-sm opacity-0">Actions</Label>
@@ -204,14 +192,34 @@ export function DispatchFormHeader({
               </Button>
             ) : (
               <div className="flex gap-2">
-                <Button 
-                  onClick={handleInternalAction}
-                  disabled={buttonConfig.disabled}
-                  className={buttonConfig.className}
-                >
-                  {buttonConfig.icon}
-                  {buttonConfig.text}
-                </Button>
+                {isAwaitingConfirmation ? (
+                  <>
+                    <Button 
+                      onClick={handleInternalAction}
+                      disabled={buttonConfig.disabled}
+                      className={buttonConfig.className}
+                    >
+                      {buttonConfig.icon}
+                      {buttonConfig.text}
+                    </Button>
+                    <Button 
+                      onClick={handleCancelPickup}
+                      variant="outline"
+                      className="h-9 px-4 border-red-300 text-red-600 hover:bg-red-50"
+                    >
+                      CANCEL PICKUP
+                    </Button>
+                  </>
+                ) : (
+                  <Button 
+                    onClick={handleInternalAction}
+                    disabled={buttonConfig.disabled}
+                    className={buttonConfig.className}
+                  >
+                    {buttonConfig.icon}
+                    {buttonConfig.text}
+                  </Button>
+                )}
                 {/* Show numbered badge only for other pending dispatches (not the one just created) */}
                 {pendingInternalDispatches.filter(d => d.id !== justCreatedDispatchId).length > 0 && (
                   <Button 

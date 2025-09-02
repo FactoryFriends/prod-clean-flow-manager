@@ -51,7 +51,6 @@ export function useDispatchOperations({
 
   const { handleInternalUse } = useInternalDispatchOperations({
     pickerName,
-    dispatchNotes,
     selectedItems,
     currentLocation,
     onSuccess

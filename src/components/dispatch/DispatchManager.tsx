@@ -17,7 +17,6 @@ interface DispatchManagerProps {
 export function DispatchManager({ currentLocation, dispatchType }: DispatchManagerProps) {
   const [customer, setCustomer] = useState("");
   const [pickerName, setPickerName] = useState("");
-  const [dispatchNotes, setDispatchNotes] = useState("");
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const [packingSlipOpen, setPackingSlipOpen] = useState(false);
   const [currentDispatchId, setCurrentDispatchId] = useState<string | null>(null);
@@ -38,7 +37,7 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
     dispatchType,
     customer,
     pickerName,
-    dispatchNotes,
+    dispatchNotes: "",
     selectedItems,
     currentLocation,
     setCurrentDispatchId,
@@ -50,7 +49,6 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
     onSuccess: () => {
       setSelectedItems([]);
       setPickerName("");
-      setDispatchNotes("");
       if (dispatchType === "internal") {
         setCustomer("");
       }
@@ -148,19 +146,17 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
   return (
     <div className="space-y-6">
       {/* Compact Form Header */}
-      <DispatchFormHeader
-        dispatchType={dispatchType}
-        customer={customer}
-        setCustomer={setCustomer}
-        pickerName={pickerName}
-        setPickerName={setPickerName}
-        dispatchNotes={dispatchNotes}
-        setDispatchNotes={setDispatchNotes}
-        selectedItems={selectedItems}
-        currentLocation={currentLocation}
-        onCreatePackingSlip={handleCreatePackingSlip}
-        onInternalUse={handleInternalUse}
-      />
+        <DispatchFormHeader
+          dispatchType={dispatchType}
+          customer={customer}
+          setCustomer={setCustomer}
+          pickerName={pickerName}
+          setPickerName={setPickerName}
+          selectedItems={selectedItems}
+          currentLocation={currentLocation}
+          onCreatePackingSlip={handleCreatePackingSlip}
+          onInternalUse={handleInternalUse}
+        />
 
       {/* Side-by-Side Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6" style={{ height: '70vh' }}>
@@ -186,7 +182,7 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
           customer={customer}
           preparedBy={packingSlipStaffNames.preparedBy}
           pickedUpBy={packingSlipStaffNames.pickedUpBy}
-          dispatchNotes={dispatchNotes}
+          dispatchNotes=""
           currentLocation={currentLocation}
           dispatchId={currentDispatchId}
           packingSlipId={packingSlipId}

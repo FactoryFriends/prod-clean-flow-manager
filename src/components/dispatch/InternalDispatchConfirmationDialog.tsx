@@ -116,13 +116,20 @@ export function InternalDispatchConfirmationDialog({
 
                   <Separator className="my-4" />
 
-                  <div className="flex justify-end">
+                  <div className="flex justify-between">
                     <Button
                       onClick={() => handleConfirmPickup(dispatch.id, dispatch.picker_name)}
                       disabled={confirmDispatch.isPending}
                       className="bg-primary hover:bg-primary/90"
                     >
                       {confirmDispatch.isPending ? "Confirming..." : "CONFIRM PICKUP"}
+                    </Button>
+                    <Button
+                      onClick={() => onOpenChange(false)}
+                      variant="outline"
+                      className="border-red-300 text-red-600 hover:bg-red-50"
+                    >
+                      CANCEL PICKUP
                     </Button>
                   </div>
                 </CardContent>

@@ -5,7 +5,6 @@ import { SelectedItem } from "@/types/dispatch";
 
 interface UseInternalDispatchOperationsProps {
   pickerName: string;
-  dispatchNotes: string;
   selectedItems: SelectedItem[];
   currentLocation: "tothai" | "khin";
   onSuccess: () => void;
@@ -13,7 +12,6 @@ interface UseInternalDispatchOperationsProps {
 
 export function useInternalDispatchOperations({
   pickerName,
-  dispatchNotes,
   selectedItems,
   currentLocation,
   onSuccess
@@ -27,7 +25,7 @@ export function useInternalDispatchOperations({
         dispatchType: "internal",
         customer: undefined,
         pickerName,
-        dispatchNotes,
+        dispatchNotes: "",
         selectedItems,
         currentLocation,
         status: "draft", // Internal dispatches start as drafts, need confirmation
