@@ -77,9 +77,13 @@ export const useCreateDispatch = () => {
 
       return dispatchRecord;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["dispatch-records"] });
-      queryClient.invalidateQueries({ queryKey: ["production-batches"] });
+      
+      // Only invalidate production batches if dispatch is confirmed, not for drafts
+      if (data.status === "confirmed") {
+        queryClient.invalidateQueries({ queryKey: ["production-batches"] });
+      }
     },
   });
 };
