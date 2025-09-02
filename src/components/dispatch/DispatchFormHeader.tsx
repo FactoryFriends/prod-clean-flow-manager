@@ -142,7 +142,7 @@ export function DispatchFormHeader({
                 <Button 
                   onClick={onInternalUse}
                   disabled={!canSubmit}
-                  className="flex-1 h-9 bg-secondary hover:bg-secondary/90"
+                  className="flex-1 h-9 bg-orange-500 hover:bg-orange-600 text-white"
                 >
                   CREATE PICK ({totalItems})
                 </Button>
