@@ -83,7 +83,7 @@ export const useBatchStock = ({
       // Prepare output array
       const allBatches: BatchWithStock[] = batches.map((b: any) => {
         const used = usedMap[b.id] || 0;
-        const packages_in_stock = Math.max(0, b.packages_produced - used);
+        const packages_in_stock = Math.max(0, (b.packages_produced + (b.manual_stock_adjustment || 0)) - used);
         return {
           ...b,
           packages_in_stock,
