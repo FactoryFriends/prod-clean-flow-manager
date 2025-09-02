@@ -5,12 +5,14 @@ import { CleaningTaskDetailsModal } from "./task/CleaningTaskDetailsModal";
 import { OperationsFilters } from "./favv/OperationsFilters";
 import { CleaningTasksFilters } from "./favv/CleaningTasksFilters";
 import { PackingSlipsTable } from "./favv/PackingSlipsTable";
+import { UnifiedOperationsTable } from "./favv/UnifiedOperationsTable";
 import { StockTakesTable } from "./favv/StockTakesTable";
 import { CompletedTasksTable } from "./favv/CompletedTasksTable";
 import { exportPackingSlipsCSV, exportStockTakesCSV, exportCompletedTasksCSV } from "./favv/csvExportUtils";
 import { useFAVVPackingSlips } from "../hooks/useFAVVPackingSlips";
 import { useFAVVStockTakes } from "../hooks/useFAVVStockTakes";
 import { useFAVVCompletedTasks } from "../hooks/useFAVVCompletedTasks";
+import { useUnifiedOperationsData } from "../hooks/useUnifiedOperationsData";
 import { Package, FileText, Brush } from "lucide-react";
 import { BatchesInStockTable } from "./favv/BatchesInStockTable";
 import { ExpandableBatchMovementsList } from "./favv/ExpandableBatchMovementsList";
@@ -27,6 +29,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
   const [taskNameFilter, setTaskNameFilter] = useState<string>("");
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [operationType, setOperationType] = useState<"all" | "external" | "internal">("all");
 
   // Updated tabs: "in-stock", "movements", "partially-used", "fully-used"
   const [batchTab, setBatchTab] = useState<"in-stock" | "movements" | "partially-used" | "fully-used">("in-stock");
@@ -37,6 +40,14 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
     locationFilter,
     startDate,
     endDate
+  });
+
+  // Unified operations data
+  const { data: unifiedOperations = [], isLoading: isLoadingOperations } = useUnifiedOperationsData({
+    locationFilter,
+    startDate,
+    endDate,
+    operationType
   });
 
   const { data: stockTakes = [], isLoading: isLoadingStockTakes } = useFAVVStockTakes({
@@ -95,7 +106,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
             value="dispatched" 
             className="flex items-center gap-2 data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-50 hover:text-red-600 border-red-200"
           >
-            PACKING LISTS
+            OPERATIONS
           </TabsTrigger>
           <TabsTrigger value="produced" className="flex items-center gap-2">
             Produced Batches
@@ -183,13 +194,18 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
             setStartDate={setStartDate}
             endDate={endDate}
             setEndDate={setEndDate}
-            onExport={() => exportPackingSlipsCSV(packingSlips)}
-            exportDisabled={!packingSlips.length}
-            title="Dispatch Overview"
-            description="Filter and view all packing slips and dispatches"
+            onExport={() => exportPackingSlipsCSV(unifiedOperations.filter(op => op.type === 'EXTERNAL').map(op => op.details))}
+            exportDisabled={!unifiedOperations.length}
+            title="Operations Overview"
+            description="Filter and view all external and internal dispatch operations"
           />
 
-          <PackingSlipsTable packingSlips={packingSlips} isLoading={isLoadingPackingSlips} />
+          <UnifiedOperationsTable 
+            operations={unifiedOperations} 
+            isLoading={isLoadingOperations}
+            operationType={operationType}
+            onOperationTypeChange={setOperationType}
+          />
         </TabsContent>
 
         <TabsContent value="cleaning" className="space-y-6">
