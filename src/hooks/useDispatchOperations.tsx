@@ -58,6 +58,6 @@ export function useDispatchOperations({
 
   return {
     handleCreatePackingSlip,
-    handleInternalUse: () => handleInternalUse()
+    handleInternalUse
   };
 }
