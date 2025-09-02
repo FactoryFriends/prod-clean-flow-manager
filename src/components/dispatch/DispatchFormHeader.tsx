@@ -65,30 +65,40 @@ export function DispatchFormHeader({
 
   // Handle progressive internal dispatch workflow
   const handleInternalAction = async () => {
+    console.log("🎯 handleInternalAction called:", { isAwaitingConfirmation, justCreatedDispatchId });
+    
     if (!isAwaitingConfirmation) {
       // First click: Create dispatch
+      console.log("📝 Creating internal dispatch...");
       try {
         const dispatchId = await onInternalUse();
+        console.log("✅ Received dispatch ID:", dispatchId, "Type:", typeof dispatchId);
+        
         if (dispatchId && typeof dispatchId === 'string') {
+          console.log("🔄 Setting state: justCreatedDispatchId =", dispatchId, "isAwaitingConfirmation = true");
           setJustCreatedDispatchId(dispatchId);
           setIsAwaitingConfirmation(true);
+        } else {
+          console.warn("⚠️ Invalid dispatch ID returned:", dispatchId);
         }
       } catch (error) {
-        console.error("Error creating internal pick:", error);
+        console.error("❌ Error creating internal pick:", error);
       }
     } else {
       // Second click: Confirm dispatch
+      console.log("✅ Confirming dispatch with ID:", justCreatedDispatchId);
       if (justCreatedDispatchId) {
         try {
           await confirmDispatch.mutateAsync({
             dispatchId: justCreatedDispatchId,
             confirmedBy: pickerName,
           });
+          console.log("🎉 Dispatch confirmed, resetting state");
           // Reset state after successful confirmation
           setJustCreatedDispatchId(null);
           setIsAwaitingConfirmation(false);
         } catch (error) {
-          console.error("Error confirming dispatch:", error);
+          console.error("❌ Error confirming dispatch:", error);
         }
       }
     }
