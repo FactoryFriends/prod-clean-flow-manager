@@ -51,7 +51,7 @@ export const addItemsTable = (pdf: jsPDF, selectedItems: PDFItem[], startY: numb
     pdf.text(item.name, 25, yPos + 6);
     pdf.text(item.batchNumber || "-", 75, yPos + 6);
     pdf.text(item.productionDate ? format(new Date(item.productionDate), "yyyy-MM-dd") : "-", 125, yPos + 6);
-    pdf.text(`${item.selectedQuantity} bags`, 165, yPos + 6);
+    pdf.text(`${item.selectedQuantity} ${item.unitType || 'units'}`, 165, yPos + 6);
     
     yPos += rowHeight;
   });

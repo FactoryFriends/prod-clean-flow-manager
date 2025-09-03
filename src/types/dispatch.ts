@@ -11,6 +11,7 @@ export interface SelectedItem {
   supplier?: string;
   productType?: string;
   innerUnitType?: string;
+  unitType?: string;
 }
 
 export interface ExternalProduct {

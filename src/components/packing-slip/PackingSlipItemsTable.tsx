@@ -7,6 +7,7 @@ interface SelectedItem {
   batchNumber?: string;
   selectedQuantity: number;
   productionDate?: string;
+  unitType?: string;
 }
 
 interface PackingSlipItemsTableProps {
@@ -35,7 +36,7 @@ export function PackingSlipItemsTable({ selectedItems }: PackingSlipItemsTablePr
               <td className="border border-gray-300 p-2 text-xs">
                 {item.productionDate ? format(new Date(item.productionDate), "yyyy-MM-dd") : "-"}
               </td>
-              <td className="border border-gray-300 p-2 text-xs">{item.selectedQuantity} bags</td>
+              <td className="border border-gray-300 p-2 text-xs">{item.selectedQuantity} {item.unitType || 'units'}</td>
             </tr>
           ))}
         </tbody>

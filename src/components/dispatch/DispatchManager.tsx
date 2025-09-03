@@ -84,6 +84,7 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
     selectedQuantity: 0,
     expiryDate: batch.expiry_date,
     productionDate: batch.production_date,
+    unitType: batch.products.unit_type,
   }));
 
   // Match InventoryBrowser data structure exactly
@@ -95,6 +96,7 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
     supplier: product.supplier_name,
     productType: 'External Product' as const,
     innerUnitType: product.inner_unit_type,
+    unitType: product.inner_unit_type,
   }));
 
   const availableIngredientProducts = (ingredientProducts || []).map(product => ({
@@ -105,6 +107,7 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
     supplier: product.supplier_name,
     productType: 'Ingredient' as const,
     innerUnitType: product.inner_unit_type,
+    unitType: product.inner_unit_type,
   }));
 
   const allAvailableItems = [...availableBatches, ...availableExternalProducts, ...availableIngredientProducts];

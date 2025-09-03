@@ -8,6 +8,7 @@ export interface PDFItem {
   type?: string;
   product_type?: string;
   product_kind?: string;
+  unitType?: string;
 }
 
 export interface PDFData {
