@@ -158,7 +158,7 @@ export function PackingSlipDetailsModal({ packingSlip, isOpen, onClose }: Packin
                     <td className="border border-gray-300 p-2 text-xs">
                       {isExternalProduct ? "SEE PACKAGING" : (item.productionDate || '-')}
                     </td>
-                    <td className="border border-gray-300 p-2 text-xs">{item.selectedQuantity} {item.unitType || 'units'}</td>
+                    <td className="border border-gray-300 p-2 text-xs">{item.selectedQuantity} {item.unitType || item.innerUnitType || 'units'}</td>
                   </tr>
                 );
               })}
