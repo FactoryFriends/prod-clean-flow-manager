@@ -13,7 +13,8 @@ import { useFAVVPackingSlips } from "../hooks/useFAVVPackingSlips";
 import { useFAVVStockTakes } from "../hooks/useFAVVStockTakes";
 import { useFAVVCompletedTasks } from "../hooks/useFAVVCompletedTasks";
 import { useUnifiedOperationsData } from "../hooks/useUnifiedOperationsData";
-import { Package, FileText, Brush, History } from "lucide-react";
+import { Package, FileText, Brush, History, Printer } from "lucide-react";
+import { printStockListA4 } from "../utils/pdf/stockListPrintA4";
 import { BatchesInStockTable } from "./favv/BatchesInStockTable";
 import { AuditTrailModal } from "./favv/AuditTrailModal";
 import { Button } from "./ui/button";
@@ -151,6 +152,22 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
               >
                 In Stock
               </button>
+              {batchTab === "in-stock" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => printStockListA4({
+                    batches: batchesInStock,
+                    currentLocation,
+                    searchFilter: batchSearch || undefined
+                  })}
+                  className="flex items-center gap-2 border-blue-200 text-blue-600 hover:bg-blue-50"
+                  disabled={!batchesInStock.length}
+                >
+                  <Printer className="w-4 h-4" />
+                  Print Stock List
+                </Button>
+              )}
               <button 
                 className={`px-3 py-1 rounded-lg border ${batchTab==="movements"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
                 onClick={() => setBatchTab("movements")}
