@@ -55,7 +55,8 @@ export const useBatchStock = ({
       const batchIds = batches.map((b: any) => b.id);
       if (batchIds.length === 0) return [];
 
-      // Only count dispatch items from confirmed dispatches
+      // Count dispatch items from ALL dispatches (confirmed and draft)
+      // This prevents phantom availability where items show as pickable but are already reserved
       const { data: dispatchItems, error: diErr } = await supabase
         .from("dispatch_items")
         .select(`
@@ -64,8 +65,7 @@ export const useBatchStock = ({
           dispatch_records!inner(status)
         `)
         .in("item_id", batchIds)
-        .eq("item_type", "batch")
-        .eq("dispatch_records.status", "confirmed");
+        .eq("item_type", "batch");
       if (diErr) {
         // Handle authentication errors gracefully
         if (diErr.code === 'PGRST116' || diErr.message?.includes('permission')) {
