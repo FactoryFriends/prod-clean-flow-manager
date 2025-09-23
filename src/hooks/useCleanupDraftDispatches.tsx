@@ -1,9 +1,11 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { queryKeys } from "./queryKeys";
 
 export function useCleanupDraftDispatches() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ hoursOld = 24 }: { hoursOld?: number } = {}) => {
@@ -50,6 +52,9 @@ export function useCleanupDraftDispatches() {
           description: result.message,
         });
       }
+      // Invalidate queries to refresh UI
+      queryClient.invalidateQueries({ queryKey: queryKeys.dispatch.internal() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.production.batches() });
     },
     onError: (error: any) => {
       console.error("Error cleaning up draft dispatches:", error);

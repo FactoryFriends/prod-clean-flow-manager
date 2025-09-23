@@ -74,8 +74,9 @@ export function useConfirmInternalDispatch() {
       return data;
     },
     onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.dispatch.internal() });
       queryClient.invalidateQueries({ queryKey: queryKeys.dispatch.records() });
-      queryClient.invalidateQueries({ queryKey: ["production-batches"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.production.batches() });
       
       toast({
         title: "Internal Pick Confirmed",

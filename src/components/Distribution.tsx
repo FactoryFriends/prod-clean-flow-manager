@@ -1,6 +1,10 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Truck, Home } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Truck, Home, Clock, Trash2 } from "lucide-react";
 import { Dispatch } from "./Dispatch";
+import { InternalDispatchConfirmationDialog } from "./dispatch/InternalDispatchConfirmationDialog";
+import { useCleanupDraftDispatches } from "@/hooks/useCleanupDraftDispatches";
+import { useInternalDispatchRecords } from "@/hooks/useInternalDispatchRecords";
 import { useState } from "react";
 
 interface DistributionProps {
@@ -10,6 +14,10 @@ interface DistributionProps {
 
 export function Distribution({ currentLocation, initialTab = "external" }: DistributionProps) {
   const [activeTab, setActiveTab] = useState<"external" | "internal">(initialTab);
+  const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
+  
+  const { data: pendingDispatches = [] } = useInternalDispatchRecords(currentLocation);
+  const cleanupDrafts = useCleanupDraftDispatches();
 
   const getLocationName = (location: string) => {
     return location === "tothai" ? "To Thai Restaurant" : "Khin Takeaway";
@@ -115,16 +123,45 @@ export function Distribution({ currentLocation, initialTab = "external" }: Distr
 
         <TabsContent value="internal" className="mt-6">
           <div className="bg-green-50 border-2 border-green-200 rounded-lg p-6">
-            <div className="mb-4">
-              <h2 className="text-xl font-semibold text-green-800 mb-2">Internal Kitchen Use</h2>
-              <p className="text-green-600 text-sm">
-                Record products used internally in the kitchen (no packing slips needed)
-              </p>
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-green-800 mb-2">Internal Kitchen Use</h2>
+                <p className="text-green-600 text-sm">
+                  Record products used internally in the kitchen (no packing slips needed)
+                </p>
+              </div>
+              <div className="flex gap-2">
+                {pendingDispatches.length > 0 && (
+                  <Button
+                    onClick={() => setConfirmationDialogOpen(true)}
+                    variant="outline"
+                    className="border-amber-500 text-amber-700 hover:bg-amber-50"
+                  >
+                    <Clock className="w-4 h-4 mr-2" />
+                    Confirm Pending Picks ({pendingDispatches.length})
+                  </Button>
+                )}
+                <Button
+                  onClick={() => cleanupDrafts.mutate({ hoursOld: 24 })}
+                  variant="outline"
+                  className="border-red-500 text-red-700 hover:bg-red-50"
+                  disabled={cleanupDrafts.isPending}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  {cleanupDrafts.isPending ? "Cleaning..." : "Cleanup Old Drafts"}
+                </Button>
+              </div>
             </div>
             <Dispatch currentLocation={currentLocation} dispatchType="internal" />
           </div>
         </TabsContent>
       </Tabs>
+
+      <InternalDispatchConfirmationDialog
+        open={confirmationDialogOpen}
+        onOpenChange={setConfirmationDialogOpen}
+        currentLocation={currentLocation}
+      />
     </div>
   );
 }
