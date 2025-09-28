@@ -55,8 +55,8 @@ export const useBatchStock = ({
       const batchIds = batches.map((b: any) => b.id);
       if (batchIds.length === 0) return [];
 
-      // Count dispatch items from ALL dispatches (confirmed and draft)
-      // This prevents phantom availability where items show as pickable but are already reserved
+      // Count dispatch items from DRAFT dispatches only (confirmed ones are already subtracted from packages_produced)
+      // This prevents double-subtraction while still showing reserved quantities
       const { data: dispatchItems, error: diErr } = await supabase
         .from("dispatch_items")
         .select(`
@@ -65,7 +65,8 @@ export const useBatchStock = ({
           dispatch_records!inner(status)
         `)
         .in("item_id", batchIds)
-        .eq("item_type", "batch");
+        .eq("item_type", "batch")
+        .eq("dispatch_records.status", "draft");
       if (diErr) {
         // Handle authentication errors gracefully
         if (diErr.code === 'PGRST116' || diErr.message?.includes('permission')) {
@@ -80,16 +81,16 @@ export const useBatchStock = ({
         throw diErr;
       }
 
-      const usedMap: Record<string, number> = {};
+      const reservedMap: Record<string, number> = {};
       dispatchItems?.forEach((item: any) => {
-        if (!usedMap[item.item_id]) usedMap[item.item_id] = 0;
-        usedMap[item.item_id] += item.quantity;
+        if (!reservedMap[item.item_id]) reservedMap[item.item_id] = 0;
+        reservedMap[item.item_id] += item.quantity;
       });
 
       // Prepare output array
       const allBatches: BatchWithStock[] = batches.map((b: any) => {
-        const used = usedMap[b.id] || 0;
-        const packages_in_stock = Math.max(0, (b.packages_produced + (b.manual_stock_adjustment || 0)) - used);
+        const reserved = reservedMap[b.id] || 0;
+        const packages_in_stock = Math.max(0, (b.packages_produced + (b.manual_stock_adjustment || 0)) - reserved);
         return {
           ...b,
           packages_in_stock,
