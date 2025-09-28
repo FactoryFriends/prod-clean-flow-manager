@@ -13,7 +13,7 @@ export function useInternalDispatchRecords(location?: string) {
           dispatch_items (*)
         `)
         .eq("dispatch_type", "internal")
-        .eq("status", "draft") // Only get pending internal dispatches
+        .eq("status", "draft") // Only get draft internal dispatches, not cancelled ones
         .order("created_at", { ascending: false });
 
       if (location) {

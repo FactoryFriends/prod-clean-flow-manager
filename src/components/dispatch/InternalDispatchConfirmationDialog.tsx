@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useConfirmInternalDispatch } from "@/hooks/useConfirmInternalDispatch";
 import { useInternalDispatchRecords } from "@/hooks/useInternalDispatchRecords";
+import { useCancelInternalDispatch } from "@/hooks/useCancelInternalDispatch";
 import { format } from "date-fns";
 import { Package, Clock, User, MapPin } from "lucide-react";
 
@@ -21,6 +22,7 @@ export function InternalDispatchConfirmationDialog({
 }: InternalDispatchConfirmationDialogProps) {
   const { data: pendingDispatches = [] } = useInternalDispatchRecords(currentLocation);
   const confirmDispatch = useConfirmInternalDispatch();
+  const cancelDispatch = useCancelInternalDispatch();
 
   const handleConfirmPickup = async (dispatchId: string, pickerName: string) => {
     try {
@@ -30,6 +32,14 @@ export function InternalDispatchConfirmationDialog({
       });
     } catch (error) {
       console.error("Error confirming pickup:", error);
+    }
+  };
+
+  const handleCancelPickup = async (dispatchId: string) => {
+    try {
+      await cancelDispatch.mutateAsync({ dispatchId });
+    } catch (error) {
+      console.error("Error cancelling pickup:", error);
     }
   };
 
@@ -125,11 +135,12 @@ export function InternalDispatchConfirmationDialog({
                       {confirmDispatch.isPending ? "Confirming..." : "CONFIRM PICKUP"}
                     </Button>
                     <Button
-                      onClick={() => onOpenChange(false)}
+                      onClick={() => handleCancelPickup(dispatch.id)}
+                      disabled={cancelDispatch.isPending}
                       variant="outline"
                       className="border-red-300 text-red-600 hover:bg-red-50"
                     >
-                      CANCEL PICKUP
+                      {cancelDispatch.isPending ? "Cancelling..." : "CANCEL PICKUP"}
                     </Button>
                   </div>
                 </CardContent>
