@@ -24,25 +24,36 @@ export function useConfirmInternalDispatch() {
         throw new Error("Dispatch not found or already confirmed");
       }
 
-      // Check stock availability for each batch item
+      // Group items by batch to get total requested quantity per batch
+      const batchQuantities = new Map<string, number>();
+      dispatch.dispatch_items.forEach(item => {
+        if (item.item_type === 'batch') {
+          const currentQty = batchQuantities.get(item.item_id) || 0;
+          batchQuantities.set(item.item_id, currentQty + item.quantity);
+        }
+      });
+
+      // Check stock availability for each batch, excluding current dispatch
       const stockIssues: string[] = [];
       
-      for (const item of dispatch.dispatch_items) {
-        if (item.item_type === 'batch') {
-          // Use the existing function to get remaining stock
-          const { data: stockData, error: stockError } = await supabase
-            .rpc('get_batch_remaining_stock', { batch_id_param: item.item_id });
+      for (const [batchId, requestedQuantity] of batchQuantities.entries()) {
+        // Use the new function that excludes the current dispatch from stock calculations
+        const { data: freeStock, error: stockError } = await supabase
+          .rpc('get_batch_free_stock_excluding_dispatch', { 
+            batch_id_param: batchId, 
+            exclude_dispatch_id_param: dispatchId 
+          });
 
-          if (stockError) {
-            console.error("Error checking stock for batch:", item.item_id, stockError);
-            continue;
-          }
+        if (stockError) {
+          console.error("Error checking stock for batch:", batchId, stockError);
+          continue;
+        }
 
-          const availableStock = stockData || 0;
-          
-          if (availableStock < item.quantity) {
-            stockIssues.push(`${item.item_name}: Available ${availableStock}, Requested ${item.quantity}`);
-          }
+        const availableStock = freeStock || 0;
+        const batchItem = dispatch.dispatch_items.find(item => item.item_id === batchId);
+        
+        if (availableStock < requestedQuantity) {
+          stockIssues.push(`${batchItem?.item_name || batchId}: Available ${availableStock}, Requested ${requestedQuantity}`);
         }
       }
 
@@ -77,6 +88,8 @@ export function useConfirmInternalDispatch() {
       queryClient.invalidateQueries({ queryKey: queryKeys.dispatch.internal() });
       queryClient.invalidateQueries({ queryKey: queryKeys.dispatch.records() });
       queryClient.invalidateQueries({ queryKey: queryKeys.production.batches() });
+      // Also invalidate batch stock queries to refresh availability
+      queryClient.invalidateQueries({ queryKey: ['batchStock'] });
       
       toast({
         title: "Internal Pick Confirmed",

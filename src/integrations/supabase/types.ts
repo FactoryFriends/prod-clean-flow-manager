@@ -810,6 +810,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      get_batch_free_stock_excluding_dispatch: {
+        Args: { batch_id_param: string; exclude_dispatch_id_param: string }
+        Returns: number
+      }
       get_batch_remaining_stock: {
         Args: { batch_id_param: string }
         Returns: number
