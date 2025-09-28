@@ -85,12 +85,12 @@ export function useConfirmInternalDispatch() {
       return data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.dispatch.internal() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.dispatch.records() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.production.batches() });
-      // Also invalidate batch stock queries to refresh availability
+      // Broadly invalidate dispatch-related queries and stock
+      queryClient.invalidateQueries({ queryKey: ['internal-dispatch-records'] });
+      queryClient.invalidateQueries({ queryKey: ['dispatch'] });
+      queryClient.invalidateQueries({ queryKey: ['production', 'batches'] });
       queryClient.invalidateQueries({ queryKey: ['batches-in-stock'] });
-      
+
       toast({
         title: "Internal Pick Confirmed",
         description: "Items have been confirmed as picked up and inventory has been updated.",
