@@ -79,6 +79,8 @@ export const useCreateDispatch = () => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["dispatch-records"] });
+      // Always invalidate batch stock to refresh availability after creating any dispatch
+      queryClient.invalidateQueries({ queryKey: ["batches-in-stock"] });
       
       // Only invalidate production batches if dispatch is confirmed, not for drafts
       if (data.status === "confirmed") {

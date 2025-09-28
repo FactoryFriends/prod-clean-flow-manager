@@ -89,7 +89,7 @@ export function useConfirmInternalDispatch() {
       queryClient.invalidateQueries({ queryKey: queryKeys.dispatch.records() });
       queryClient.invalidateQueries({ queryKey: queryKeys.production.batches() });
       // Also invalidate batch stock queries to refresh availability
-      queryClient.invalidateQueries({ queryKey: ['batchStock'] });
+      queryClient.invalidateQueries({ queryKey: ['batches-in-stock'] });
       
       toast({
         title: "Internal Pick Confirmed",
