@@ -27,7 +27,7 @@ export function InternalDispatchConfirmationDialog({
 
   const [cancelingId, setCancelingId] = useState<string | null>(null);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
-  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  
 
   const handleConfirmPickup = async (dispatchId: string, pickerName: string) => {
     console.debug("[InternalDispatchConfirmationDialog] Confirm click", { dispatchId });
@@ -49,10 +49,7 @@ export function InternalDispatchConfirmationDialog({
       console.debug("[InternalDispatchConfirmationDialog] Cancel button clicked", { dispatchId, currentLocation });
       setCancelingId(dispatchId);
       await cancelDispatch.mutateAsync({ dispatchId, location: currentLocation });
-      
-      // Immediately hide this item from the UI
-      setHiddenIds(prev => new Set([...prev, dispatchId]));
-      console.debug("[InternalDispatchConfirmationDialog] Cancel successful, item hidden", { dispatchId });
+      console.debug("[InternalDispatchConfirmationDialog] Cancel successful", { dispatchId });
     } catch (error) {
       console.error("Error cancelling pickup:", error);
     } finally {
@@ -60,17 +57,13 @@ export function InternalDispatchConfirmationDialog({
     }
   };
 
-  // Auto-close dialog if no pending dispatches when opened or after successful operations
+  // Auto-close dialog only when server data shows no pending dispatches
   useEffect(() => {
-    const visibleDispatches = pendingDispatches?.filter(d => !hiddenIds.has(d.id)) || [];
-    if (open && visibleDispatches.length === 0) {
-      console.debug("[InternalDispatchConfirmationDialog] Auto-closing dialog - no visible dispatches", { 
-        totalPending: pendingDispatches?.length, 
-        hiddenCount: hiddenIds.size 
-      });
+    if (open && (pendingDispatches?.length ?? 0) === 0) {
+      console.debug("[InternalDispatchConfirmationDialog] Auto-closing dialog - no pending dispatches from server");
       onOpenChange(false);
     }
-  }, [open, pendingDispatches, hiddenIds, onOpenChange]);
+  }, [open, pendingDispatches, onOpenChange]);
 
   const getLocationName = (location: string) => {
     return location === "tothai" ? "Tothai Kitchen" : "Khin Restaurant";
@@ -95,7 +88,6 @@ export function InternalDispatchConfirmationDialog({
             </div>
           ) : (
             pendingDispatches
-              .filter(dispatch => !hiddenIds.has(dispatch.id))
               .map((dispatch) => (
               <Card key={dispatch.id} className="border-l-4 border-l-warning">
                 <CardHeader className="pb-3">

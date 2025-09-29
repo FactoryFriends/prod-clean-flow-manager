@@ -798,6 +798,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_internal_dispatch: {
+        Args: { p_id: string }
+        Returns: {
+          cancelled_id: string
+        }[]
+      }
       generate_batch_number: {
         Args: { product_name: string; production_date: string }
         Returns: string

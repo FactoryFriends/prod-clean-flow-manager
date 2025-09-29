@@ -12,51 +12,33 @@ export function useCancelInternalDispatch() {
 
   return useMutation({
     mutationFn: async ({ dispatchId, location }: CancelInternalDispatchParams) => {
-      console.debug("[useCancelInternalDispatch] Starting cancellation", { dispatchId, location });
-      
-      const { data, error } = await supabase
-        .from("dispatch_records")
-        .update({ status: "cancelled", updated_at: new Date().toISOString() })
-        .eq("id", dispatchId)
-        .eq("dispatch_type", "internal")
-        .eq("status", "draft")
-        .select()
-        .maybeSingle();
+      console.debug("[useCancelInternalDispatch] Starting cancellation via RPC", { dispatchId, location });
 
-      console.debug("[useCancelInternalDispatch] Supabase response", { data, error, dispatchId });
+      const { data, error } = await supabase.rpc('cancel_internal_dispatch', { p_id: dispatchId });
+      console.debug("[useCancelInternalDispatch] RPC response", { data, error, dispatchId });
 
       if (error) {
-        console.error("Error cancelling internal dispatch:", error);
+        console.error("Error cancelling internal dispatch (RPC):", error);
         throw error;
       }
 
-      if (!data) {
-        // No matching draft dispatch (likely already confirmed/cancelled)
+      const cancelledId = Array.isArray(data) && data.length > 0 ? data[0]?.cancelled_id : null;
+      if (!cancelledId) {
         console.debug("[useCancelInternalDispatch] No rows updated - dispatch not found or already handled", { dispatchId });
         throw new Error("This pick was not found or is already handled.");
       }
 
-      console.debug("[useCancelInternalDispatch] Successfully cancelled dispatch", { dispatchId, updatedData: data });
-      return data;
+      console.debug("[useCancelInternalDispatch] Successfully cancelled dispatch", { dispatchId, cancelledId });
+      return { id: cancelledId } as any;
     },
     onMutate: async ({ dispatchId, location }) => {
-      console.debug("[useCancelInternalDispatch] onMutate starting optimistic update", { dispatchId, location });
-      
+      console.debug("[useCancelInternalDispatch] onMutate - pausing queries (no optimistic remove)", { dispatchId, location });
+
       // Cancel any outgoing refetches for internal dispatch lists
       await queryClient.cancelQueries({ queryKey: ["internal-dispatch-records"] });
 
-      // Snapshot current lists so we can rollback on error
+      // Snapshot current lists so we can rollback if needed
       const previous = queryClient.getQueriesData<any>({ queryKey: ["internal-dispatch-records"] });
-
-      // Optimistically remove the cancelled dispatch from all cached lists
-      previous.forEach(([key, old]) => {
-        if (Array.isArray(old)) {
-          const next = old.filter((rec: any) => rec?.id !== dispatchId);
-          queryClient.setQueryData(key, next);
-        }
-      });
-
-      console.debug("[useCancelInternalDispatch] Optimistic remove completed", { dispatchId, affectedCaches: previous.map(([k]) => k) });
 
       return { previous, dispatchId, location };
     },
