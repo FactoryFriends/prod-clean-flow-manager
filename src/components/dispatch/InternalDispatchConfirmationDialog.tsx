@@ -21,7 +21,7 @@ export function InternalDispatchConfirmationDialog({
   onOpenChange,
   currentLocation,
 }: InternalDispatchConfirmationDialogProps) {
-  const { data: pendingDispatches = [] } = useInternalDispatchRecords(currentLocation);
+  const { data: pendingDispatches = [], isFetching } = useInternalDispatchRecords(currentLocation);
   const confirmDispatch = useConfirmInternalDispatch();
   const cancelDispatch = useCancelInternalDispatch();
 
@@ -59,11 +59,11 @@ export function InternalDispatchConfirmationDialog({
 
   // Auto-close dialog only when server data shows no pending dispatches
   useEffect(() => {
-    if (open && (pendingDispatches?.length ?? 0) === 0) {
+    if (open && !isFetching && (pendingDispatches?.length ?? 0) === 0) {
       console.debug("[InternalDispatchConfirmationDialog] Auto-closing dialog - no pending dispatches from server");
       onOpenChange(false);
     }
-  }, [open, pendingDispatches, onOpenChange]);
+  }, [open, isFetching, pendingDispatches, onOpenChange]);
 
   const getLocationName = (location: string) => {
     return location === "tothai" ? "Tothai Kitchen" : "Khin Restaurant";

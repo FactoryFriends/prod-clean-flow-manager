@@ -12,24 +12,46 @@ export function useCancelInternalDispatch() {
 
   return useMutation({
     mutationFn: async ({ dispatchId, location }: CancelInternalDispatchParams) => {
-      console.debug("[useCancelInternalDispatch] Starting cancellation via RPC", { dispatchId, location });
+      console.debug("[useCancelInternalDispatch] Starting cancellation", { dispatchId, location });
 
-      const { data, error } = await supabase.rpc('cancel_internal_dispatch', { p_id: dispatchId });
-      console.debug("[useCancelInternalDispatch] RPC response", { data, error, dispatchId });
-
-      if (error) {
-        console.error("Error cancelling internal dispatch (RPC):", error);
-        throw error;
+      // Try RPC first
+      try {
+        const { data, error } = await supabase.rpc('cancel_internal_dispatch', { p_id: dispatchId });
+        console.debug("[useCancelInternalDispatch] RPC response", { data, error, dispatchId });
+        if (!error) {
+          const cancelledId = Array.isArray(data) && data.length > 0 ? (data as any)[0]?.cancelled_id : null;
+          if (cancelledId) {
+            console.debug("[useCancelInternalDispatch] Cancelled via RPC", { dispatchId, cancelledId });
+            return { id: cancelledId } as any;
+          }
+          console.debug("[useCancelInternalDispatch] RPC returned no rows; will fallback", { dispatchId });
+        } else {
+          console.warn("[useCancelInternalDispatch] RPC error; will fallback to direct update", { error });
+        }
+      } catch (rpcErr) {
+        console.warn("[useCancelInternalDispatch] RPC threw; will fallback", { rpcErr });
       }
 
-      const cancelledId = Array.isArray(data) && data.length > 0 ? data[0]?.cancelled_id : null;
-      if (!cancelledId) {
-        console.debug("[useCancelInternalDispatch] No rows updated - dispatch not found or already handled", { dispatchId });
+      // Fallback: direct update on dispatch_records
+      const { data: updData, error: updError } = await supabase
+        .from('dispatch_records')
+        .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+        .eq('id', dispatchId)
+        .eq('dispatch_type', 'internal')
+        .eq('status', 'draft')
+        .select('id');
+
+      if (updError) {
+        console.error("[useCancelInternalDispatch] Fallback update error", { updError });
+        throw updError;
+      }
+
+      const updatedId = Array.isArray(updData) && updData.length > 0 ? (updData as any)[0]?.id : null;
+      if (!updatedId) {
         throw new Error("This pick was not found or is already handled.");
       }
-
-      console.debug("[useCancelInternalDispatch] Successfully cancelled dispatch", { dispatchId, cancelledId });
-      return { id: cancelledId } as any;
+      console.debug("[useCancelInternalDispatch] Cancelled via fallback update", { dispatchId, updatedId });
+      return { id: updatedId } as any;
     },
     onMutate: async ({ dispatchId, location }) => {
       console.debug("[useCancelInternalDispatch] onMutate - pausing queries (no optimistic remove)", { dispatchId, location });
