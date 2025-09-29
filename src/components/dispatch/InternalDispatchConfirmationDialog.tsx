@@ -27,6 +27,7 @@ export function InternalDispatchConfirmationDialog({
 
   const [cancelingId, setCancelingId] = useState<string | null>(null);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
 
   const handleConfirmPickup = async (dispatchId: string, pickerName: string) => {
     console.debug("[InternalDispatchConfirmationDialog] Confirm click", { dispatchId });
@@ -44,10 +45,14 @@ export function InternalDispatchConfirmationDialog({
   };
 
   const handleCancelPickup = async (dispatchId: string) => {
-    console.debug("[InternalDispatchConfirmationDialog] Cancel click", { dispatchId });
-    setCancelingId(dispatchId);
     try {
-      await cancelDispatch.mutateAsync({ dispatchId });
+      console.debug("[InternalDispatchConfirmationDialog] Cancel button clicked", { dispatchId, currentLocation });
+      setCancelingId(dispatchId);
+      await cancelDispatch.mutateAsync({ dispatchId, location: currentLocation });
+      
+      // Immediately hide this item from the UI
+      setHiddenIds(prev => new Set([...prev, dispatchId]));
+      console.debug("[InternalDispatchConfirmationDialog] Cancel successful, item hidden", { dispatchId });
     } catch (error) {
       console.error("Error cancelling pickup:", error);
     } finally {
@@ -55,11 +60,17 @@ export function InternalDispatchConfirmationDialog({
     }
   };
 
+  // Auto-close dialog if no pending dispatches when opened or after successful operations
   useEffect(() => {
-    if (open && pendingDispatches.length === 0) {
+    const visibleDispatches = pendingDispatches?.filter(d => !hiddenIds.has(d.id)) || [];
+    if (open && visibleDispatches.length === 0) {
+      console.debug("[InternalDispatchConfirmationDialog] Auto-closing dialog - no visible dispatches", { 
+        totalPending: pendingDispatches?.length, 
+        hiddenCount: hiddenIds.size 
+      });
       onOpenChange(false);
     }
-  }, [open, pendingDispatches, onOpenChange]);
+  }, [open, pendingDispatches, hiddenIds, onOpenChange]);
 
   const getLocationName = (location: string) => {
     return location === "tothai" ? "Tothai Kitchen" : "Khin Restaurant";
@@ -83,7 +94,9 @@ export function InternalDispatchConfirmationDialog({
               <p className="text-sm">All internal kitchen picks have been confirmed</p>
             </div>
           ) : (
-            pendingDispatches.map((dispatch) => (
+            pendingDispatches
+              .filter(dispatch => !hiddenIds.has(dispatch.id))
+              .map((dispatch) => (
               <Card key={dispatch.id} className="border-l-4 border-l-warning">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -154,11 +167,11 @@ export function InternalDispatchConfirmationDialog({
                     </Button>
                     <Button
                       onClick={() => handleCancelPickup(dispatch.id)}
-                      disabled={cancelingId === dispatch.id || cancelDispatch.isPending}
+                      disabled={cancelingId === dispatch.id || confirmingId === dispatch.id}
                       variant="outline"
                       className="border-red-300 text-red-600 hover:bg-red-50"
                     >
-                      {cancelingId === dispatch.id && cancelDispatch.isPending ? "Cancelling..." : "CANCEL PICKUP"}
+                      {cancelingId === dispatch.id ? "Cancelling..." : "CANCEL PICKUP"}
                     </Button>
                   </div>
                 </CardContent>

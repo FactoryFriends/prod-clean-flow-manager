@@ -4,13 +4,16 @@ import { toast } from "sonner";
 
 interface CancelInternalDispatchParams {
   dispatchId: string;
+  location: string;
 }
 
 export function useCancelInternalDispatch() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ dispatchId }: CancelInternalDispatchParams) => {
+    mutationFn: async ({ dispatchId, location }: CancelInternalDispatchParams) => {
+      console.debug("[useCancelInternalDispatch] Starting cancellation", { dispatchId, location });
+      
       const { data, error } = await supabase
         .from("dispatch_records")
         .update({ status: "cancelled", updated_at: new Date().toISOString() })
@@ -20,6 +23,8 @@ export function useCancelInternalDispatch() {
         .select()
         .maybeSingle();
 
+      console.debug("[useCancelInternalDispatch] Supabase response", { data, error, dispatchId });
+
       if (error) {
         console.error("Error cancelling internal dispatch:", error);
         throw error;
@@ -27,12 +32,16 @@ export function useCancelInternalDispatch() {
 
       if (!data) {
         // No matching draft dispatch (likely already confirmed/cancelled)
+        console.debug("[useCancelInternalDispatch] No rows updated - dispatch not found or already handled", { dispatchId });
         throw new Error("This pick was not found or is already handled.");
       }
 
+      console.debug("[useCancelInternalDispatch] Successfully cancelled dispatch", { dispatchId, updatedData: data });
       return data;
     },
-    onMutate: async ({ dispatchId }) => {
+    onMutate: async ({ dispatchId, location }) => {
+      console.debug("[useCancelInternalDispatch] onMutate starting optimistic update", { dispatchId, location });
+      
       // Cancel any outgoing refetches for internal dispatch lists
       await queryClient.cancelQueries({ queryKey: ["internal-dispatch-records"] });
 
@@ -47,9 +56,9 @@ export function useCancelInternalDispatch() {
         }
       });
 
-      console.debug("[useCancelInternalDispatch] Optimistic remove", { dispatchId, affectedCaches: previous.map(([k]) => k) });
+      console.debug("[useCancelInternalDispatch] Optimistic remove completed", { dispatchId, affectedCaches: previous.map(([k]) => k) });
 
-      return { previous };
+      return { previous, dispatchId, location };
     },
     onError: (error, _variables, context) => {
       // Rollback optimistic updates on error
@@ -63,12 +72,25 @@ export function useCancelInternalDispatch() {
       const message = (error as any)?.message || "Failed to cancel internal pick";
       toast.error(message);
     },
-    onSuccess: () => {
+    onSuccess: (data, variables, context) => {
+      console.debug("[useCancelInternalDispatch] onSuccess", { dispatchId: variables.dispatchId, location: variables.location });
+      
+      // Ensure the specific location query is updated
+      const locationKey = ["internal-dispatch-records", variables.location];
+      const currentData = queryClient.getQueryData<any[]>(locationKey);
+      if (currentData) {
+        const filteredData = currentData.filter((rec: any) => rec?.id !== variables.dispatchId);
+        queryClient.setQueryData(locationKey, filteredData);
+        console.debug("[useCancelInternalDispatch] Updated location-specific cache", { locationKey, remainingCount: filteredData.length });
+      }
+      
       toast.success("Internal pick cancelled successfully");
     },
     onSettled: async (_data, _error, variables) => {
-      // Invalidate and immediately refetch active internal dispatch queries
-      console.debug("[useCancelInternalDispatch] onSettled", { dispatchId: (variables as any)?.dispatchId });
+      const { dispatchId, location } = variables;
+      console.debug("[useCancelInternalDispatch] onSettled - starting invalidation and refetch", { dispatchId, location });
+      
+      // Invalidate broad set of related queries
       await queryClient.invalidateQueries({
         predicate: (q) => Array.isArray(q.queryKey) && (
           q.queryKey[0] === 'internal-dispatch-records' ||
@@ -77,10 +99,20 @@ export function useCancelInternalDispatch() {
           q.queryKey[0] === 'batches-in-stock'
         )
       });
+      
+      // Force refetch the specific location query to update counters
+      await queryClient.refetchQueries({
+        queryKey: ["internal-dispatch-records", location],
+        type: 'active'
+      });
+      
+      // Also refetch all internal dispatch queries
       await queryClient.refetchQueries({
         predicate: (q) => Array.isArray(q.queryKey) && q.queryKey[0] === 'internal-dispatch-records',
         type: 'active'
       });
+      
+      console.debug("[useCancelInternalDispatch] onSettled completed");
     },
   });
 }
