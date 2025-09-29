@@ -8,6 +8,7 @@ import { useInternalDispatchRecords } from "@/hooks/useInternalDispatchRecords";
 import { useCancelInternalDispatch } from "@/hooks/useCancelInternalDispatch";
 import { format } from "date-fns";
 import { Package, Clock, User, MapPin } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface InternalDispatchConfirmationDialogProps {
   open: boolean;
@@ -24,7 +25,12 @@ export function InternalDispatchConfirmationDialog({
   const confirmDispatch = useConfirmInternalDispatch();
   const cancelDispatch = useCancelInternalDispatch();
 
+  const [cancelingId, setCancelingId] = useState<string | null>(null);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+
   const handleConfirmPickup = async (dispatchId: string, pickerName: string) => {
+    console.debug("[InternalDispatchConfirmationDialog] Confirm click", { dispatchId });
+    setConfirmingId(dispatchId);
     try {
       await confirmDispatch.mutateAsync({
         dispatchId,
@@ -32,16 +38,28 @@ export function InternalDispatchConfirmationDialog({
       });
     } catch (error) {
       console.error("Error confirming pickup:", error);
+    } finally {
+      setConfirmingId(null);
     }
   };
 
   const handleCancelPickup = async (dispatchId: string) => {
+    console.debug("[InternalDispatchConfirmationDialog] Cancel click", { dispatchId });
+    setCancelingId(dispatchId);
     try {
       await cancelDispatch.mutateAsync({ dispatchId });
     } catch (error) {
       console.error("Error cancelling pickup:", error);
+    } finally {
+      setCancelingId(null);
     }
   };
+
+  useEffect(() => {
+    if (open && pendingDispatches.length === 0) {
+      onOpenChange(false);
+    }
+  }, [open, pendingDispatches, onOpenChange]);
 
   const getLocationName = (location: string) => {
     return location === "tothai" ? "Tothai Kitchen" : "Khin Restaurant";
@@ -129,18 +147,18 @@ export function InternalDispatchConfirmationDialog({
                   <div className="flex justify-start gap-2">
                     <Button
                       onClick={() => handleConfirmPickup(dispatch.id, dispatch.picker_name)}
-                      disabled={confirmDispatch.isPending}
+                      disabled={confirmingId === dispatch.id || confirmDispatch.isPending}
                       className="bg-primary hover:bg-primary/90"
                     >
-                      {confirmDispatch.isPending ? "Confirming..." : "CONFIRM PICKUP"}
+                      {confirmingId === dispatch.id && confirmDispatch.isPending ? "Confirming..." : "CONFIRM PICKUP"}
                     </Button>
                     <Button
                       onClick={() => handleCancelPickup(dispatch.id)}
-                      disabled={cancelDispatch.isPending}
+                      disabled={cancelingId === dispatch.id || cancelDispatch.isPending}
                       variant="outline"
                       className="border-red-300 text-red-600 hover:bg-red-50"
                     >
-                      {cancelDispatch.isPending ? "Cancelling..." : "CANCEL PICKUP"}
+                      {cancelingId === dispatch.id && cancelDispatch.isPending ? "Cancelling..." : "CANCEL PICKUP"}
                     </Button>
                   </div>
                 </CardContent>

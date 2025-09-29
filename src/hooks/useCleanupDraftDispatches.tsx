@@ -45,16 +45,26 @@ export function useCleanupDraftDispatches() {
         cleanedDrafts: oldDrafts
       };
     },
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       if (result.cleaned > 0) {
         toast({
           title: "Cleanup Complete",
           description: result.message,
         });
       }
-      // Invalidate queries to refresh UI
-      queryClient.invalidateQueries({ queryKey: queryKeys.dispatch.internal() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.production.batches() });
+      // Invalidate and refetch to refresh UI
+      await queryClient.invalidateQueries({
+        predicate: (q) => Array.isArray(q.queryKey) && (
+          q.queryKey[0] === 'internal-dispatch-records' ||
+          q.queryKey[0] === 'dispatch' ||
+          (q.queryKey[0] === 'production' && q.queryKey[1] === 'batches') ||
+          q.queryKey[0] === 'batches-in-stock'
+        )
+      });
+      await queryClient.refetchQueries({
+        predicate: (q) => Array.isArray(q.queryKey) && q.queryKey[0] === 'internal-dispatch-records',
+        type: 'active'
+      });
     },
     onError: (error: any) => {
       console.error("Error cleaning up draft dispatches:", error);

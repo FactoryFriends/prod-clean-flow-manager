@@ -47,6 +47,8 @@ export function useCancelInternalDispatch() {
         }
       });
 
+      console.debug("[useCancelInternalDispatch] Optimistic remove", { dispatchId, affectedCaches: previous.map(([k]) => k) });
+
       return { previous };
     },
     onError: (error, _variables, context) => {
@@ -64,12 +66,21 @@ export function useCancelInternalDispatch() {
     onSuccess: () => {
       toast.success("Internal pick cancelled successfully");
     },
-    onSettled: () => {
-      // Broadly invalidate to ensure all views refresh
-      queryClient.invalidateQueries({ queryKey: ["internal-dispatch-records"] });
-      queryClient.invalidateQueries({ queryKey: ["dispatch"] });
-      queryClient.invalidateQueries({ queryKey: ["production", "batches"] });
-      queryClient.invalidateQueries({ queryKey: ["batches-in-stock"] });
+    onSettled: async (_data, _error, variables) => {
+      // Invalidate and immediately refetch active internal dispatch queries
+      console.debug("[useCancelInternalDispatch] onSettled", { dispatchId: (variables as any)?.dispatchId });
+      await queryClient.invalidateQueries({
+        predicate: (q) => Array.isArray(q.queryKey) && (
+          q.queryKey[0] === 'internal-dispatch-records' ||
+          q.queryKey[0] === 'dispatch' ||
+          (q.queryKey[0] === 'production' && q.queryKey[1] === 'batches') ||
+          q.queryKey[0] === 'batches-in-stock'
+        )
+      });
+      await queryClient.refetchQueries({
+        predicate: (q) => Array.isArray(q.queryKey) && q.queryKey[0] === 'internal-dispatch-records',
+        type: 'active'
+      });
     },
   });
 }

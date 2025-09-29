@@ -84,12 +84,20 @@ export function useConfirmInternalDispatch() {
 
       return data;
     },
-    onSuccess: (data) => {
-      // Broadly invalidate dispatch-related queries and stock
-      queryClient.invalidateQueries({ queryKey: ['internal-dispatch-records'] });
-      queryClient.invalidateQueries({ queryKey: ['dispatch'] });
-      queryClient.invalidateQueries({ queryKey: ['production', 'batches'] });
-      queryClient.invalidateQueries({ queryKey: ['batches-in-stock'] });
+    onSuccess: async (_data) => {
+      // Invalidate broadly and refetch active internal-dispatch queries to force UI refresh
+      await queryClient.invalidateQueries({
+        predicate: (q) => Array.isArray(q.queryKey) && (
+          q.queryKey[0] === 'internal-dispatch-records' ||
+          q.queryKey[0] === 'dispatch' ||
+          (q.queryKey[0] === 'production' && q.queryKey[1] === 'batches') ||
+          q.queryKey[0] === 'batches-in-stock'
+        )
+      });
+      await queryClient.refetchQueries({
+        predicate: (q) => Array.isArray(q.queryKey) && q.queryKey[0] === 'internal-dispatch-records',
+        type: 'active'
+      });
 
       toast({
         title: "Internal Pick Confirmed",
@@ -111,6 +119,13 @@ export function useConfirmInternalDispatch() {
         title: "Cannot Confirm Pick",
         description: errorMessage,
         variant: "destructive",
+      });
+    },
+    onSettled: async (_data, _error, variables) => {
+      console.debug("[useConfirmInternalDispatch] onSettled", variables);
+      await queryClient.refetchQueries({
+        predicate: (q) => Array.isArray(q.queryKey) && q.queryKey[0] === 'internal-dispatch-records',
+        type: 'active'
       });
     },
   });
