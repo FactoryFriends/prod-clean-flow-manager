@@ -159,11 +159,11 @@ export function InternalDispatchConfirmationDialog({
                     </Button>
                     <Button
                       onClick={() => handleCancelPickup(dispatch.id)}
-                      disabled={cancelingId === dispatch.id || confirmingId === dispatch.id}
+                      disabled={cancelingId === dispatch.id || confirmingId === dispatch.id || cancelDispatch.isPending}
                       variant="outline"
                       className="border-red-300 text-red-600 hover:bg-red-50"
                     >
-                      {cancelingId === dispatch.id ? "Cancelling..." : "CANCEL PICKUP"}
+                      {cancelingId === dispatch.id || cancelDispatch.isPending ? "Cancelling..." : "CANCEL PICKUP"}
                     </Button>
                   </div>
                 </CardContent>
