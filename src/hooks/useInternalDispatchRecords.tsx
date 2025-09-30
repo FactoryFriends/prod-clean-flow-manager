@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { queryKeys } from "./queryKeys";
 
@@ -29,5 +29,8 @@ export function useInternalDispatchRecords(location?: string) {
       
       return data || [];
     },
+    placeholderData: keepPreviousData,
+    staleTime: 5000,
+    refetchOnWindowFocus: false,
   });
 }
