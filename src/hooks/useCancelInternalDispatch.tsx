@@ -13,49 +13,26 @@ export function useCancelInternalDispatch() {
 
   return useMutation({
     mutationFn: async ({ dispatchId, location }: CancelInternalDispatchParams) => {
-      console.log("[useCancelInternalDispatch] Starting cancellation (direct)", { dispatchId, location });
+      console.log("[useCancelInternalDispatch] Starting cancellation via RPC", { dispatchId, location });
 
       const { data, error } = await supabase
-        .from('dispatch_records')
-        .update({ status: 'cancelled', updated_at: new Date().toISOString() })
-        .eq('id', dispatchId)
-        .eq('dispatch_type', 'internal')
-        .eq('status', 'draft')
-        .select('id, status')
-        .maybeSingle();
+        .rpc('cancel_internal_dispatch', { p_id: dispatchId });
 
       if (error) {
-        console.error("[useCancelInternalDispatch] Update error", { error });
+        console.error("[useCancelInternalDispatch] RPC error", { error });
+        // Map constraint errors to friendly messages
+        if (error.code === '23514') {
+          throw new Error("This action isn't allowed for the current status.");
+        }
         throw error;
       }
 
-      if (!data) {
-        // Fetch existing row to provide a clearer error
-        const { data: existing, error: fetchErr } = await supabase
-          .from('dispatch_records')
-          .select('id, status, dispatch_type')
-          .eq('id', dispatchId)
-          .maybeSingle();
-
-        if (fetchErr) {
-          console.warn("[useCancelInternalDispatch] Fallback fetch error", { fetchErr });
-          throw new Error("Could not cancel: dispatch not found or insufficient permissions.");
-        }
-
-        if (!existing) {
-          throw new Error("This pick was not found.");
-        }
-        if (existing.dispatch_type !== 'internal') {
-          throw new Error("Not an internal pick.");
-        }
-        if (existing.status !== 'draft') {
-          throw new Error(`This pick is already ${existing.status}.`);
-        }
-        throw new Error("No changes applied.");
+      if (!data || data.length === 0) {
+        throw new Error("This pick was not found, is not internal, or is not in draft anymore.");
       }
 
-      console.log("[useCancelInternalDispatch] Cancelled", { id: data.id });
-      return { id: data.id } as any;
+      console.log("[useCancelInternalDispatch] Cancelled successfully", { id: data[0].cancelled_id });
+      return { id: data[0].cancelled_id };
     },
     onMutate: async ({ dispatchId, location }) => {
       console.log("[useCancelInternalDispatch] onMutate", { dispatchId, location });
