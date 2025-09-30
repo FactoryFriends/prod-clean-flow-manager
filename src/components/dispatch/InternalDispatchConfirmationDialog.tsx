@@ -160,6 +160,7 @@ export function InternalDispatchConfirmationDialog({
 
                   <div className="flex justify-start gap-2">
                     <Button
+                      type="button"
                       onClick={() => handleConfirmPickup(dispatch.id, dispatch.picker_name)}
                       disabled={confirmingId === dispatch.id || confirmDispatch.isPending}
                       className="bg-primary hover:bg-primary/90"
@@ -167,6 +168,7 @@ export function InternalDispatchConfirmationDialog({
                       {confirmingId === dispatch.id && confirmDispatch.isPending ? "Confirming..." : "CONFIRM PICKUP"}
                     </Button>
                     <Button
+                      type="button"
                       onClick={() => handleCancelPickup(dispatch.id)}
                       disabled={cancelingId === dispatch.id || confirmingId === dispatch.id || cancelDispatch.isPending}
                       variant="outline"
