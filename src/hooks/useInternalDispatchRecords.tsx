@@ -1,8 +1,34 @@
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useQuery, keepPreviousData, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { queryKeys } from "./queryKeys";
-
+import { useEffect } from "react";
 export function useInternalDispatchRecords(location?: string) {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('internal-dispatch-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'dispatch_records' },
+        (payload) => {
+          const newRec = (payload as any).new as any;
+          const oldRec = (payload as any).old as any;
+          const isInternal = newRec?.dispatch_type === 'internal' || oldRec?.dispatch_type === 'internal';
+          const locationMatch = location ? (newRec?.location === location || oldRec?.location === location) : true;
+          if (isInternal && locationMatch) {
+            queryClient.invalidateQueries({ queryKey: queryKeys.dispatch.internal(location) });
+          }
+        }
+      );
+
+    channel.subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [location, queryClient]);
+
   return useQuery({
     queryKey: queryKeys.dispatch.internal(location),
     queryFn: async () => {
@@ -13,7 +39,7 @@ export function useInternalDispatchRecords(location?: string) {
           dispatch_items (*)
         `)
         .eq("dispatch_type", "internal")
-        .eq("status", "draft") // Only get draft internal dispatches, not cancelled ones
+        .eq("status", "draft")
         .order("created_at", { ascending: false });
 
       if (location) {

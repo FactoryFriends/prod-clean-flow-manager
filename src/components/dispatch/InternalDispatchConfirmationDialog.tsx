@@ -9,6 +9,7 @@ import { useCancelInternalDispatch } from "@/hooks/useCancelInternalDispatch";
 import { format } from "date-fns";
 import { Package, Clock, User, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface InternalDispatchConfirmationDialogProps {
   open: boolean;
@@ -46,10 +47,18 @@ export function InternalDispatchConfirmationDialog({
 
   const handleCancelPickup = async (dispatchId: string) => {
     try {
-      console.debug("[InternalDispatchConfirmationDialog] Cancel button clicked", { dispatchId, currentLocation });
+      console.log("[InternalDispatchConfirmationDialog] Cancel button clicked", { dispatchId, currentLocation });
+      toast.info("Cancelling pick…");
       setCancelingId(dispatchId);
       await cancelDispatch.mutateAsync({ dispatchId, location: currentLocation });
-      console.debug("[InternalDispatchConfirmationDialog] Cancel successful", { dispatchId });
+      console.log("[InternalDispatchConfirmationDialog] Cancel successful", { dispatchId });
+
+      // If it still appears in the list shortly after success, inform user we're syncing
+      const stillThere = (pendingDispatches || []).some(d => d.id === dispatchId);
+      if (stillThere) {
+        console.info("[InternalDispatchConfirmationDialog] Item still visible after cancel; awaiting server refresh", { dispatchId });
+        toast.info("Syncing updates…");
+      }
     } catch (error) {
       console.error("Error cancelling pickup:", error);
     } finally {

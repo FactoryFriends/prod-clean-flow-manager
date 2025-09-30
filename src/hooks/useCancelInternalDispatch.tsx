@@ -13,63 +13,62 @@ export function useCancelInternalDispatch() {
 
   return useMutation({
     mutationFn: async ({ dispatchId, location }: CancelInternalDispatchParams) => {
-      console.debug("[useCancelInternalDispatch] Starting cancellation", { dispatchId, location });
+      console.log("[useCancelInternalDispatch] Starting cancellation (direct)", { dispatchId, location });
 
-      // Try RPC first for atomic server-side update
-      const rpcRes = await supabase.rpc('cancel_internal_dispatch', { p_id: dispatchId });
-      if (rpcRes.error) {
-        console.warn("[useCancelInternalDispatch] RPC failed, falling back to direct update", { error: rpcRes.error });
-      } else {
-        const cancelled = Array.isArray(rpcRes.data) ? rpcRes.data : [];
-        const updatedId = cancelled.length > 0 ? (cancelled[0] as any)?.cancelled_id : null;
-        if (updatedId) {
-          console.debug("[useCancelInternalDispatch] RPC success", { dispatchId, updatedId });
-          return { id: updatedId } as any;
-        }
-        console.debug("[useCancelInternalDispatch] RPC returned no rows; will try direct update", { dispatchId });
-      }
-
-      // Fallback: direct guarded update
       const { data, error } = await supabase
         .from('dispatch_records')
         .update({ status: 'cancelled', updated_at: new Date().toISOString() })
         .eq('id', dispatchId)
         .eq('dispatch_type', 'internal')
         .eq('status', 'draft')
-        .select('id');
+        .select('id, status')
+        .maybeSingle();
 
       if (error) {
         console.error("[useCancelInternalDispatch] Update error", { error });
         throw error;
       }
 
-      const updatedId = Array.isArray(data) && data.length > 0 ? (data as any)[0]?.id : null;
-      if (!updatedId) {
-        console.debug("[useCancelInternalDispatch] No rows updated - dispatch not found or already handled", { dispatchId });
-        throw new Error("This pick was not found or is already handled.");
+      if (!data) {
+        // Fetch existing row to provide a clearer error
+        const { data: existing, error: fetchErr } = await supabase
+          .from('dispatch_records')
+          .select('id, status, dispatch_type')
+          .eq('id', dispatchId)
+          .maybeSingle();
+
+        if (fetchErr) {
+          console.warn("[useCancelInternalDispatch] Fallback fetch error", { fetchErr });
+          throw new Error("Could not cancel: dispatch not found or insufficient permissions.");
+        }
+
+        if (!existing) {
+          throw new Error("This pick was not found.");
+        }
+        if (existing.dispatch_type !== 'internal') {
+          throw new Error("Not an internal pick.");
+        }
+        if (existing.status !== 'draft') {
+          throw new Error(`This pick is already ${existing.status}.`);
+        }
+        throw new Error("No changes applied.");
       }
 
-      console.debug("[useCancelInternalDispatch] Successfully cancelled dispatch via direct update", { dispatchId, updatedId });
-      return { id: updatedId } as any;
+      console.log("[useCancelInternalDispatch] Cancelled", { id: data.id });
+      return { id: data.id } as any;
     },
     onMutate: async ({ dispatchId, location }) => {
-      console.debug("[useCancelInternalDispatch] onMutate - no optimistic cache edits", { dispatchId, location });
+      console.log("[useCancelInternalDispatch] onMutate", { dispatchId, location });
+      toast.info("Cancelling pick…");
       return { dispatchId, location };
     },
-    onError: (error, _variables, context) => {
-      // Rollback optimistic updates on error
-      const prev = (context as any)?.previous as [unknown, any][] | undefined;
-      if (prev) {
-        prev.forEach(([key, data]) => {
-          queryClient.setQueryData(key as any, data);
-        });
-      }
+    onError: (error) => {
       console.error("Error cancelling internal dispatch:", error);
       const message = (error as any)?.message || "Failed to cancel internal pick";
       toast.error(message);
     },
     onSuccess: (_data, variables) => {
-      console.debug("[useCancelInternalDispatch] onSuccess", { dispatchId: variables.dispatchId, location: variables.location });
+      console.log("[useCancelInternalDispatch] onSuccess", { dispatchId: variables.dispatchId, location: variables.location });
       // Optimistically remove the cancelled record from cache for snappier UX
       queryClient.setQueryData(queryKeys.dispatch.internal(variables.location), (old: any[] | undefined) => {
         if (!old) return old;
@@ -78,17 +77,14 @@ export function useCancelInternalDispatch() {
       toast.success("Internal pick cancelled successfully");
     },
     onSettled: async (_data, _error, variables) => {
-      const { dispatchId, location } = variables;
-      console.debug("[useCancelInternalDispatch] onSettled - invalidate and refetch", { dispatchId, location });
-
-      // Invalidate and refetch the exact internal dispatch list for the location
-      await queryClient.invalidateQueries({ queryKey: ["internal-dispatch-records", location] });
-      await queryClient.refetchQueries({ queryKey: ["internal-dispatch-records", location], type: 'active' });
-
-      // Also invalidate general dispatch records for the location (if used elsewhere)
-      await queryClient.invalidateQueries({ queryKey: ["dispatch", "records", location] });
-
-      console.debug("[useCancelInternalDispatch] onSettled completed");
+      const { location } = variables;
+      console.log("[useCancelInternalDispatch] onSettled - invalidate", { location });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.dispatch.internal(location) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dispatch.records(location) }),
+        queryClient.refetchQueries({ queryKey: queryKeys.dispatch.internal(location), type: 'active' }),
+      ]);
+      console.log("[useCancelInternalDispatch] onSettled completed");
     },
   });
 }
