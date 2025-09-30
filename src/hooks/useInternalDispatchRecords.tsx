@@ -1,13 +1,15 @@
 import { useQuery, keepPreviousData, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { queryKeys } from "./queryKeys";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 export function useInternalDispatchRecords(location?: string) {
   const queryClient = useQueryClient();
+  const instanceIdRef = useRef(Math.random().toString(36).slice(2));
 
   useEffect(() => {
+    const channelName = `internal-dispatch-realtime-${location ?? 'all'}-${instanceIdRef.current}`;
     const channel = supabase
-      .channel('internal-dispatch-realtime')
+      .channel(channelName)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'dispatch_records' },
