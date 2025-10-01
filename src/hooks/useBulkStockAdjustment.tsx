@@ -74,20 +74,28 @@ export const useBulkStockAdjustment = () => {
 
           if (batchError) throw batchError;
 
-          // Get dispatched quantity
+          // Get ONLY reserved quantity from DRAFT dispatches (same logic as useBatchStock)
           const { data: dispatchItems, error: dispatchError } = await supabase
             .from("dispatch_items")
-            .select("quantity")
+            .select(`
+              quantity,
+              dispatch_records!inner(status)
+            `)
             .eq("item_id", match.batchId!)
-            .eq("item_type", "batch");
+            .eq("item_type", "batch")
+            .eq("dispatch_records.status", "draft");
 
           if (dispatchError) throw dispatchError;
 
-          const totalDispatched = dispatchItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+          const reservedQuantity = dispatchItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
           const currentAdjustment = batch.manual_stock_adjustment || 0;
           
-          // Calculate new adjustment
-          const newAdjustment = match.row.physicalCount - batch.packages_produced + totalDispatched;
+          // Calculate current displayed stock (same as useBatchStock)
+          const currentDisplayedStock = batch.packages_produced + currentAdjustment - reservedQuantity;
+          
+          // Calculate new adjustment to reach physical count
+          // Formula: newAdjustment = physicalCount - packages_produced + reservedQuantity
+          const newAdjustment = match.row.physicalCount - batch.packages_produced + reservedQuantity;
 
           // Update batch
           const { error: updateError } = await supabase
@@ -105,16 +113,18 @@ export const useBulkStockAdjustment = () => {
           // Log audit trail
           await supabase.from("audit_logs").insert({
             action_type: "stock_adjustment",
-            action_description: `Bulk stock adjustment: ${match.row.batchNumber} from ${batch.packages_produced + currentAdjustment - totalDispatched} to ${match.row.physicalCount}`,
+            action_description: `Bulk stock adjustment: ${match.row.batchNumber} from ${currentDisplayedStock} to ${match.row.physicalCount}`,
             reference_type: "production_batch",
             reference_id: match.batchId!,
             staff_name: adjustedBy,
             metadata: {
-              old_remaining_stock: batch.packages_produced + currentAdjustment - totalDispatched,
+              old_remaining_stock: currentDisplayedStock,
               new_remaining_stock: match.row.physicalCount,
               adjustment_reason: reason,
               old_adjustment: currentAdjustment,
               new_adjustment: newAdjustment,
+              reserved_quantity: reservedQuantity,
+              packages_produced: batch.packages_produced,
               bulk_import: true,
             },
             favv_relevant: true,
