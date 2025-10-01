@@ -20,6 +20,7 @@ import { AuditTrailModal } from "./favv/AuditTrailModal";
 import { Button } from "./ui/button";
 import { ExpandableBatchMovementsList } from "./favv/ExpandableBatchMovementsList";
 import { useBatchStock } from "@/hooks/useBatchStock";
+import { BulkStockAdjustment } from "./favv/BulkStockAdjustment";
 
 interface FAVVReportsProps {
   currentLocation: "tothai" | "khin";
@@ -118,7 +119,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
       </Card>
 
       <Tabs defaultValue="dispatched" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger 
             value="dispatched" 
             className="flex items-center gap-2 data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-50 hover:text-red-600 border-red-200"
@@ -127,6 +128,9 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
           </TabsTrigger>
           <TabsTrigger value="produced" className="flex items-center gap-2">
             Produced Batches
+          </TabsTrigger>
+          <TabsTrigger value="stock-adjustment" className="flex items-center gap-2">
+            Stock Adjustment
           </TabsTrigger>
           <TabsTrigger value="cleaning" className="flex items-center gap-2">
             Cleaning Tasks
@@ -239,6 +243,10 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
             operationType={operationType}
             onOperationTypeChange={setOperationType}
           />
+        </TabsContent>
+
+        <TabsContent value="stock-adjustment" className="space-y-6">
+          <BulkStockAdjustment />
         </TabsContent>
 
         <TabsContent value="cleaning" className="space-y-6">
