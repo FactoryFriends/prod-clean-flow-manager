@@ -8,7 +8,7 @@ import { PackingSlipsTable } from "./favv/PackingSlipsTable";
 import { UnifiedOperationsTable } from "./favv/UnifiedOperationsTable";
 import { StockTakesTable } from "./favv/StockTakesTable";
 import { CompletedTasksTable } from "./favv/CompletedTasksTable";
-import { exportPackingSlipsCSV, exportStockTakesCSV, exportCompletedTasksCSV } from "./favv/csvExportUtils";
+import { exportPackingSlipsCSV, exportStockTakesCSV, exportCompletedTasksCSV, exportBatchesInStockCSV } from "./favv/csvExportUtils";
 import { useFAVVPackingSlips } from "../hooks/useFAVVPackingSlips";
 import { useFAVVStockTakes } from "../hooks/useFAVVStockTakes";
 import { useFAVVCompletedTasks } from "../hooks/useFAVVCompletedTasks";
@@ -157,20 +157,32 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
                 In Stock
               </button>
               {batchTab === "in-stock" && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => printStockListA4({
-                    batches: batchesInStock,
-                    currentLocation,
-                    searchFilter: batchSearch || undefined
-                  })}
-                  className="flex items-center gap-2 border-blue-200 text-blue-600 hover:bg-blue-50"
-                  disabled={!batchesInStock.length}
-                >
-                  <Printer className="w-4 h-4" />
-                  Print Stock List
-                </Button>
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => exportBatchesInStockCSV(batchesInStock)}
+                    className="flex items-center gap-2 border-green-200 text-green-600 hover:bg-green-50"
+                    disabled={!batchesInStock.length}
+                  >
+                    <FileText className="w-4 h-4" />
+                    Export CSV
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => printStockListA4({
+                      batches: batchesInStock,
+                      currentLocation,
+                      searchFilter: batchSearch || undefined
+                    })}
+                    className="flex items-center gap-2 border-blue-200 text-blue-600 hover:bg-blue-50"
+                    disabled={!batchesInStock.length}
+                  >
+                    <Printer className="w-4 h-4" />
+                    Print Stock List
+                  </Button>
+                </>
               )}
               <button 
                 className={`px-3 py-1 rounded-lg border ${batchTab==="movements"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}

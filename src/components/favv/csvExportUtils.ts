@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { BatchWithStock } from "@/hooks/useBatchStock";
 
 interface PackingSlip {
   id: string;
@@ -81,6 +82,44 @@ const downloadCSV = (csvContent: string, filename: string) => {
   URL.revokeObjectURL(url);
 
   toast.success("CSV file downloaded successfully");
+};
+
+export const exportBatchesInStockCSV = (batches: BatchWithStock[]) => {
+  if (!batches.length) {
+    toast.error("No batches to export");
+    return;
+  }
+
+  const csvHeaders = [
+    "Batch Number",
+    "Product Name",
+    "Production Date",
+    "Expiry Date",
+    "Packages Produced",
+    "Packages In Stock",
+    "Unit Type",
+    "Chef Name",
+    "Created At"
+  ];
+
+  const csvData = batches.map(batch => [
+    batch.batch_number,
+    batch.products?.name || "",
+    format(new Date(batch.production_date), "yyyy-MM-dd"),
+    format(new Date(batch.expiry_date), "yyyy-MM-dd"),
+    batch.packages_produced.toString(),
+    batch.packages_in_stock.toString(),
+    batch.products?.unit_type || "",
+    batch.chefs?.name || "",
+    format(new Date(batch.created_at), "yyyy-MM-dd HH:mm")
+  ]);
+
+  const csvContent = [
+    csvHeaders.join(";"),
+    ...csvData.map(row => row.map(cell => `"${cell || ""}"`).join(";"))
+  ].join("\n");
+
+  downloadCSV(csvContent, `Stock_List_${format(new Date(), "yyyy-MM-dd")}.csv`);
 };
 
 export const exportPackingSlipsCSV = (packingSlips: PackingSlip[]) => {
