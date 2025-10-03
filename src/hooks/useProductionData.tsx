@@ -449,50 +449,94 @@ export const useCreateProductionBatch = () => {
       production_notes?: string;
       location: "tothai" | "khin";
     }) => {
-      // First get the product name for batch number generation
-      const { data: product } = await supabase
-        .from("products")
-        .select("name")
-        .eq("id", batchData.product_id)
-        .single();
+      const MAX_RETRIES = 3;
+      const INITIAL_DELAY = 100; // ms
       
-      if (!product) throw new Error("Product not found");
+      // Retry function with exponential backoff
+      const attemptCreateBatch = async (retryCount = 0): Promise<any> => {
+        try {
+          // First get the product name for batch number generation
+          const { data: product } = await supabase
+            .from("products")
+            .select("name")
+            .eq("id", batchData.product_id)
+            .single();
+          
+          if (!product) throw new Error("Product not found");
+          
+          // Generate batch number
+          const { data: batchNumber } = await supabase
+            .rpc("generate_batch_number", {
+              product_name: product.name,
+              production_date: new Date().toISOString().split('T')[0]
+            });
+          
+          if (!batchNumber) throw new Error("Failed to generate batch number");
+          
+          // Create the batch
+          const { data, error } = await supabase
+            .from("production_batches")
+            .insert({
+              ...batchData,
+              batch_number: batchNumber,
+            })
+            .select(`
+              *,
+              products(*),
+              chefs(*)
+            `)
+            .single();
+          
+          if (error) throw error;
+          return data;
+          
+        } catch (error: any) {
+          // Check if it's a duplicate key error (PostgreSQL error code 23505)
+          const isDuplicateError = error.code === '23505' || 
+                                   error.message?.includes('duplicate key') ||
+                                   error.message?.includes('production_batches_batch_number_key');
+          
+          // If it's a duplicate error and we have retries left, try again
+          if (isDuplicateError && retryCount < MAX_RETRIES) {
+            const delay = INITIAL_DELAY * Math.pow(2, retryCount);
+            Logger.warn(`Batch number collision detected, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`, {
+              component: 'useCreateProductionBatch',
+              data: { retryCount, delay }
+            });
+            
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return attemptCreateBatch(retryCount + 1);
+          }
+          
+          // If it's not a duplicate error or we're out of retries, throw
+          throw error;
+        }
+      };
       
-      // Generate batch number
-      const { data: batchNumber } = await supabase
-        .rpc("generate_batch_number", {
-          product_name: product.name,
-          production_date: new Date().toISOString().split('T')[0]
-        });
-      
-      if (!batchNumber) throw new Error("Failed to generate batch number");
-      
-      // Create the batch
-      const { data, error } = await supabase
-        .from("production_batches")
-        .insert({
-          ...batchData,
-          batch_number: batchNumber,
-        })
-        .select(`
-          *,
-          products(*),
-          chefs(*)
-        `)
-        .single();
-      
-      if (error) throw error;
-      return data;
+      return attemptCreateBatch();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["production-batches"] });
       toast.success("Production batch created successfully");
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      const isDuplicateError = error.code === '23505' || 
+                               error.message?.includes('duplicate key') ||
+                               error.message?.includes('production_batches_batch_number_key');
+      
       const errorMessage = error.message?.includes('permission') 
         ? "You don't have permission to create production batches. Please sign in."
+        : isDuplicateError
+        ? "Failed to create batch due to high system load. Please try again."
         : "Failed to create production batch: " + error.message;
+      
       toast.error(errorMessage);
+      
+      Logger.error('Failed to create production batch', {
+        component: 'useCreateProductionBatch',
+        error,
+        data: { isDuplicateError }
+      });
     },
   });
 };
