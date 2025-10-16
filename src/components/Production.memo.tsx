@@ -293,7 +293,6 @@ export const Production = React.memo(function Production({ currentLocation }: Pr
                               size="sm" 
                               onClick={() => handleEditBatch(batch)}
                               className="flex items-center gap-1"
-                              disabled={isExpired}
                             >
                               <Edit className="w-3 h-3" />
                               Edit Stock
@@ -304,7 +303,6 @@ export const Production = React.memo(function Production({ currentLocation }: Pr
                               size="sm" 
                               onClick={() => handleEditBatch(batch)}
                               className="flex items-center gap-1"
-                              disabled={isExpired}
                             >
                               <Edit className="w-3 h-3" />
                               Edit Batch

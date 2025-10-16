@@ -5,10 +5,13 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Button } from "./ui/button";
+import { Alert, AlertDescription } from "./ui/alert";
 import { useChefs, useUpdateProductionBatch, ProductionBatch } from "@/hooks/useProductionData";
 import { useStockAdjustment } from "@/hooks/useStockAdjustment";
 import { useIsAdmin } from "./auth/RoleGuard";
 import { supabase } from "@/integrations/supabase/client";
+import { AlertTriangle } from "lucide-react";
+import { isAfter, parseISO } from "date-fns";
 
 interface EditBatchDialogProps {
   open: boolean;
@@ -128,6 +131,15 @@ export function EditBatchDialog({ open, onOpenChange, batch }: EditBatchDialogPr
         
         {batch && (
           <form onSubmit={handleSubmit} className="space-y-4">
+            {isAfter(new Date(), parseISO(batch.expiry_date)) && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  This batch is expired. Only adjust stock for inventory corrections or waste tracking.
+                </AlertDescription>
+              </Alert>
+            )}
+            
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Product</Label>
