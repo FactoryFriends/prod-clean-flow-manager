@@ -1,14 +1,11 @@
-
-import { ChefHat, Truck, ClipboardList, ShieldCheck, Store } from "lucide-react";
+import { ChefHat, Truck, ClipboardList, ShieldCheck, Store, Thermometer } from "lucide-react";
 
 interface DashboardQuickActionsProps {
-  // onSectionChange now allows `'reports:favv'` and `'distribution:internal'` as well!
   onSectionChange: (section: string) => void;
   currentLocation: string;
 }
 
 export function DashboardQuickActions({ onSectionChange, currentLocation }: DashboardQuickActionsProps) {
-  // currentLocation should already be "tothai" or "khin"
   const dbLocation = currentLocation;
   
   // Define all buttons
@@ -47,6 +44,13 @@ export function DashboardQuickActions({ onSectionChange, currentLocation }: Dash
       className: "p-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors",
       icon: ShieldCheck,
       label: "FAVV Compliance"
+    },
+    {
+      id: 'temperature',
+      onClick: () => onSectionChange('reports:favv:temperature'),
+      className: "p-4 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors",
+      icon: Thermometer,
+      label: "Temperaturen"
     }
   ];
 

@@ -8,9 +8,17 @@ interface ReportsProps {
   currentLocation: "tothai" | "khin";
   onSectionChange?: (section: string) => void;
   favvTabActive?: boolean;
+  openTemperatureDialog?: boolean;
+  onTemperatureDialogChange?: (open: boolean) => void;
 }
 
-export function Reports({ currentLocation, onSectionChange, favvTabActive }: ReportsProps) {
+export function Reports({ 
+  currentLocation, 
+  onSectionChange, 
+  favvTabActive,
+  openTemperatureDialog,
+  onTemperatureDialogChange 
+}: ReportsProps) {
   // If favvTabActive is set, show favv, otherwise show management tab by default
   const [tab, setTab] = useState(favvTabActive ? "favv" : "management");
 
@@ -41,7 +49,11 @@ export function Reports({ currentLocation, onSectionChange, favvTabActive }: Rep
         </TabsContent>
 
         <TabsContent value="favv" className="space-y-6">
-          <FAVVReports currentLocation={currentLocation} />
+          <FAVVReports 
+            currentLocation={currentLocation} 
+            openTemperatureDialog={openTemperatureDialog}
+            onTemperatureDialogChange={onTemperatureDialogChange}
+          />
         </TabsContent>
       </Tabs>
     </div>
