@@ -33,13 +33,11 @@ export const useUserProfiles = () => {
     queryKey: ["user-profiles"],
     queryFn: async () => {
       try {
-        // Use the get_user_profiles function that exists in the database
         const { data, error } = await supabase
           .rpc('get_user_profiles' as any);
         
         if (error) {
           console.error('Error fetching user profiles:', error);
-          // If the function doesn't exist or there's a permission error, return empty array
           if (error.code === 'PGRST116' || error.message?.includes('function') || error.message?.includes('permission')) {
             console.warn('User profiles function not available or no permission');
             return [];
@@ -47,17 +45,14 @@ export const useUserProfiles = () => {
           throw error;
         }
         
-        // Ensure we always return an array
         return Array.isArray(data) ? data : [];
       } catch (error: any) {
         console.error('Error in useUserProfiles:', error);
-        // Return empty array on any error to prevent UI crashes
         return [];
       }
     },
-    // Add some default options to help with loading states
-    staleTime: 30000, // 30 seconds
-    retry: 1, // Only retry once on failure
+    staleTime: 30000,
+    retry: 1,
   });
 };
 
@@ -69,9 +64,6 @@ export const useCurrentUserProfile = () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("No user found");
 
-        console.log('Fetching profile for user:', user.id); // Debug log
-
-        // Fetch user profile from database using the RPC function
         const { data, error } = await supabase
           .rpc('get_current_user_profile' as any, { p_user_id: user.id });
         
@@ -80,12 +72,7 @@ export const useCurrentUserProfile = () => {
           throw error;
         }
 
-        console.log('Profile data from database:', data); // Debug log
-
-        // The RPC function returns an array, get the first result
         const profile = data && data.length > 0 ? data[0] : null;
-        console.log('Final profile:', profile); // Debug log
-        
         return profile;
       } catch (error) {
         console.error('Error fetching current user profile:', error);
@@ -100,19 +87,19 @@ export const useCreateUser = () => {
   
   return useMutation({
     mutationFn: async (userData: CreateUserRequest) => {
-      // This would normally require an edge function to create users with specific roles
-      // For now, we'll show how the UI would work
-      const { data, error } = await supabase.auth.admin.createUser({
-        email: userData.email,
-        password: userData.password,
-        user_metadata: {
+      const { data, error } = await supabase.functions.invoke('manage-users', {
+        body: {
+          action: 'create',
+          email: userData.email,
+          password: userData.password,
           full_name: userData.full_name,
           role: userData.role,
-          extended_session: userData.extended_session
-        }
+          extended_session: userData.extended_session,
+        },
       });
       
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       return data;
     },
     onSuccess: () => {
@@ -182,8 +169,15 @@ export const useDeleteUser = () => {
   
   return useMutation({
     mutationFn: async (userId: string) => {
-      const { error } = await supabase.auth.admin.deleteUser(userId);
+      const { data, error } = await supabase.functions.invoke('manage-users', {
+        body: {
+          action: 'delete',
+          userId,
+        },
+      });
+      
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       return userId;
     },
     onSuccess: () => {
@@ -202,21 +196,25 @@ export const useResetUserPassword = () => {
   return useMutation({
     mutationFn: async ({ userId, email, newPassword }: { userId?: string; email: string; newPassword?: string }) => {
       if (newPassword && userId) {
-        // Admin setting a specific password
-        const { data, error } = await supabase.auth.admin.updateUserById(
-          userId,
-          { password: newPassword }
-        );
+        // Admin setting a specific password via edge function
+        const { data, error } = await supabase.functions.invoke('manage-users', {
+          body: {
+            action: 'update-password',
+            userId,
+            password: newPassword,
+          },
+        });
+        
         if (error) throw error;
+        if (data?.error) throw new Error(data.error);
         return { ...data, resetLink: null };
       } else {
-        // Send reset email
+        // Send reset email (this still works with anon key)
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/reset-password`
         });
         if (error) throw error;
         
-        // Generate reset link for admin to copy
         const resetLink = `${window.location.origin}/reset-password`;
         return { success: true, resetLink, email };
       }
@@ -235,7 +233,6 @@ export const useResetUserPassword = () => {
   });
 };
 
-// New hook for generating admin reset links
 export const useGenerateResetLink = () => {
   return useMutation({
     mutationFn: async ({ email }: { email: string }) => {
@@ -244,7 +241,6 @@ export const useGenerateResetLink = () => {
       });
       if (error) throw error;
       
-      // Return the email and a reference to the reset link
       return { 
         email, 
         resetLink: `${window.location.origin}/reset-password`,
