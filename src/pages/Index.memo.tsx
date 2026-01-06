@@ -98,7 +98,7 @@ const Index = React.memo(function Index() {
       default:
         return <Dashboard currentLocation={currentLocation} onSectionChange={handleSectionChange} />;
     }
-  }, [activeTab, currentLocation, distributionInitialTab, favvTabActive, handleSectionChange]);
+  }, [activeTab, currentLocation, distributionInitialTab, favvTabActive, openTemperatureDialog, handleSectionChange]);
 
   const mobileLayout = useMemo(() => (
     <div className="flex flex-col min-h-screen">
