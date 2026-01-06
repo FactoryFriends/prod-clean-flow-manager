@@ -16,7 +16,7 @@ import { FloatingActionButton } from "@/components/navigation/FloatingActionButt
 import { TopNavigation } from "@/components/navigation/TopNavigation";
 import { toast } from "sonner";
 
-// For FAVV deep-link: keep track of FAVV subtab
+// For FAVV deep-link: keep track of FAVV subtab and temperature dialog
 const Index = React.memo(function Index() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -24,6 +24,7 @@ const Index = React.memo(function Index() {
   const isMobile = useIsMobile();
   const [favvTabActive, setFavvTabActive] = useState(false);
   const [distributionInitialTab, setDistributionInitialTab] = useState<"external" | "internal">("external");
+  const [openTemperatureDialog, setOpenTemperatureDialog] = useState(false);
 
   // Handle quick actions from FAB
   const handleQuickAction = useCallback((action: string) => {
@@ -45,18 +46,25 @@ const Index = React.memo(function Index() {
     }
   }, []);
 
-  // handle deep linking for "reports:favv" and "distribution:internal"
+  // handle deep linking for "reports:favv", "reports:favv:temperature" and "distribution:internal"
   const handleSectionChange = useCallback((section: string) => {
     if (section === "reports:favv") {
       setActiveTab("reports");
       setFavvTabActive(true);
+      setOpenTemperatureDialog(false);
+    } else if (section === "reports:favv:temperature") {
+      setActiveTab("reports");
+      setFavvTabActive(true);
+      setOpenTemperatureDialog(true);
     } else if (section === "distribution:internal") {
       setActiveTab("distribution");
       setDistributionInitialTab("internal");
       setFavvTabActive(false);
+      setOpenTemperatureDialog(false);
     } else {
       setActiveTab(section);
       setFavvTabActive(false);
+      setOpenTemperatureDialog(false);
       if (section !== "distribution") {
         setDistributionInitialTab("external");
       }
@@ -78,7 +86,7 @@ const Index = React.memo(function Index() {
       case "invoicing":
         return <Invoicing currentLocation={currentLocation} />;
       case "reports":
-        return <Reports currentLocation={currentLocation} onSectionChange={handleSectionChange} favvTabActive={favvTabActive} />;
+        return <Reports currentLocation={currentLocation} onSectionChange={handleSectionChange} favvTabActive={favvTabActive} openTemperatureDialog={openTemperatureDialog} onTemperatureDialogChange={setOpenTemperatureDialog} />;
       case "recipe-management":
         // Only allow viewing recipe management if location is 'tothai'
         if (currentLocation === "tothai") {

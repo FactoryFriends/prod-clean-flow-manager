@@ -29,9 +29,15 @@ import { Alert, AlertDescription } from "./ui/alert";
 
 interface FAVVReportsProps {
   currentLocation: "tothai" | "khin";
+  openTemperatureDialog?: boolean;
+  onTemperatureDialogChange?: (open: boolean) => void;
 }
 
-export function FAVVReports({ currentLocation }: FAVVReportsProps) {
+export function FAVVReports({ 
+  currentLocation, 
+  openTemperatureDialog,
+  onTemperatureDialogChange 
+}: FAVVReportsProps) {
   const [locationFilter, setLocationFilter] = useState<"all" | "tothai" | "khin">(currentLocation);
   const [startDate, setStartDate] = useState<Date | undefined>(new Date(new Date().getFullYear(), new Date().getMonth() - 2, 1));
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
@@ -40,7 +46,11 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [operationType, setOperationType] = useState<"all" | "external" | "internal">("all");
   const [auditTrailOpen, setAuditTrailOpen] = useState(false);
-  const [temperatureDialogOpen, setTemperatureDialogOpen] = useState(false);
+  
+  // Internal state for temperature dialog, controlled by parent if provided
+  const [internalTempDialogOpen, setInternalTempDialogOpen] = useState(false);
+  const temperatureDialogOpen = openTemperatureDialog ?? internalTempDialogOpen;
+  const setTemperatureDialogOpen = onTemperatureDialogChange ?? setInternalTempDialogOpen;
 
   // Updated tabs: "in-stock", "movements", "partially-used", "fully-used"
   const [batchTab, setBatchTab] = useState<"in-stock" | "movements" | "partially-used" | "fully-used">("in-stock");
