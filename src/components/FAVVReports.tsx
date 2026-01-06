@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { subDays } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { CleaningTaskDetailsModal } from "./task/CleaningTaskDetailsModal";
@@ -13,7 +14,7 @@ import { useFAVVPackingSlips } from "../hooks/useFAVVPackingSlips";
 import { useFAVVStockTakes } from "../hooks/useFAVVStockTakes";
 import { useFAVVCompletedTasks } from "../hooks/useFAVVCompletedTasks";
 import { useUnifiedOperationsData } from "../hooks/useUnifiedOperationsData";
-import { Package, FileText, Brush, History, Printer } from "lucide-react";
+import { Package, FileText, Brush, History, Printer, Thermometer } from "lucide-react";
 import { printStockListA4 } from "../utils/pdf/stockListPrintA4";
 import { BatchesInStockTable } from "./favv/BatchesInStockTable";
 import { AuditTrailModal } from "./favv/AuditTrailModal";
@@ -21,6 +22,10 @@ import { Button } from "./ui/button";
 import { ExpandableBatchMovementsList } from "./favv/ExpandableBatchMovementsList";
 import { useBatchStock } from "@/hooks/useBatchStock";
 import { BulkStockAdjustment } from "./favv/BulkStockAdjustment";
+import { TemperatureLogDialog } from "./temperature/TemperatureLogDialog";
+import { TemperatureLogsTable } from "./temperature/TemperatureLogsTable";
+import { useTodayTemperatureStatus } from "@/hooks/useTemperatureLogs";
+import { Alert, AlertDescription } from "./ui/alert";
 
 interface FAVVReportsProps {
   currentLocation: "tothai" | "khin";
@@ -35,6 +40,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [operationType, setOperationType] = useState<"all" | "external" | "internal">("all");
   const [auditTrailOpen, setAuditTrailOpen] = useState(false);
+  const [temperatureDialogOpen, setTemperatureDialogOpen] = useState(false);
 
   // Updated tabs: "in-stock", "movements", "partially-used", "fully-used"
   const [batchTab, setBatchTab] = useState<"in-stock" | "movements" | "partially-used" | "fully-used">("in-stock");
@@ -94,6 +100,13 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
   // Filter batches for fully used (no stock remaining)
   const fullyUsedBatches = allBatches.filter(b => b.packages_in_stock === 0);
 
+  // Temperature status for current location
+  const { data: todayTempStatus } = useTodayTemperatureStatus(currentLocation);
+
+  // Temperature logs date range (last 7 days)
+  const tempEndDate = new Date();
+  const tempStartDate = subDays(tempEndDate, 6);
+
   return (
     <div className="space-y-6">
       <Card>
@@ -119,7 +132,7 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
       </Card>
 
       <Tabs defaultValue="dispatched" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger 
             value="dispatched" 
             className="flex items-center gap-2 data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-50 hover:text-red-600 border-red-200"
@@ -134,6 +147,10 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
           </TabsTrigger>
           <TabsTrigger value="cleaning" className="flex items-center gap-2">
             Cleaning Tasks
+          </TabsTrigger>
+          <TabsTrigger value="temperature" className="flex items-center gap-2">
+            <Thermometer className="w-4 h-4" />
+            Temperature
           </TabsTrigger>
         </TabsList>
 
@@ -281,6 +298,46 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
             onTaskClick={handleTaskClick}
           />
         </TabsContent>
+
+        <TabsContent value="temperature" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Thermometer className="w-5 h-5" />
+                    Temperatuurregistratie
+                  </CardTitle>
+                  <CardDescription>
+                    Dagelijkse temperatuurmetingen van diepvriezers en koelkasten
+                  </CardDescription>
+                </div>
+                <Button
+                  onClick={() => setTemperatureDialogOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Thermometer className="w-4 h-4" />
+                  Temperaturen Registreren
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {!todayTempStatus?.isRecorded && (
+                <Alert className="mb-4 border-amber-200 bg-amber-50 text-amber-800">
+                  <Thermometer className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Let op:</strong> De temperaturen van vandaag zijn nog niet geregistreerd.
+                  </AlertDescription>
+                </Alert>
+              )}
+              <TemperatureLogsTable
+                location={currentLocation}
+                startDate={tempStartDate}
+                endDate={tempEndDate}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       <CleaningTaskDetailsModal
@@ -292,6 +349,12 @@ export function FAVVReports({ currentLocation }: FAVVReportsProps) {
       <AuditTrailModal
         isOpen={auditTrailOpen}
         onClose={() => setAuditTrailOpen(false)}
+      />
+
+      <TemperatureLogDialog
+        open={temperatureDialogOpen}
+        onOpenChange={setTemperatureDialogOpen}
+        location={currentLocation}
       />
     </div>
   );

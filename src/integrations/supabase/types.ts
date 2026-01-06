@@ -766,6 +766,92 @@ export type Database = {
         }
         Relationships: []
       }
+      temperature_equipment: {
+        Row: {
+          active: boolean | null
+          code: string
+          created_at: string | null
+          equipment_type: string
+          id: string
+          location: Database["public"]["Enums"]["location_type"]
+          max_temp: number | null
+          min_temp: number | null
+          name: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          code: string
+          created_at?: string | null
+          equipment_type: string
+          id?: string
+          location: Database["public"]["Enums"]["location_type"]
+          max_temp?: number | null
+          min_temp?: number | null
+          name?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          code?: string
+          created_at?: string | null
+          equipment_type?: string
+          id?: string
+          location?: Database["public"]["Enums"]["location_type"]
+          max_temp?: number | null
+          min_temp?: number | null
+          name?: string | null
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      temperature_logs: {
+        Row: {
+          created_at: string | null
+          equipment_id: string
+          id: string
+          is_within_range: boolean
+          location: Database["public"]["Enums"]["location_type"]
+          log_date: string
+          notes: string | null
+          recorded_at: string | null
+          recorded_by: string | null
+          temperature: number
+        }
+        Insert: {
+          created_at?: string | null
+          equipment_id: string
+          id?: string
+          is_within_range: boolean
+          location: Database["public"]["Enums"]["location_type"]
+          log_date?: string
+          notes?: string | null
+          recorded_at?: string | null
+          recorded_by?: string | null
+          temperature: number
+        }
+        Update: {
+          created_at?: string | null
+          equipment_id?: string
+          id?: string
+          is_within_range?: boolean
+          location?: Database["public"]["Enums"]["location_type"]
+          log_date?: string
+          notes?: string | null
+          recorded_at?: string | null
+          recorded_by?: string | null
+          temperature?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "temperature_logs_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "temperature_equipment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       unit_options: {
         Row: {
           active: boolean
@@ -808,14 +894,8 @@ export type Database = {
         Args: { product_name: string; production_date: string }
         Returns: string
       }
-      generate_daily_cleaning_tasks: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      generate_scheduled_cleaning_tasks: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      generate_daily_cleaning_tasks: { Args: never; Returns: undefined }
+      generate_scheduled_cleaning_tasks: { Args: never; Returns: undefined }
       get_batch_free_stock_excluding_dispatch: {
         Args: { batch_id_param: string; exclude_dispatch_id_param: string }
         Returns: number
@@ -838,7 +918,7 @@ export type Database = {
         }[]
       }
       get_user_profiles: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           created_by: string
