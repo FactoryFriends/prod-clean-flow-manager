@@ -1,1 +1,7 @@
 project_id = "dtfhwnvclwbknycmcejb"
+
+[functions.manage-users]
+verify_jwt = false
+
+[functions.send-reset-email]
+verify_jwt = false
