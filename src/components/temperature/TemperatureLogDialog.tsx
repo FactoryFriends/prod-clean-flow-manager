@@ -1,11 +1,5 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Thermometer, Info, MapPin } from "lucide-react";
+import { Loader2, Thermometer, Info, MapPin, ArrowLeft } from "lucide-react";
 import { useTemperatureEquipment, useRecordTemperatures, useTodayTemperatureStatus, TemperatureEquipment } from "@/hooks/useTemperatureLogs";
 import { useStaffCodes } from "@/hooks/useStaffCodes";
 import { TemperatureStepper } from "./TemperatureStepper";
@@ -78,7 +72,7 @@ export function TemperatureLogDialog({
     }
   }, [equipment]);
 
-  // Reset form when dialog closes
+  // Reset form when panel closes
   useEffect(() => {
     if (!open) {
       setSelectedStaff("");
@@ -135,6 +129,10 @@ export function TemperatureLogDialog({
     );
   };
 
+  const handleClose = () => {
+    onOpenChange(false);
+  };
+
   const freezers = equipment?.filter((eq) => eq.equipment_type === "freezer") || [];
   const fridges = equipment?.filter((eq) => eq.equipment_type === "fridge") || [];
   
@@ -142,47 +140,52 @@ export function TemperatureLogDialog({
 
   const activeStaffCodes = staffCodes?.filter((s) => s.active) || [];
 
+  // Don't render if not open
+  if (!open) return null;
+
+  // Loading state
   if (equipmentLoading || statusLoading) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl">
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        </DialogContent>
-      </Dialog>
+      <div className="fixed inset-0 z-50 bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <Thermometer className="h-5 w-5" />
-            Record Temperatures
-          </DialogTitle>
-        </DialogHeader>
-
-        {/* Location banner */}
-        <div className="bg-primary text-primary-foreground rounded-lg py-3 px-4 flex items-center justify-center gap-2">
-          <MapPin className="h-5 w-5" />
-          <span className="text-xl font-bold tracking-wide">{locationDisplay}</span>
+    <div className="fixed inset-0 z-50 bg-background flex flex-col animate-in fade-in duration-200">
+      {/* Header */}
+      <header className="flex items-center justify-between p-4 border-b bg-background shrink-0">
+        <Button variant="ghost" onClick={handleClose} className="gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Cancel
+        </Button>
+        <div className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg">
+          <MapPin className="h-4 w-4" />
+          <span className="font-bold">{locationDisplay}</span>
         </div>
-        
-        <p className="text-sm text-muted-foreground text-center">{today}</p>
+        <div className="text-sm text-muted-foreground">{today}</div>
+      </header>
 
-        {todayStatus?.isRecorded && (
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              Already recorded today by <strong>{todayStatus.recordedBy}</strong>.
-              New entry will overwrite existing data.
-            </AlertDescription>
-          </Alert>
-        )}
+      {/* Scrollable content */}
+      <main className="flex-1 overflow-auto p-4 pb-24">
+        <div className="max-w-3xl mx-auto space-y-6">
+          {/* Title */}
+          <div className="flex items-center gap-2">
+            <Thermometer className="h-5 w-5" />
+            <h1 className="text-xl font-semibold">Record Temperatures</h1>
+          </div>
 
-        <div className="space-y-6 py-4">
+          {todayStatus?.isRecorded && (
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Already recorded today by <strong>{todayStatus.recordedBy}</strong>.
+                New entry will overwrite existing data.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Freezers section */}
           {freezers.length > 0 && (
             <div className="space-y-4">
@@ -261,27 +264,27 @@ export function TemperatureLogDialog({
             />
           </div>
         </div>
+      </main>
 
-        <div className="flex justify-end gap-2 pt-4 border-t">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
+      {/* Sticky footer */}
+      <footer className="fixed bottom-0 left-0 right-0 p-4 border-t bg-background">
+        <div className="max-w-3xl mx-auto">
           <Button 
             onClick={handleSubmit} 
             disabled={!canSubmit || recordMutation.isPending}
-            className="min-w-[100px]"
+            className="w-full h-12 text-lg"
           >
             {recordMutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 Saving...
               </>
             ) : (
-              "Save"
+              "Save Temperatures"
             )}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </footer>
+    </div>
   );
 }
