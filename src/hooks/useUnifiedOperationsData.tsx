@@ -126,9 +126,18 @@ export function useUnifiedOperationsData({
 
       // Apply location filter
       if (locationFilter !== "all") {
-        filteredOperations = filteredOperations.filter(op => 
-          op.location === locationFilter
-        );
+        filteredOperations = filteredOperations.filter(op => {
+          // Show operations originating from this location
+          if (op.location === locationFilter) return true;
+          
+          // For KHIN: also show incoming transfers (destination contains "KHIN")
+          if (locationFilter === "khin") {
+            const destLower = op.destination.toLowerCase();
+            if (destLower.includes("khin")) return true;
+          }
+          
+          return false;
+        });
       }
 
       // Sort by date (most recent first)
