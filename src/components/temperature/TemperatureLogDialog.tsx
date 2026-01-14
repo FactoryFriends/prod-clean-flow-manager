@@ -180,7 +180,7 @@ export function TemperatureLogDialog({
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription>
-                Already recorded today by <strong>{todayStatus.recordedBy}</strong>.
+                Already recorded today by <strong>{staffCodes?.find(s => s.code === todayStatus.recordedBy)?.name || todayStatus.recordedBy}</strong>.
                 New entry will overwrite existing data.
               </AlertDescription>
             </Alert>
