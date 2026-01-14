@@ -133,7 +133,7 @@ export function ProductList({ onEditProduct, typeFilter = "all", searchFilter = 
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
                   <div>
-                    <span className="font-medium">Size:</span> {product.unit_size} {product.unit_type}
+                    <span className="font-medium">Size:</span> {product.unit_size} {product.inner_unit_type || product.unit_type}
                   </div>
                   <div>
                     <span className="font-medium">Packages/Batch:</span> {product.packages_per_batch}
