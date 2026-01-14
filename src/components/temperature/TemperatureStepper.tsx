@@ -21,11 +21,11 @@ export function TemperatureStepper({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleIncrement = () => {
-    onChange(Math.round((value + 1) * 10) / 10);
+    onChange(Math.round((value + 0.1) * 10) / 10);
   };
 
   const handleDecrement = () => {
-    onChange(Math.round((value - 1) * 10) / 10);
+    onChange(Math.round((value - 0.1) * 10) / 10);
   };
 
   const startHold = (action: () => void) => {
@@ -74,9 +74,9 @@ export function TemperatureStepper({
         </Button>
 
         {/* Temperature value */}
-        <div className="w-16 text-center">
+        <div className="w-20 text-center">
           <span className="text-2xl font-mono font-bold">
-            {value > 0 ? `+${value}` : value}
+            {value > 0 ? `+${value.toFixed(1)}` : value.toFixed(1)}
           </span>
           <span className="text-sm text-muted-foreground">°C</span>
         </div>

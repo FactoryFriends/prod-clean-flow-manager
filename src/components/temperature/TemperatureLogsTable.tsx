@@ -120,7 +120,7 @@ export function TemperatureLogsTable({
                         log && !log.is_within_range && "text-red-600 font-bold bg-red-50 dark:bg-red-950"
                       )}
                     >
-                      {log ? log.temperature : "-"}
+                      {log ? log.temperature.toFixed(1) : "-"}
                     </TableCell>
                   );
                 })}
@@ -134,7 +134,7 @@ export function TemperatureLogsTable({
                         log && !log.is_within_range && "text-red-600 font-bold bg-red-50 dark:bg-red-950"
                       )}
                     >
-                      {log ? (log.temperature > 0 ? `+${log.temperature}` : log.temperature) : "-"}
+                      {log ? (log.temperature > 0 ? `+${log.temperature.toFixed(1)}` : log.temperature.toFixed(1)) : "-"}
                     </TableCell>
                   );
                 })}
