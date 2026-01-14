@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTemperatureEquipment, useTemperatureLogs } from "@/hooks/useTemperatureLogs";
+import { useStaffCodes } from "@/hooks/useStaffCodes";
 import { cn } from "@/lib/utils";
 
 interface TemperatureLogsTableProps {
@@ -26,6 +27,14 @@ export function TemperatureLogsTable({
 }: TemperatureLogsTableProps) {
   const { data: equipment, isLoading: equipmentLoading } = useTemperatureEquipment(location);
   const { data: logs, isLoading: logsLoading } = useTemperatureLogs(location, startDate, endDate);
+  const { data: staffCodes } = useStaffCodes();
+
+  // Helper to get staff name from code
+  const getStaffName = (code: string | null) => {
+    if (!code) return "-";
+    const staff = staffCodes?.find(s => s.code === code);
+    return staff?.name || code;
+  };
 
   // Generate all dates in range
   const dates = useMemo(() => {
@@ -139,7 +148,7 @@ export function TemperatureLogsTable({
                   );
                 })}
                 <TableCell className="text-center">
-                  {recordedBy || "-"}
+                  {getStaffName(recordedBy)}
                 </TableCell>
               </TableRow>
             );
