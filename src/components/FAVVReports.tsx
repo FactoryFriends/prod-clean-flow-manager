@@ -14,7 +14,8 @@ import { useFAVVPackingSlips } from "../hooks/useFAVVPackingSlips";
 import { useFAVVStockTakes } from "../hooks/useFAVVStockTakes";
 import { useFAVVCompletedTasks } from "../hooks/useFAVVCompletedTasks";
 import { useUnifiedOperationsData } from "../hooks/useUnifiedOperationsData";
-import { Package, FileText, Brush, History, Printer, Thermometer } from "lucide-react";
+import { Package, FileText, Brush, History, Printer, Thermometer, FileSpreadsheet } from "lucide-react";
+import { downloadStockVerificationTemplate } from "@/utils/excel/stockVerificationTemplate";
 import { printStockListA4 } from "../utils/pdf/stockListPrintA4";
 import { BatchesInStockTable } from "./favv/BatchesInStockTable";
 import { AuditTrailModal } from "./favv/AuditTrailModal";
@@ -208,6 +209,16 @@ export function FAVVReports({
                   >
                     <Printer className="w-4 h-4" />
                     Print Stock List
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => downloadStockVerificationTemplate(batchesInStock, currentLocation)}
+                    className="flex items-center gap-2 border-orange-200 text-orange-600 hover:bg-orange-50"
+                    disabled={!batchesInStock.length}
+                  >
+                    <FileSpreadsheet className="w-4 h-4" />
+                    Download Template
                   </Button>
                 </>
               )}
