@@ -74,11 +74,11 @@ export function TemperatureStepper({
         </Button>
 
         {/* Temperature value */}
-        <div className="w-20 text-center">
-          <span className="text-2xl font-mono font-bold">
+        <div className="w-24 text-center flex flex-col items-center justify-center">
+          <span className="text-2xl font-mono font-bold leading-none">
             {value > 0 ? `+${value.toFixed(1)}` : value.toFixed(1)}
           </span>
-          <span className="text-sm text-muted-foreground">°C</span>
+          <span className="text-xs text-muted-foreground">°C</span>
         </div>
 
         {/* Plus button */}
