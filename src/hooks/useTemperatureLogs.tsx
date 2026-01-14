@@ -121,14 +121,7 @@ export const useRecordTemperatures = () => {
     }) => {
       const today = format(new Date(), "yyyy-MM-dd");
       
-      // Delete existing logs for today first (to allow overwriting)
-      await supabase
-        .from("temperature_logs")
-        .delete()
-        .eq("location", location)
-        .eq("log_date", today);
-
-      // Insert new logs
+      // Use upsert to insert or update existing logs (avoids duplicate key errors)
       const logsToInsert = temperatures.map((t) => ({
         log_date: today,
         location,
@@ -141,7 +134,10 @@ export const useRecordTemperatures = () => {
 
       const { error } = await supabase
         .from("temperature_logs")
-        .insert(logsToInsert);
+        .upsert(logsToInsert, { 
+          onConflict: 'log_date,equipment_id',
+          ignoreDuplicates: false 
+        });
 
       if (error) throw error;
     },
