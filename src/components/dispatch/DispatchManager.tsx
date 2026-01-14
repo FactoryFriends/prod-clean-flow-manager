@@ -85,6 +85,7 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
     expiryDate: batch.expiry_date,
     productionDate: batch.production_date,
     unitType: batch.products.unit_type,
+    innerUnitType: batch.products.inner_unit_type,
   }));
 
   // Match InventoryBrowser data structure exactly

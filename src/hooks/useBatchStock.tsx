@@ -14,6 +14,8 @@ export interface BatchWithStock {
   products?: {
     name?: string;
     unit_type?: string;
+    inner_unit_type?: string;
+    unit_size?: number;
   } | null;
   chefs?: {
     name?: string;
@@ -34,7 +36,7 @@ export const useBatchStock = ({
         .select(
           `
             *,
-            products (name, unit_type),
+            products (name, unit_type, inner_unit_type, unit_size),
             chefs (name)
           `
         )
