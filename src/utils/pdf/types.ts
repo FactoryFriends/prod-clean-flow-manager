@@ -9,6 +9,7 @@ export interface PDFItem {
   product_type?: string;
   product_kind?: string;
   unitType?: string;
+  innerUnitType?: string;
 }
 
 export interface PDFData {

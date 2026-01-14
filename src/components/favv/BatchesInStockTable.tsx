@@ -62,13 +62,25 @@ export function BatchesInStockTable({ batches, isLoading, onBatchClick }: Batche
                     <TableCell>
                       {format(new Date(batch.expiry_date), "MMM dd, yyyy")}
                     </TableCell>
-                    <TableCell>{batch.packages_produced}</TableCell>
+                    <TableCell>
+                      {batch.packages_produced} {batch.products?.unit_type || 'pkg'}
+                      {batch.products?.unit_size && batch.products?.inner_unit_type && (
+                        <div className="text-xs text-muted-foreground">
+                          ({batch.packages_produced * batch.products.unit_size} {batch.products.inner_unit_type})
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell className={
                       batch.packages_in_stock > 0 
                         ? "text-green-700 font-semibold" 
                         : "text-muted-foreground"
                     }>
-                      {batch.packages_in_stock}
+                      {batch.packages_in_stock} {batch.products?.unit_type || 'pkg'}
+                      {batch.products?.unit_size && batch.products?.inner_unit_type && (
+                        <div className="text-xs text-muted-foreground">
+                          ({batch.packages_in_stock * batch.products.unit_size} {batch.products.inner_unit_type})
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>{batch.chefs?.name || "N/A"}</TableCell>
                   </TableRow>

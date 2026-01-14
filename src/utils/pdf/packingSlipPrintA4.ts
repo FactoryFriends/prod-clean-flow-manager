@@ -202,12 +202,15 @@ export const printPackingSlipA4 = (data: PDFData) => {
               (item.product_type && item.product_type !== 'zelfgemaakt') ||
               (item.product_kind && item.product_kind !== 'zelfgemaakt');
             
+            // Determine unit label - prefer innerUnitType for content, fallback to unitType
+            const unitLabel = item.innerUnitType || item.unitType || 'pkg';
+            
             return `
             <tr>
               <td>${item.name}</td>
               <td>${isExternalProduct ? 'EXTERNAL PRODUCT' : (item.batchNumber || '-')}</td>
               <td>${isExternalProduct ? 'SEE PACKAGING' : (item.productionDate || '-')}</td>
-              <td>${item.selectedQuantity} bags</td>
+              <td>${item.selectedQuantity} ${unitLabel}</td>
             </tr>
             `;
           }).join('')}

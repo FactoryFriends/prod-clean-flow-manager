@@ -39,6 +39,7 @@ interface PackingSlip {
       name: string;
       unit_size: number;
       unit_type: string;
+      inner_unit_type?: string;
     };
   }[];
 }
@@ -62,7 +63,9 @@ export function PackingSlipDetailsModal({ packingSlip, isOpen, onClose }: Packin
           batchNumber: batch.batch_number,
           selectedQuantity: 1, // Fallback for old records
           productionDate: batch.production_date,
-          type: 'batch' as const
+          type: 'batch' as const,
+          unitType: batch.products.unit_type,
+          innerUnitType: batch.products.inner_unit_type
         })) || [];
 
     printPackingSlipA4({
