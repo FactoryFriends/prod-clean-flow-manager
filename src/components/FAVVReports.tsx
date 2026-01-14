@@ -167,80 +167,85 @@ export function FAVVReports({
 
         <TabsContent value="produced" className="space-y-6">
           {/* Search and batch filters only in "produced" tab */}
-          <div className="flex flex-col md:flex-row md:items-center md:gap-8 gap-2">
-            <div className="flex gap-1 border rounded-lg px-2 py-1 bg-white shadow-inner w-full max-w-xs">
-              <input
-                type="text"
-                placeholder="Search batch number..."
-                value={batchSearch}
-                onChange={e => setBatchSearch(e.target.value)}
-                className="flex-1 outline-none bg-transparent text-sm"
-              />
+          <div className="space-y-3">
+            {/* Row 1: Search and Tab Navigation */}
+            <div className="flex flex-col md:flex-row md:items-center gap-3">
+              <div className="flex gap-1 border rounded-lg px-2 py-1 bg-white shadow-inner w-full max-w-xs">
+                <input
+                  type="text"
+                  placeholder="Search batch number..."
+                  value={batchSearch}
+                  onChange={e => setBatchSearch(e.target.value)}
+                  className="flex-1 outline-none bg-transparent text-sm"
+                />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button 
+                  className={`px-3 py-1 rounded-lg border text-sm ${batchTab==="in-stock"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
+                  onClick={() => setBatchTab("in-stock")}
+                >
+                  In Stock
+                </button>
+                <button 
+                  className={`px-3 py-1 rounded-lg border text-sm ${batchTab==="movements"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
+                  onClick={() => setBatchTab("movements")}
+                >
+                  Stock Movements
+                </button>
+                <button 
+                  className={`px-3 py-1 rounded-lg border text-sm ${batchTab==="partially-used"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
+                  onClick={() => setBatchTab("partially-used")}
+                >
+                  Partially Used
+                </button>
+                <button 
+                  className={`px-3 py-1 rounded-lg border text-sm ${batchTab==="fully-used"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
+                  onClick={() => setBatchTab("fully-used")}
+                >
+                  Fully Used
+                </button>
+              </div>
             </div>
-            <div className="flex gap-2 mt-2 md:mt-0">
-              <button 
-                className={`px-3 py-1 rounded-lg border ${batchTab==="in-stock"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
-                onClick={() => setBatchTab("in-stock")}
-              >
-                In Stock
-              </button>
-              {batchTab === "in-stock" && (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => exportBatchesInStockCSV(batchesInStock)}
-                    className="flex items-center gap-2 border-green-200 text-green-600 hover:bg-green-50"
-                    disabled={!batchesInStock.length}
-                  >
-                    <FileText className="w-4 h-4" />
-                    Export CSV
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => printStockListA4({
-                      batches: batchesInStock,
-                      currentLocation,
-                      searchFilter: batchSearch || undefined
-                    })}
-                    className="flex items-center gap-2 border-blue-200 text-blue-600 hover:bg-blue-50"
-                    disabled={!batchesInStock.length}
-                  >
-                    <Printer className="w-4 h-4" />
-                    Print Stock List
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => downloadStockVerificationTemplate(batchesInStock, currentLocation)}
-                    className="flex items-center gap-2 border-orange-200 text-orange-600 hover:bg-orange-50"
-                    disabled={!batchesInStock.length}
-                  >
-                    <FileSpreadsheet className="w-4 h-4" />
-                    Download Template
-                  </Button>
-                </>
-              )}
-              <button 
-                className={`px-3 py-1 rounded-lg border ${batchTab==="movements"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
-                onClick={() => setBatchTab("movements")}
-              >
-                Stock Movements
-              </button>
-              <button 
-                className={`px-3 py-1 rounded-lg border ${batchTab==="partially-used"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
-                onClick={() => setBatchTab("partially-used")}
-              >
-                Partially Used
-              </button>
-              <button 
-                className={`px-3 py-1 rounded-lg border ${batchTab==="fully-used"?"bg-green-100 border-green-400":"bg-white border-gray-300"}`}
-                onClick={() => setBatchTab("fully-used")}
-              >
-                Fully Used
-              </button>
-            </div>
+
+            {/* Row 2: Action Buttons - Only visible for In Stock tab */}
+            {batchTab === "in-stock" && (
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => exportBatchesInStockCSV(batchesInStock)}
+                  className="flex items-center gap-2 border-green-200 text-green-600 hover:bg-green-50"
+                  disabled={!batchesInStock.length}
+                >
+                  <FileText className="w-4 h-4" />
+                  Export CSV
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => printStockListA4({
+                    batches: batchesInStock,
+                    currentLocation,
+                    searchFilter: batchSearch || undefined
+                  })}
+                  className="flex items-center gap-2 border-blue-200 text-blue-600 hover:bg-blue-50"
+                  disabled={!batchesInStock.length}
+                >
+                  <Printer className="w-4 h-4" />
+                  Print Stock List
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => downloadStockVerificationTemplate(batchesInStock, currentLocation)}
+                  className="flex items-center gap-2 border-orange-200 text-orange-600 hover:bg-orange-50"
+                  disabled={!batchesInStock.length}
+                >
+                  <FileSpreadsheet className="w-4 h-4" />
+                  Download Template
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Tab Content for produced batches */}
