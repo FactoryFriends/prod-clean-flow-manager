@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { SettingsTabsList } from "@/components/settings/SettingsTabsList";
 import { ProductsTab } from "@/components/settings/tabs/ProductsTab";
@@ -13,6 +12,7 @@ import { UsersTab } from "@/components/settings/tabs/UsersTab";
 import IngredientPriceManager from "../reports/IngredientPriceManager";
 import { UnitOptionsManagement } from "./UnitOptionsManagement";
 import { ExcelImport } from "./ExcelImport";
+import { PWAInstallSection } from "./PWAInstallSection";
 
 interface SettingsContentProps {
   currentLocation: "tothai" | "khin";
@@ -118,6 +118,11 @@ export function SettingsContent({
       <TabsContent value="ingredient-margins" className="space-y-4">
         <IngredientPriceManager />
       </TabsContent>
+      
+      {/* PWA Install Section - always visible at bottom */}
+      <div className="mt-8 pt-6 border-t">
+        <PWAInstallSection />
+      </div>
     </Tabs>
   );
 }
