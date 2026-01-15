@@ -143,38 +143,38 @@ export function FAVVReports({
       </Card>
 
       <Tabs defaultValue="dispatched" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 bg-red-500 border border-red-600 p-1 rounded-lg">
+        <TabsList className="grid w-full grid-cols-5 bg-red-500 p-1.5 rounded-lg border-none shadow-sm">
           <TabsTrigger 
             value="dispatched" 
-            className="flex items-center gap-2 text-white/90 hover:text-white hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-600"
+            className="flex items-center gap-2 text-white font-medium hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-500"
           >
             <ClipboardList className="w-4 h-4" />
             OPERATIONS
           </TabsTrigger>
           <TabsTrigger 
             value="temperature" 
-            className="flex items-center gap-2 text-white/90 hover:text-white hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-600"
+            className="flex items-center gap-2 text-white font-medium hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-500"
           >
             <Thermometer className="w-4 h-4" />
             TEMPERATURE
           </TabsTrigger>
           <TabsTrigger 
             value="produced" 
-            className="flex items-center gap-2 text-white/90 hover:text-white hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-600"
+            className="flex items-center gap-2 text-white font-medium hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-500"
           >
             <Package className="w-4 h-4" />
             PRODUCED BATCHES
           </TabsTrigger>
           <TabsTrigger 
             value="stock-adjustment" 
-            className="flex items-center gap-2 text-white/90 hover:text-white hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-600"
+            className="flex items-center gap-2 text-white font-medium hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-500"
           >
             <PenLine className="w-4 h-4" />
             STOCK ADJUSTMENT
           </TabsTrigger>
           <TabsTrigger 
             value="cleaning" 
-            className="flex items-center gap-2 text-white/90 hover:text-white hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-600"
+            className="flex items-center gap-2 text-white font-medium hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-500"
           >
             <Sparkles className="w-4 h-4" />
             CLEANING TASKS
