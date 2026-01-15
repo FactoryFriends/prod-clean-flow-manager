@@ -159,7 +159,10 @@ export function FAVVReports({
           <TabsTrigger value="cleaning" className="flex items-center gap-2">
             Cleaning Tasks
           </TabsTrigger>
-          <TabsTrigger value="temperature" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="temperature" 
+            className="flex items-center gap-2 data-[state=active]:bg-cyan-600 data-[state=active]:text-white hover:bg-cyan-50 hover:text-cyan-600"
+          >
             <Thermometer className="w-4 h-4" />
             Temperature
           </TabsTrigger>
