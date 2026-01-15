@@ -14,7 +14,7 @@ import { useFAVVPackingSlips } from "../hooks/useFAVVPackingSlips";
 import { useFAVVStockTakes } from "../hooks/useFAVVStockTakes";
 import { useFAVVCompletedTasks } from "../hooks/useFAVVCompletedTasks";
 import { useUnifiedOperationsData } from "../hooks/useUnifiedOperationsData";
-import { Package, FileText, Brush, History, Printer, Thermometer, FileSpreadsheet, ClipboardList, BarChart3, Sparkles } from "lucide-react";
+import { Package, FileText, Brush, History, Printer, Thermometer, FileSpreadsheet, ClipboardList, PenLine, Sparkles } from "lucide-react";
 import { downloadStockVerificationTemplate } from "@/utils/excel/stockVerificationTemplate";
 import { printStockListA4 } from "../utils/pdf/stockListPrintA4";
 import { BatchesInStockTable } from "./favv/BatchesInStockTable";
@@ -143,38 +143,38 @@ export function FAVVReports({
       </Card>
 
       <Tabs defaultValue="dispatched" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 bg-slate-200 border border-slate-300">
+        <TabsList className="grid w-full grid-cols-5 bg-red-500 border border-red-600 p-1 rounded-lg">
           <TabsTrigger 
             value="dispatched" 
-            className="flex items-center gap-2 data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-50 hover:text-red-600"
+            className="flex items-center gap-2 text-white/90 hover:text-white hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-600"
           >
             <ClipboardList className="w-4 h-4" />
             OPERATIONS
           </TabsTrigger>
           <TabsTrigger 
             value="temperature" 
-            className="flex items-center gap-2 data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-50 hover:text-red-600"
+            className="flex items-center gap-2 text-white/90 hover:text-white hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-600"
           >
             <Thermometer className="w-4 h-4" />
             TEMPERATURE
           </TabsTrigger>
           <TabsTrigger 
             value="produced" 
-            className="flex items-center gap-2 data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-50 hover:text-red-600"
+            className="flex items-center gap-2 text-white/90 hover:text-white hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-600"
           >
             <Package className="w-4 h-4" />
             PRODUCED BATCHES
           </TabsTrigger>
           <TabsTrigger 
             value="stock-adjustment" 
-            className="flex items-center gap-2 data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-50 hover:text-red-600"
+            className="flex items-center gap-2 text-white/90 hover:text-white hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-600"
           >
-            <BarChart3 className="w-4 h-4" />
+            <PenLine className="w-4 h-4" />
             STOCK ADJUSTMENT
           </TabsTrigger>
           <TabsTrigger 
             value="cleaning" 
-            className="flex items-center gap-2 data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-50 hover:text-red-600"
+            className="flex items-center gap-2 text-white/90 hover:text-white hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-600"
           >
             <Sparkles className="w-4 h-4" />
             CLEANING TASKS
