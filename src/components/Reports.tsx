@@ -39,9 +39,14 @@ export function Reports({
       </div>
 
       <Tabs value={tab} onValueChange={setTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-2 bg-slate-100 border border-slate-200">
           <TabsTrigger value="management">Management Reports</TabsTrigger>
-          <TabsTrigger value="favv">FAVV Compliance</TabsTrigger>
+          <TabsTrigger 
+            value="favv"
+            className="data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-50 hover:text-red-600"
+          >
+            FAVV Compliance
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="management" className="space-y-6">
