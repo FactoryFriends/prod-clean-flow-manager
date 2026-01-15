@@ -14,7 +14,7 @@ import { useFAVVPackingSlips } from "../hooks/useFAVVPackingSlips";
 import { useFAVVStockTakes } from "../hooks/useFAVVStockTakes";
 import { useFAVVCompletedTasks } from "../hooks/useFAVVCompletedTasks";
 import { useUnifiedOperationsData } from "../hooks/useUnifiedOperationsData";
-import { Package, FileText, Brush, History, Printer, Thermometer, FileSpreadsheet, ClipboardList, PenLine, Sparkles } from "lucide-react";
+import { Package, FileText, Brush, History, Printer, Thermometer, FileSpreadsheet, PenLine, Sparkles, Truck } from "lucide-react";
 import { downloadStockVerificationTemplate } from "@/utils/excel/stockVerificationTemplate";
 import { printStockListA4 } from "../utils/pdf/stockListPrintA4";
 import { BatchesInStockTable } from "./favv/BatchesInStockTable";
@@ -122,34 +122,23 @@ export function FAVVReports({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="text-2xl">FAVV Compliance Reports</CardTitle>
-              <CardDescription>
-                Complete overview of production, distribution, and cleaning compliance for FAVV inspections
-              </CardDescription>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setAuditTrailOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <History className="w-4 h-4" />
-              Audit Trail
-            </Button>
+          <div>
+            <CardTitle className="text-2xl">FAVV Compliance Reports</CardTitle>
+            <CardDescription>
+              Complete overview of production, distribution, and cleaning compliance for FAVV inspections
+            </CardDescription>
           </div>
         </CardHeader>
       </Card>
 
       <Tabs defaultValue="dispatched" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 bg-red-500 p-1.5 rounded-lg border-none shadow-sm">
+        <TabsList className="grid w-full grid-cols-6 bg-red-500 p-1.5 rounded-lg border-none shadow-sm">
           <TabsTrigger 
             value="dispatched" 
             className="flex items-center gap-2 text-white font-medium hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-500"
           >
-            <ClipboardList className="w-4 h-4" />
-            OPERATIONS
+            <Truck className="w-4 h-4" />
+            STOCK MOVEMENTS
           </TabsTrigger>
           <TabsTrigger 
             value="temperature" 
@@ -178,6 +167,14 @@ export function FAVVReports({
           >
             <Sparkles className="w-4 h-4" />
             CLEANING TASKS
+          </TabsTrigger>
+          <TabsTrigger 
+            value="audit-trail" 
+            className="flex items-center gap-2 text-white font-medium hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-500"
+            onClick={() => setAuditTrailOpen(true)}
+          >
+            <History className="w-4 h-4" />
+            AUDIT TRAIL
           </TabsTrigger>
         </TabsList>
 
