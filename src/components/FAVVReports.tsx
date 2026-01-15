@@ -163,7 +163,8 @@ export function FAVVReports({
           </TabsTrigger>
           <TabsTrigger 
             value="cleaning" 
-            className="flex items-center gap-2 text-white font-medium hover:bg-red-600 data-[state=active]:bg-white data-[state=active]:text-red-500"
+            className="flex items-center gap-2 text-white/50 font-medium cursor-not-allowed"
+            disabled
           >
             <Sparkles className="w-4 h-4" />
             CLEANING TASKS
