@@ -239,11 +239,11 @@ export const printStockListA4 = (data: StockListData) => {
             const today = new Date().toISOString().split('T')[0];
             const isExpired = batch.expiry_date && batch.expiry_date < today;
             return `
-            <tr style="height: 25px; ${isExpired ? 'background-color: #fee2e2;' : ''}">
+            <tr style="height: 25px; ${isExpired ? 'background-color: #d0d0d0; border: 2px solid #000; font-weight: bold;' : ''}">
               <td><strong>${batch.batch_number}</strong></td>
-              <td>${batch.products.name}</td>
+              <td>${isExpired ? '*** EXPIRED *** ' : ''}${batch.products.name}</td>
               <td>${new Date(batch.production_date).toLocaleDateString('en-GB')}</td>
-              <td style="${isExpired ? 'color: #dc2626; font-weight: bold;' : ''}">${batch.expiry_date ? new Date(batch.expiry_date).toLocaleDateString('en-GB') : '-'}${isExpired ? ' ⚠️' : ''}</td>
+              <td style="${isExpired ? 'font-weight: bold; text-decoration: underline;' : ''}">${batch.expiry_date ? new Date(batch.expiry_date).toLocaleDateString('en-GB') : '-'}${isExpired ? ' XXX' : ''}</td>
               <td style="text-align: center;"><strong>${batch.packages_in_stock}</strong></td>
               <td class="physical-count" style="background-color: #f0f0f0;"></td>
               <td class="notes" style="background-color: #f0f0f0;"></td>
