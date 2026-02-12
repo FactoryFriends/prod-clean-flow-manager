@@ -1,7 +1,7 @@
-import { ChefHat, Truck, ClipboardList, ShieldCheck, Store, Thermometer, FileSpreadsheet } from "lucide-react";
+import { ChefHat, Truck, ClipboardList, ShieldCheck, Store, Thermometer, Printer } from "lucide-react";
 
 import { useBatchStock } from "@/hooks/useBatchStock";
-import { downloadStockVerificationTemplate } from "@/utils/excel/stockVerificationTemplate";
+import { printStockListA4 } from "@/utils/pdf/stockListPrintA4";
 
 interface DashboardQuickActionsProps {
   onSectionChange: (section: string) => void;
@@ -59,9 +59,9 @@ export function DashboardQuickActions({ onSectionChange, currentLocation }: Dash
     },
     {
       id: 'stocklist',
-      onClick: () => downloadStockVerificationTemplate(batchesInStock, dbLocation),
+      onClick: () => printStockListA4({ batches: batchesInStock as any, currentLocation: dbLocation as "tothai" | "khin" }),
       className: "p-4 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors",
-      icon: FileSpreadsheet,
+      icon: Printer,
       label: "Stocklijst"
     }
   ];
