@@ -1,37 +1,33 @@
 
 
-# Grayscale-vriendelijke markering voor vervallen batches
+## Beveiliging Edit Batch voor Production Users
 
-## Probleem
-De huidige rode kleuren (#fee2e2 achtergrond, #dc2626 tekst) zijn niet goed zichtbaar bij zwart-wit afdrukken.
+### Probleem
+Production users kunnen via "Edit Batch" het veld `packages_produced` vrij aanpassen naar elk getal (inclusief 0), zonder:
+- Een reden op te geven
+- Audit trail logging
+- Bevestiging of waarschuwing
 
-## Oplossing
-Vervangen door grayscale-opvallende stijlen:
+Alleen admin users krijgen het "Remaining Stock" veld met verplichte reden en audit logging.
 
-### In `src/utils/pdf/stockListPrintA4.ts` (regels 242-246):
+### Oplossing
 
-**Vervallen rijen krijgen:**
-- Donkergrijze achtergrond (`#d0d0d0`) - duidelijk zichtbaar contrast met witte rijen
-- Vetgedrukte tekst met `*** VERVALLEN ***` prefix bij de productnaam
-- Doorstreepte vervaldatum met bold
-- Dikkere rand (`border: 2px solid #000`) rond de hele rij
+Beperk wat production users kunnen wijzigen in de Edit Batch dialog:
 
-**Van:**
-```
-background-color: #fee2e2
-color: #dc2626; font-weight: bold
-⚠️ emoji
-```
+1. **Verwijder de mogelijkheid voor production users om `packages_produced` te wijzigen**
+   - Production users mogen alleen chef, vervaldatum en notities aanpassen
+   - Het "Number of Packages Produced" veld wordt read-only (alleen weergave, niet bewerkbaar)
+   - Stockaanpassingen blijven exclusief voor admins via het "Remaining Stock" veld met verplichte reden
 
-**Naar:**
-```
-background-color: #d0d0d0; border: 2px solid #000
-font-weight: bold; text-decoration: underline
-"*** EXPIRED ***" tekst prefix + "XXX" markering
-```
+2. **Bestand te wijzigen**: `src/components/EditBatchDialog.tsx`
+   - In het `else` blok (non-admin path), verwijder de `packagesProduced` input
+   - Toon `packages_produced` als read-only info (net als het product en batch nummer)
+   - Bij submit voor production users, gebruik altijd `batch.packages_produced` (ongewijzigd)
 
-Dit zorgt ervoor dat vervallen batches er bij grayscale print duidelijk uitspringen door:
-1. Donkere achtergrond (contrast met witte rijen)
-2. Dikke rand
-3. Tekstuele markering "*** EXPIRED ***"
+### Technische Details
+
+In `EditBatchDialog.tsx`:
+- Het blok op regel 155-168 (de `else` branch met het packages input veld) wordt vervangen door een read-only weergave
+- In de submit handler (regel 100-115), wordt `packagesToUpdate` altijd `batch.packages_produced` voor non-admins
+- De `canSubmit` validatie wordt vereenvoudigd: geen check meer op `packagesProduced` voor non-admins
 
