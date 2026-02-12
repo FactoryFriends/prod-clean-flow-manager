@@ -99,8 +99,7 @@ export function EditBatchDialog({ open, onOpenChange, batch }: EditBatchDialogPr
       });
     } else {
       // Regular batch update for non-admins or no stock change
-      const packagesToUpdate = isAdmin ? batch.packages_produced : parseInt(packagesProduced);
-      if (!isAdmin && !packagesProduced) return;
+      const packagesToUpdate = batch.packages_produced;
       
       updateBatch.mutate({
         id: batch.id,
@@ -117,7 +116,6 @@ export function EditBatchDialog({ open, onOpenChange, batch }: EditBatchDialogPr
   };
 
   const canSubmit = selectedChefId && 
-    (isAdmin ? true : packagesProduced) && 
     !updateBatch.isPending && 
     !stockAdjustment.isPending &&
     (isAdmin && remainingStock && parseInt(remainingStock) !== currentRemainingStock ? adjustmentReason.trim() : true);
@@ -207,17 +205,10 @@ export function EditBatchDialog({ open, onOpenChange, batch }: EditBatchDialogPr
               </div>
             ) : (
               <div className="space-y-2">
-                <Label htmlFor="packages">
-                  Number of Packages{batch.products.unit_type === "PIECE" ? "/Bags" : ""} Produced
-                </Label>
-                <Input
-                  id="packages"
-                  type="number"
-                  min="1"
-                  value={packagesProduced}
-                  onChange={(e) => setPackagesProduced(e.target.value)}
-                  placeholder="Enter number of packages"
-                />
+                <Label>Packages Produced</Label>
+                <div className="p-2 bg-muted rounded text-sm">
+                  {batch.packages_produced} packages
+                </div>
               </div>
             )}
 
