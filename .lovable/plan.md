@@ -1,36 +1,37 @@
 
 
-# Vervallen batches toevoegen aan stocktelling
+# Grayscale-vriendelijke markering voor vervallen batches
 
 ## Probleem
-De stock verification (stocktelling) filtert momenteel vervallen batches weg. Hierdoor verschijnen ze niet in het Excel-template en kunnen ze niet gecontroleerd of afgeschreven worden.
+De huidige rode kleuren (#fee2e2 achtergrond, #dc2626 tekst) zijn niet goed zichtbaar bij zwart-wit afdrukken.
 
 ## Oplossing
-Vervallen batches met reststock meenemen in de stocktelling, met een duidelijke markering dat ze vervallen zijn.
+Vervangen door grayscale-opvallende stijlen:
 
-## Technische aanpassing
+### In `src/utils/pdf/stockListPrintA4.ts` (regels 242-246):
 
-### 1. `useBatchStock.tsx` - Filter aanpassen
-De huidige filter verwijdert vervallen batches wanneer `inStockOnly = true`. Aanpassing: vervallen batches met stock > 0 WEL meenemen.
+**Vervallen rijen krijgen:**
+- Donkergrijze achtergrond (`#d0d0d0`) - duidelijk zichtbaar contrast met witte rijen
+- Vetgedrukte tekst met `*** VERVALLEN ***` prefix bij de productnaam
+- Doorstreepte vervaldatum met bold
+- Dikkere rand (`border: 2px solid #000`) rond de hele rij
 
 **Van:**
 ```
-allBatches.filter((b) => b.packages_in_stock > 0 && b.expiry_date >= today)
+background-color: #fee2e2
+color: #dc2626; font-weight: bold
+⚠️ emoji
 ```
 
 **Naar:**
 ```
-allBatches.filter((b) => b.packages_in_stock > 0)
+background-color: #d0d0d0; border: 2px solid #000
+font-weight: bold; text-decoration: underline
+"*** EXPIRED ***" tekst prefix + "XXX" markering
 ```
 
-### 2. `stockVerificationTemplate.ts` - Kolom "Status" toevoegen
-Een extra kolom toevoegen die aangeeft of een batch "OK" of "EXPIRED" is, zodat het bij het tellen meteen duidelijk is welke batches vervallen zijn.
-
-### 3. UI - Visuele markering (optioneel)
-In de BatchesInStockTable een rode markering tonen voor vervallen batches, zodat ze ook in de app zichtbaar zijn.
-
-## Impact
-- Vervallen batches met reststock verschijnen nu in de stocktelling
-- Geen bestaande functionaliteit wordt gebroken
-- De Production-pagina kan eventueel een aparte filter behouden
+Dit zorgt ervoor dat vervallen batches er bij grayscale print duidelijk uitspringen door:
+1. Donkere achtergrond (contrast met witte rijen)
+2. Dikke rand
+3. Tekstuele markering "*** EXPIRED ***"
 
