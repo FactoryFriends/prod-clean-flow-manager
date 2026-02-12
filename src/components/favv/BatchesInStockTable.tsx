@@ -47,10 +47,13 @@ export function BatchesInStockTable({ batches, isLoading, onBatchClick }: Batche
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {batches.map((batch) => (
-                  <TableRow key={batch.id} onClick={() => onBatchClick?.(batch)} className="cursor-pointer hover:bg-green-50">
+                {batches.map((batch) => {
+                  const isExpired = new Date(batch.expiry_date) < new Date(new Date().toISOString().split('T')[0]);
+                  return (
+                  <TableRow key={batch.id} onClick={() => onBatchClick?.(batch)} className={`cursor-pointer ${isExpired ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-green-50'}`}>
                     <TableCell className="font-mono text-sm">
                       {batch.batch_number}
+                      {isExpired && <span className="ml-2 text-xs text-red-600 font-semibold">EXPIRED</span>}
                     </TableCell>
                     <TableCell>
                       {format(new Date(batch.created_at), "MMM dd, yyyy HH:mm")}
@@ -84,7 +87,8 @@ export function BatchesInStockTable({ batches, isLoading, onBatchClick }: Batche
                     </TableCell>
                     <TableCell>{batch.chefs?.name || "N/A"}</TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </div>

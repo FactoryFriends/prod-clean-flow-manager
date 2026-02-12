@@ -21,6 +21,7 @@ export const downloadStockVerificationTemplate = (
     "Product Name", 
     "Production Date",
     "Expiry Date",
+    "Status",
     "System Stock",
     "Physical Count",
     "Notes"
@@ -31,11 +32,13 @@ export const downloadStockVerificationTemplate = (
     (a.products?.name || "").localeCompare(b.products?.name || "")
   );
 
+  const today = new Date().toISOString().split('T')[0];
   const data = sortedBatches.map(batch => [
     batch.batch_number,
     batch.products?.name || "",
     format(new Date(batch.production_date), "yyyy-MM-dd"),
     format(new Date(batch.expiry_date), "yyyy-MM-dd"),
+    batch.expiry_date < today ? "EXPIRED" : "OK",
     batch.packages_in_stock, // System stock (current)
     "", // Physical Count - to be filled by user
     ""  // Notes - optional
@@ -59,6 +62,7 @@ export const downloadStockVerificationTemplate = (
     { wch: 35 }, // Product Name
     { wch: 14 }, // Production Date
     { wch: 14 }, // Expiry Date
+    { wch: 10 }, // Status
     { wch: 14 }, // System Stock
     { wch: 16 }, // Physical Count
     { wch: 35 }, // Notes
