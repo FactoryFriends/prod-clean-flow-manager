@@ -99,11 +99,9 @@ export const useBatchStock = ({
         };
       });
 
-      // Filter for in-stock only if requested, excluding expired batches
-      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-      
+      // Filter for in-stock only if requested (include expired batches so they appear in stock verification)
       return inStockOnly
-        ? allBatches.filter((b) => b.packages_in_stock > 0 && b.expiry_date >= today)
+        ? allBatches.filter((b) => b.packages_in_stock > 0)
         : allBatches;
     },
   });
