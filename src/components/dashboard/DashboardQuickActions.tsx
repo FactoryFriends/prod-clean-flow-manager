@@ -1,4 +1,7 @@
-import { ChefHat, Truck, ClipboardList, ShieldCheck, Store, Thermometer } from "lucide-react";
+import { ChefHat, Truck, ClipboardList, ShieldCheck, Store, Thermometer, FileSpreadsheet } from "lucide-react";
+
+import { useBatchStock } from "@/hooks/useBatchStock";
+import { downloadStockVerificationTemplate } from "@/utils/excel/stockVerificationTemplate";
 
 interface DashboardQuickActionsProps {
   onSectionChange: (section: string) => void;
@@ -8,6 +11,8 @@ interface DashboardQuickActionsProps {
 export function DashboardQuickActions({ onSectionChange, currentLocation }: DashboardQuickActionsProps) {
   const dbLocation = currentLocation;
   
+  const { data: batchesInStock = [] } = useBatchStock({ location: dbLocation as "tothai" | "khin", inStockOnly: true });
+
   // Define all buttons
   const allButtons = [
     {
@@ -51,13 +56,20 @@ export function DashboardQuickActions({ onSectionChange, currentLocation }: Dash
       className: "p-4 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors",
       icon: Thermometer,
       label: "Temperaturen"
+    },
+    {
+      id: 'stocklist',
+      onClick: () => downloadStockVerificationTemplate(batchesInStock, dbLocation),
+      className: "p-4 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors",
+      icon: FileSpreadsheet,
+      label: "Stocklijst"
     }
   ];
 
   // Filter buttons based on location - only restrict for KHIN
   const visibleButtons = dbLocation === "khin" 
     ? allButtons.filter(button => 
-        button.id === 'favv' || button.id === 'cleaning' || button.id === 'temperature'
+        button.id === 'favv' || button.id === 'cleaning' || button.id === 'temperature' || button.id === 'stocklist'
       )
     : allButtons; // Show all buttons for ToThai
 
