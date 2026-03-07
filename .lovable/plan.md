@@ -1,26 +1,33 @@
 
 
-## Fix: Lege Stocklijst door Opgestapelde Draft Dispatches
+## Beveiliging Edit Batch voor Production Users
 
 ### Probleem
-Er zijn 55 draft dispatch records opgestapeld (oudste van okt 2025). De `useBatchStock` hook trekt hoeveelheden van ALLE draft dispatches af van de voorraad. Dezelfde batches worden meerdere keren gereserveerd, waardoor de berekende stock op 0 uitkomt en de inventarislijst leeg verschijnt.
+Production users kunnen via "Edit Batch" het veld `packages_produced` vrij aanpassen naar elk getal (inclusief 0), zonder:
+- Een reden op te geven
+- Audit trail logging
+- Bevestiging of waarschuwing
 
-Voorbeeld: batch Khin Curry heeft 1 package geproduceerd maar 17 gereserveerd door drafts.
+Alleen admin users krijgen het "Remaining Stock" veld met verplichte reden en audit logging.
 
-### Oplossing (2 stappen)
+### Oplossing
 
-#### 1. Opruimen oude draft dispatches
-Verwijder alle draft dispatch records en hun items. Deze zijn stale/verlaten sessies en hebben geen waarde meer.
+Beperk wat production users kunnen wijzigen in de Edit Batch dialog:
 
-- Verwijder dispatch_items waar dispatch_id verwijst naar een draft dispatch
-- Verwijder dispatch_records met status 'draft'
+1. **Verwijder de mogelijkheid voor production users om `packages_produced` te wijzigen**
+   - Production users mogen alleen chef, vervaldatum en notities aanpassen
+   - Het "Number of Packages Produced" veld wordt read-only (alleen weergave, niet bewerkbaar)
+   - Stockaanpassingen blijven exclusief voor admins via het "Remaining Stock" veld met verplichte reden
 
-#### 2. Automatische cleanup van oude drafts
-In `useBatchStock.tsx`: negeer draft dispatches die ouder zijn dan 24 uur. Dit voorkomt dat verlaten sessies de stock permanent blokkeren.
+2. **Bestand te wijzigen**: `src/components/EditBatchDialog.tsx`
+   - In het `else` blok (non-admin path), verwijder de `packagesProduced` input
+   - Toon `packages_produced` als read-only info (net als het product en batch nummer)
+   - Bij submit voor production users, gebruik altijd `batch.packages_produced` (ongewijzigd)
 
-**Technische wijziging** in `useBatchStock.tsx`:
-- Voeg een tijdsfilter toe aan de dispatch_items query: alleen drafts van de laatste 24 uur meetellen
-- Toevoegen: `.gte("dispatch_records.created_at", new Date(Date.now() - 24*60*60*1000).toISOString())`
+### Technische Details
 
-Dit lost beide problemen op: de huidige stocklijst wordt direct zichtbaar na cleanup, en toekomstige verlaten drafts blokkeren de stock niet meer na 24 uur.
+In `EditBatchDialog.tsx`:
+- Het blok op regel 155-168 (de `else` branch met het packages input veld) wordt vervangen door een read-only weergave
+- In de submit handler (regel 100-115), wordt `packagesToUpdate` altijd `batch.packages_produced` voor non-admins
+- De `canSubmit` validatie wordt vereenvoudigd: geen check meer op `packagesProduced` voor non-admins
 
