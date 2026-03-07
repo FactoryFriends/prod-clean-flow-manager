@@ -59,16 +59,19 @@ export const useBatchStock = ({
 
       // Count dispatch items from DRAFT dispatches only (confirmed ones are already subtracted from packages_produced)
       // This prevents double-subtraction while still showing reserved quantities
+      // Only count drafts from the last 24 hours to prevent stale sessions from blocking stock
+      const cutoff24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { data: dispatchItems, error: diErr } = await supabase
         .from("dispatch_items")
         .select(`
           item_id, 
           quantity,
-          dispatch_records!inner(status)
+          dispatch_records!inner(status, created_at)
         `)
         .in("item_id", batchIds)
         .eq("item_type", "batch")
-        .eq("dispatch_records.status", "draft");
+        .eq("dispatch_records.status", "draft")
+        .gte("dispatch_records.created_at", cutoff24h);
       if (diErr) {
         // Handle authentication errors gracefully
         if (diErr.code === 'PGRST116' || diErr.message?.includes('permission')) {
