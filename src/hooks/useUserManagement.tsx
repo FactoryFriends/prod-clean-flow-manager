@@ -211,11 +211,11 @@ export const useResetUserPassword = () => {
       } else {
         // Send reset email (this still works with anon key)
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`
+          redirectTo: 'https://optithai-manager.lovable.app/reset-password'
         });
         if (error) throw error;
         
-        const resetLink = `${window.location.origin}/reset-password`;
+        const resetLink = 'https://optithai-manager.lovable.app/reset-password';
         return { success: true, resetLink, email };
       }
     },
