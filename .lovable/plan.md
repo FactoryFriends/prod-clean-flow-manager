@@ -1,33 +1,28 @@
 
 
-## Beveiliging Edit Batch voor Production Users
+## Fix: Password Reset Link Geeft 522 Timeout
 
 ### Probleem
-Production users kunnen via "Edit Batch" het veld `packages_produced` vrij aanpassen naar elk getal (inclusief 0), zonder:
-- Een reden op te geven
-- Audit trail logging
-- Bevestiging of waarschuwing
 
-Alleen admin users krijgen het "Remaining Stock" veld met verplichte reden en audit logging.
+De reset email link wijst naar het **sandbox/preview domein** (`a3029fbc-...sandbox.lovable.dev`), niet naar de live app. Dit sandbox domein is niet altijd bereikbaar, wat de Cloudflare 522 timeout veroorzaakt.
+
+De oorzaak: `window.location.origin` wordt gebruikt als redirect URL. Wanneer de reset vanuit de preview wordt aangevraagd, wordt het preview-domein in de link gezet.
 
 ### Oplossing
 
-Beperk wat production users kunnen wijzigen in de Edit Batch dialog:
+Hardcode de redirect URL naar de gepubliceerde live URL (`https://optithai-manager.lovable.app`).
 
-1. **Verwijder de mogelijkheid voor production users om `packages_produced` te wijzigen**
-   - Production users mogen alleen chef, vervaldatum en notities aanpassen
-   - Het "Number of Packages Produced" veld wordt read-only (alleen weergave, niet bewerkbaar)
-   - Stockaanpassingen blijven exclusief voor admins via het "Remaining Stock" veld met verplichte reden
+**Bestanden te wijzigen:**
 
-2. **Bestand te wijzigen**: `src/components/EditBatchDialog.tsx`
-   - In het `else` blok (non-admin path), verwijder de `packagesProduced` input
-   - Toon `packages_produced` als read-only info (net als het product en batch nummer)
-   - Bij submit voor production users, gebruik altijd `batch.packages_produced` (ongewijzigd)
+1. **`src/contexts/AuthContext.tsx`** (regel 88):
+   - Vervang `window.location.origin` door `https://optithai-manager.lovable.app`
 
-### Technische Details
+2. **`src/hooks/useUserManagement.tsx`** (regels waar `window.location.origin` gebruikt wordt voor reset links):
+   - Vervang alle `window.location.origin` in reset-gerelateerde functies door `https://optithai-manager.lovable.app`
 
-In `EditBatchDialog.tsx`:
-- Het blok op regel 155-168 (de `else` branch met het packages input veld) wordt vervangen door een read-only weergave
-- In de submit handler (regel 100-115), wordt `packagesToUpdate` altijd `batch.packages_produced` voor non-admins
-- De `canSubmit` validatie wordt vereenvoudigd: geen check meer op `packagesProduced` voor non-admins
+3. **Supabase Dashboard configuratie** (handmatig door gebruiker):
+   - Site URL instellen op `https://optithai-manager.lovable.app`
+   - `https://optithai-manager.lovable.app/reset-password` toevoegen aan Redirect URLs
+
+Dit zorgt ervoor dat de reset link altijd naar de werkende live URL wijst, ongeacht vanwaar de reset wordt aangevraagd.
 
