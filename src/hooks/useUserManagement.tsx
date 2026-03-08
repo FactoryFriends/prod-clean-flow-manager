@@ -243,7 +243,7 @@ export const useGenerateResetLink = () => {
       
       return { 
         email, 
-        resetLink: `${window.location.origin}/reset-password`,
+        resetLink: 'https://optithai-manager.lovable.app/reset-password',
         message: "Reset email sent to user. They will receive an email with a secure reset link."
       };
     },
