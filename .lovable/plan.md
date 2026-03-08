@@ -1,33 +1,29 @@
 
 
-## Beveiliging Edit Batch voor Production Users
+## Root Cause: Lege Stocklijst
 
 ### Probleem
-Production users kunnen via "Edit Batch" het veld `packages_produced` vrij aanpassen naar elk getal (inclusief 0), zonder:
-- Een reden op te geven
-- Audit trail logging
-- Bevestiging of waarschuwing
 
-Alleen admin users krijgen het "Remaining Stock" veld met verplichte reden en audit logging.
+De `useBatchStock` hook haalt eerst **alle** 641 batches op voor locatie "tothai", en probeert dan een tweede query te doen:
+
+```
+.in("item_id", batchIds)  // 641 UUIDs in de URL
+```
+
+Dit genereert een GET request met **641 UUIDs** in de URL query string (~23.000 karakters). Dit overschrijdt de URL-lengte limiet van PostgREST/Supabase, waardoor de dispatch_items query faalt. Omdat `InventoryBrowser` de error negeert (`const { data: batches } = ...` zonder error handling), wordt `data` `undefined`, en toont de lijst "No items available".
 
 ### Oplossing
 
-Beperk wat production users kunnen wijzigen in de Edit Batch dialog:
+**Bestand: `src/hooks/useBatchStock.tsx`**
 
-1. **Verwijder de mogelijkheid voor production users om `packages_produced` te wijzigen**
-   - Production users mogen alleen chef, vervaldatum en notities aanpassen
-   - Het "Number of Packages Produced" veld wordt read-only (alleen weergave, niet bewerkbaar)
-   - Stockaanpassingen blijven exclusief voor admins via het "Remaining Stock" veld met verplichte reden
+Twee aanpassingen:
 
-2. **Bestand te wijzigen**: `src/components/EditBatchDialog.tsx`
-   - In het `else` blok (non-admin path), verwijder de `packagesProduced` input
-   - Toon `packages_produced` als read-only info (net als het product en batch nummer)
-   - Bij submit voor production users, gebruik altijd `batch.packages_produced` (ongewijzigd)
+1. **Filter batches vooraf op stock > 0** in de eerste query — alleen batches met `packages_produced > 0` ophalen. Dit reduceert het aantal van 641 naar ~182, wat binnen de URL-limiet valt.
 
-### Technische Details
+2. **Chunk de `.in()` call** als fallback — splits `batchIds` in groepen van max 100 en voer meerdere queries uit, merge de resultaten. Dit voorkomt dat de URL ooit te lang wordt, ook als het aantal groeit.
 
-In `EditBatchDialog.tsx`:
-- Het blok op regel 155-168 (de `else` branch met het packages input veld) wordt vervangen door een read-only weergave
-- In de submit handler (regel 100-115), wordt `packagesToUpdate` altijd `batch.packages_produced` voor non-admins
-- De `canSubmit` validatie wordt vereenvoudigd: geen check meer op `packagesProduced` voor non-admins
+Concrete wijzigingen:
+- Voeg `.gt("packages_produced", 0)` toe aan de eerste batch query (wanneer `inStockOnly` true is)
+- Implementeer een `chunkedIn()` helper die de dispatch_items query opsplitst in batches van 100 IDs
+- Merge alle dispatch_items resultaten in de `reservedMap`
 
