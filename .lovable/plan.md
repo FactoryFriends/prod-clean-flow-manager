@@ -1,33 +1,35 @@
 
 
-## Beveiliging Edit Batch voor Production Users
+## Fix: Password Reset Link Werkt Niet
 
 ### Probleem
-Production users kunnen via "Edit Batch" het veld `packages_produced` vrij aanpassen naar elk getal (inclusief 0), zonder:
-- Een reden op te geven
-- Audit trail logging
-- Bevestiging of waarschuwing
+De ResetPassword pagina (`src/pages/ResetPassword.tsx`) heeft twee bugs:
 
-Alleen admin users krijgen het "Remaining Stock" veld met verplichte reden en audit logging.
+1. **Hash fragment niet gelezen**: Supabase stuurt recovery links met een hash fragment (`#access_token=...&type=recovery`), maar de pagina leest alleen query parameters (`?type=recovery`). 
+2. **Geen token exchange**: Bij de PKCE flow (query params met `token_hash`) moet eerst `supabase.auth.verifyOtp()` worden aangeroepen om een sessie te starten. Dat gebeurt niet.
+3. **Geen sessie = updateUser faalt**: `supabase.auth.updateUser({ password })` vereist een actieve sessie.
 
 ### Oplossing
 
-Beperk wat production users kunnen wijzigen in de Edit Batch dialog:
+Herschrijf `src/pages/ResetPassword.tsx`:
 
-1. **Verwijder de mogelijkheid voor production users om `packages_produced` te wijzigen**
-   - Production users mogen alleen chef, vervaldatum en notities aanpassen
-   - Het "Number of Packages Produced" veld wordt read-only (alleen weergave, niet bewerkbaar)
-   - Stockaanpassingen blijven exclusief voor admins via het "Remaining Stock" veld met verplichte reden
+1. **Luister naar `onAuthStateChange` met `PASSWORD_RECOVERY` event** — dit is de betrouwbare manier. Supabase's JS client detecteert automatisch het hash fragment en triggert een `PASSWORD_RECOVERY` event.
 
-2. **Bestand te wijzigen**: `src/components/EditBatchDialog.tsx`
-   - In het `else` blok (non-admin path), verwijder de `packagesProduced` input
-   - Toon `packages_produced` als read-only info (net als het product en batch nummer)
-   - Bij submit voor production users, gebruik altijd `batch.packages_produced` (ongewijzigd)
+2. **Verwijder de handmatige token/type checks** uit `useEffect` — die zijn onnodig als we het auth event gebruiken.
+
+3. **Flow wordt**:
+   - Pagina laadt → Supabase client leest hash fragment automatisch → triggert `PASSWORD_RECOVERY` event
+   - Component zet een `ready` state wanneer dit event binnenkomt
+   - Gebruiker vult nieuw wachtwoord in → `updateUser({ password })` werkt nu (sessie is actief)
+   - Bij PKCE flow (token_hash in query params): roep `verifyOtp({ token_hash, type: 'recovery' })` aan
 
 ### Technische Details
 
-In `EditBatchDialog.tsx`:
-- Het blok op regel 155-168 (de `else` branch met het packages input veld) wordt vervangen door een read-only weergave
-- In de submit handler (regel 100-115), wordt `packagesToUpdate` altijd `batch.packages_produced` voor non-admins
-- De `canSubmit` validatie wordt vereenvoudigd: geen check meer op `packagesProduced` voor non-admins
+**Bestand**: `src/pages/ResetPassword.tsx`
+
+- Voeg `onAuthStateChange` listener toe die luistert naar `PASSWORD_RECOVERY` event
+- Voeg fallback toe: als query params `token_hash` en `type=recovery` aanwezig zijn, roep `verifyOtp` aan
+- Verwijder de oude `useEffect` die `type`/`token` checkt
+- Toon een "Verifying reset link..." state terwijl de sessie wordt opgebouwd
+- Na succesvolle password update: sign out en redirect naar `/auth`
 
