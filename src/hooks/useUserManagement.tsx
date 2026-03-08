@@ -237,7 +237,7 @@ export const useGenerateResetLink = () => {
   return useMutation({
     mutationFn: async ({ email }: { email: string }) => {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`
+        redirectTo: 'https://optithai-manager.lovable.app/reset-password'
       });
       if (error) throw error;
       
