@@ -1,33 +1,28 @@
 
 
-## Beveiliging Edit Batch voor Production Users
+## Plan: Bulk afschrijving verlopen voorraad naar 0
 
-### Probleem
-Production users kunnen via "Edit Batch" het veld `packages_produced` vrij aanpassen naar elk getal (inclusief 0), zonder:
-- Een reden op te geven
-- Audit trail logging
-- Bevestiging of waarschuwing
+### Wat
+Alle verlopen batches met positief saldo in één keer op 0 zetten via een database script, met audit trail per batch.
 
-Alleen admin users krijgen het "Remaining Stock" veld met verplichte reden en audit logging.
+### Aanpak
 
-### Oplossing
+1. **Database query uitvoeren** via psql die in één keer:
+   - Alle `production_batches` vindt waar `expiry_date < CURRENT_DATE` en `packages_produced + COALESCE(manual_stock_adjustment, 0) > 0`
+   - Per batch de `manual_stock_adjustment` berekent zodat het netto saldo exact 0 wordt (rekening houdend met draft dispatch reserveringen)
+   - De `manual_stock_adjustment`, `adjusted_by`, `adjustment_reason` en `adjustment_timestamp` update
+   - Per batch een `audit_logs` entry insert met actie "stock_adjustment", reden "Stocktelling en oplossen software error", en de oude/nieuwe waarden in metadata
 
-Beperk wat production users kunnen wijzigen in de Edit Batch dialog:
+2. **Verificatie**: Na uitvoering een controle-query draaien om te bevestigen dat er geen verlopen batches met positief saldo meer zijn.
 
-1. **Verwijder de mogelijkheid voor production users om `packages_produced` te wijzigen**
-   - Production users mogen alleen chef, vervaldatum en notities aanpassen
-   - Het "Number of Packages Produced" veld wordt read-only (alleen weergave, niet bewerkbaar)
-   - Stockaanpassingen blijven exclusief voor admins via het "Remaining Stock" veld met verplichte reden
+### Technisch detail
 
-2. **Bestand te wijzigen**: `src/components/EditBatchDialog.tsx`
-   - In het `else` blok (non-admin path), verwijder de `packagesProduced` input
-   - Toon `packages_produced` als read-only info (net als het product en batch nummer)
-   - Bij submit voor production users, gebruik altijd `batch.packages_produced` (ongewijzigd)
+Het script zal twee stappen bevatten:
+- **INSERT** naar `audit_logs` met per batch: oude stock, nieuwe stock (0), reden, en `favv_relevant = true`
+- **UPDATE** op `production_batches`: `manual_stock_adjustment` aanpassen zodat `packages_produced + adjustment - reserved = 0`, dus `new_adjustment = reserved - packages_produced`
 
-### Technische Details
+Reden in audit trail: **"Stocktelling en oplossen software error"**
+Staff name: **"System (admin bulk write-off)"**
 
-In `EditBatchDialog.tsx`:
-- Het blok op regel 155-168 (de `else` branch met het packages input veld) wordt vervangen door een read-only weergave
-- In de submit handler (regel 100-115), wordt `packagesToUpdate` altijd `batch.packages_produced` voor non-admins
-- De `canSubmit` validatie wordt vereenvoudigd: geen check meer op `packagesProduced` voor non-admins
+Geen code-wijzigingen nodig -- dit is een eenmalige data-operatie.
 
