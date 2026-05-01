@@ -61,7 +61,6 @@ export const useBatchStock = ({
 
       // Chunk helper: split IDs into groups of 100 to avoid URL length limits
       const CHUNK_SIZE = 100;
-      const cutoff24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const allDispatchItems: any[] = [];
 
       for (let i = 0; i < batchIds.length; i += CHUNK_SIZE) {
@@ -71,12 +70,13 @@ export const useBatchStock = ({
           .select(`
             item_id, 
             quantity,
-            dispatch_records!inner(status, created_at)
+            dispatch_records!inner(status)
           `)
           .in("item_id", chunk)
           .eq("item_type", "batch")
-          .eq("dispatch_records.status", "draft")
-          .gte("dispatch_records.created_at", cutoff24h);
+          .eq("dispatch_records.status", "draft");
+          // No time cutoff: ALL draft dispatches reserve stock, regardless of age.
+          // A draft is a reservation until it is confirmed or cancelled.
 
         if (diErr) {
           if (diErr.code === 'PGRST116' || diErr.message?.includes('permission')) {

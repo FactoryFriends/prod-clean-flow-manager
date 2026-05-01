@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -24,34 +24,47 @@ export function NewBatchDialog({ currentLocation }: NewBatchDialogProps) {
   const { data: chefs, isLoading: chefsLoading } = useChefs(currentLocation);
   const createBatch = useCreateProductionBatch();
 
+  // Synchronous guard against double-submit (tablet double-tap, button bounce).
+  // isPending is async — too slow to block a near-simultaneous second tap.
+  const isSubmittingRef = useRef(false);
+
   const selectedProduct = products?.find(p => p.id === selectedProductId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!selectedProductId || !selectedChefId || !packagesProduced) {
+
+    // Synchronous double-submit guard
+    if (isSubmittingRef.current) return;
+
+    const parsedPackages = parseInt(packagesProduced);
+    if (!selectedProductId || !selectedChefId || !packagesProduced || parsedPackages <= 0) {
       return;
     }
 
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + parseInt(expiryDays));
 
+    isSubmittingRef.current = true;
     createBatch.mutate({
       product_id: selectedProductId,
       chef_id: selectedChefId,
-      packages_produced: parseInt(packagesProduced),
+      packages_produced: parsedPackages,
       expiry_date: expiryDate.toISOString().split('T')[0],
       production_notes: notes || undefined,
       location: currentLocation,
     }, {
       onSuccess: () => {
+        isSubmittingRef.current = false;
         setOpen(false);
         setSelectedProductId("");
         setSelectedChefId("");
         setPackagesProduced("");
         setExpiryDays("7");
         setNotes("");
-      }
+      },
+      onError: () => {
+        isSubmittingRef.current = false;
+      },
     });
   };
 
