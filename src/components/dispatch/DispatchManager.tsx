@@ -34,7 +34,8 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
   const [summaryItems, setSummaryItems] = useState<SelectedItem[]>([]);
   const [summaryPickerName, setSummaryPickerName] = useState("");
 
-  const { data: batches } = useProductionBatches(currentLocation);
+  // Use useBatchStock so availableQuantity respects draft reservations (matches InventoryBrowser).
+  const { data: batches } = useBatchStock({ location: currentLocation, inStockOnly: false });
   const { data: customers = [] } = useCustomers(true);
   const { data: externalProducts } = useExternalProducts();
   const { data: ingredientProducts } = useIngredientProducts();
