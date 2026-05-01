@@ -67,16 +67,17 @@ export const useStockAdjustment = () => {
       // Log audit trail
       await supabase.from("audit_logs").insert({
         action_type: "stock_adjustment",
-        action_description: `Stock adjusted from ${batch.packages_produced + currentAdjustment - totalDispatched} to ${newRemainingStock}`,
+        action_description: `Stock adjusted from ${currentDisplayedStock} to ${newRemainingStock}`,
         reference_type: "production_batch",
         reference_id: batchId,
         staff_name: adjustedBy,
         metadata: {
-          old_remaining_stock: batch.packages_produced + currentAdjustment - totalDispatched,
+          old_remaining_stock: currentDisplayedStock,
           new_remaining_stock: newRemainingStock,
           adjustment_reason: reason,
           old_adjustment: currentAdjustment,
           new_adjustment: newAdjustment,
+          draft_reserved: draftReserved,
         },
         favv_relevant: true,
       });
