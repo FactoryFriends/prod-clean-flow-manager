@@ -26,6 +26,13 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
   const { data: chefs, isLoading: chefsLoading } = useChefs(currentLocation);
   const createBatch = useCreateProductionBatch();
 
+  // Synchronous guard against double-submit (tablet double-tap, button bounce).
+  // React state updates are async — isPending only becomes true after the first
+  // render cycle, which is too late to block a second near-simultaneous tap.
+  // A double-submit creates two fully valid batches (both with correct packages_produced),
+  // not zero-packages batches. The user ends up with duplicate batch numbers (001 + 002).
+  const isSubmittingRef = useRef(false);
+
   const selectedProduct = products?.find(p => p.id === selectedProductId);
 
   // Helper function to get packaging type from product unit_type
