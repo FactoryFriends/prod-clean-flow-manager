@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useProductionBatches, useExternalProducts, useIngredientProducts } from "@/hooks/useProductionData";
+import { useBatchStock } from "@/hooks/useBatchStock";
 import { useCustomers } from "@/hooks/useCustomers";
 import { PackingSlipDialog } from "../PackingSlipDialog";
 import { DispatchFormHeader } from "./DispatchFormHeader";
