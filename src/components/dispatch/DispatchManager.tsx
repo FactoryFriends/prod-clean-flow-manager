@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useProductionBatches, useExternalProducts, useIngredientProducts } from "@/hooks/useProductionData";
+import { useBatchStock } from "@/hooks/useBatchStock";
 import { useCustomers } from "@/hooks/useCustomers";
 import { PackingSlipDialog } from "../PackingSlipDialog";
 import { DispatchFormHeader } from "./DispatchFormHeader";
@@ -33,7 +34,8 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
   const [summaryItems, setSummaryItems] = useState<SelectedItem[]>([]);
   const [summaryPickerName, setSummaryPickerName] = useState("");
 
-  const { data: batches } = useProductionBatches(currentLocation);
+  // Use useBatchStock so availableQuantity respects draft reservations (matches InventoryBrowser).
+  const { data: batches } = useBatchStock({ location: currentLocation, inStockOnly: false });
   const { data: customers = [] } = useCustomers(true);
   const { data: externalProducts } = useExternalProducts();
   const { data: ingredientProducts } = useIngredientProducts();
@@ -78,14 +80,14 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
   const availableBatches = (batches || []).map(batch => ({
     id: batch.id,
     type: 'batch' as const,
-    name: batch.products.name,
+    name: batch.products?.name || 'Unknown',
     batchNumber: batch.batch_number,
-    availableQuantity: batch.packages_produced,
+    availableQuantity: batch.packages_in_stock,
     selectedQuantity: 0,
     expiryDate: batch.expiry_date,
     productionDate: batch.production_date,
-    unitType: batch.products.unit_type,
-    innerUnitType: batch.products.inner_unit_type,
+    unitType: batch.products?.unit_type,
+    innerUnitType: batch.products?.inner_unit_type,
   }));
 
   // Match InventoryBrowser data structure exactly

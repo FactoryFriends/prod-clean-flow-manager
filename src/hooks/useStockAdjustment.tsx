@@ -23,22 +23,32 @@ export const useStockAdjustment = () => {
 
       if (batchError) throw batchError;
 
-      // Get total dispatched quantity
+      // Get only DRAFT dispatch quantities (confirmed ones are already subtracted
+      // from packages_produced by the DB trigger update_inventory_on_dispatch_confirmation).
+      // Using all dispatch items here would double-count confirmed dispatches.
       const { data: dispatchItems, error: dispatchError } = await supabase
         .from("dispatch_items")
-        .select("quantity")
+        .select(`
+          quantity,
+          dispatch_records!inner(status)
+        `)
         .eq("item_id", batchId)
-        .eq("item_type", "batch");
+        .eq("item_type", "batch")
+        .eq("dispatch_records.status", "draft");
 
       if (dispatchError) throw dispatchError;
 
-      const totalDispatched = dispatchItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+      const draftReserved = dispatchItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
       const currentAdjustment = batch.manual_stock_adjustment || 0;
-      
-      // Calculate what the new adjustment should be
-      // newRemainingStock = packages_produced + adjustment - dispatched
-      // adjustment = newRemainingStock - packages_produced + dispatched
-      const newAdjustment = newRemainingStock - batch.packages_produced + totalDispatched;
+
+      // packages_produced is already reduced by confirmed dispatches (DB trigger).
+      // Formula: stock_in_ui = packages_produced + adjustment - draftReserved
+      // → adjustment = newRemainingStock - packages_produced + draftReserved
+      const newAdjustment = newRemainingStock - batch.packages_produced + draftReserved;
+      const currentDisplayedStock = Math.max(
+        0,
+        batch.packages_produced + currentAdjustment - draftReserved
+      );
 
       const { data, error } = await supabase
         .from("production_batches")
@@ -57,16 +67,17 @@ export const useStockAdjustment = () => {
       // Log audit trail
       await supabase.from("audit_logs").insert({
         action_type: "stock_adjustment",
-        action_description: `Stock adjusted from ${batch.packages_produced + currentAdjustment - totalDispatched} to ${newRemainingStock}`,
+        action_description: `Stock adjusted from ${currentDisplayedStock} to ${newRemainingStock}`,
         reference_type: "production_batch",
         reference_id: batchId,
         staff_name: adjustedBy,
         metadata: {
-          old_remaining_stock: batch.packages_produced + currentAdjustment - totalDispatched,
+          old_remaining_stock: currentDisplayedStock,
           new_remaining_stock: newRemainingStock,
           adjustment_reason: reason,
           old_adjustment: currentAdjustment,
           new_adjustment: newAdjustment,
+          draft_reserved: draftReserved,
         },
         favv_relevant: true,
       });

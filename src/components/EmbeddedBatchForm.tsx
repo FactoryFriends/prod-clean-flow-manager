@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Input } from "./ui/input";
 import { InputWithKeyboard } from "./ui/input-with-keyboard";
 import { Label } from "./ui/label";
@@ -25,6 +25,13 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
   const { data: products, isLoading: productsLoading } = useProducts();
   const { data: chefs, isLoading: chefsLoading } = useChefs(currentLocation);
   const createBatch = useCreateProductionBatch();
+
+  // Synchronous guard against double-submit (tablet double-tap, button bounce).
+  // React state updates are async — isPending only becomes true after the first
+  // render cycle, which is too late to block a second near-simultaneous tap.
+  // A double-submit creates two fully valid batches (both with correct packages_produced),
+  // not zero-packages batches. The user ends up with duplicate batch numbers (001 + 002).
+  const isSubmittingRef = useRef(false);
 
   const selectedProduct = products?.find(p => p.id === selectedProductId);
 
@@ -54,38 +61,45 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!selectedProductId || !selectedChefId || !packagesProduced) {
+
+    // Synchronous double-submit guard — fires before React re-renders
+    if (isSubmittingRef.current) return;
+
+    const parsedPackages = parseInt(packagesProduced);
+    if (!selectedProductId || !selectedChefId || !packagesProduced || parsedPackages <= 0) {
       return;
     }
 
     const batchData: any = {
       product_id: selectedProductId,
       chef_id: selectedChefId,
-      packages_produced: parseInt(packagesProduced),
+      packages_produced: parsedPackages,
       expiry_date: calculatedExpiryDate,
       production_notes: notes || undefined,
       location: currentLocation,
     };
 
-    // Add items_per_package if variable packaging is enabled and value is provided
     if (selectedProduct?.variable_packaging && itemsPerPackage) {
       batchData.items_per_package = parseInt(itemsPerPackage);
     }
 
+    isSubmittingRef.current = true;
     createBatch.mutate(batchData, {
       onSuccess: (newBatch) => {
+        isSubmittingRef.current = false;
         setSelectedProductId("");
         setSelectedChefId("");
         setPackagesProduced("");
         setItemsPerPackage("");
         setNotes("");
-        
-        // Call the callback to open label printing
+
         if (onBatchCreated) {
           onBatchCreated(newBatch);
         }
-      }
+      },
+      onError: () => {
+        isSubmittingRef.current = false;
+      },
     });
   };
 
