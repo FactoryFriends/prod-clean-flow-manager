@@ -80,14 +80,14 @@ export function DispatchManager({ currentLocation, dispatchType }: DispatchManag
   const availableBatches = (batches || []).map(batch => ({
     id: batch.id,
     type: 'batch' as const,
-    name: batch.products.name,
+    name: batch.products?.name || 'Unknown',
     batchNumber: batch.batch_number,
-    availableQuantity: batch.packages_produced,
+    availableQuantity: batch.packages_in_stock,
     selectedQuantity: 0,
     expiryDate: batch.expiry_date,
     productionDate: batch.production_date,
-    unitType: batch.products.unit_type,
-    innerUnitType: batch.products.inner_unit_type,
+    unitType: batch.products?.unit_type,
+    innerUnitType: batch.products?.inner_unit_type,
   }));
 
   // Match InventoryBrowser data structure exactly
