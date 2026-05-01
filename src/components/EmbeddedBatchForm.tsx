@@ -61,38 +61,45 @@ export function EmbeddedBatchForm({ currentLocation, onBatchCreated }: EmbeddedB
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!selectedProductId || !selectedChefId || !packagesProduced) {
+
+    // Synchronous double-submit guard — fires before React re-renders
+    if (isSubmittingRef.current) return;
+
+    const parsedPackages = parseInt(packagesProduced);
+    if (!selectedProductId || !selectedChefId || !packagesProduced || parsedPackages <= 0) {
       return;
     }
 
     const batchData: any = {
       product_id: selectedProductId,
       chef_id: selectedChefId,
-      packages_produced: parseInt(packagesProduced),
+      packages_produced: parsedPackages,
       expiry_date: calculatedExpiryDate,
       production_notes: notes || undefined,
       location: currentLocation,
     };
 
-    // Add items_per_package if variable packaging is enabled and value is provided
     if (selectedProduct?.variable_packaging && itemsPerPackage) {
       batchData.items_per_package = parseInt(itemsPerPackage);
     }
 
+    isSubmittingRef.current = true;
     createBatch.mutate(batchData, {
       onSuccess: (newBatch) => {
+        isSubmittingRef.current = false;
         setSelectedProductId("");
         setSelectedChefId("");
         setPackagesProduced("");
         setItemsPerPackage("");
         setNotes("");
-        
-        // Call the callback to open label printing
+
         if (onBatchCreated) {
           onBatchCreated(newBatch);
         }
-      }
+      },
+      onError: () => {
+        isSubmittingRef.current = false;
+      },
     });
   };
 
